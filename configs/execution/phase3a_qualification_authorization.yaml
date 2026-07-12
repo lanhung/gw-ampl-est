@@ -3,12 +3,12 @@ authorization_status: authorized
 authorized_by: human_project_owner
 authorization_date: "2026-07-12"
 
-base_main_commit: "c5efd0e3aacfeda65881de5a63e92d72b87fa0bb"
+base_main_commit: "80167ea690914bb18be1fd1994b4dc626490e146"
 
 frozen_preregistration:
-  version: "1.0.0-rc.4"
+  version: "1.0.0-rc.5"
   path: "configs/statistics/phase2_preregistration.yaml"
-  canonical_hash: "1403f1f8cf96fbc34c2cfd99928bd7c24b5fde5495e54689d2a5ee7ec250c418"
+  canonical_hash: "4dde279cf1bea78d1ddbd4fab99d88e88e334c80c180dc7850679736c5e53edb"
   scientific_schema_version: "2.0.0-alpha.3"
 
 authorization:

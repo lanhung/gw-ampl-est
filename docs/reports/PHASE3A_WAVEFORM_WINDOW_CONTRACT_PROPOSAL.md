@@ -1,11 +1,12 @@
 # Phase 3A waveform-window contract proposal
 
-Status: **proposal for human review; not frozen and not authorized**.
+Status: **approved by the human project owner and frozen as RC.5**.
 
-This document responds to the RC.4 waveform-boundary hard failure. It does not
-change the preregistration, Phase 3A configuration, authorization, generator or
-execution gate. No microbenchmark pair, shard or dataset was generated while
-preparing it.
+This document responds to the RC.4 waveform-boundary hard failure. The human
+project owner subsequently approved all ten items; they are frozen in RC.5 at
+canonical hash
+`4dde279cf1bea78d1ddbd4fab99d88e88e334c80c180dc7850679736c5e53edb`.
+No microbenchmark pair, shard or dataset was generated while preparing it.
 
 ## Diagnosed causes
 

@@ -85,8 +85,7 @@ main at:
 `80167ea690914bb18be1fd1994b4dc626490e146`
 
 Human review explicitly authorizes Phase 3A only. The separate Phase 3A
-authorization must be renewed against this exact RC.5 version, hash and main
-commit before execution resumes.
+authorization is renewed against this exact RC.5 version, hash and main commit.
 
 The frozen scientific design is:
 

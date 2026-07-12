@@ -16,7 +16,7 @@ def test_phase3a_authorization_matches_frozen_preregistration() -> None:
         AUTH, repository_root=ROOT, authorizing_git_commit=AUTH_COMMIT
     )
     assert authorization.preregistration_hash == (
-        "1403f1f8cf96fbc34c2cfd99928bd7c24b5fde5495e54689d2a5ee7ec250c418"
+        "4dde279cf1bea78d1ddbd4fab99d88e88e334c80c180dc7850679736c5e53edb"
     )
     assert authorization.accepted_pair_count == 4096
     assert authorization.shard_pair_count == 128

@@ -24,14 +24,14 @@ Work only on:
 
 The frozen authoritative preregistration is:
 
-- version: `1.0.0-rc.4`;
+- version: `1.0.0-rc.5`;
 - configuration hash:
-  `1403f1f8cf96fbc34c2cfd99928bd7c24b5fde5495e54689d2a5ee7ec250c418`;
+  `4dde279cf1bea78d1ddbd4fab99d88e88e334c80c180dc7850679736c5e53edb`;
 - scientific schema: `2.0.0-alpha.3`;
 - base main commit:
-  `c5efd0e3aacfeda65881de5a63e92d72b87fa0bb`.
+  `80167ea690914bb18be1fd1994b4dc626490e146`.
 
-Do not change the frozen RC.2 distributions merely to make the generator
+Do not change the frozen RC.5 distributions or waveform-window contract merely to make the generator
 pass. A contradiction or unimplementable requirement is a hard failure and
 must stop execution for human review.
 
@@ -56,7 +56,7 @@ Before modifying production code:
 5. Recompute the canonical preregistration hash.
 6. Require an exact match to:
 
-   `1403f1f8cf96fbc34c2cfd99928bd7c24b5fde5495e54689d2a5ee7ec250c418`
+   `4dde279cf1bea78d1ddbd4fab99d88e88e334c80c180dc7850679736c5e53edb`
 
 7. Confirm:
    - exact accepted count is 4096;
@@ -309,14 +309,22 @@ Before the 4,096-pair run, create deterministic boundary fixtures covering:
 - high magnification;
 - long delay.
 
-Compare the 8-second waveform construction against a longer reference
-window and verify that:
+Construct the published 8-second product from the frozen 64-second internal
+grid and compare it against the separately generated 128-second reference.
+Apply the exact RC.5 crop, zero guards and raised-cosine transitions. Verify:
 
 - no cyclic wraparound occurs;
 - merger and relevant waveform support are contained;
 - no edge-truncated waveform is accepted;
 - time-domain and frequency-domain products are finite;
-- detector projections remain finite.
+- detector projections remain finite;
+- Bilby `infft` sampling-frequency normalization is preserved;
+- both 0.25-second guard regions have exactly zero energy;
+- conditioned 64-to-128-second relative difference is no greater than 0.005;
+- construction energy outside the 8-second crop is no greater than 0.005;
+- conditioned crop energy retention is at least 0.999;
+- detector-frame chirp time is reported;
+- selection SNR is recomputed from the conditioned published clean signal.
 
 Define the numerical boundary criteria in the Phase 3A configuration before
 running the 4,096 pairs.
