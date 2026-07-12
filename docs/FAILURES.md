@@ -76,8 +76,9 @@ materialization.
   not an astrophysical time-delay population model.
 - Initial Phase 1B branch CI failed only under the Python 3.9 runner because
   newer NumPy typing inferred a division result too broadly for `float()`.
-  Intermediate norm values were made explicitly scalar before division; no
-  runtime algorithm or published dataset bytes changed.
+  A dedicated float-returning safe-norm helper resolved the cross-version
+  NumPy stub ambiguity; no runtime algorithm or published dataset bytes
+  changed.
 
 Both failed staging states remain immutable evidence; neither was published or
 silently removed.

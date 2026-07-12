@@ -175,6 +175,11 @@ class SmokeGenerator:
     def _morse_factor(morse: MorseClass) -> complex:
         return complex(np.exp(-1j * math.pi * morse.half_integer_index))
 
+    @staticmethod
+    def _safe_norm(values: np.ndarray) -> float:
+        norm = float(np.linalg.norm(values))
+        return norm if norm > 0.0 else 1e-300
+
     def _project(
         self,
         polarizations: Mapping[str, np.ndarray],
@@ -226,7 +231,7 @@ class SmokeGenerator:
                 reference_fd = self._project(polarizations, image_parameters, detector)
                 lensed_fd = self._project(lensed, image_parameters, detector)
                 expected_fd = reference_fd * factor
-                denominator = max(float(np.linalg.norm(expected_fd)), np.finfo(float).tiny)
+                denominator = self._safe_norm(expected_fd)
                 response_error = float(np.linalg.norm(lensed_fd - expected_fd))
                 relative_errors.append(response_error / denominator)
                 morse_error = float(
@@ -236,8 +241,7 @@ class SmokeGenerator:
                     )
                 )
                 morse_errors.append(
-                    morse_error
-                    / max(float(np.linalg.norm(reference_fd)), np.finfo(float).tiny)
+                    morse_error / self._safe_norm(reference_fd)
                 )
                 clean_time = np.fft.irfft(lensed_fd, n=self.sample_count)
                 noise_time = self._noise(
