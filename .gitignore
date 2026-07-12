@@ -1,0 +1,41 @@
+# Secrets
+.env
+.env.*
+!.env.example
+.secrets/
+*.pem
+*.key
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+
+# Large data
+data/
+cache/
+artifacts/
+checkpoints/
+*.npy
+*.npz
+*.h5
+*.hdf5
+*.pt
+*.pth
+*.ckpt
+*.zarr/
+*.tar
+*.tar.gz
+
+# Raw experiment products
+results/raw/
+reports/tmp/
+
+# Editors
+.vscode/
+.idea/
+.DS_Store
