@@ -176,3 +176,15 @@ No microbenchmark pair, qualification pair, staging directory or publication
 was created. This is a preregistration execution contradiction, not a runtime
 or solver failure. Human review must provide a versioned contract; code must not
 silently choose a solver search window or approximate caustic area.
+
+## Phase 2.2 source-plane contract resolution
+
+- RC.2 did not define the solver bounding region or an executable normalized
+  multiply-imaged cross-section measure. Phase 3A correctly stopped before any
+  microbenchmark or qualification data were created.
+- Human-approved RC.3 resolves this by freezing an exact normalized
+  preselection source-plane measure and treating lens multiplicity/detection as
+  explicit selection events. It does not estimate a caustic area and call that
+  estimate exact.
+- The source support and solver search window still require the frozen Phase 3A
+  boundary comparison. A failed support audit remains a hard stop.

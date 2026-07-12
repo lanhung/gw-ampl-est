@@ -2,12 +2,12 @@
 
 ## Current phase
 
-Phase 1B and Phase 1B.1 are merged and frozen. Phase 2.1 preregistration
-`1.0.0-rc.2` is merged. Human review authorized Phase 3A qualification only,
-but its pre-generation gap audit found an unexecutable normalized source-plane
-density contract. Phase 3A is blocked before microbenchmark or data generation
-pending a reviewed specification amendment. Full production, training,
-calibration, scientific testing and GWOSC/GWTC access remain unauthorized.
+Phase 1B and Phase 1B.1 are merged and frozen. Phase 3A correctly stopped
+before generation on the incomplete RC.2 source-plane density. The human
+project owner then approved RC.3, now merged into main at
+`8e14d927146ac3b2223343eaca89a323c58d5e13`. Phase 3A may resume only after
+its independent authorization names this commit and RC.3 hash. Full production,
+training, calibration, scientific testing and GWOSC/GWTC remain unauthorized.
 
 ## Completed
 
@@ -89,6 +89,9 @@ calibration, scientific testing and GWOSC/GWTC access remain unauthorized.
 - completed a section-by-section Phase 3A implementation gap audit and stopped
   before generation when the normalized source-plane density could not be
   implemented from the frozen specification.
+- defined the exact RC.3 source-plane preselection measure, normalized angular
+  log density, selection-conditioning boundary and deterministic Lenstronomy
+  numerical/support-audit contract.
 
 ## Not started by design
 
@@ -98,8 +101,7 @@ calibration, scientific testing and GWOSC/GWTC access remain unauthorized.
 
 ## Next recommended phase
 
-Human review must amend and version the preregistration to define the proposal
-bounding region and the normalized multiply-imaged cross-section measure,
-including caustic/pseudo-caustic handling and numerical tolerances. After that
-review, Phase 3A must restart preflight and implementation audit from the new
-frozen hash. Full production remains gated on measured qualification evidence.
+Update the independent Phase 3A authorization to RC.3 commit/hash, then rerun
+all preflight and support gates before the microbenchmark. Full production
+remains gated on measured qualification throughput, solver acceptance,
+dynamics convergence, disk and resume evidence.

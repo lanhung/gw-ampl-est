@@ -1,6 +1,7 @@
 # Phase 2 statistical preregistration
 
-Status: `1.0.0-rc.2`, automatic review passed; no execution authorized.
+Status: `1.0.0-rc.3`, source-plane execution contract approved by the human
+project owner; this file alone authorizes no execution.
 The machine-readable authority is
 `configs/statistics/phase2_preregistration.yaml`.
 
@@ -30,6 +31,22 @@ The BBH joint support is normalized rather than rejection-sampled: draw `m1`
 from the declared power law, then `q` uniformly on
 `[max(0.25,10/m1),1]`. Thus `m2>=10 Msun` by construction and the conditional
 normalization is present in proposal and evaluation log densities.
+
+RC.3 defines source position before lens-multiplicity and detection selection.
+With `u=beta/theta_E`, both coordinates are independently uniform on
+`[-2.5,2.5)`. Relative to `d beta_x d beta_y`, the exact normalized log density
+is `-log(25)-2 log(theta_E)`. Proposal and evaluation use the same source-plane
+factor, so it cancels exactly in their importance ratio. Multiple imaging and
+detection remain explicit selection events; no numerically estimated caustic
+area is inserted into a supposedly exact density.
+
+The solver contract takes the validated union of the EPL/SIE analytical solver
+and a deterministic grid search with an `8 theta_E` window and `0.02 theta_E`
+grid separation. Candidates must pass a `1e-8 arcsec` lens-equation residual;
+strongly demagnified central images are retained. Phase 3A compares boundary
+fixtures against an analytical solver at twice the angular sampling and a
+`12 theta_E`, `0.005 theta_E` grid. Failure means the declared source support
+is not qualified and stops generation.
 
 ## External convergence and dynamics
 
