@@ -1,0 +1,179 @@
+{
+  "generator": "realobs_quality_controlled_mu0_v1",
+  "attempts": 2825,
+  "accepted": 2500,
+  "acceptance_rate": 0.8849557522123894,
+  "reject_counts": {
+    "low_pair_network_snr": 1,
+    "low_snr_image_1": 2,
+    "low_snr_image_2": 5,
+    "low_window_signal_noise_rms": 4,
+    "td_out_of_range": 313
+  },
+  "config": {
+    "save_dir": "/root/autodl-tmp/tmp/数据生成/data_lens_randomu_realobs_quality_mu0(1)",
+    "seed": 238,
+    "target_events": 2500,
+    "max_attempts": 25000,
+    "overwrite": false,
+    "feature_data_kind": "realobs_a21friendly_noisy_whitened",
+    "generator_name": "realobs_quality_controlled_mu0_v1",
+    "z_min": 0.05,
+    "z_max": 1.5,
+    "lens_z_min": 0.01,
+    "min_lens_source_z_gap": 0.001,
+    "m1_source_min": 20.0,
+    "m1_source_max": 70.0,
+    "m2_source_min": 10.0,
+    "m2_source_max": 50.0,
+    "sigma_v_min": 150.0,
+    "sigma_v_max": 350.0,
+    "a21_min": 0.45,
+    "a21_max": 0.92,
+    "a21_bins": 8,
+    "td_min_sec": 100.0,
+    "td_max_sec": 10000000.0,
+    "detector_names": [
+      "ET"
+    ],
+    "reference_detector_index": 0,
+    "sampling_frequency": 4096,
+    "duration": 24.0,
+    "minimum_frequency": 20.0,
+    "waveform_approximant": "IMRPhenomXPHM",
+    "reference_frequency": 10.0,
+    "pre_trigger_seconds": 6.0,
+    "train_window_seconds": 1.0,
+    "main_feature_seconds": 0.5,
+    "extra_feature_windows": [
+      0.25,
+      0.5,
+      0.9
+    ],
+    "add_detector_noise": true,
+    "force_same_detector_response_time": false,
+    "geocent_time_includes_delay": true,
+    "save_windowed_raw": true,
+    "save_full_strain": false,
+    "save_time_arrays": true,
+    "redshift_obs_sigma": 0.0005,
+    "sigma_v_obs_frac_sigma": 0.05,
+    "theta_E_obs_frac_sigma": 0.02,
+    "astrometric_sigma_arcsec": 0.01,
+    "lens_center_sigma_arcsec": 0.02,
+    "time_obs_floor_sec": 0.000244140625,
+    "time_obs_snr_scale_sec": 0.03,
+    "min_snr_image_1": 12.0,
+    "min_snr_image_2": 8.0,
+    "min_network_snr_pair": 18.0,
+    "max_abs_peak_time_error_sec": 0.25,
+    "min_window_signal_noise_rms": 0.015,
+    "random_spin": true,
+    "random_external": true,
+    "random_distance": true,
+    "fixed_luminosity_distance_mpc": 3000.0
+  },
+  "distributions": {
+    "mu0": {
+      "n": 2500,
+      "min": 2.5094884321183537,
+      "p05": 2.5897672590589336,
+      "median": 3.9647722575843716,
+      "mean": 4.885437499224363,
+      "p95": 10.184849271487526,
+      "max": 13.018361232400778
+    },
+    "A21_true": {
+      "n": 2500,
+      "min": 0.4505827537377537,
+      "p05": 0.47721046765719227,
+      "median": 0.703958381570008,
+      "mean": 0.6984784557355832,
+      "p95": 0.8964540630242765,
+      "max": 0.9199841478922899
+    },
+    "y_true": {
+      "n": 2500,
+      "min": 0.08320601957811521,
+      "p05": 0.10887494950940928,
+      "median": 0.3372940392173719,
+      "mean": 0.34866724228353924,
+      "p95": 0.629022892813886,
+      "max": 0.6624760937032432
+    },
+    "t_d_true": {
+      "n": 2500,
+      "min": 9463.802699850905,
+      "p05": 167850.27117777648,
+      "median": 1825167.4909406966,
+      "mean": 2637447.9471866065,
+      "p95": 7747833.555064903,
+      "max": 9994296.856129602
+    },
+    "t_d_observed": {
+      "n": 2500,
+      "min": 9463.830380916595,
+      "p05": 167850.27596744298,
+      "median": 1825167.4929152727,
+      "mean": 2637447.947311359,
+      "p95": 7747833.547227577,
+      "max": 9994296.852728128
+    },
+    "snr_1": {
+      "n": 2500,
+      "min": 12.954349317286319,
+      "p05": 33.27687833869935,
+      "median": 97.65988548188199,
+      "mean": 130.16189377546758,
+      "p95": 329.9686880642214,
+      "max": 1666.6560977907563
+    },
+    "snr_2": {
+      "n": 2500,
+      "min": 8.84636961698218,
+      "p05": 20.40132269634454,
+      "median": 67.12840416091268,
+      "mean": 93.33908941330992,
+      "p95": 263.8226769244561,
+      "max": 985.4185944801335
+    },
+    "peak_amp_ratio_21": {
+      "n": 2500,
+      "min": 0.12377592992566741,
+      "p05": 0.3738011948189084,
+      "median": 0.796785794021077,
+      "mean": 0.8794537396187759,
+      "p95": 1.674014074318344,
+      "max": 5.016701479469547
+    },
+    "rms_ratio_21": {
+      "n": 2500,
+      "min": 0.19504634883483896,
+      "p05": 0.4827051697783108,
+      "median": 0.8704962866008692,
+      "mean": 0.8923076848103101,
+      "p95": 1.4124632231324803,
+      "max": 3.2217228828360525
+    },
+    "image_position_asymmetry_observed": {
+      "n": 2500,
+      "min": 0.0001,
+      "p05": 0.06558128891724392,
+      "median": 0.3266190765430172,
+      "mean": 0.33879556209547723,
+      "p95": 0.6406704466408919,
+      "max": 0.9240589863858527
+    }
+  },
+  "diagnostic_correlations_spearman": {
+    "peak_amp_ratio_21_vs_A21_true": 0.22048336046133774,
+    "rms_ratio_21_vs_A21_true": 0.1821194856511177,
+    "energy_ratio_21_vs_R_abs_21_true": 0.1821194856511177,
+    "env_area_ratio_21_vs_A21_true": 0.1801160843705735,
+    "snr_ratio_21_vs_A21_true": 0.3852845585415294,
+    "image_asymmetry_vs_y_true": 0.8510653542561848,
+    "t_d_observed_vs_t_d_true": 1.0,
+    "peak_time_diff_vs_t_d_true": 1.0
+  },
+  "nan_counts_observable_features": {}
+}

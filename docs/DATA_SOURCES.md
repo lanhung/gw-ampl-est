@@ -1,46 +1,54 @@
 # Data sources
 
-## Control repository
+## Authoritative code repository
 
-- Host: Vultr
-- Repository path: /root/work/lensing-4
-- This is the only authoritative code and Git repository.
+- Host role: Vultr control plane
+- Repository: `/root/work/lensing-4`
+- GitHub: `git@github.com:lanhung/gw-ampl-est.git`
+- Rule: all new source edits and commits originate here.
 
-## Remote compute and data host
+## AutoDL compute roots
 
-- SSH host: gpu.chzmark.com
-- SSH port: 2338
-- Remote base path:
-  /root/autodl-tmp/wjx_project/classcify-gw-lensing-pairs-main/
+- SSH alias: `autodl-lensing`
+- New writable root: `/root/autodl-tmp/lensing-4`
+- Large v2 data, GWOSC cache and runs remain on AutoDL.
 
-## In-scope legacy datasets
+## Resolved legacy roots
 
-Only the datasets identified by the names or date markers:
+### Original 0222/0228 catalogs
 
-- 0222
-- 0228
+`/root/autodl-tmp/qkzhang`
 
-are in scope.
+This is the physical location of the audited SIS, point-mass and unlensed
+0222/0228 arrays. It has no root Git repository and contains unrelated projects.
+Treat the lensing assets as immutable.
 
-The user reports that these two datasets were generated with different
-random seeds. This must be verified from files, metadata and sample
-content before relying on the claim.
+### Downstream pair-verification project
 
-## Explicit exclusions
+`/root/autodl-tmp/wjx_project/classcify-gw-lensing-pairs-main`
 
-- All existing source code under the remote base directory belongs to an
-  older, unrelated project.
-- That source code must not be copied, imported, modified, executed or
-  used as the implementation basis for this project.
-- All datasets other than 0222 and 0228 are out of scope unless the user
-  explicitly approves them later.
+This is a separate Git repository for pair verification/classification. Its
+reproducibility manifests reference the qkzhang 0222/0228 catalogs. It also
+contains later H1/L1 Gaussian-noise regenerations. It is not the source of the
+magnification point-regression PDF.
 
-## Data handling policy
+### Magnification point-regression baseline
 
-- The 0222 and 0228 datasets are immutable inputs.
-- Do not rename, modify, delete or overwrite any file in them.
-- Do not recursively copy the full waveform datasets to Vultr.
-- Initially retrieve only metadata, schemas, array shapes, small sampled
-  rows and audit reports.
-- All new code and generated results must be written to a separate new
-  AutoDL working directory.
+`/root/autodl-tmp/tmp`
+
+The PDF-named generator, training entry, dataset, checkpoint and report sources
+were found here. The exact baseline data root is:
+
+`/root/autodl-tmp/tmp/数据生成/data_lens_randomu_realobs_quality_mu0`
+
+The `(1)` sibling is a later observable-fix regeneration, not the dataset used
+by the PDF checkpoint.
+
+## Data handling
+
+- All three legacy locations are read-only inputs.
+- Do not rename, modify, delete, overwrite or normalize them in place.
+- Do not recursively copy waveform catalogs to Vultr.
+- The curated small-file snapshot under `vendor/legacy_snapshot/` is provenance
+  evidence, not an implementation dependency.
+- New outputs belong only under `/root/autodl-tmp/lensing-4`.

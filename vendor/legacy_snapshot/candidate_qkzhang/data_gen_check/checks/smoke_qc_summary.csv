@@ -1,0 +1,7 @@
+dataset,output_directory,directory_exists,expected_file_count,present_expected_file_count,missing_files,npy_file_count,npy_no_nan_or_inf,test_luminosity_distance_positive,overall_ok
+ET_PM,/root/autodl-tmp/qkzhang/data_gen_check/smoke_data/ET_PM_data,True,23,23,,16,True,True,True
+ET_SIS,/root/autodl-tmp/qkzhang/data_gen_check/smoke_data/ET_SIS_data,True,23,23,,16,True,True,True
+ET_unlensed,/root/autodl-tmp/qkzhang/data_gen_check/smoke_data/ET_unlensed_data,True,5,5,,4,True,NA,True
+LIGO_PM,/root/autodl-tmp/qkzhang/data_gen_check/smoke_data/LIGO_PM_data,True,27,27,,20,True,True,True
+LIGO_SIS,/root/autodl-tmp/qkzhang/data_gen_check/smoke_data/LIGO_SIS_data,True,27,27,,20,True,True,True
+LIGO_unlensed,/root/autodl-tmp/qkzhang/data_gen_check/smoke_data/LIGO_unlensed_data,True,6,6,,5,True,NA,True

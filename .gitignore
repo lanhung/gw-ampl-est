@@ -3,6 +3,7 @@
 .env.*
 !.env.example
 .secrets/
+configs/remote/autodl.env
 *.pem
 *.key
 
@@ -17,6 +18,9 @@ venv/
 
 # Large data
 data/
+data_v2/
+gwosc_cache/
+runs/
 cache/
 artifacts/
 checkpoints/
@@ -24,6 +28,7 @@ checkpoints/
 *.npz
 *.h5
 *.hdf5
+*.gwf
 *.pt
 *.pth
 *.ckpt
@@ -34,6 +39,12 @@ checkpoints/
 # Raw experiment products
 results/raw/
 reports/tmp/
+.remote_tmp/
+*.partial
+*.tmp
+
+# Codex local state
+.codex/session*
 
 # Editors
 .vscode/

@@ -1,0 +1,735 @@
+\documentclass[11pt,a4paper]{ctexart}
+
+\usepackage[top=2cm,bottom=2cm,left=1.5cm,right=1.5cm]{geometry}
+\usepackage{ragged2e}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{physics}
+\usepackage{graphicx}
+\usepackage{subfigure}
+\usepackage{float}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{caption}
+\usepackage{needspace}
+\usepackage{multicol}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{lineno}
+\usepackage{titlesec}
+
+\captionsetup[table]{font=normalsize,labelfont=bf}
+\captionsetup[figure]{font=normalsize,labelfont=bf}
+\setlength{\floatsep}{8pt plus 2pt minus 2pt}
+\setlength{\columnsep}{0.75cm}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt}
+\renewcommand{\arraystretch}{0.88}
+
+\titleformat{\section}{\normalfont\large\bfseries}{\thesection}{0.5em}{}
+\titleformat{\subsection}{\normalfont\normalsize\bfseries}{\thesubsection}{0.5em}{}
+\titlespacing*{\section}{0pt}{8pt plus 2pt minus 2pt}{4pt plus 2pt minus 2pt}
+\titlespacing*{\subsection}{0pt}{6pt plus 2pt minus 2pt}{3pt plus 2pt minus 2pt}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    urlcolor=blue,
+    citecolor=blue
+}
+
+\newcommand{\code}[1]{\texttt{\detokenize{#1}}}
+\newcommand{\tablesize}{\small}
+
+\title{基于真实观测代理特征的 SIS 引力波强透镜放大率预测基线报告}
+\author{项目内部技术报告}
+\date{2026年6月10日}
+
+\begin{document}
+
+\maketitle
+
+\noindent\textbf{摘要}
+
+\noindent
+本报告围绕当前 baseline 的两个核心环节展开: 第一, 使用 \code{SIS_GW_events_randomu_baseline_quality_mu0_before_obsfix.py} 构建质量控制的真实观测代理数据集; 第二, 使用 \code{train_mu0_baseline_obs_realobs_quality.py} 及其基础训练模块完成 SIS 双像放大率预测。数据生成流程以奇异等温球(Singular Isothermal Sphere, SIS)透镜为物理模型, 随机采样源参数、透镜红移、速度弥散、天空位置、自旋和外在几何, 通过 \code{bilby} 生成双黑洞并合波形, 注入 Einstein Telescope 探测器噪声, 并保存以触发峰值为中心的一秒白化观测窗口。训练流程以两幅像的 noisy whitened waveform、波形统计量、时间延迟代理、光学红移、速度弥散和成像几何为输入, 使用共享一维卷积波形编码器与观测特征编码器融合预测第一像放大率 \(\mu_0\), 并由 SIS 物理约束 \(\mu_1=2-\mu_0\) 推导第二像放大率。
+
+当前 baseline 的主要方法特点包括: 观测特征、标签真值、诊断真值和质量控制报告的显式分离; 面向真实观测的 detector-noise 注入与观测误差建模; 基于 SIS 物理关系的目标变换与输出约束; 支持多种观测链路消融的 feature preset 设计; 以及面向尾端误差的分桶诊断机制。实验显示, baseline 在验证集上达到 \(\mu_0\) MAE \(=0.774\), RMSE \(=1.324\), MAPE \(=13.16\%\), Pearson 相关系数 \(=0.853\)。同时, 诊断结果表明当前数据协议并未实现 \(\mu_0\) 均匀覆盖: 脚本分层采样的是振幅比 \(A_{21}\), 而不是 \(\mu_0\)。由于
+\[
+    \mu_0=\frac{2}{1-A_{21}^2},
+\]
+均匀覆盖 \(A_{21}\) 会在高 \(\mu_0\) 区间产生稀疏尾端, 进而导致模型在 \(\mu_0>8\) 后出现系统性低估。本报告最后给出后续数据协议和训练策略的改进方向, 包括按 \(\mu_0\) 分层生成、按 accepted count 控制分桶样本数、分层训练验证划分和分桶加权损失。
+
+\vspace{0.5em}
+\noindent\textbf{关键词:} 引力波强透镜; SIS 模型; 放大率预测; 真实观测代理特征; 数据生成; 一维卷积网络; 物理约束回归; 长尾诊断
+
+\vspace{1em}
+
+\begin{multicols}{2}
+\linenumbers
+
+\section{引言}
+\justifying
+
+强透镜引力波事件中的多幅像来自同一个内禀源, 因此它们共享源质量、自旋和距离等参数, 但由于透镜几何不同而具有不同的放大率、到达时间、Morse 相位和探测器响应。对于 SIS 双像系统, 两幅像的放大率满足严格物理关系, 使得放大率预测可以被组织成一个有约束的监督学习问题: 模型只需预测第一像放大率 \(\mu_0\), 第二像放大率由
+\[
+    \mu_1 = 2-\mu_0
+\]
+直接给出。
+
+当前 baseline 的目标不是复现完整参数估计后验, 而是建立一个可控、可诊断、可扩展的数据生成与训练基线。该基线回答三个具体问题:
+\begin{enumerate}
+    \item 在包含 detector noise、随机外在几何和观测误差的条件下, 两幅像 waveform 与观测代理能否稳定预测 \(\mu_0\)?
+    \item 哪些观测链路, 如波形振幅比、时间延迟、光学尺度和成像几何, 对 \(\mu_0\) 预测贡献最大?
+    \item 当前数据协议是否覆盖了完整 \(\mu_0\) 范围, 尤其是高放大率尾端?
+\end{enumerate}
+
+报告范围限定为当前 baseline 数据生成脚本和训练脚本。全文结构如下: 第 2 节总结当前 baseline 的方法创新点; 第 3 节给出 SIS 物理公式; 第 4 节介绍数据生成协议; 第 5 节介绍训练代码架构; 第 6 节分析实验结果和尾端误差; 第 7 节讨论局限和改进方向。
+
+\section{方法创新点}
+\justifying
+
+\subsection{真实观测代理的数据协议}
+\justifying
+
+当前 baseline 将生成数据拆分为训练观测量、监督标签、诊断真值和质量控制报告四类文件。训练脚本默认只读取 \code{observable_features.csv} 中的观测代理和 \code{SIS_data_strain_*.npy} 中的 noisy waveform, 而将 \(\mu_0\)、\(\mu_1\)、\(y\)、\(u\)、\(A_{21}\) 等理论真值保留在 \code{lens.csv} 或 \code{diagnostic_features.csv} 中。这种文件级分离使得训练输入和标签侧变量边界清晰, 有利于后续进行无泄露实验和 oracle 消融。
+
+\subsection{质量控制的双像波形生成}
+\justifying
+
+数据生成流程不是简单保存理论波形, 而是在 ET 探测器配置下生成 24 秒 strain frame, 注入 detector noise, 白化后围绕 clean signal peak 裁剪一秒窗口。每个候选事件还需要通过 SNR、时间延迟范围、窗口信噪比和到达时间观测一致性等质量门。该设计使训练数据更接近真实观测片段, 同时避免低质量样本主导训练。
+
+\subsection{SIS 物理约束的目标设计}
+\justifying
+
+训练模块不直接同时回归 \(\mu_0\) 和 \(\mu_1\), 而是预测
+\[
+    z = \log(\mu_0-1),
+\]
+然后反变换得到
+\[
+    \hat{\mu}_0 = 1+\exp(\hat{z}), \qquad
+    \hat{\mu}_1 = 2-\hat{\mu}_0 .
+\]
+该目标变换同时利用了 \(u=\mu_0-1=1/y\) 的 SIS 结构和 \(\mu_0\) 的正值约束, 能压缩长尾动态范围并保持物理一致性。
+
+\subsection{多观测链路融合与可控消融}
+\justifying
+
+训练入口将输入特征划分为波形振幅代理、波形形状代理、噪声上下文、时间观测、光学红移、速度弥散、透镜尺度和像位置几何等模块。通过 preset 可以得到 \code{all}、\code{gw_only}、\code{no_image}、\code{no_time}、\code{a21_wave} 和 \code{time_lens} 等实验设置。这使得 baseline 不只是一个单一模型, 而是一套可用于比较不同观测链路贡献的实验框架。
+
+\subsection{配对波形编码与振幅保持}
+\justifying
+
+每幅像的 waveform 输入包含两个通道: 一个使用同一事件两幅像共享均值和标准差的形态通道, 另一个使用固定尺度 \(\tanh(x/s)\) 的幅度通道。共享归一化保留两幅像之间的相对幅度关系, 固定尺度通道则避免绝对放大率信息被完全标准化抹去。模型使用共享 WaveEncoder 分别编码两幅像, 再融合 \(f_1\)、\(f_2\)、\(|f_1-f_2|\) 和 \(f_1\odot f_2\), 显式建模双像关系。
+
+\subsection{分桶诊断驱动的数据协议修正}
+\justifying
+
+当前 baseline 不仅报告整体 MAE/RMSE/MAPE, 还按真实 \(\mu_0\) 分桶统计样本数、bias、MAE 和 RMSE。该诊断揭示了一个关键数据协议问题: 均匀分层采样 \(A_{21}\) 并不等价于均匀覆盖 \(\mu_0\)。这为下一版按 \(\mu_0\) accepted-bin 采样的数据生成协议提供了直接依据。
+
+\section{SIS 物理模型}
+\justifying
+
+\subsection{双像几何}
+\justifying
+
+SIS lens equation 的一维径向形式为
+\[
+    \beta = \theta - \theta_E \operatorname{sgn}(\theta),
+\]
+其中 \(\theta_E\) 是 Einstein 角半径。定义无量纲变量
+\[
+    y=\frac{\beta}{\theta_E}, \qquad x=\frac{\theta}{\theta_E},
+\]
+则有
+\[
+    y=x-\operatorname{sgn}(x).
+\]
+当 \(0<y<1\) 时系统产生双像, 两幅像的位置为
+\[
+    x_+ = 1+y, \qquad x_- = y-1 .
+\]
+对应角位置为
+\[
+    \theta_+ = \theta_E(1+y), \qquad
+    \theta_- = \theta_E(y-1).
+\]
+若只看两幅像相对于 lens center 的绝对角距, 则
+\[
+    |\theta_+|=\theta_E(1+y), \qquad
+    |\theta_-|=\theta_E(1-y),
+\]
+因此
+\[
+    |\theta_+|+|\theta_-| = 2\theta_E.
+\]
+单独的 image separation 只能给出 \(\theta_E\), 不能唯一决定 \(y\)。若同时知道两幅像各自到 lens center 的距离, 则可由
+\[
+    y = \frac{|\theta_+|-|\theta_-|}
+             {|\theta_+|+|\theta_-|}
+\]
+恢复源位置代理。因此, 像位置不对称度在 SIS 设定下是一个很强的 \(\mu_0\) 观测代理。
+
+\subsection{放大率与振幅比}
+\justifying
+
+定义
+\[
+    u=\frac{1}{y},
+\]
+则 SIS 双像有符号放大率为
+\[
+    \mu_0 = 1+u, \qquad \mu_1 = 1-u.
+\]
+由于 \(0<y<1\), 有 \(u>1\)、\(\mu_0>2\)、\(\mu_1<0\), 并且
+\[
+    \mu_0+\mu_1=2.
+\]
+绝对放大率比为
+\[
+    R_{21}=\frac{|\mu_1|}{\mu_0}
+          =\frac{u-1}{u+1}
+          =\frac{1-y}{1+y}
+          =\frac{\mu_0-2}{\mu_0}.
+\]
+定义两幅像的振幅比
+\[
+    A_{21} = \sqrt{R_{21}},
+\]
+可得
+\[
+    A_{21}^2 = \frac{\mu_0-2}{\mu_0},
+\]
+从而
+\[
+    \mu_0 = \frac{2}{1-A_{21}^2}, \qquad
+    \mu_1 = 2-\mu_0
+           = -\frac{2A_{21}^2}{1-A_{21}^2}.
+\]
+该关系是当前任务的核心: 任何能够准确估计 \(A_{21}\)、\(R_{21}\) 或 \(y\) 的观测链路, 都可以强约束 \(\mu_0\)。
+
+\subsection{误差放大}
+\justifying
+
+\(\mu_0\) 对 \(A_{21}\) 的敏感性由导数给出:
+\[
+    \frac{d\mu_0}{dA_{21}}
+    = \frac{4A_{21}}{(1-A_{21}^2)^2}.
+\]
+因此当 \(A_{21}\to 1\) 时, 同样大小的振幅比误差会在高放大率尾端被显著放大。相对误差近似为
+\[
+    \frac{\delta\mu_0}{\mu_0}
+    \simeq
+    \frac{2A_{21}}{1-A_{21}^2}\delta A_{21}.
+\]
+这解释了为什么高 \(\mu_0\) 区间需要更多样本、更强质量控制和更有针对性的损失权重。
+
+\begin{figure*}[!t]
+\centering
+\includegraphics[width=0.82\textwidth]{baseline_report_assets/fig3_a21_to_mu0_mapping.png}
+\caption{\(A_{21}\) 到 \(\mu_0\) 的 SIS 非线性映射。当前 baseline 均匀分层采样 \(A_{21}\), 但高 \(A_{21}\) 区间会映射到快速增长的高 \(\mu_0\) 尾端。}
+\label{fig:a21_to_mu0}
+\end{figure*}
+
+\section{Baseline 数据生成流程}
+\justifying
+
+\subsection{输出文件与数据分层}
+\justifying
+
+数据生成脚本输出的核心文件包括 \code{lens.csv}、\code{lens_params.csv}、\code{observable_features.csv}、\code{diagnostic_features.csv}、\code{quality_report.json}、\code{quality_report.md} 以及双像 waveform 数组。其职责划分如下:
+
+\begin{table}[H]
+\centering
+\tablesize
+\begin{tabular}{@{}ll@{}}
+\toprule
+文件 & 作用 \\
+\midrule
+\code{SIS_data_strain_1/2.npy} & noisy whitened 双像训练波形 \\
+\code{SIS_h_strain_1/2.npy} & clean signal 诊断波形 \\
+\code{SIS_noise_strain_1/2.npy} & detector noise 诊断波形 \\
+\code{lens.csv} & \(\mu_0,\mu_1,R_{21},A_{21},u,y,t_d\) 等标签侧真值 \\
+\code{lens_params.csv} & 透镜、源和观测几何参数 \\
+\code{observable_features.csv} & 训练可选观测特征 \\
+\code{diagnostic_features.csv} & 不默认输入模型的 privileged diagnostics \\
+\code{quality_report.md} & 质量门、分布和相关性报告 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+这种分层避免把标签侧变量误混入训练输入, 也方便后续检查每个观测链路对预测结果的贡献。
+
+\subsection{源参数采样}
+\justifying
+
+源光度距离通过均匀共动体积先验采样, 再由所选宇宙学模型换算为源红移 \(z_s\)。源质量采样范围为
+\[
+    m_{1,\mathrm{src}}\in[20,70]M_\odot,\qquad
+    m_{2,\mathrm{src}}\in[10,\min(50,m_{1,\mathrm{src}})]M_\odot.
+\]
+探测器系质量由红移因子给出:
+\[
+    m_1=(1+z_s)m_{1,\mathrm{src}}, \qquad
+    m_2=(1+z_s)m_{2,\mathrm{src}}.
+\]
+当前 baseline 默认随机采样自旋大小、倾角、相位角、赤经、赤纬、视线倾角、偏振角和相位, 因而 detector response 在样本间真实变化。
+
+\subsection{透镜参数和放大率采样}
+\justifying
+
+透镜红移从
+\[
+    z_l \sim \mathcal{U}(z_{l,\min}, z_s-\Delta z)
+\]
+采样, 速度弥散从
+\[
+    \sigma_v \sim \mathcal{U}(150,350)\ \mathrm{km\,s^{-1}}
+\]
+采样。Einstein 半径由 SIS 速度弥散公式计算。当前脚本的关键设定是: 先分层采样振幅比 \(A_{21}\), 再反推其他 SIS 量。具体为
+\[
+    A_{21}\sim \mathcal{U}(A_{\min}, A_{\max}),
+    \qquad A_{\min}=0.45,\quad A_{\max}=0.92,
+\]
+\[
+    R_{21}=A_{21}^2,\qquad
+    y=\frac{1-R_{21}}{1+R_{21}},\qquad
+    u=\frac{1}{y},
+\]
+\[
+    \mu_0=1+u,\qquad
+    \mu_1=1-u.
+\]
+等价地,
+\[
+    \mu_0=\frac{2}{1-A_{21}^2}.
+\]
+该采样策略保证 \(A_{21}\) 尝试阶段覆盖均衡, 但不保证 \(\mu_0\) 均衡。
+
+\subsection{时间延迟和观测误差}
+\justifying
+
+SIS 时间延迟由透镜几何和速度弥散计算, 并通过
+\[
+    10^2\ \mathrm{s} \le t_d \le 10^7\ \mathrm{s}
+\]
+进行质量筛选。观测误差包括红移加性噪声、速度弥散分数噪声、Einstein 半径分数噪声、像位置 astrometric noise 和 lens center 位置噪声。像位置观测进一步给出
+\[
+    y_{\mathrm{img,obs}}
+    =
+    \frac{\theta_{+,\mathrm{obs}}-\theta_{-,\mathrm{obs}}}
+         {\theta_{+,\mathrm{obs}}+\theta_{-,\mathrm{obs}}},
+\]
+其在 \code{observable_features.csv} 中保存为 \code{image_position_asymmetry_observed}。
+
+\subsection{双像波形注入}
+\justifying
+
+波形由 \code{IMRPhenomXPHM} 生成, 并在频域施加透镜放大和 Morse 相位。第 \(i\) 幅像的透镜因子为
+\[
+    F_i(f)=\sqrt{|\mu_i|}
+    \exp\left[-i\pi\left(2 f t_{\mathrm{eff},i}+n_i\right)\right],
+\]
+其中
+\[
+    n_0=0,\qquad n_1=0.5.
+\]
+当前配置中时间延迟通过第二像的 geocentric arrival time 体现, 因此第二像可以具有与第一像不同的 detector response。每幅像被注入 ET detector strain, 白化后围绕 clean signal peak 裁剪
+\[
+    4096\ \mathrm{samples}=1\ \mathrm{s}
+\]
+作为训练窗口。
+
+\subsection{质量控制}
+\justifying
+
+候选事件需要通过以下质量门:
+\[
+    \rho_1 \ge 12,\qquad
+    \rho_2 \ge 8,\qquad
+    \sqrt{\rho_1^2+\rho_2^2}\ge 18,
+\]
+\[
+    \mathrm{window\ SNR\ proxy}\ge 0.015,
+\]
+且到达时间观测误差需满足设定阈值。当前数据集接受 2500 个事件, 总尝试次数 2825, 接受率为
+\[
+    \frac{2500}{2825}=0.885.
+\]
+主要拒绝原因为 \(t_d\) 超出范围, 共 313 次; SNR 相关拒绝较少。
+
+\subsection{观测特征体系}
+\justifying
+
+\code{observable_features.csv} 中的特征可以分为六组:
+\begin{enumerate}
+    \item 波形振幅代理: peak amplitude ratio、RMS ratio、energy ratio、envelope area ratio 及不同窗口版本。
+    \item 波形形状代理: cross-correlation lag、normalized correlation、aligned residual、spectral centroid difference 和 band energy ratios。
+    \item 噪声上下文: local noise RMS 和 window SNR proxy。
+    \item 时间观测: 两幅像到达时间、时间不确定度、peak time difference。
+    \item 光学尺度: observed redshift、velocity dispersion、Einstein radius 和 image separation。
+    \item 成像几何: individual image positions、lens center 和 image-position asymmetry。
+\end{enumerate}
+训练入口通过 preset 控制这些特征组是否进入模型。
+
+\begin{figure*}[!t]
+\centering
+\includegraphics[width=0.86\textwidth]{baseline_report_assets/fig5_a21_mu0_distributions.png}
+\caption{当前数据集中 \(A_{21}\) 与 \(\mu_0\) 的分布对比。\(A_{21}\) 的分层覆盖相对均衡, 但 \(\mu_0\) 明显集中于低中值区间。}
+\label{fig:a21_mu0_distribution}
+\end{figure*}
+
+\section{训练代码架构}
+\justifying
+
+\subsection{训练入口与 preset}
+\justifying
+
+训练入口 \code{train_mu0_baseline_obs_realobs_quality.py} 负责设置数据路径、输出路径和观测特征 preset, 然后调用基础训练模块。默认数据目录为 \code{/root/autodl-tmp/tmp/数据生成/data_lens_randomu_realobs_quality_mu0}; 默认输出目录为 \code{/root/autodl-tmp/tmp/runs/mu_direct_baseline_realobs_quality_waveobs/all}。
+
+入口支持 \code{all}、\code{gw_only}、\code{no_image}、\code{no_time}、\code{a21_wave}、\code{time_lens} 和 \code{legacy} 等 preset。该设计允许系统性比较不同观测链路对 \(\mu_0\) 的贡献。
+
+\subsection{数据读取与样本构造}
+\justifying
+
+训练模块使用内存映射读取 \code{SIS_data_strain_1.npy} 和 \code{SIS_data_strain_2.npy} 两个双像 waveform 文件。标签来自 \code{lens.csv}, 观测特征来自 \code{observable_features.csv}。数据按固定随机种子 shuffle 后划分为
+\[
+    80\%\ \mathrm{training},\qquad 20\%\ \mathrm{validation}.
+\]
+每个样本包含两幅像 waveform、标准化观测向量、目标
+\[
+    z=\log(\mu_0-1),
+\]
+以及用于评估的 \(\mu_0\)、\(\mu_1\) 和事件索引。
+
+\subsection{波形输入表示}
+\justifying
+
+对每个事件, 两幅像共享一个 pair-wise normalization:
+\[
+    \bar{x}=\frac{1}{2N}\sum_{i=1}^{2}\sum_{j=1}^{N}x_{ij},\qquad
+    s_x=\sqrt{\frac{1}{2N}\sum_{i=1}^{2}\sum_{j=1}^{N}(x_{ij}-\bar{x})^2}.
+\]
+形态通道为
+\[
+    x_{\mathrm{shape}}=\frac{x-\bar{x}}{s_x+\epsilon},
+\]
+幅度通道为
+\[
+    x_{\mathrm{amp}}=\tanh\left(\frac{x}{s_{\mathrm{raw}}}\right),
+\]
+其中 \(s_{\mathrm{raw}}\) 为固定幅度压缩尺度。最终每幅像输入为
+\[
+    X_i^{\mathrm{in}}=
+    \begin{bmatrix}
+    x_{i,\mathrm{shape}}\\
+    x_{i,\mathrm{amp}}
+    \end{bmatrix}.
+\]
+
+\subsection{模型结构}
+\justifying
+
+模型由共享 WaveEncoder、观测特征编码器和融合预测头组成。两幅像经过同一个一维卷积编码器:
+\[
+    f_1 = E_{\mathrm{wave}}(X_1^{\mathrm{in}}),\qquad
+    f_2 = E_{\mathrm{wave}}(X_2^{\mathrm{in}}).
+\]
+观测特征经过 MLP 得到
+\[
+    f_o = E_{\mathrm{obs}}(o).
+\]
+融合向量为
+\[
+    f_{\mathrm{fuse}}
+    =
+    \left[
+    f_1,\ f_2,\ |f_1-f_2|,\ f_1\odot f_2,\ f_o
+    \right].
+\]
+预测头输出
+\[
+    \hat{z}=H(f_{\mathrm{fuse}}),
+\]
+并反变换为
+\[
+    \hat{\mu}_0=1+\exp(\hat{z}),\qquad
+    \hat{\mu}_1=2-\hat{\mu}_0.
+\]
+
+\subsection{损失函数}
+\justifying
+
+训练损失结合 transformed-space 误差和 real-space 误差。设
+\[
+    z=\log(\mu_0-1),
+\]
+则 transformed-space MAE 为
+\[
+    \mathcal{L}_{z} = |\hat{z}-z|.
+\]
+real-space 绝对误差和相对误差为
+\[
+    e_{\mu}=|\hat{\mu}_0-\mu_0|,\qquad
+    r_{\mu}=\frac{|\hat{\mu}_0-\mu_0|}{|\mu_0|+\epsilon}.
+\]
+当前 baseline 使用温和尾部权重
+\[
+    w(\mu_0)=1+\alpha\log(1+|\mu_0|),\qquad \alpha=0.35.
+\]
+总损失为
+\[
+    \mathcal{L}
+    =
+    \mathbb{E}[\mathcal{L}_{z}]
+    + \lambda_{\mathrm{mae}}\mathbb{E}[w(\mu_0)e_{\mu}]
+    + \lambda_{\mathrm{rel}}\mathbb{E}[w(\mu_0)r_{\mu}],
+\]
+其中
+\[
+    \lambda_{\mathrm{mae}}=0.02,\qquad
+    \lambda_{\mathrm{rel}}=0.08.
+\]
+
+\subsection{优化与保存}
+\justifying
+
+训练使用 AdamW, 初始学习率 \(10^{-4}\), weight decay \(5\times 10^{-4}\), batch size 为 32。模型参数使用 EMA 平滑:
+\[
+    \theta_{\mathrm{EMA}}
+    \leftarrow
+    \gamma\theta_{\mathrm{EMA}}+(1-\gamma)\theta,
+    \qquad \gamma=0.995.
+\]
+验证时使用 EMA 模型, 监控指标为 \(\mu_0\) MAPE。若验证 MAPE 改善, 保存 checkpoint、散点图和验证预测表。
+
+\section{结果与诊断}
+\justifying
+
+\subsection{总体指标}
+\justifying
+
+当前 \code{all} preset 在验证集上的结果如下:
+
+\begin{table}[H]
+\centering
+\tablesize
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+目标 & MAE & RMSE & MAPE & Corr \\
+\midrule
+\(\mu_0\) & 0.774 & 1.324 & 13.16\% & 0.853 \\
+\(\mu_1\) & 0.774 & 1.324 & 26.26\% & 0.853 \\
+\bottomrule
+\end{tabular}
+\caption{baseline 验证集总体指标。}
+\label{tab:global_metrics}
+\end{table}
+
+由于 \(\hat{\mu}_1=2-\hat{\mu}_0\), \(\mu_0\) 与 \(\mu_1\) 的绝对误差基本一致, 但 \(\mu_1\) 在低放大率端绝对值较小, 因而 MAPE 更高。
+
+\begin{figure*}[!t]
+\centering
+\includegraphics[width=0.86\textwidth]{baseline_report_assets/fig11_checkpoint_metrics_summary.png}
+\caption{从 baseline 训练 checkpoint 直接读取的验证集指标和模型配置摘要。左侧为 checkpoint 中保存的 \(\mu_0\) 与 \(\mu_1\) 指标, 右侧为目标变换、观测特征维度、波形输入长度和主要网络宽度等训练配置。该图用于保证报告指标、训练配置和后续诊断图来自同一个训练产物。}
+\label{fig:checkpoint_metrics_summary}
+\end{figure*}
+
+\begin{figure*}[!t]
+\centering
+\includegraphics[width=0.86\textwidth]{baseline_report_assets/fig8_baseline_scatter.png}
+\caption{baseline 模型在验证集上的 \(\mu_0\) 和 \(\mu_1\) 预测散点图。高 \(\mu_0\) 与负 \(\mu_1\) 尾端存在明显收缩。}
+\label{fig:baseline_scatter}
+\end{figure*}
+
+图~\ref{fig:baseline_scatter} 给出了逐点散点, 但散点图容易被低中值区间的高密度样本主导。为了更清楚地呈现校准关系, 图~\ref{fig:density_calibration} 使用 hexbin 密度形式重新绘制真实值与预测值, 并同时给出 \(1:1\) 参考线和最小二乘拟合线。验证集上的拟合斜率约为
+\[
+    \hat{\mu}_0 \simeq 0.632\,\mu_0 + 1.349,
+\]
+显著小于理想斜率 1。这说明模型并非在全区间均匀偏移, 而是将真实动态范围压缩到更窄的预测动态范围内。对应到 \(\mu_1=2-\mu_0\), 表现为负放大率尾端向中部收缩。
+
+\begin{figure*}[!t]
+\centering
+\includegraphics[width=0.86\textwidth]{baseline_report_assets/fig12_density_calibration.png}
+\caption{验证集真实值与预测值的密度校准图。每个六边形颜色表示该区域样本数量, 黑色虚线为理想 \(1:1\) 关系, 红色实线为验证集最小二乘拟合。两幅子图都显示斜率小于 1, 说明当前 baseline 的主要误差形态是尾端收缩和动态范围压缩。}
+\label{fig:density_calibration}
+\end{figure*}
+
+残差视角可以更直接地定位尾端问题。定义
+\[
+    r_{\mu_0}=\hat{\mu}_0-\mu_0,
+    \qquad
+    z=\log(\mu_0-1),
+    \qquad
+    r_z=\hat{z}-z.
+\]
+图~\ref{fig:residual_diagnostics} 显示, 当 \(\mu_0\) 较低时残差围绕 0 波动; 随 \(\mu_0\) 增大, 分桶中位数快速转为负值, 且 \(16\%\)--\(84\%\) 分位区间明显变宽。由于训练目标采用 \(z=\log(\mu_0-1)\), 变换空间中的残差也在高 \(z\) 区域系统性为负, 这表明尾端收缩不仅来自反变换尺度效应, 也已经出现在模型直接优化的目标空间中。
+
+\begin{figure*}[!t]
+\centering
+\includegraphics[width=0.86\textwidth]{baseline_report_assets/fig13_residual_diagnostics.png}
+\caption{baseline 验证集残差诊断。左图为 \(\mu_0\) 空间 signed residual 与真实 \(\mu_0\) 的关系, 红线为分桶残差中位数, 浅红区域为 \(16\%\)--\(84\%\) 分位区间; 中图为整体残差分布; 右图为 transformed target 空间的残差。高放大率区域同时出现负 bias 和更大的离散度。}
+\label{fig:residual_diagnostics}
+\end{figure*}
+
+\subsection{目标分布诊断}
+\justifying
+
+当前数据集中 \(\mu_0\) 的固定宽度分桶计数为:
+
+\begin{table}[H]
+\centering
+\tablesize
+\begin{tabular}{@{}lr@{}}
+\toprule
+\(\mu_0\) 区间 & 样本数 \\
+\midrule
+\([2,3)\) & 580 \\
+\([3,4)\) & 687 \\
+\([4,5)\) & 357 \\
+\([5,6)\) & 243 \\
+\([6,7)\) & 191 \\
+\([7,8)\) & 118 \\
+\([8,9)\) & 112 \\
+\([9,10)\) & 82 \\
+\([10,11)\) & 46 \\
+\([11,12)\) & 44 \\
+\([12,13)\) & 37 \\
+\([13,\infty)\) & 3 \\
+\bottomrule
+\end{tabular}
+\caption{接受样本的 \(\mu_0\) 分布。}
+\label{tab:mu0_distribution}
+\end{table}
+
+低中值区间 \([2,4)\) 合计 1267 个样本, 而 \(\mu_0\ge 10\) 仅约 130 个样本。该分布不均衡是尾端预测收缩的重要来源。
+
+\subsection{分桶误差}
+\justifying
+
+按真实 \(\mu_0\) 分桶后, 验证集 bias 随 \(\mu_0\) 增大而快速变负。特别是 \(\mu_0\ge 10\) 后, bias 达到 \(-3\) 到 \(-4\) 的量级。线性拟合关系近似为
+\[
+    \hat{\mu}_0 \simeq 0.632\,\mu_0 + 1.349,
+\]
+理想情况下斜率应接近 1。当前斜率小于 1, 表明模型预测动态范围被压缩。
+
+\begin{figure*}[!t]
+\centering
+\includegraphics[width=0.86\textwidth]{baseline_report_assets/fig9_mu0_binned_errors.png}
+\caption{验证集按真实 \(\mu_0\) 分桶后的样本数、bias 和 MAE。尾端样本数下降时, 系统性低估和误差同步增大。}
+\label{fig:mu0_binned_errors}
+\end{figure*}
+
+除了固定宽度分桶, 还可以按阈值集合
+\[
+    \mathcal{D}_{T}=\{i\mid \mu_{0,i}\ge T\},
+    \qquad
+    T\in\{2,4,6,8,10,12\},
+\]
+观察尾端子集的有效样本量和误差变化。图~\ref{fig:tail_performance} 显示, 当阈值从 \(T=2\) 提高到 \(T=10\) 后, 验证样本数由 500 降至 21, MAE 和 RMSE 同步上升, bias 则由轻微负偏变为显著低估。该图与图~\ref{fig:mu0_binned_errors} 相互印证: 当前尾端问题首先是数据覆盖不足, 其次是训练目标与损失函数在样本不均衡下倾向于学习条件均值, 从而压缩极端 \(\mu_0\) 的预测。
+
+\begin{figure*}[!t]
+\centering
+\includegraphics[width=0.86\textwidth]{baseline_report_assets/fig14_tail_performance.png}
+\caption{按阈值 \(\mu_0\ge T\) 统计的尾端性能。左图为验证样本数, 中图为 MAE 与 RMSE, 右图为 bias 与 MAPE。随着 \(T\) 增大, 可用样本快速减少, 绝对误差和系统性低估同步增强。}
+\label{fig:tail_performance}
+\end{figure*}
+
+最后, 为了判断哪些输入特征与误差增大相关, 我们仅使用 checkpoint 中记录的 \code{obs_cols} 特征集合, 将验证预测表与 \code{observable_features.csv} 按 \code{event_id} 对齐, 并计算每个特征与误差的 Spearman 相关系数:
+\[
+    \rho_s(x,e)
+    =
+    \operatorname{corr}\!\left(
+        \operatorname{rank}(x),
+        \operatorname{rank}(e)
+    \right),
+    \qquad
+    e=|\hat{\mu}_0-\mu_0|.
+\]
+图~\ref{fig:feature_error_correlation} 中, image position asymmetry、peak time difference、envelope peak time difference 等几何和时延相关特征与误差呈较强相关。这并不表示这些特征不应使用, 而是说明当前模型在高放大率、图像位置更接近临界几何或时延特征更极端的样本上更容易产生系统性收缩。因此后续改进可围绕这些特征做分层验证、tail reweighting 和特征消融。
+
+\begin{figure*}[!t]
+\centering
+\includegraphics[width=0.86\textwidth]{baseline_report_assets/fig15_feature_error_correlation.png}
+\caption{checkpoint 观测特征与验证误差的 Spearman 相关性。左图选择与 \(|\hat{\mu}_0-\mu_0|\) 绝对相关性最高的特征; 右图对同一组特征展示其与真实 \(\mu_0\) 及 signed residual 的相关性。该图用于定位误差随物理观测量变化的敏感方向。}
+\label{fig:feature_error_correlation}
+\end{figure*}
+
+参考物理分析论文中常用的二维参数平面可视化方式, 我们进一步构造误差地形图。对任意观测量 \(q\), 在 \((\mu_0,q)\) 平面上划分二维 bin, 并在每个 bin 内计算
+\[
+    E_{\mathrm{bin}}
+    =
+    \operatorname{median}_{i\in \mathrm{bin}}
+    \left|\hat{\mu}_{0,i}-\mu_{0,i}\right|.
+\]
+图~\ref{fig:error_landscape} 将 image position asymmetry、peak time difference、redshift ratio 和 SNR ratio 分别作为第二坐标。该图的重点不是替代总体指标, 而是展示误差在物理观测空间中的地形: 低 \(\mu_0\) 区域通常误差较低, 高 \(\mu_0\) 与某些极端观测量组合处误差显著升高; 同时, 白色空区也提示当前验证集在高放大率和极端观测量组合上的覆盖不足。
+
+\begin{figure*}[!t]
+\centering
+\includegraphics[width=0.86\textwidth]{baseline_report_assets/fig16_error_landscape.png}
+\caption{PRD 风格的二维误差地形图。横轴均为真实 \(\mu_0\), 纵轴分别为图像位置不对称度 \(q_{\rm img}\)、峰值时延 \(\log_{10}(\Delta t_{\rm peak}/{\rm day})\)、红移比 \(z_l/z_s\) 和 SNR 比 \(R_{\rm SNR,21}\); 色标为每个二维 bin 内的 median \(|\hat{\mu}_0-\mu_0|\)。白色区域表示该二维 bin 中验证样本不足或无样本。}
+\label{fig:error_landscape}
+\end{figure*}
+
+\subsection{A21 分层与 mu0 分层的差异}
+\justifying
+
+当前脚本使用 \(A_{21}\) 分层, 但 \(A_{21}\) 的最后一个区间覆盖了很宽的 \(\mu_0\) 范围。由
+\[
+    \mu_0=\frac{2}{1-A_{21}^2}
+\]
+可知, 当 \(A_{21}\) 接近 1 时, \(\mu_0\) 对 \(A_{21}\) 的变化极其敏感。因此, 如果目标是训练稳定的 \(\mu_0\) 回归器, 下一版数据协议应直接对 \(\mu_0\) 分层, 再反推
+\[
+    u=\mu_0-1,\qquad
+    y=\frac{1}{u},\qquad
+    \mu_1=2-\mu_0,\qquad
+    A_{21}=\sqrt{\frac{|\mu_1|}{\mu_0}}.
+\]
+
+\begin{figure*}[!t]
+\centering
+\includegraphics[width=0.86\textwidth]{baseline_report_assets/fig10_sampling_protocol_comparison.png}
+\caption{\(A_{21}\) 分层采样与 \(\mu_0\) 分层采样的协议对比。直接对 \(\mu_0\) 分层可以显著改善高放大率尾端覆盖。}
+\label{fig:sampling_protocol_comparison}
+\end{figure*}
+
+\section{局限与后续改进}
+\justifying
+
+\subsection{数据协议}
+\justifying
+
+当前最主要的局限是 \(\mu_0\) 尾端覆盖不足。建议新增 \(\mu_{0,\min}\)、\(\mu_{0,\max}\) 和 \(\mu_0\) bins, 并按 accepted count 而非 attempt count 控制每个 bin 的样本数。这样可以避免质量门筛选后重新引入分布偏差。
+
+\subsection{训练划分}
+\justifying
+
+当前训练验证划分是普通随机划分。建议改为 \(\mu_0\) 分层划分, 保证训练集和验证集在各个 \(\mu_0\) 区间具有相似比例, 尤其保证 \(\mu_0\ge 8\) 和 \(\mu_0\ge 10\) 区间有足够验证样本。
+
+\subsection{损失函数}
+\justifying
+
+当前尾部权重较温和。建议使用分桶反频率权重:
+\[
+    w_i = \frac{1}{\sqrt{N_{b(i)}}},
+\]
+其中 \(N_{b(i)}\) 是样本 \(i\) 所在 \(\mu_0\) bin 的训练样本数。为了避免极端权重放大噪声, 可对 \(w_i\) 做上下界裁剪, 并将 transformed-space MAE 替换为 weighted SmoothL1。
+
+\subsection{消融实验}
+\justifying
+
+当前 \code{all} preset 包含 image-position asymmetry, 该特征在 SIS 下可强约束 \(y\)。因此后续报告必须系统比较 \code{all}、\code{no_image}、\code{no_time}、\code{gw_only} 和 \code{a21_wave}。只有这样才能判断模型主要依赖 waveform 信息、时间延迟链路, 还是光学成像几何链路。
+
+\section{结论}
+\justifying
+
+当前 baseline 已经形成了完整的数据生成与训练闭环: 生成端提供 noisy real-observation proxy 双像波形、观测误差、质量控制报告和诊断真值; 训练端提供多观测链路融合、SIS 物理约束输出、oracle guard 和分桶误差诊断。总体结果表明, 模型能够在验证集上学习到较强的 \(\mu_0\) 顺序关系, 但高放大率尾端存在系统性低估。
+
+诊断显示, 尾端问题的主要来源是数据协议中的采样变量选择: 当前均匀覆盖的是 \(A_{21}\), 而不是 \(\mu_0\)。由于 \(A_{21}\to\mu_0\) 的非线性映射, 高 \(\mu_0\) 区间天然样本稀疏。下一阶段应优先改为 \(\mu_0\) 分层 accepted sampling, 配合分层训练验证划分和分桶加权损失。完成这些修正后, 再比较不同 feature preset, 才能更准确地评估 waveform 与观测代理在真实观测条件下恢复 SIS 放大率的能力。
+
+\end{multicols}
+
+\end{document}

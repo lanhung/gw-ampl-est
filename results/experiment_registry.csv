@@ -1,0 +1,2 @@
+experiment_id,phase,status,data_type,description,verified_result,limitations,artifact
+phase0_remote_audit_20260712,0,completed,legacy_metadata,"Read-only path, data, generator and PDF traceability audit","Three distinct lineages resolved; PDF checkpoint metrics verified","No full waveform hashing; missing historical Git/seed metadata",docs/audits/PHASE0_REMOTE_AUDIT.md
