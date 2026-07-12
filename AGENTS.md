@@ -78,28 +78,29 @@ generator audit and approving a v2 schema.
 
 ## Current phase gate
 
-Phase 0, Phase 1A, Phase 1A.1, Phase 1B, Phase 1B.1, Phase 2 and
-Phase 2.1 are complete and merged into main at:
+Phase 0, Phase 1A, Phase 1A.1, Phase 1B, Phase 1B.1 and Phase 2 through the
+human-approved RC.5 waveform-window amendment are complete and merged into
+main at:
 
-`c5efd0e3aacfeda65881de5a63e92d72b87fa0bb`
+`80167ea690914bb18be1fd1994b4dc626490e146`
 
-Human review explicitly authorizes Phase 3A only.
-
-Phase 3A execution is currently stopped before microbenchmark: the frozen RC.4
-waveform-boundary gate failed all four fixtures on generator commit
-`a2b8a02b4631e86c39e1b682e4424ecc2f2c5ca9`. Do not resume execution or relax
-the observed criteria without a separately reviewed, versioned waveform-window
-contract and renewed Phase 3A authorization.
+Human review explicitly authorizes Phase 3A only. The separate Phase 3A
+authorization must be renewed against this exact RC.5 version, hash and main
+commit before execution resumes.
 
 The frozen scientific design is:
 
-- preregistration version: `1.0.0-rc.4`;
+- preregistration version: `1.0.0-rc.5`;
 - preregistration configuration:
   `configs/statistics/phase2_preregistration.yaml`;
 - canonical configuration hash:
-  `1403f1f8cf96fbc34c2cfd99928bd7c24b5fde5495e54689d2a5ee7ec250c418`;
+  `4dde279cf1bea78d1ddbd4fab99d88e88e334c80c180dc7850679736c5e53edb`;
 - scientific schema: `2.0.0-alpha.3`;
 - frozen engineering-smoke schema: `2.0.0-alpha.2`.
+
+RC.5 freezes the 64-second internal waveform construction, 8-second
+conditioned publication and 128-second numerical reference. Thresholds may not
+be changed after execution begins.
 
 Phase 3A may only:
 
@@ -125,7 +126,8 @@ During Phase 3A, do not:
 - download GWOSC or GWTC products;
 - generate real-noise data;
 - alter the frozen Phase 1B smoke artifact;
-- alter the frozen RC.4 scientific distributions merely to make generation pass;
+- alter the frozen RC.5 scientific distributions or waveform-window contract
+  merely to make generation pass;
 - call synthetic Gaussian noise real detector noise;
 - modify any legacy file;
 - start manuscript writing;
