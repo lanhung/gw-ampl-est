@@ -93,9 +93,9 @@ def test_storage_size_calculation(pairs, expected_bytes):
     assert strain_storage_estimate(pairs).bytes == expected_bytes
 
 
-def test_smoke_configuration_validates_but_is_not_authorized():
+def test_phase1b_smoke_configuration_is_explicitly_authorized():
     config = load_yaml(ROOT / "configs/data/v2_smoke.yaml")
-    validate_smoke_configuration(config)
-    assert config["execution_authorized"] is False
+    validate_smoke_configuration(config, expected_execution_authorized=True)
+    assert config["execution_authorized"] is True
     assert sum(config["accepted_pairs"].values()) == 48
     assert config["schema_version"] == SCHEMA_VERSION == "2.0.0-alpha.2"
