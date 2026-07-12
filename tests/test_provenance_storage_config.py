@@ -118,7 +118,7 @@ def phase2_config():
 
 def test_phase2_preregistration_is_fail_closed_and_hash_frozen():
     config = phase2_config()
-    assert config["status"] == "human_source_plane_contract_approved"
+    assert config["status"] == "human_finite_source_support_approved"
     for field in (
         "execution_enabled",
         "scientific_data_generation_authorized",
@@ -129,7 +129,7 @@ def test_phase2_preregistration_is_fail_closed_and_hash_frozen():
         assert config[field] is False
     assert config["splits"]["real_noise_test"] == 0
     assert configuration_hash(config) == (
-        "16a75327df5aacafa1fb4459e19429cc08d3350cd3056986356ef3c57864c1e8"
+        "1403f1f8cf96fbc34c2cfd99928bd7c24b5fde5495e54689d2a5ee7ec250c418"
     )
 
 
@@ -150,6 +150,8 @@ def test_rc3_source_plane_density_is_exact_and_shared() -> None:
     assert measure["density_evaluation_stage"] == (
         "before_lens_multiplicity_and_detection_selection"
     )
+    assert measure["support_interpretation"] == "deliberately_truncated_finite_benchmark"
+    assert measure["full_multiply_imaged_cross_section_claim"] is False
 
 
 def test_rc3_solver_and_support_audit_are_frozen() -> None:
@@ -165,6 +167,10 @@ def test_rc3_solver_and_support_audit_are_frozen() -> None:
     reference_grid = audit["reference_components"][1]
     assert reference_grid["search_window_over_einstein_radius"] == 12.0
     assert reference_grid["minimum_image_separation_over_einstein_radius"] == 0.005
+    assert audit["boundary_requirement"] == (
+        "identical_primary_reference_classification_and_images"
+    )
+    assert audit["require_no_multiple_images_on_source_support_boundary"] is False
     assert audit["failure_action"] == "hard_stop_before_microbenchmark"
 
 

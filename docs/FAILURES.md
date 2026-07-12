@@ -168,3 +168,12 @@ silently removed.
   estimate exact.
 - The source support and solver search window still require the frozen Phase 3A
   boundary comparison. A failed support audit remains a hard stop.
+
+## Phase 2.3 finite-support clarification
+
+- RC.3's first extreme probe found steep EPL doubles on every tested finite
+  source-square boundary point. No dataset output was created.
+- RC.4 corrects the claim boundary: the exact square is a deliberately
+  truncated benchmark and does not purport to contain the complete strong-lens
+  cross-section. Primary/reference solver agreement replaces the impossible
+  no-multiple-images-at-boundary requirement.

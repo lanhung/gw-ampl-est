@@ -1,6 +1,6 @@
 # Phase 2 statistical preregistration
 
-Status: `1.0.0-rc.3`, source-plane execution contract approved by the human
+Status: `1.0.0-rc.4`, finite source-support contract approved by the human
 project owner; this file alone authorizes no execution.
 The machine-readable authority is
 `configs/statistics/phase2_preregistration.yaml`.
@@ -39,6 +39,13 @@ is `-log(25)-2 log(theta_E)`. Proposal and evaluation use the same source-plane
 factor, so it cancels exactly in their importance ratio. Multiple imaging and
 detection remain explicit selection events; no numerically estimated caustic
 area is inserted into a supposedly exact density.
+
+The square is a deliberately truncated finite benchmark support, not a claim
+to contain the full multiply-imaged cross-section. This distinction is required
+for singular EPL slopes above two, which can produce a demagnified additional
+image for sources outside any proposed finite boundary. Boundary validation
+therefore requires primary/reference solver agreement, not absence of multiple
+images.
 
 The solver contract takes the validated union of the EPL/SIE analytical solver
 and a deterministic grid search with an `8 theta_E` window and `0.02 theta_E`
