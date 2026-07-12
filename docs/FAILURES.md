@@ -126,3 +126,9 @@ silently removed.
 - Package builds still warn that the repository has no conventional top-level
   README. The sdist and wheel complete successfully; this packaging-quality
   warning is deferred and is not hidden as a failed build.
+- Because the safe sync intentionally omits `--delete`, the disposable AutoDL
+  checkout retained a superseded untracked Phase 2 test after that test was
+  consolidated into a tracked module on Vultr. An unrestricted remote pytest
+  therefore reported 108 passes by running both copies. The authoritative
+  Vultr file set passed 104 tests remotely with the stale path explicitly
+  ignored. No AutoDL source file was edited or deleted.

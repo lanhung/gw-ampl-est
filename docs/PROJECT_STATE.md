@@ -62,7 +62,7 @@ this state.
   frozen Phase 1B generic PSD label as imprecise provenance;
 - created a fail-closed Phase 3 plan with exact storage arithmetic, a 4,096-pair
   qualification gate, 128-pair atomic shards and byte-identical resume rules;
-- passed 100 local tests plus one optional skip and 105 AutoDL tests, Ruff,
+- passed 99 local tests plus one optional skip and 104 AutoDL tests, Ruff,
   mypy, and package builds.
 
 ## Not started by design
@@ -73,8 +73,8 @@ this state.
 
 ## Next recommended phase
 
-Review `docs/reports/PHASE2_REPORT.md`, the preregistration and the planned
-manifest. If accepted, explicitly authorize only Phase 3A generator
+Review `docs/reports/PHASE2_ENTRY_REPORT.md` and the preregistration. If
+accepted, explicitly authorize only Phase 3A generator
 qualification. Full production remains gated on measured qualification
 throughput, solver acceptance, storage and interruption/resume evidence. Do not
 reuse the engineering smoke artifact scientifically.
