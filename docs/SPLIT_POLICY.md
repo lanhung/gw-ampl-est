@@ -4,6 +4,7 @@
 
 The v2 schema enumerates:
 
+- `engineering_smoke`, which is never a scientific split;
 - `train`;
 - `validation` for model selection;
 - `calibration` for post-hoc calibration only;
@@ -16,6 +17,10 @@ The v2 schema enumerates:
 
 Calibration and IID testing are separate. Diagnostic/OOD sets do not replace
 the IID test.
+
+Records assigned to `engineering_smoke` are excluded from training,
+calibration, IID/OOD evaluation, and reported performance. Their dataset
+manifest must additionally set `scientific_use_authorized=false`.
 
 ## Grouping invariants
 

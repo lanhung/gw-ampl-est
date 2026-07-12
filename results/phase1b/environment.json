@@ -1,0 +1,13 @@
+{
+  "astropy": "6.1.7",
+  "bilby": "2.6.0",
+  "h5py": "3.11.0",
+  "lalsuite": "7.26.1",
+  "lenstronomy": "1.13.6",
+  "numcodecs": "0.13.1",
+  "numpy": "1.26.4",
+  "pandas": "2.2.3",
+  "pyarrow": "17.0.0",
+  "scipy": "1.13.1",
+  "zarr": "2.18.3"
+}

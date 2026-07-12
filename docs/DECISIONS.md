@@ -104,3 +104,25 @@ than a hard cut because photometric posteriors may overlap.
 Schema `2.0.0-alpha.2` supersedes metadata-only alpha.1. No migration is needed
 because no v2 dataset was generated. Complete manifests require target count
 and every published artifact checksum to be complete.
+
+## D020 — Engineering split and use boundary
+
+Phase 1B records use the explicit `engineering_smoke` split. The dataset
+manifest sets `dataset_purpose=engineering_smoke` and
+`scientific_use_authorized=false`; these records are excluded from all future
+training, calibration, IID, OOD, and reported performance analyses.
+
+## D021 — Separated-image waveform construction
+
+Each selected image has an independently centered one-second window and its
+own geocentric detector-response time. Galaxy-scale delay is metadata, never a
+multi-day shift inside the tensor. Amplitude is validated against an unlensed
+reference at the same response time, never by a raw cross-image detector ratio.
+
+## D022 — Phase 1B publication identity
+
+The published smoke dataset is
+`gwlens-v2-2.0.0-alpha.2-ae86beab1c132682`. Its generator commit is
+`d7287f8cc800406cc1e727a177fd27d7ca02cddf`; its authorization commit is
+`a607ddb6844cb8a9cd6761011cb545633cd4fdf1`. Zarr v2 and Parquet artifacts
+remain on AutoDL and are rooted by a complete checksum manifest.

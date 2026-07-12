@@ -78,21 +78,19 @@ generator audit and approving a v2 schema.
 
 ## Current phase gate
 
-Phase 0, Phase 1A and Phase 1A.1 are complete.
+Phase 0, Phase 1A, Phase 1A.1, and Phase 1B are complete.
 
-The currently authorized phase is Phase 1B:
+The reviewed Phase 1B engineering artifact is frozen as:
 
-- install and pin the smoke-generation environment on AutoDL;
-- implement and numerically validate SIS, SIE+shear and EPL+shear adapters;
-- implement the v2 generator and storage publication pipeline;
-- generate exactly 48 accepted engineering-smoke pairs;
-- validate physics, schema, provenance, resumability and amplitude preservation;
-- publish only small manifests, reports and diagnostic artifacts to Git.
+`gwlens-v2-2.0.0-alpha.2-ae86beab1c132682`
 
-During Phase 1B, do not:
+No subsequent phase is authorized until human review of
+`docs/reports/PHASE1B_SMOKE_REPORT.md`.
+
+Until a new gate is explicitly opened, do not:
 
 - train any neural model;
-- generate more than 48 accepted pairs;
+- generate additional waveform pairs;
 - download GWTC or GWOSC data;
 - call synthetic Gaussian noise real detector noise;
 - modify any legacy file;
@@ -104,8 +102,8 @@ All smoke outputs must be written only below:
 
 `/root/autodl-tmp/lensing-4/data_v2/smoke`
 
-Phase 1B must stop after the 48-pair smoke dataset and its validation report
-are complete.
+The 48-pair smoke dataset is engineering-only and may never be used for
+training, calibration, scientific testing, or reported performance claims.
 
 ## Scientific integrity
 

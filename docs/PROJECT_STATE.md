@@ -2,8 +2,8 @@
 
 ## Current phase
 
-Phase 1A.1 schema hardening is complete on `phase1/physics-schema`, pending PR
-and human review. No smoke generation is authorized by this state update.
+Phase 1B is complete on `phase1b/v2-smoke`, pending human review. No training,
+catalog download, or larger data generation is authorized by this state.
 
 ## Completed
 
@@ -29,18 +29,28 @@ and human review. No smoke generation is authorized by this state update.
 - upgraded the unmaterialized schema to `2.0.0-alpha.2`;
 - passed 93 pytest cases, Ruff, mypy, package build, the prior AutoDL SIS
   contract, and the AutoDL alpha.2 metadata contract.
+- merged the Phase 1A PR after its GitHub Actions check passed;
+- pinned an isolated AutoDL Phase 1B scientific environment;
+- numerically validated SIS, SIE+shear, and EPL+shear deterministic fixtures;
+- implemented detector-time-aware IMRPhenomXPHM smoke waveform generation;
+- generated and atomically published exactly 48 accepted engineering pairs;
+- validated Zarr v2 arrays, Parquet records, checksums, policies, six-slot
+  noise provenance, grouped IDs, and interruption/resume behavior;
+- demonstrated matched-response amplitude and Morse-phase preservation at
+  maximum relative errors below `2.0e-16`;
+- kept all published waveform arrays on AutoDL; only small manifests and
+  validation evidence are tracked by Git.
 
 ## Not started by design
 
 - literature review;
-- v2 data generation;
 - model or posterior training;
 - GWOSC/GWTC download;
 - manuscript work.
 
 ## Next recommended phase
 
-Open a PR from `phase1/physics-schema`, require GitHub Actions, and review the
-alpha.2 schema diff plus `docs/reports/PHASE1A1_SCHEMA_HARDENING_REPORT.md`.
-Only after merge to main should a new Phase 1B branch authorize pinned SIE/EPL
-solver adapters and exactly 48 accepted smoke pairs. Stop before training.
+Review `docs/reports/PHASE1B_SMOKE_REPORT.md`, the copied manifest, and failure
+record. If accepted, open a separate gate for Phase 2 literature,
+identifiability, and preregistration work. Do not reuse the engineering smoke
+artifact as a scientific dataset.
