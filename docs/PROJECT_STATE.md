@@ -2,9 +2,9 @@
 
 ## Current phase
 
-Phase 1B is accepted and Phase 1B.1 solver-time cleanup is complete on
-`phase1b/v2-smoke`, pending PR CI and merge. No training, catalog download, or
-larger data generation is authorized by this state.
+Phase 1B and Phase 1B.1 are merged and frozen. Phase 2 documentation and
+preregistration are in progress on `phase2/preregistration`. No training,
+catalog download, or scientific data generation is authorized by this state.
 
 ## Completed
 
@@ -46,17 +46,23 @@ larger data generation is authorized by this state.
 - corrected first-two fixture diagnostics and re-ran 101 AutoDL tests;
 - verified the frozen manifest, Parquet records, and validation-file hashes
   were identical before and after Phase 1B.1.
+- merged PR #2 after GitHub Actions passed at merge commit
+  `2a8d8de39d332f90339bd4e7d4c49f66697e6c01`;
+- tagged the exact generator commit as
+  `gwlens-v2-2.0.0-alpha.2-ae86beab1c132682` and made the published AutoDL
+  artifact read-only while preserving its hashes;
+- opened Phase 2 as a design-only preregistration phase.
 
 ## Not started by design
 
-- literature review;
 - model or posterior training;
 - GWOSC/GWTC download;
 - manuscript work.
 
 ## Next recommended phase
 
-Create the Phase 1B PR, require CI, merge to main, tag the exact generator
-commit, and make the AutoDL publication read-only. Then open a separate Phase 2
-branch for literature, identifiability, statistical design, and
-preregistration. Do not reuse the engineering smoke artifact scientifically.
+Complete and review the Phase 2 literature/identifiability audit and statistical
+preregistration. Freeze estimands, priors, observation and selection models,
+calibration criteria, baselines, ablations, split sizes, and a storage/compute
+plan before authorizing any Phase 3 generation or training. Do not reuse the
+engineering smoke artifact scientifically.

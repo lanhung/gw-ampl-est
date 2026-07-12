@@ -1,0 +1,55 @@
+phase: "2"
+status: entry_draft
+execution_enabled: false
+scientific_data_generation_authorized: false
+training_authorized: false
+gwtc_gwosc_download_authorized: false
+engineering_smoke_scientific_use_authorized: false
+
+estimands:
+  primary:
+    - log_abs_mu_primary
+    - log_abs_mu_secondary
+  derived:
+    - log_abs_mu_difference
+    - abs_magnification_ratio
+    - flux_ratio
+    - amplitude_factor_ratio
+  conditioning_required:
+    - lens_family
+    - cosmology
+    - external_convergence_and_model_discrepancy
+    - population_and_selection_model
+    - gw_and_em_observation_models
+
+lens_families:
+  development: [sie_external_shear, epl_external_shear]
+  analytic_control: sis
+
+nominal_coverage_levels: [0.50, 0.80, 0.90, 0.95]
+splits:
+  - validation
+  - calibration
+  - iid_test
+  - balanced_tail_diagnostic
+  - lens_family_ood
+  - parameter_region_ood
+  - real_noise_test
+  - waveform_psd_mismatch_test
+
+hard_failures:
+  - grouped_split_leakage
+  - privileged_input_access
+  - proposal_support_failure
+  - nonfinite_importance_weights
+  - incomplete_manifest
+  - declared_executed_prior_mismatch
+
+unresolved_before_phase3:
+  - numerical_prior_bounds_and_versions
+  - selection_and_missingness_models
+  - coverage_interval_and_precision_target
+  - powered_split_and_stratum_sizes
+  - waveform_psd_calibration_versions
+  - compute_storage_log_manifest_resume_plan
+  - human_review

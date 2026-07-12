@@ -97,3 +97,15 @@ silently removed.
   0 manifest-builder script, which contains pre-existing long audit-table lines.
   Phase 1B.1 therefore ran Ruff on `src`, `tests`, all `scripts/phase1b`, and the
   schema generator. The exclusion is explicit; no new lint failure was hidden.
+
+## Phase 1B.1 closeout operations
+
+- The first Git push used the host's default SSH identity and GitHub rejected
+  it. Re-running with the repository's dedicated deploy identity succeeded;
+  no commit or remote branch was lost.
+- The first closeout pytest command ran from the AutoDL project root rather
+  than its `repo/` code directory. Pytest followed the editable installation
+  into `repo/tests` but could not import the script namespace from that working
+  directory, yielding 100 passed and one path-related failure. Re-running from
+  `/root/autodl-tmp/lensing-4/repo` passed all 101 tests. This was an operator
+  working-directory error, not a solver or test portability defect.
