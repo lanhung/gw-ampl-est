@@ -46,7 +46,14 @@ def test_phase3ca_contract_is_bounded_and_non_scientific() -> None:
 
 
 def test_contract_derives_distinct_arm_identities() -> None:
-    head = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
+    marker = ROOT / "SYNCED_COMMIT"
+    head = (
+        marker.read_text().strip()
+        if marker.is_file()
+        else subprocess.check_output(
+            ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True
+        ).strip()
+    )
     config, _, _, identity = load_and_verify_contract(ROOT, head)
     assert identity.control_dataset_id != identity.candidate_dataset_id
     control = arm_config(ROOT, config, "rc5_control")
