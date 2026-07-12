@@ -1,9 +1,9 @@
 phase: "2"
-preregistration_version: "1.0.0-rc.2"
+preregistration_version: "1.0.0-rc.3"
 scientific_schema_version: "2.0.0-alpha.3"
 frozen_engineering_schema_version: "2.0.0-alpha.2"
 root_seed: 2026071202
-status: automatic_review_passed
+status: human_source_plane_contract_approved
 execution_enabled: false
 scientific_data_generation_authorized: false
 training_authorized: false
@@ -31,6 +31,27 @@ cosmology:
   sensitivity_cases:
     - flat_lcdm_h0_73_omega_m_0.30
 
+source_plane_measure:
+  id: dimensionless_einstein_square_preselection_v1
+  coordinates:
+    u_x_formula: source_beta_x_arcsec / einstein_radius_arcsec
+    u_y_formula: source_beta_y_arcsec / einstein_radius_arcsec
+  support:
+    u_x: {minimum: -2.5, maximum: 2.5, closed_lower: true, closed_upper: false}
+    u_y: {minimum: -2.5, maximum: 2.5, closed_lower: true, closed_upper: false}
+    area_dimensionless: 25.0
+  sampling: independent_uniform_u_x_u_y
+  canonical_density_measure: d_beta_x_arcsec_d_beta_y_arcsec
+  normalized_log_density_formula: -log(25.0)-2*log(einstein_radius_arcsec)
+  density_evaluation_stage: before_lens_multiplicity_and_detection_selection
+  lens_multiplicity_conditioning: explicit_selection_event
+  detection_conditioning: explicit_selection_event
+  proposal_evaluation_source_factor: identical_and_cancels_in_importance_ratio
+  cross_section_interpretation: >-
+    conditional_on_the_multiple_image_event_the_constant_base_density_is_uniform
+    over_the_intersection_of_the_declared_support_and_multiply_imaged_region
+  full_cross_section_claim_requires_support_audit: true
+
 proposal_distribution:
   id: broad_support_v1
   lens_family_probabilities:
@@ -49,7 +70,7 @@ proposal_distribution:
   shear_angle_rad: {distribution: uniform, minimum: 0.0, maximum: 3.141592653589793}
   epl_density_slope: {distribution: uniform, minimum: 1.6, maximum: 2.5}
   external_convergence: {distribution: uniform, minimum: -0.15, maximum: 0.15}
-  source_plane_sampling: uniform_in_solver_bounding_region_then_condition_on_multiple_images
+  source_plane_sampling: dimensionless_einstein_square_preselection_v1
 
 evaluation_distribution:
   id: balanced_literature_informed_benchmark_v1
@@ -94,7 +115,7 @@ evaluation_distribution:
     standard_deviation: 0.05
     minimum: -0.15
     maximum: 0.15
-  source_plane_sampling: uniform_in_multiply_imaged_cross_section
+  source_plane_sampling: dimensionless_einstein_square_preselection_v1
 
 lens_model_discrepancy:
   baseline: none_within_declared_family
@@ -140,6 +161,42 @@ lens_solver:
   families: [sie_external_shear, epl_external_shear]
   analytic_control: sis
   retain_all_physical_images: true
+  numerical_contract:
+    solver: deterministic_union
+    primary_components:
+      - solver: analytical
+        angular_samples: 400
+        low_shear_extra_samples: 80
+      - solver: lenstronomy_grid
+        search_window_over_einstein_radius: 8.0
+        minimum_image_separation_over_einstein_radius: 0.02
+        initial_guess_cut: false
+    precision_limit_arcsec: 1.0e-10
+    maximum_iterations: 200
+    arrival_time_sort: true
+    random_initial_guesses: 0
+    non_linear_solver: false
+    magnification_limit: null
+    candidate_validation:
+      maximum_lens_equation_residual_arcsec: 1.0e-8
+      duplicate_position_tolerance_over_einstein_radius: 1.0e-7
+      retain_demagnified_central_images: true
+    degenerate_image_policy: reject_and_record
+    support_audit:
+      reference_components:
+        - solver: analytical
+          angular_samples: 800
+          low_shear_extra_samples: 160
+        - solver: lenstronomy_grid
+          search_window_over_einstein_radius: 12.0
+          minimum_image_separation_over_einstein_radius: 0.005
+          initial_guess_cut: false
+      require_identical_image_multiplicity: true
+      maximum_position_difference_arcsec: 1.0e-6
+      maximum_relative_magnification_difference: 1.0e-5
+      boundary_source_points_per_edge: 32
+      require_no_multiple_images_on_source_support_boundary: true
+      failure_action: hard_stop_before_microbenchmark
   external_convergence_forward_model:
     id: mass_sheet_transform_v1
     lambda_formula: 1.0 - external_convergence
@@ -516,6 +573,8 @@ hard_failures:
   - undeclared_psd_or_waveform_version
   - waveform_edge_truncation
   - resume_byte_mismatch
+  - source_plane_support_audit_failure
+  - source_plane_density_normalization_failure
 
 remaining_external_gate:
   - explicit_phase3a_authorization

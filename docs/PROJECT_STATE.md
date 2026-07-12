@@ -2,11 +2,12 @@
 
 ## Current phase
 
-Phase 1B and Phase 1B.1 are merged and frozen. Phase 2 release candidate 1
-received a request-changes review; Phase 2.1 hardening has produced
-preregistration `1.0.0-rc.2` on `phase2/preregistration`, and the user-directed
-automatic review passed. No training, catalog download, Phase 3A execution, or
-scientific data generation is authorized by this state.
+Phase 1B and Phase 1B.1 are merged and frozen. Phase 2.1 RC.2 was merged. The
+human project owner approved the RC.3 source-plane execution contract on the
+dedicated Phase 2.2 branch. RC.3 remains execution-disabled; its exact commit
+and hash must be named by the separate Phase 3A authorization before generator
+qualification resumes. Full production, training, calibration, scientific
+testing and GWOSC/GWTC access remain unauthorized.
 
 ## Completed
 
@@ -79,6 +80,9 @@ scientific data generation is authorized by this state.
   conservative novelty statement with no unsupported “first” claim;
 - expanded storage gating from raw capacity to peak staging/publication use
   plus a 100 GB post-peak reserve.
+- defined the exact RC.3 source-plane preselection measure, normalized angular
+  log density, selection-conditioning boundary and deterministic Lenstronomy
+  numerical/support-audit contract.
 
 ## Not started by design
 
@@ -88,9 +92,7 @@ scientific data generation is authorized by this state.
 
 ## Next recommended phase
 
-RC.2 may be merged after CI. A later, separate decision may explicitly
-authorize only Phase 3A generator qualification; rc.2 itself does not grant
-that authorization. Full production remains gated on measured
-qualification throughput, solver acceptance, dynamics convergence, peak-disk
-amplification, storage and interruption/resume evidence. Do not reuse the
-engineering smoke artifact scientifically.
+Validate and merge RC.3, then update the independent Phase 3A authorization to
+its exact commit and canonical hash. Qualification must rerun all preflight and
+support gates. Full production remains gated on measured qualification
+throughput, solver acceptance, dynamics convergence, disk and resume evidence.

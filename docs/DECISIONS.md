@@ -257,3 +257,17 @@ modeling and LVK catalog searches. The preregistered novelty is the evaluated
 intersection of separated galaxy images, GW+EM conditioning, model-conditional
 absolute magnification and calibration. Journal targeting does not substitute
 for validated results.
+
+## D039 — Exact source-plane density precedes selection
+
+RC.3 resolves the RC.2 execution ambiguity by defining `u=beta/theta_E`
+uniformly on the half-open square `[-2.5,2.5)^2`. The normalized density with
+respect to angular source coordinates is `1/(25 theta_E^2)`. Proposal and
+evaluation share this factor. Lens multiplicity and synthetic detection are
+explicit selection events and are not hidden inside proposal normalization.
+
+The primary solver is the residual-validated union of Lenstronomy's analytical
+EPL/SIE solver and a deterministic grid search, so shallow-EPL demagnified
+central images are not discarded. A finer, wider union is the frozen reference.
+A failed support audit blocks Phase 3A; implementation may not change these
+tolerances after seeing qualification results.
