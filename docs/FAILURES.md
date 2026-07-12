@@ -188,3 +188,16 @@ silently choose a solver search window or approximate caustic area.
   estimate exact.
 - The source support and solver search window still require the frozen Phase 3A
   boundary comparison. A failed support audit remains a hard stop.
+
+## Phase 3A RC.3 source-boundary audit
+
+- The pre-generation boundary probe found that EPL slope 2.5 systems can remain
+  multiply imaged at every tested edge/corner of `[-2.5,2.5)^2`. This is
+  consistent with the singular steep power-law deflection and means a claim of
+  covering a finite full multiply-imaged cross-section is not executable.
+- SIE and shallow-EPL boundary probes returned no multiple images in the same
+  test. No pair or shard was generated.
+- RC.3 is retained as superseded history. A new version must call the finite
+  source square a deliberately truncated benchmark support and test primary
+  versus reference solver classification on its boundary rather than require
+  absence of multiple images there.

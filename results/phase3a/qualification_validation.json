@@ -1,11 +1,11 @@
 {
   "accepted_pair_count": 0,
   "authorizing_git_commit": "a7be12c5c0dce7c0570911749f6e431c2033c020",
-  "blocker": "normalized source-plane proposal/evaluation density is not executable from frozen RC.2",
+  "blocker": "RC.3 full-cross-section support audit is incompatible with steep singular EPL boundary behavior",
   "complete_shard_count": 0,
   "generator_checkpoint": "2bb1ea43cb50f0fbaf8eea9f88750a90603b596a",
   "microbenchmark_accepted_pair_count": 0,
-  "preregistration_hash": "a7d475150b1c01d8e539a3fd5eb8d83f2ce696c5d78125f4c435c7519803aef1",
+  "preregistration_hash": "16a75327df5aacafa1fb4459e19429cc08d3350cd3056986356ef3c57864c1e8",
   "publication_created": false,
   "verification": {
     "autodl_pytest_passed": 126,

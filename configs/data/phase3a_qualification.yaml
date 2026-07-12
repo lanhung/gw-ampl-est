@@ -2,11 +2,12 @@ phase: "3A"
 schema_version: "2.0.0-alpha.3"
 preregistration:
   path: "configs/statistics/phase2_preregistration.yaml"
-  version: "1.0.0-rc.2"
-  canonical_hash: "a7d475150b1c01d8e539a3fd5eb8d83f2ce696c5d78125f4c435c7519803aef1"
+  version: "1.0.0-rc.3"
+  canonical_hash: "16a75327df5aacafa1fb4459e19429cc08d3350cd3056986356ef3c57864c1e8"
+  base_main_commit: "8e14d927146ac3b2223343eaca89a323c58d5e13"
 authorization:
   path: "configs/execution/phase3a_qualification_authorization.yaml"
-  authorizing_git_commit: "a7be12c5c0dce7c0570911749f6e431c2033c020"
+  authorizing_git_commit: "46df8bb23ad99ce153e3fc9dc3b4fe46962f41f9"
 root_seed: 2026071202
 dataset_purpose: generator_qualification
 scientific_use_authorized: false

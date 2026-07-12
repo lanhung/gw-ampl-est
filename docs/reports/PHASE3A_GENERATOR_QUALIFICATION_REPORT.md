@@ -75,3 +75,13 @@ A reviewed, versioned preregistration amendment must define:
 
 After amendment, Phase 3A must restart from the new frozen configuration hash.
 This report does not authorize full production or any model training.
+
+## RC.3 follow-up
+
+The human-approved RC.3 finite source square resolved exact preselection
+normalization, but its first extreme boundary probe exposed an invalid support
+audit expectation: steep singular EPL (`gamma=2.5`) remained multiply imaged at
+all eight tested square corners/edge midpoints. RC.3 is therefore superseded
+before generation. RC.4 must retain the finite normalized square while labeling
+it a truncated benchmark, with primary/reference classification agreement—not
+absence of multiple imaging—as the boundary criterion.
