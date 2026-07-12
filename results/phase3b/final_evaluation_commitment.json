@@ -8,9 +8,9 @@
     "resolution_requires_separate_human_authorization": true
   },
   "preregistration": {
-    "version": "1.1.0-rc.2",
+    "version": "1.1.0-rc.3",
     "path": "configs/statistics/adaptive_scientific_production_preregistration.yaml",
-    "canonical_hash": "b94e7733d7fbb6f4c9dc4d5842b6a87f29e0515b4047b7b1604bca1438d15805",
+    "canonical_hash": "6082475631539d3069edacc52f41b37fb8fe725ccd7c6bc9980cc3008795a927",
     "parent_version": "1.0.0-rc.5",
     "parent_hash": "4dde279cf1bea78d1ddbd4fab99d88e88e334c80c180dc7850679736c5e53edb"
   },

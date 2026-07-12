@@ -1,51 +1,65 @@
-# Proposal-efficiency qualification plan
+# Proposal-efficiency A/B qualification plan
 
-Status: future engineering design only; proposal-v2 and its 512-pair A/B run
-are unauthorized.
+Status: future engineering design only under `1.1.0-rc.3`; proposal-v2 and the
+A/B qualification are unauthorized.
 
-## Invariant target and training correction
+The future design contains 512 accepted pairs per arm and 1,024 accepted
+engineering pairs total:
+
+| Arm | Accepted pairs | Use |
+|---|---:|---|
+| RC.5 control | 512 | engineering control only |
+| proposal-v2 candidate | 512 | engineering candidate only |
+
+Both arms permanently deny scientific, training, calibration and test use and
+can never enter a scientific split. The hard authorization maximum is exactly
+1,024 accepted pairs across both arms.
+
+## Invariant target and executable prerequisite
 
 Proposal v2 may improve training-system sampling but cannot change the RC.5
-evaluation target. Training under proposal `q_train(theta)` must minimize the
-importance-weighted conditional NLP with
-`log w = log p_eval(theta) - log q_train(theta)` over the complete latent
-state. Weights are global mean-one per rung, unclipped, finite, privileged and
-never model inputs. Validation, calibration, SBC and IID use direct target
-draws; SBC may not use uncorrected proposal draws.
+evaluation target. Later training under `q_train(theta)` must use the frozen
+full-latent importance-weighted conditional NLP. Weights remain privileged and
+never deployable inputs. Validation, calibration, SBC and IID use direct target
+draws.
 
-## Executable specification before authorization
+The candidate components remain concepts, not executable distributions. Before
+the future A/B gate can be authorized, a separate review must freeze each
+sampler, exact normalized log density, support, truncation/normalization,
+conditionals, seed domains, latent coverage and numerical boundary tests. The
+0.2 RC.5 broad-support mixture remains mandatory.
 
-The current caustic-aware and distance/magnification-stratified labels are
-concepts, not executable probability distributions. Before any 512-pair
-authorization, a separate review must freeze for every component its sampling
-algorithm, exact normalized log-density evaluator, support, truncation and
-normalization constants, mixture-variable semantics, conditionals,
-deterministic seed domains, full latent-variable coverage, numerical
-normalization tests and boundary tests.
+## Separate artifact identities
 
-The final mixture must retain weight 0.2 on the RC.5 broad-support safety
-component and evaluate its exact normalized density with log-sum-exp.
+One parent A/B run identity binds two distinct dataset identities: an RC.5
+control dataset and a proposal-v2 candidate dataset. The parent has one
+comparison manifest; each arm has its own manifest and checksums. Environment,
+worker count and telemetry contracts are identical. The concrete future IDs
+are derived once from the future authorization commit and RC.3 hash using the
+machine-readable templates; they cannot be shared between arms.
 
-## Future A/B gate
+## Matched A/B design
 
-The mandatory primary endpoint is accepted pairs per active hour. RC.5 control
-and proposal-v2 candidate each produce 512 engineering-only accepted pairs on
-the same hardware, environment, worker count and code path where possible.
-Each arm has sixteen matched blocks of 32 accepted pairs. Arm order alternates
-deterministically with even/odd reversal. Active time excludes only declared
-operator pauses. A 10,000-replicate bootstrap resamples matched block indices
-using seed domain `proposal_v2_throughput_ab_bootstrap_v1`, recomputes the ratio
-of aggregate candidate and control accepted-pair rates, and forms a percentile
-95% interval in log-rate-ratio space before exponentiating. The lower bound
-must be at least 2.0.
+Each arm has 16 matched blocks of 32 accepted pairs, so `16 × 32 = 512` per arm
+and `2 × 512 = 1,024` total. Arm order alternates deterministically. A frozen
+10,000-replicate matched-block bootstrap produces the log throughput-rate ratio
+95% interval. Proposal-v2 can be adopted only if its lower bound is at least
+2.0. Acceptance rate and CPU/solver/density timing are secondary; acceptance
+alone cannot pass.
 
-Acceptance-rate ratio, attempts per accepted pair, CPU seconds per accepted
-pair, lens-solver time and proposal-density time are secondary. An acceptance
-gain without the required throughput gain cannot authorize adoption. Endpoint
-switching after results is forbidden; an interval crossing 2.0 is
-inconclusive/failing and retains RC.5.
+## Conservative resource gate
 
-The candidate must additionally pass finite-weight, relative-ESS,
-maximum-weight, support, bounded-memory, duplicate-ID and resume gates. No
-threshold may be relaxed after observation. Phase 3B.1 runs none of these
-procedures.
+Both arms use the measured RC.5 rate for prelaunch planning:
+
+- control: 0.7432 active hours;
+- candidate conservative: 0.7432 active hours;
+- combined conservative: 1.4864 active hours;
+- combined projected publication: 1,112,673,640 bytes;
+- temporary/staging reserve: 20,333,802,092 bytes;
+- projected peak: 21,446,475,732 bytes;
+- minimum prelaunch free space: 121,446,475,732 bytes, preserving 100 GB after peak.
+
+A candidate running at exactly 2× would reduce the combined estimate to 1.1148
+hours, but that unmeasured hypothesis cannot lower the prelaunch gate.
+
+Phase 3B.2 implements or runs none of this future A/B qualification.

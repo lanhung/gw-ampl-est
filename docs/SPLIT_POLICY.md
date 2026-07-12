@@ -80,3 +80,7 @@ forbidden from scientific assignments. Noise augmentations inherit the parent
 physical-system split and are not counted as independent systems. Exactly one
 Gaussian noise realization is stored per independent physical system in the
 current design; any augmentation policy requires a later frozen gate.
+
+The future proposal-efficiency A/B datasets are also excluded: the 512-pair
+RC.5 control arm and 512-pair proposal-v2 candidate arm are engineering-only,
+and their combined 1,024 pairs contribute to no scientific split.

@@ -1,5 +1,5 @@
 phase: "3B"
-preregistration_version: "1.1.0-rc.2"
+preregistration_version: "1.1.0-rc.3"
 status: awaiting_human_review
 parent_preregistration:
   version: "1.0.0-rc.5"
@@ -294,11 +294,36 @@ final_architecture_selection:
   open_calibration_sbc_or_final_evaluation_automatically: false
 
 proposal_efficiency_future_gate:
-  qualification_id: proposal_v2_engineering_qualification_v1
-  accepted_pair_count: 512
+  qualification_id: proposal_v2_engineering_ab_qualification_v1
+  arm_count: 2
+  accepted_pair_count_per_arm: 512
+  total_accepted_pair_count: 1024
+  control_accepted_pair_count: 512
+  candidate_accepted_pair_count: 512
+  paired_blocks_per_arm: 16
+  accepted_pairs_per_block: 32
+  hard_maximum_accepted_pairs_across_both_arms: 1024
   authorized_in_phase3b: false
   scientific_use_authorized: false
+  training_use_authorized: false
+  calibration_use_authorized: false
+  test_use_authorized: false
+  permanent_exclusion_from_all_scientific_splits: true
   evaluation_target_unchanged: true
+  artifact_identity_contract:
+    parent_ab_run_id_template: proposal-v2-engineering-ab-{authorization_commit_12}-{config_hash_12}
+    control_dataset_id_template: "{parent_ab_run_id}-rc5-control"
+    candidate_dataset_id_template: "{parent_ab_run_id}-proposal-v2-candidate"
+    dataset_ids_must_differ: true
+    parent_comparison_manifest_template: manifests/proposal_v2/{parent_ab_run_id}/comparison_manifest.json
+    control_manifest_template: manifests/proposal_v2/{parent_ab_run_id}/rc5_control/manifest.json
+    candidate_manifest_template: manifests/proposal_v2/{parent_ab_run_id}/proposal_v2_candidate/manifest.json
+    separate_arm_manifests: true
+    separate_arm_checksums: true
+    identical_environment: true
+    identical_worker_count: true
+    identical_telemetry_contract: true
+    identities_resolved_once_by_future_authorization: true
   candidate_mixture:
     efficient_component_weight: 0.8
     rc5_broad_support_safety_component_weight: 0.2
@@ -327,9 +352,7 @@ proposal_efficiency_future_gate:
       same_generator_code_path_where_possible: true
       arms: [rc5_control, proposal_v2_candidate]
       budget: fixed_accepted_count_per_arm
-      accepted_count_per_arm: 512
-      paired_blocks_per_arm: 16
-      accepted_pairs_per_block: 32
+      accepted_pair_count_per_arm: 512
       block_order: deterministic_alternating_arm_order_with_even_odd_reversal
       active_time_definition: wall_seconds_excluding_declared_operator_pause
       bootstrap:
@@ -361,6 +384,25 @@ proposal_efficiency_future_gate:
       - full_latent_variable_coverage
     conceptual_component_names_are_not_executable_specification: true
   phase3a_rejection_data_role: engineering_baseline_only
+  conservative_resource_gate:
+    projection_basis: phase3a_rc5_measured_rate_and_bytes_for_both_arms
+    control_projected_attempts: 181963
+    candidate_projected_attempts: 181963
+    combined_projected_attempts: 363926
+    control_projected_active_hours: 0.743207861621631
+    candidate_conservative_projected_active_hours: 0.743207861621631
+    combined_conservative_active_hours: 1.48641572324326
+    combined_projected_publication_bytes: 1112673640
+    retained_failed_evidence_reserve_bytes: 55633682
+    run_checkpoint_and_cache_reserve_bytes: 20000000000
+    two_active_arm_shards_reserve_bytes: 278168410
+    temporary_and_staging_reserve_bytes: 20333802092
+    projected_peak_bytes: 21446475732
+    minimum_post_peak_free_bytes: 100000000000
+    minimum_prelaunch_free_bytes: 121446475732
+    hypothetical_candidate_two_x_active_hours: 0.371603930810816
+    hypothetical_combined_active_hours: 1.11481179243245
+    hypothetical_speedup_may_reduce_prelaunch_gate: false
 
 resource_projection:
   model_id: phase3a_measured_linear_rc5_v1

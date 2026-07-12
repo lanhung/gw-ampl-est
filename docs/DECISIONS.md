@@ -387,7 +387,8 @@ one size. No best seed is selected.
 
 A future proposal-v2 candidate must retain a positive 0.2 RC.5 broad-support
 safety component and evaluate the exact normalized mixture density. This is the
-support argument; a 512-pair finite sample cannot prove absence of holes.
+support argument; the finite two-arm qualification cannot prove absence of
+holes.
 
 The future engineering gate remains unauthorized in Phase 3B, and failure or
 ambiguity retains RC.5. D052 replaces the preliminary acceptance-or-throughput
@@ -425,7 +426,7 @@ Validation, calibration, SBC and IID are direct target-generative draws. The
 future proposal-v2 gate can pass only when the 95% lower confidence bound on
 accepted pairs per active hour is at least 2.0; acceptance alone is secondary.
 Every proposal component needs a reviewed executable sampler and normalized
-density before the unauthorized 512-pair gate can be opened.
+density before the unauthorized A/B gate can be opened.
 
 ## D053 — Seal generation commitments, not unknowable accepted IDs
 
@@ -450,3 +451,16 @@ Each independent scientific physical system stores exactly one Gaussian noise
 realization. Future augmentation remains unauthorized, cannot cross the parent
 split or count as another independent system, and must be frozen identically
 across rungs before training.
+
+## D055 — Proposal qualification is 512 pairs per arm and 1,024 total
+
+RC.2 simultaneously described a 512-pair qualification and two 512-pair arms.
+No data were generated, but the machine contract was ambiguous. RC.3 freezes
+two arms: 512 RC.5 control pairs and 512 proposal-v2 candidate pairs, arranged
+as 16 matched blocks of 32 in each arm. The hard future authorization maximum
+is exactly 1,024 accepted engineering pairs across both arms.
+
+The two arms have distinct dataset identities, manifests and checksums under
+one parent A/B run and comparison manifest. Both are permanently excluded from
+science. Prelaunch planning assumes RC.5 throughput for both arms; a future
+candidate speedup cannot reduce the resource gate before it is measured.

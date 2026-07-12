@@ -12,9 +12,9 @@ from gwlens_mm.provenance import configuration_hash
 ROOT = Path(__file__).resolve().parents[1]
 CONFIG_PATH = ROOT / "configs/statistics/adaptive_scientific_production_preregistration.yaml"
 COMMITMENT_PATH = ROOT / "results/phase3b/final_evaluation_commitment.json"
-EXPECTED_HASH = "b94e7733d7fbb6f4c9dc4d5842b6a87f29e0515b4047b7b1604bca1438d15805"
+EXPECTED_HASH = "6082475631539d3069edacc52f41b37fb8fe725ccd7c6bc9980cc3008795a927"
 EXPECTED_COMMITMENT_HASH = (
-    "29a1b8487679e7f6a671395e47288c6bace45eb21b141f0ec94940391d14f272"
+    "015e4ee50b78f9bd80f17723ccf084fad22768b04c09ba9da9677b62808b6533"
 )
 
 
@@ -26,9 +26,9 @@ def commitment() -> dict[str, Any]:
     return json.loads(COMMITMENT_PATH.read_text(encoding="utf-8"))
 
 
-def test_phase3b1_version_hash_parent_and_review_status_are_frozen() -> None:
+def test_phase3b2_version_hash_parent_and_review_status_are_frozen() -> None:
     config = adaptive_config()
-    assert config["preregistration_version"] == "1.1.0-rc.2"
+    assert config["preregistration_version"] == "1.1.0-rc.3"
     assert config["status"] == "awaiting_human_review"
     assert configuration_hash(config) == EXPECTED_HASH
     assert config["parent_preregistration"]["canonical_hash"] == (
@@ -153,15 +153,59 @@ def test_proposal_adoption_requires_two_x_throughput_lower_bound() -> None:
     assert adoption["acceptance_gain_without_throughput_gain_authorizes_adoption"] is False
     assert "acceptance_rate_ratio" in adoption["secondary_endpoints"]
     ab_design = adoption["ab_design"]
-    assert ab_design["paired_blocks_per_arm"] == 16
-    assert ab_design["accepted_pairs_per_block"] == 32
-    assert ab_design["paired_blocks_per_arm"] * ab_design["accepted_pairs_per_block"] == 512
+    assert gate["paired_blocks_per_arm"] == 16
+    assert gate["accepted_pairs_per_block"] == 32
+    assert (
+        gate["paired_blocks_per_arm"] * gate["accepted_pairs_per_block"]
+        == gate["accepted_pair_count_per_arm"]
+        == 512
+    )
     assert ab_design["bootstrap"]["replicates"] == 10000
     assert ab_design["bootstrap"]["resampling_unit"] == "matched_block_index"
     assert ab_design["endpoint_switching_after_results_forbidden"] is True
 
 
-def test_executable_proposal_specification_precedes_any_512_pair_authorization() -> None:
+def test_proposal_ab_count_and_distinct_artifact_identities_are_exact() -> None:
+    gate = adaptive_config()["proposal_efficiency_future_gate"]
+    identity = gate["artifact_identity_contract"]
+    assert gate["qualification_id"] == "proposal_v2_engineering_ab_qualification_v1"
+    assert gate["arm_count"] == 2
+    assert gate["accepted_pair_count_per_arm"] == 512
+    assert gate["control_accepted_pair_count"] == 512
+    assert gate["candidate_accepted_pair_count"] == 512
+    assert gate["total_accepted_pair_count"] == 1024
+    assert gate["hard_maximum_accepted_pairs_across_both_arms"] == 1024
+    assert gate["arm_count"] * gate["accepted_pair_count_per_arm"] == 1024
+    assert (
+        gate["control_accepted_pair_count"] + gate["candidate_accepted_pair_count"]
+        == gate["total_accepted_pair_count"]
+    )
+    assert identity["control_dataset_id_template"] != identity[
+        "candidate_dataset_id_template"
+    ]
+    assert identity["dataset_ids_must_differ"] is True
+    assert identity["separate_arm_manifests"] is True
+    assert identity["separate_arm_checksums"] is True
+    assert identity["parent_comparison_manifest_template"]
+    assert identity["identical_environment"] is True
+    assert identity["identical_worker_count"] is True
+    assert identity["identical_telemetry_contract"] is True
+
+
+def test_both_proposal_ab_arms_are_permanently_engineering_only() -> None:
+    gate = adaptive_config()["proposal_efficiency_future_gate"]
+    for key in (
+        "scientific_use_authorized",
+        "training_use_authorized",
+        "calibration_use_authorized",
+        "test_use_authorized",
+    ):
+        assert gate[key] is False
+    assert gate["permanent_exclusion_from_all_scientific_splits"] is True
+    assert gate["authorized_in_phase3b"] is False
+
+
+def test_executable_proposal_specification_precedes_any_ab_authorization() -> None:
     gate = adaptive_config()["proposal_efficiency_future_gate"]
     specification = gate["executable_specification_required_before_authorization"]
     mixture = gate["candidate_mixture"]
@@ -175,6 +219,35 @@ def test_executable_proposal_specification_precedes_any_512_pair_authorization()
         1.0,
     )
     assert mixture["rc5_broad_support_safety_component_weight"] == 0.2
+
+
+def test_proposal_ab_resource_gate_uses_1024_at_double_rc5_baseline() -> None:
+    config = adaptive_config()
+    gate = config["proposal_efficiency_future_gate"]
+    projection = gate["conservative_resource_gate"]
+    baseline = config["resource_projection"]["baseline"]
+    per_arm = gate["accepted_pair_count_per_arm"]
+    expected_attempts_per_arm = math.ceil(
+        per_arm * baseline["attempts"] / baseline["accepted_pairs"]
+    )
+    expected_bytes = math.ceil(
+        gate["total_accepted_pair_count"]
+        * baseline["published_bytes"]
+        / baseline["accepted_pairs"]
+    )
+    assert projection["control_projected_attempts"] == expected_attempts_per_arm
+    assert projection["candidate_projected_attempts"] == expected_attempts_per_arm
+    assert projection["combined_projected_attempts"] == 2 * expected_attempts_per_arm
+    assert projection["combined_projected_publication_bytes"] == expected_bytes
+    assert math.isclose(
+        projection["combined_conservative_active_hours"],
+        2 * projection["control_projected_active_hours"],
+    )
+    assert projection["minimum_prelaunch_free_bytes"] == (
+        projection["projected_peak_bytes"]
+        + projection["minimum_post_peak_free_bytes"]
+    )
+    assert projection["hypothetical_speedup_may_reduce_prelaunch_gate"] is False
 
 
 def test_probe_fits_are_reused_and_only_nine_new_fits_are_allowed() -> None:

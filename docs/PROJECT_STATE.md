@@ -4,10 +4,10 @@
 
 Human review accepted Phase 3A and PR #4 merged at
 `589b6a554d5bf8213c3014b5cb6f3b0e0f4edd5e`. The 4,096-pair qualification
-artifact remains permanently non-scientific. Phase 3B.1 has completed its
-design-only corrections and is awaiting human review on adaptive
-preregistration `1.1.0-rc.2`, canonical hash
-`b94e7733d7fbb6f4c9dc4d5842b6a87f29e0515b4047b7b1604bca1438d15805`.
+artifact remains permanently non-scientific. Phase 3B.2 has completed its
+design-only A/B count correction and is awaiting human review on adaptive
+preregistration `1.1.0-rc.3`, canonical hash
+`6082475631539d3069edacc52f41b37fb8fe725ccd7c6bc9980cc3008795a927`.
 
 No scientific pair, proposal-v2 qualification pair or model may be generated
 or trained. Calibration, SBC, final evaluation, real noise, GWOSC/GWTC and
@@ -114,8 +114,8 @@ Phase 3C remain unauthorized. The next action is human review, not execution.
 - opened Phase 3B as design-only adaptive-production preregistration work;
 - froze a nested 16k/32k/65k ladder, development-only stopping evidence and a
   separately sealed 20,480-system final evaluation pool;
-- designed but did not authorize a support-preserving 512-pair proposal-v2
-  engineering qualification and a separate real-noise/catalog boundary.
+- designed but did not authorize a support-preserving proposal-v2 engineering
+  A/B qualification and a separate real-noise/catalog boundary;
 - superseded Phase 3B RC.1 with design-only RC.2 after human statistical review;
 - reclassified 16k as a probe subset and limited final locks to 32k/65k;
 - staged future materialization as 38,912 scale-selection systems, a conditional
@@ -130,6 +130,14 @@ Phase 3C remain unauthorized. The next action is human review, not execution.
   noise realization per independent physical system;
 - kept all generation, training, proposal-v2, calibration, evaluation,
   GWOSC/GWTC and Phase 3C execution closed pending human review.
+- resolved the proposal qualification count as two distinct 512-pair arms,
+  exactly 1,024 engineering-only accepted pairs in total;
+- froze separate parent/control/candidate manifest and dataset identity
+  templates and permanent scientific-use denial for both arms;
+- added a conservative double-RC.5 prelaunch projection of 1.4864 active hours,
+  1,112,673,640 publication bytes and 121,446,475,732 minimum free bytes;
+- upgraded the design to RC.3 and refreshed the final-evaluation commitment
+  reference without resolving its future generator placeholder.
 
 ## Not started by design
 
@@ -143,8 +151,9 @@ Phase 3C remain unauthorized. The next action is human review, not execution.
 
 ## Next recommended phase
 
-Human review should inspect Phase 3B.1 RC.2's target correction, commitment,
-throughput A/B endpoint and staged arithmetic. No PR merge or subsequent gate
-follows automatically. If accepted, proposal-v2 still needs an executable
-density specification before a separately authorized 512-pair engineering
-qualification; scientific Stage A and training remain independent later gates.
+Human review should inspect Phase 3B.2 RC.3's explicit 512-per-arm/1,024-total
+contract, distinct artifact identities and conservative resource gate. No PR
+merge or subsequent execution follows automatically. If accepted, proposal-v2
+still needs an executable density specification before the separately
+authorized A/B engineering qualification; scientific Stage A and training
+remain independent later gates.

@@ -114,18 +114,19 @@ testing or reported scientific performance.
 Human review now authorizes Phase 3B design work only on the adaptive scientific
 production preregistration hardening release candidate:
 
-- version: `1.1.0-rc.2`;
+- version: `1.1.0-rc.3`;
 - configuration:
   `configs/statistics/adaptive_scientific_production_preregistration.yaml`;
 - canonical hash:
-  `b94e7733d7fbb6f4c9dc4d5842b6a87f29e0515b4047b7b1604bca1438d15805`.
+  `6082475631539d3069edacc52f41b37fb8fe725ccd7c6bc9980cc3008795a927`.
 
 Phase 3B may only write configurations, statistical decision rules, resource
 projections, safety tests, documentation and small design evidence. It may
 preregister a 16,384-system probe subset nested in the independently lockable
 32,768/65,536 training ladder, a staged 12,288-system development pool, a
-sealed 20,480-system final evaluation commitment and a future 512-pair
-proposal-efficiency qualification gate. RC.2 may freeze importance-weighted
+sealed 20,480-system final evaluation commitment and a future two-arm
+proposal-efficiency qualification gate with 512 accepted pairs per arm and
+1,024 accepted engineering pairs total. RC.3 may freeze importance-weighted
 training-target correction, but may not execute it.
 
 During Phase 3B, do not:
@@ -150,7 +151,7 @@ All Phase 3A remote outputs must remain under:
 Full production, staged scientific production, proposal-v2 qualification,
 model training, calibration, SBC, scientific IID/OOD/mismatch testing,
 real-noise work, GWOSC/GWTC access and Phase 3C remain closed. Phase 3B must stop
-after its Phase 3B.1 hardening report and human-review gate. The Phase 3A artifact
+after its Phase 3B.2 consistency report and human-review gate. The Phase 3A artifact
 must never enter any scientific split.
 
 ## Scientific integrity

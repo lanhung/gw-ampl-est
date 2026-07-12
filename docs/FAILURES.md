@@ -283,3 +283,12 @@ silently choose a solver search window or approximate caustic area.
 - RC.1 allowed acceptance or throughput to pass proposal-v2. No proposal was
   implemented or tested. RC.2 makes a 2× throughput lower confidence bound
   mandatory and requires an executable density specification before any gate.
+
+## Phase 3B.1 A/B count ambiguity
+
+- RC.2 declared a 512-pair proposal qualification while its two-arm design
+  separately required 512 accepted pairs in each arm. That would make the
+  actual total 1,024 and could exceed a literal 512-pair authorization.
+- No proposal was implemented, no pair was generated and no resource was
+  consumed. RC.3 resolves the design before PR review by freezing 512 pairs per
+  arm, 1,024 total, distinct arm identities and a double-RC.5 resource gate.

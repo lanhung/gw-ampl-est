@@ -1,12 +1,13 @@
 # Adaptive scientific-production plan
 
-Status: design-only preregistration `1.1.0-rc.2`, awaiting human review. No
+Status: design-only preregistration `1.1.0-rc.3`, awaiting human review. No
 generation, training, calibration, evaluation, proposal qualification or
 external-data access is authorized.
 
 The machine-readable authority is
 `configs/statistics/adaptive_scientific_production_preregistration.yaml`. Its
-canonical hash is recorded after the complete RC.2 configuration is frozen.
+canonical hash is
+`6082475631539d3069edacc52f41b37fb8fe725ccd7c6bc9980cc3008795a927`.
 
 ## Boundary inherited from Phase 3A
 
@@ -16,7 +17,7 @@ pairs. Dataset `gwlens-v2-2.0.0-alpha.3-7081b2e8be3a84e1` remains permanently
 outside every scientific split. Its throughput and rejection evidence may
 inform engineering projections but never scientific training or evaluation.
 
-RC.5 remains the parent evaluation target. RC.2 changes allocation, target
+RC.5 remains the parent evaluation target. RC.3 changes allocation, target
 correction and decision rules; it does not alter the parent estimand,
 source-plane measure, observation model, selection model or waveform contract.
 
@@ -88,7 +89,7 @@ diagnostic distributions.
 
 Accepted IDs do not exist before selection runs. Before training, the project
 instead finalizes and hashes a deterministic generation commitment containing
-the future generator commit, RC.2 hash, root and split seed domains,
+the future generator commit, RC.3 hash, root and split seed domains,
 attempt-stream and accepted-rank rules, counts, distribution identities,
 versions, grouping rules and manifest validators. The design template is
 `results/phase3b/final_evaluation_commitment.json`.
@@ -107,8 +108,9 @@ objective, optimizer and budget match. At most nine new fits are then needed.
 Proposal-v2 adoption requires the lower bound of a frozen 95% confidence
 interval for accepted pairs per active hour relative to RC.5 to be at least
 2.0. Acceptance is secondary and cannot authorize adoption alone. Before even
-authorizing the 512-pair A/B gate, every proposal component needs a reviewed,
-executable sampler and exact normalized density specification. Phase 3B.1 does
+authorizing the A/B gate—512 accepted pairs per arm and 1,024 accepted
+engineering pairs total—every proposal component needs a reviewed, executable
+sampler and exact normalized density specification. Phase 3B.2 does
 not implement or run it.
 
 ## Resource projection and authorization
@@ -122,6 +124,11 @@ systems. Assuming exactly 2× training throughput while direct-target nontrainin
 splits retain RC.5 rate gives 71.35 and 95.13 hours for the two completed
 totals. It is not an observed result.
 
-Every later action requires a new human gate. RC.2 authorizes no pair,
+The future A/B gate uses distinct control/candidate datasets and conservative
+double-RC.5 planning: 1.4864 active hours, 1,112,673,640 publication bytes and
+121,446,475,732 minimum prelaunch free bytes. A hypothetical 2× candidate
+cannot lower that gate.
+
+Every later action requires a new human gate. RC.3 authorizes no pair,
 training fit, calibration, SBC, final evaluation, real-noise work, GWOSC/GWTC
 access or Phase 3C execution.

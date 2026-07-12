@@ -77,7 +77,7 @@ lower bound for accepted pairs per active hour relative to RC.5 must be at
 least 2.0. Acceptance and CPU/solver/density measures are secondary; acceptance
 alone cannot pass the gate.
 
-Before a 512-pair authorization, every candidate component requires a reviewed
+Before a future proposal A/B authorization, every candidate component requires a reviewed
 executable sampler, exact normalized density, support and normalization
 constants, conditionals, seed domains and numerical/boundary tests. The 20%
 RC.5 safety mixture remains required.
@@ -135,3 +135,7 @@ training, calibration, SBC, IID/OOD/mismatch evaluation, real noise,
 GWOSC/GWTC and Phase 3C.
 
 Phase 3B.1 stops here for human review.
+
+Phase 3B.2 later supersedes RC.2 only for the ambiguous A/B accepted-pair
+count. RC.2's other scientific and statistical conclusions remain review
+history.
