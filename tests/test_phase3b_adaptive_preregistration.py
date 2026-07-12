@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import hashlib
+import json
 import math
 from pathlib import Path
 from typing import Any
@@ -9,23 +11,32 @@ from gwlens_mm.provenance import configuration_hash
 
 ROOT = Path(__file__).resolve().parents[1]
 CONFIG_PATH = ROOT / "configs/statistics/adaptive_scientific_production_preregistration.yaml"
-EXPECTED_HASH = "ba5dae2aa769331b917d3f622bfc967c607700f9908521576301841cb71d804b"
+COMMITMENT_PATH = ROOT / "results/phase3b/final_evaluation_commitment.json"
+EXPECTED_HASH = "b94e7733d7fbb6f4c9dc4d5842b6a87f29e0515b4047b7b1604bca1438d15805"
+EXPECTED_COMMITMENT_HASH = (
+    "29a1b8487679e7f6a671395e47288c6bace45eb21b141f0ec94940391d14f272"
+)
 
 
 def adaptive_config() -> dict[str, Any]:
     return load_yaml(CONFIG_PATH)
 
 
-def test_phase3b_version_hash_and_parent_are_frozen() -> None:
+def commitment() -> dict[str, Any]:
+    return json.loads(COMMITMENT_PATH.read_text(encoding="utf-8"))
+
+
+def test_phase3b1_version_hash_parent_and_review_status_are_frozen() -> None:
     config = adaptive_config()
-    assert config["preregistration_version"] == "1.1.0-rc.1"
+    assert config["preregistration_version"] == "1.1.0-rc.2"
+    assert config["status"] == "awaiting_human_review"
     assert configuration_hash(config) == EXPECTED_HASH
     assert config["parent_preregistration"]["canonical_hash"] == (
         "4dde279cf1bea78d1ddbd4fab99d88e88e334c80c180dc7850679736c5e53edb"
     )
 
 
-def test_phase3b_is_design_only_and_every_execution_gate_is_closed() -> None:
+def test_every_execution_gate_remains_closed() -> None:
     authorization = adaptive_config()["authorization"]
     assert authorization["design_work_authorized"] is True
     for key, value in authorization.items():
@@ -41,140 +52,176 @@ def test_phase3a_artifact_is_permanently_excluded() -> None:
     assert evidence["scientific_use_authorized"] is False
     assert evidence["permanent_exclusion_from_all_scientific_splits"] is True
     assert evidence["dataset_id"] in grouping["phase3a_dataset_ids_forbidden"]
-    assert len(evidence["forbidden_id_prefixes"]) == 5
 
 
-def test_training_ladder_is_strictly_nested_and_capped() -> None:
+def test_16k_is_probe_only_and_only_32k_or_65k_can_lock() -> None:
     ladder = adaptive_config()["nested_training_ladder"]
     rungs = ladder["rungs"]
-    assert list(rungs.values()) == [16384, 32768, 65536]
-    assert rungs["train_16k"] < rungs["train_32k"] < rungs["train_65k"]
-    assert ladder["membership_rule"] == "stable_rank_less_than_rung_count"
+    assert rungs == {
+        "train_16k_probe_subset": 16384,
+        "train_32k": 32768,
+        "train_65k": 65536,
+    }
+    assert ladder["independently_lockable_final_rungs"] == [
+        "train_32k",
+        "train_65k",
+    ]
+    assert ladder["train_16k_probe_subset_is_final_lock"] is False
     assert ladder["automatic_extension_above_65536"] is False
-    assert ladder["above_65536_action"] == "hard_stop_and_new_preregistration"
 
 
-def test_development_and_final_pool_arithmetic_and_roles() -> None:
-    config = adaptive_config()
-    development = config["development_pool"]
-    final = config["final_evaluation_pool"]
-    development_total = sum(item["count"] for item in development["splits"].values())
-    final_total = sum(item["count"] for item in final["splits"].values())
-    assert development_total == development["total"] == 12288
-    assert final_total == final["total"] == 20480
-    assert development["group_disjoint"] is True
-    assert final["group_disjoint"] is True
-    assert final["group_disjoint_from_training_and_development"] is True
-    assert "learning_curve_stopping" in development["splits"]["validation"][
-        "allowed_uses"
-    ]
-    assert "learning_curve_stopping" in development["splits"]["calibration_fit"][
-        "forbidden_uses"
-    ]
-    assert "calibration_fit" in development["splits"]["sbc_diagnostic"][
-        "forbidden_uses"
-    ]
+def test_only_achievable_final_totals_are_65536_and_98304() -> None:
+    totals = adaptive_config()["total_scientific_counts_by_stop"]
+    assert totals["achievable_final_totals"] == [65536, 98304]
+    assert totals["train_32k"] == 32768 + 12288 + 20480 == 65536
+    assert totals["train_65k"] == 65536 + 12288 + 20480 == 98304
+    assert totals["train_16k_probe_subset_final_total"] is None
+    assert 49152 not in totals.values()
 
 
-def test_total_counts_exclude_phase3a_and_are_exact() -> None:
-    config = adaptive_config()
-    totals = config["total_scientific_counts_by_stop"]
-    development = config["development_pool"]["total"]
-    final = config["final_evaluation_pool"]["total"]
-    for rung, count in config["nested_training_ladder"]["rungs"].items():
-        assert totals[rung] == count + development + final
-    assert totals["phase3a_qualification_excluded_from_totals"] is True
-
-
-def test_final_evaluation_cannot_affect_scale_selection() -> None:
-    config = adaptive_config()
-    final = config["final_evaluation_pool"]
-    probe = config["learning_curve_probe"]
-    final_names = set(final["splits"])
-    assert final["sealed_during_scale_and_architecture_selection"] is True
-    assert final["early_materialization_authorized"] is False
-    assert final_names <= set(probe["forbidden_metric_sources"])
-    assert config["stopping_rule"]["final_evaluation_may_affect_stopping"] is False
-
-
-def test_stopping_rule_is_fail_closed_at_32k_and_65k() -> None:
-    rule = adaptive_config()["stopping_rule"]
-    first = rule["comparison_16k_to_32k"]
-    second = rule["comparison_32k_to_65k"]
-    assert first["require_all_conditions"] is True
-    assert first["gray_zone_action"] == "continue_to_train_65k"
-    assert first["nlp_improvement_ci_upper_max_nat_per_target_dimension"] == 0.01
-    assert first["median_crps_relative_improvement_max"] == 0.01
-    assert first["maximum_marginal_coverage_error_improvement_max"] == 0.005
-    assert first["maximum_em_cell_coverage_degradation"] == 0.02
-    assert second["meaningful_improvement_action"] == (
-        "stop_data_limited_and_new_preregistration"
+def test_staged_materialization_arithmetic_and_order_are_exact() -> None:
+    sequence = adaptive_config()["materialization_sequence"]
+    stage_a = sequence["stage_a_scale_selection"]
+    stage_b = sequence["stage_b_conditional_extension"]
+    stage_c = sequence["stage_c_post_lock"]
+    assert stage_a["train_32k"] + stage_a["validation"] == stage_a["total"] == 38912
+    assert stage_a["generation_continues_to_train_32k_regardless_of_16k_probe_result"]
+    assert stage_b["additional_training_systems"] == 32768
+    assert stage_b["automatic"] is False
+    assert (
+        stage_c["calibration_fit"]
+        + stage_c["sbc_diagnostic"]
+        + stage_c["final_evaluation"]
+        == stage_c["total"]
+        == 26624
     )
-    assert second["gray_zone_action"] == "stop_inconclusive_and_new_preregistration"
+    assert stage_c["requires_training_size_and_architecture_lock"] is True
 
 
-def test_calibration_sbc_and_architecture_gates_remain_separate() -> None:
+def test_changed_training_proposal_requires_weighted_target_correction() -> None:
+    targets = adaptive_config()["scientific_sampling_targets"]
+    correction = targets["training_target_correction"]
+    assert targets["evaluation_target_id"] == "balanced_literature_informed_benchmark_v1"
+    assert correction["required_when_training_proposal_differs_from_evaluation_target"]
+    assert correction["objective"] == "importance_weighted_conditional_negative_log_probability"
+    assert "log_p_eval" in correction["log_weight_formula"]
+    assert "log_q_train" in correction["log_weight_formula"]
+    assert correction["full_latent_proposal_and_evaluation_variables_required"]
+    assert correction["normalized_globally_within_each_rung_to_mean"] == 1.0
+    assert correction["clipping_authorized"] is False
+    assert correction["deployable_model_input"] is False
+    assert correction["identical_semantics_across_rungs"] is True
+
+
+def test_validation_calibration_sbc_and_iid_are_direct_target_draws() -> None:
+    targets = adaptive_config()["scientific_sampling_targets"]
+    direct = targets["direct_target_splits"]
+    assert set(direct) == {"validation", "calibration_fit", "sbc_diagnostic", "iid_test"}
+    assert all(value.startswith("direct_evaluation") for value in direct.values())
+    assert targets["sbc_uncorrected_proposal_draws_forbidden"] is True
+    probe_forbidden = set(adaptive_config()["learning_curve_probe"]["forbidden_metric_sources"])
+    assert {"calibration_fit", "sbc_diagnostic", "iid_test"} <= probe_forbidden
+
+
+def test_final_commitment_freezes_generation_rules_not_unknown_ids() -> None:
     config = adaptive_config()
-    development = config["development_pool"]["splits"]
-    architecture = config["final_architecture_selection"]
-    assert development["calibration_fit"]["count"] == 4096
-    assert development["sbc_diagnostic"]["count"] == 2048
-    assert architecture["begins_only_after_training_size_lock"] is True
-    assert architecture["best_seed_selection_forbidden"] is True
-    assert architecture["maximum_fits"] == 12
-    assert architecture["open_calibration_sbc_or_final_evaluation_automatically"] is False
+    final = config["final_evaluation_pool"]
+    item = commitment()
+    assert final["concrete_accepted_ids_known_before_materialization"] is False
+    assert final["deterministic_generation_commitment_required_before_training"] is True
+    assert item["accepted_ids_known_before_materialization"] is False
+    assert item["future_scientific_generator_commit"]["value"] is None
+    assert item["must_be_finalized_and_hashed_before_training"] is True
+    assert item["preregistration"]["canonical_hash"] == EXPECTED_HASH
+    assert sum(
+        count for name, count in item["split_counts"].items() if name != "total"
+    ) == item["split_counts"]["total"] == 20480
+    assert "attempt_id_allocation_rule" in item
+    assert "accepted_rank_allocation_rule" in item
+    assert hashlib.sha256(COMMITMENT_PATH.read_bytes()).hexdigest() == EXPECTED_COMMITMENT_HASH
 
 
-def test_proposal_v2_gate_is_support_preserving_and_unauthorized() -> None:
+def test_proposal_adoption_requires_two_x_throughput_lower_bound() -> None:
     gate = adaptive_config()["proposal_efficiency_future_gate"]
-    mixture = gate["candidate_mixture"]
     adoption = gate["adoption_gates"]
-    assert gate["accepted_pair_count"] == 512
     assert gate["authorized_in_phase3b"] is False
-    assert gate["scientific_use_authorized"] is False
-    assert gate["evaluation_target_unchanged"] is True
+    assert adoption["primary_mandatory_endpoint"] == (
+        "accepted_pairs_per_active_hour_ratio_vs_rc5"
+    )
+    assert adoption["confidence_level"] == 0.95
+    assert adoption["minimum_lower_confidence_bound"] == 2.0
+    assert adoption["acceptance_gain_without_throughput_gain_authorizes_adoption"] is False
+    assert "acceptance_rate_ratio" in adoption["secondary_endpoints"]
+    ab_design = adoption["ab_design"]
+    assert ab_design["paired_blocks_per_arm"] == 16
+    assert ab_design["accepted_pairs_per_block"] == 32
+    assert ab_design["paired_blocks_per_arm"] * ab_design["accepted_pairs_per_block"] == 512
+    assert ab_design["bootstrap"]["replicates"] == 10000
+    assert ab_design["bootstrap"]["resampling_unit"] == "matched_block_index"
+    assert ab_design["endpoint_switching_after_results_forbidden"] is True
+
+
+def test_executable_proposal_specification_precedes_any_512_pair_authorization() -> None:
+    gate = adaptive_config()["proposal_efficiency_future_gate"]
+    specification = gate["executable_specification_required_before_authorization"]
+    mixture = gate["candidate_mixture"]
+    assert specification["separately_reviewed"] is True
+    assert len(specification["requirements"]) == 10
+    assert "exact_normalized_log_density_evaluator" in specification["requirements"]
+    assert specification["conceptual_component_names_are_not_executable_specification"]
     assert math.isclose(
         mixture["efficient_component_weight"]
         + mixture["rc5_broad_support_safety_component_weight"],
         1.0,
     )
-    assert mixture["rc5_broad_support_safety_component_weight"] > 0
-    assert adoption["minimum_acceptance_or_throughput_ratio_vs_rc5"] == 2.0
-    assert adoption["all_importance_weights_finite"] is True
+    assert mixture["rc5_broad_support_safety_component_weight"] == 0.2
 
 
-def test_resource_projections_reproduce_phase3a_linear_model() -> None:
+def test_probe_fits_are_reused_and_only_nine_new_fits_are_allowed() -> None:
+    architecture = adaptive_config()["final_architecture_selection"]
+    assert architecture["maximum_architecture_results"] == 12
+    assert architecture["reuse_probe_fits_at_locked_rung"] is True
+    assert architecture["maximum_new_architecture_fits_after_lock"] == 9
+    assert architecture["identical_probe_retraining_without_declared_failure_forbidden"]
+    assert architecture["best_seed_selection_forbidden"] is True
+
+
+def test_physical_system_and_noise_realization_semantics_are_explicit() -> None:
+    semantics = adaptive_config()["physical_system_and_noise_semantics"]
+    future = semantics["future_augmentation_requirements"]
+    assert semantics["independent_sample_unit"] == "accepted_physical_system"
+    assert semantics["stored_gaussian_noise_realizations_per_accepted_physical_system"] == 1
+    assert semantics["additional_training_time_noise_augmentation_authorized"] is False
+    assert future["inherit_parent_physical_system_split"] is True
+    assert future["count_as_additional_physical_system"] is False
+    assert future["identical_policy_across_training_rungs"] is True
+
+
+def test_resource_projections_cover_stages_and_only_achievable_totals() -> None:
     resource = adaptive_config()["resource_projection"]
     baseline = resource["baseline"]
-    peak_model = resource["peak_storage_model"]
-    for total in (49152, 65536, 98304):
-        projection = resource["rc5_baseline_projections"][f"total_{total}"]
-        expected_attempts = math.ceil(total * baseline["attempts"] / 4096)
-        expected_published = math.ceil(total * baseline["published_bytes"] / 4096)
-        expected_peak = math.ceil(
-            expected_published
-            * (1 + peak_model["retained_failed_evidence_fraction"])
-            + peak_model["run_checkpoint_and_cache_reserve_bytes"]
-            + peak_model["active_shard_bytes"]
+    stages = resource["staged_rc5_baseline_projections"]
+    for row in stages.values():
+        count = row["incremental_accepted_systems"]
+        assert row["projected_attempts"] == math.ceil(count * baseline["attempts"] / 4096)
+        assert row["projected_published_bytes"] == math.ceil(
+            count * baseline["published_bytes"] / 4096
         )
-        assert projection["projected_attempts"] == expected_attempts
-        assert projection["projected_published_bytes"] == expected_published
-        assert projection["projected_peak_bytes"] == expected_peak
-        assert projection["projected_remaining_free_bytes"] == (
-            baseline["free_bytes_after_phase3a"] - expected_peak
-        )
-        assert projection["projected_remaining_free_bytes"] > 100_000_000_000
-    hypothetical = resource["proposal_v2_hypothetical_two_x_scenario"]
+    finals = resource["achievable_final_rc5_baseline_projections"]
+    assert set(finals) == {"total_65536", "total_98304"}
+    hypothetical = resource["proposal_v2_hypothetical_training_only_two_x_scenario"]
     assert hypothetical["measured"] is False
+    assert "direct_target_nontraining_splits_unchanged" in hypothetical["assumption"]
     assert hypothetical["may_be_reported_as_completed_measurement"] is False
 
 
-def test_real_noise_catalog_and_later_phase_remain_closed() -> None:
+def test_final_evaluation_and_external_work_remain_closed() -> None:
     config = adaptive_config()
+    final = config["final_evaluation_pool"]
     protocol = config["real_noise_and_catalog_future_protocol"]
-    authorization = config["authorization"]
+    assert final["sealed_during_scale_and_architecture_selection"] is True
+    assert final["early_materialization_authorized"] is False
+    assert config["stopping_rule"]["final_evaluation_may_affect_stopping"] is False
     assert protocol["authorized_in_phase3b"] is False
-    assert protocol["separate_authorization_required"] is True
-    assert protocol["proposed_91_event_count_is_fixed_fact"] is False
-    assert authorization["gwosc_gwtc_access_authorized"] is False
-    assert authorization["phase3c_or_later_authorized"] is False
+    assert config["authorization"]["gwosc_gwtc_access_authorized"] is False
+    assert config["authorization"]["phase3c_or_later_authorized"] is False

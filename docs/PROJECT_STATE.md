@@ -4,13 +4,14 @@
 
 Human review accepted Phase 3A and PR #4 merged at
 `589b6a554d5bf8213c3014b5cb6f3b0e0f4edd5e`. The 4,096-pair qualification
-artifact remains permanently non-scientific. Phase 3B is open for design only
-on adaptive preregistration `1.1.0-rc.1`, canonical hash
-`ba5dae2aa769331b917d3f622bfc967c607700f9908521576301841cb71d804b`.
+artifact remains permanently non-scientific. Phase 3B.1 has completed its
+design-only corrections and is awaiting human review on adaptive
+preregistration `1.1.0-rc.2`, canonical hash
+`b94e7733d7fbb6f4c9dc4d5842b6a87f29e0515b4047b7b1604bca1438d15805`.
 
 No scientific pair, proposal-v2 qualification pair or model may be generated
 or trained. Calibration, SBC, final evaluation, real noise, GWOSC/GWTC and
-Phase 3C remain unauthorized.
+Phase 3C remain unauthorized. The next action is human review, not execution.
 
 ## Completed
 
@@ -115,6 +116,20 @@ Phase 3C remain unauthorized.
   separately sealed 20,480-system final evaluation pool;
 - designed but did not authorize a support-preserving 512-pair proposal-v2
   engineering qualification and a separate real-noise/catalog boundary.
+- superseded Phase 3B RC.1 with design-only RC.2 after human statistical review;
+- reclassified 16k as a probe subset and limited final locks to 32k/65k;
+- staged future materialization as 38,912 scale-selection systems, a conditional
+  32,768-system extension and 26,624 post-lock systems;
+- froze importance-weighted target correction for any efficient training
+  proposal while requiring direct-target validation, calibration, SBC and IID;
+- replaced unknowable pre-materialization accepted IDs with a hashed
+  deterministic final-evaluation generation commitment template;
+- made a 2× throughput lower confidence bound mandatory for proposal-v2 and
+  required executable normalized component densities before its future gate;
+- required reuse of three locked-rung probe fits and froze one stored Gaussian
+  noise realization per independent physical system;
+- kept all generation, training, proposal-v2, calibration, evaluation,
+  GWOSC/GWTC and Phase 3C execution closed pending human review.
 
 ## Not started by design
 
@@ -128,8 +143,8 @@ Phase 3C remain unauthorized.
 
 ## Next recommended phase
 
-Human review should inspect Phase 3B's allocation, learning-curve thresholds,
-proposal-v2 ESS gates and resource model. Review may next authorize either the
-512-pair proposal-efficiency qualification or a separately configured first
-scientific production rung. Neither execution follows automatically, and
-training remains a later independent gate.
+Human review should inspect Phase 3B.1 RC.2's target correction, commitment,
+throughput A/B endpoint and staged arithmetic. No PR merge or subsequent gate
+follows automatically. If accepted, proposal-v2 still needs an executable
+density specification before a separately authorized 512-pair engineering
+qualification; scientific Stage A and training remain independent later gates.

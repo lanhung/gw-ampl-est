@@ -1,6 +1,7 @@
 # ADR-003: Adaptive scientific-production allocation and sealing
 
-Status: proposed by preregistration `1.1.0-rc.1`; execution disabled.
+Status: revised by preregistration `1.1.0-rc.2`; awaiting human review and
+execution disabled.
 
 ## Context
 
@@ -11,24 +12,31 @@ decide scale would leak evaluation evidence into development.
 
 ## Decision
 
-- Assign stable group ranks and all split memberships before materialization.
-- Use cumulative 16k/32k/65k training cutoffs with fixed development/final
-  pools.
+- Assign deterministic group and attempt namespaces before materialization;
+  do not claim accepted IDs are known before selection executes.
+- Use 16k only as a probe subset of 32k; permit final lock only at 32k or 65k.
+- Materialize Stage A (32k train plus validation), conditional Stage B (32k
+  more train), then post-lock Stage C (calibration, SBC and final evaluation).
 - Permit scale and architecture decisions from validation only.
 - Materialize final evaluation after size/architecture lock by default.
+- Finalize and hash a deterministic generation commitment before training.
+- Correct any efficient training proposal to the evaluation target with the
+  frozen unclipped importance-weighted conditional likelihood.
 - Keep calibration-fit, SBC and final evaluation behind separate gates.
-- Count physical systems separately from noise or EM augmentations.
+- Store one Gaussian noise realization per physical system and count any
+  future augmentation separately from independent systems.
+- Reuse exact locked-rung probe fits in architecture selection.
 - Use atomic 128-system shards and the Phase 3A manifest/checksum conventions.
 - Persist continuous peak RSS, integrated CPU utilization and peak staging
   bytes in any future execution.
 
 ## Consequences
 
-Stopping at 16k, 32k or 65k produces 49,152, 65,536 or 98,304 total scientific
-systems after fixed development and final pools. Evidence that 65k remains
-data-limited cannot enlarge the training pool under this ADR; it requires a new
-preregistration.
+Locking at 32k or 65k produces 65,536 or 98,304 total scientific systems.
+There is no 16k final total. Evidence that 65k remains data-limited cannot
+enlarge the training pool under this ADR; it requires a new preregistration.
 
-Final data may have IDs/seeds committed before training without arrays being
-materialized. If a later design permits early materialization, cryptographic
-sealing and access logs require a reviewed ADR amendment.
+The pre-training commitment fixes generation identities, seed/attempt domains,
+allocation rules and validators, not unknowable accepted IDs. Later accepted
+IDs must be verified as its deterministic output. Early materialization still
+requires a reviewed sealed-access amendment.

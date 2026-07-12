@@ -356,7 +356,7 @@ Physical-system counts and noise augmentations must be reported separately.
 Synthetic OOD evaluation and real-noise/GWOSC/GWTC evaluation must not share an
 implicit authorization. The latter remains behind its own future gate.
 
-## D047 — Scale decisions use development evidence only
+## D047 — Scale decisions use development evidence only (superseded by RC.2 clarification)
 
 Preregistration `1.1.0-rc.1` replaces the single planned training size with
 strictly nested 16,384, 32,768 and 65,536 physical-system rungs. The fixed
@@ -367,6 +367,10 @@ split are inaccessible to scale selection.
 The 12,288-system development pool and 20,480-system final pool remain fixed
 across rungs. Phase 3A's 4,096 engineering pairs are excluded from all counts
 and can never be relabeled.
+
+RC.1 incorrectly presented 16k as a possible final lock and claimed concrete
+final accepted IDs could be frozen before materialization. D051 and D053
+supersede those details without changing the development-only evidence rule.
 
 ## D048 — Data-limited evidence at 65k forces a new preregistration
 
@@ -379,15 +383,15 @@ larger rung.
 Only after size lock does the four-architecture by three-seed selection run at
 one size. No best seed is selected.
 
-## D049 — Proposal efficiency preserves support through an RC.5 mixture
+## D049 — Proposal efficiency preserves support through an RC.5 mixture (hardened by D052)
 
 A future proposal-v2 candidate must retain a positive 0.2 RC.5 broad-support
 safety component and evaluate the exact normalized mixture density. This is the
 support argument; a 512-pair finite sample cannot prove absence of holes.
 
-The future engineering gate requires at least 2× acceptance or throughput,
-finite weights and frozen relative-ESS/support checks. It remains unauthorized
-in Phase 3B, and failure or ambiguity retains RC.5.
+The future engineering gate remains unauthorized in Phase 3B, and failure or
+ambiguity retains RC.5. D052 replaces the preliminary acceptance-or-throughput
+criterion and freezes how target correction would be used.
 
 ## D050 — Catalog counts and external data are versioned future inputs
 
@@ -396,3 +400,53 @@ phase needs a separate release/product freeze, exact event-list hash, data-
 quality and PSD rules, ranking statistic, background, multiple-testing
 correction and null-result policy. Synthetic OOD permission cannot open
 GWOSC/GWTC access.
+
+## D051 — Sixteen thousand systems are probe evidence, not a final stop
+
+Preregistration `1.1.0-rc.2` classifies the first 16,384 ranked training
+systems as `train_16k_probe_subset`. The first executable scale decision needs
+both 16k and 32k fits, so generation continues to 32k regardless of the 16k
+result. Only 32k and 65k may lock, producing completed scientific totals of
+65,536 or 98,304.
+
+Materialization proceeds as Stage A (32k train plus validation), conditional
+Stage B (32k more train), and post-lock Stage C (calibration, SBC and final
+evaluation). A larger-than-65k rung still requires a new preregistration.
+
+## D052 — Efficient training proposals require target-weighted likelihood
+
+When `q_train` differs from `p_eval`, unweighted conditional NPE would learn
+the proposal posterior rather than the declared evaluation-target posterior.
+RC.2 therefore requires an unclipped importance-weighted conditional NLP using
+full-latent `p_eval/q_train` weights, normalized globally to mean one within
+each rung. Weights are privileged provenance and never deployable inputs.
+
+Validation, calibration, SBC and IID are direct target-generative draws. The
+future proposal-v2 gate can pass only when the 95% lower confidence bound on
+accepted pairs per active hour is at least 2.0; acceptance alone is secondary.
+Every proposal component needs a reviewed executable sampler and normalized
+density before the unauthorized 512-pair gate can be opened.
+
+## D053 — Seal generation commitments, not unknowable accepted IDs
+
+Selection and rejection history determine accepted IDs, so they cannot be
+listed before materialization. RC.2 instead freezes a deterministic commitment
+template containing generator/config identities, seed and attempt namespaces,
+accepted-rank rules, counts, distributions, versions, grouping and validators.
+
+Before training, its generator placeholder must be resolved and the commitment
+re-hashed. Later accepted IDs and manifests must replay as deterministic
+outputs. This preserves test sealing without making a false pre-generation ID
+claim.
+
+## D054 — Probe fit reuse and one-noise semantics reduce redundant work
+
+The locked-rung 10-transform, width-256, three-seed probe results are reused in
+the twelve-result architecture comparison whenever all training identities
+match, limiting new fits to nine. Retraining identical probe fits without a
+declared failure is forbidden.
+
+Each independent scientific physical system stores exactly one Gaussian noise
+realization. Future augmentation remains unauthorized, cannot cross the parent
+split or count as another independent system, and must be frozen identically
+across rungs before training.

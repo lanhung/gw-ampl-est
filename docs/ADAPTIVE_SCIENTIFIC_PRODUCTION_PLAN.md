@@ -1,122 +1,127 @@
 # Adaptive scientific-production plan
 
-Status: design-only preregistration `1.1.0-rc.1`. No data generation, training,
-calibration, evaluation or external-data access is authorized.
+Status: design-only preregistration `1.1.0-rc.2`, awaiting human review. No
+generation, training, calibration, evaluation, proposal qualification or
+external-data access is authorized.
 
 The machine-readable authority is
-`configs/statistics/adaptive_scientific_production_preregistration.yaml`, with
-canonical hash
-`ba5dae2aa769331b917d3f622bfc967c607700f9908521576301841cb71d804b`.
+`configs/statistics/adaptive_scientific_production_preregistration.yaml`. Its
+canonical hash is recorded after the complete RC.2 configuration is frozen.
 
 ## Boundary inherited from Phase 3A
 
 Phase 3A qualified generator commit
 `fbcd0616611d9cdf915ef0af030e6061c1be7f59` using 4,096 engineering-only
 pairs. Dataset `gwlens-v2-2.0.0-alpha.3-7081b2e8be3a84e1` remains permanently
-outside every scientific split. Its rejection counts, throughput and storage
-are engineering evidence only.
+outside every scientific split. Its throughput and rejection evidence may
+inform engineering projections but never scientific training or evaluation.
 
-The RC.5 estimand, benchmark population, source-plane measure, observation
-models and selection model remain the scientific parent contract. Phase 3B
-changes planned allocation and decision rules, not those distributions.
+RC.5 remains the parent evaluation target. RC.2 changes allocation, target
+correction and decision rules; it does not alter the parent estimand,
+source-plane measure, observation model, selection model or waveform contract.
 
-## Nested training ladder
+## Executable training sizes
 
-Scientific physical systems receive a deterministic SHA-256 rank before
-materialization. Cumulative membership is rank below the rung cutoff:
+The cumulative relation is:
 
 ```text
-train_16k (16,384) ⊂ train_32k (32,768) ⊂ train_65k (65,536)
+train_16k_probe_subset (16,384) ⊂ train_32k (32,768) ⊂ train_65k (65,536)
 ```
 
-Source, lens, physical-system, pair, noise-segment and augmentation-parent
-groups cannot cross splits. Every noise augmentation inherits its physical
-system's split and never counts as another independent physical system.
+The 16k subset is evidence for the 16k-to-32k learning-curve comparison. It is
+not an independently lockable final size: generation continues to 32k
+regardless of the 16k result. The only final locks are 32k and 65k. Evidence
+that 65k remains data-limited stops execution and requires a new
+preregistration rather than an automatic larger rung.
 
-There is no automatic rung above 65,536. Evidence that 65k remains
-data-limited stops the phase and requires a new preregistration.
+Every reported sample count is an independent accepted physical-system count.
+Exactly one synthetic Gaussian noise realization is stored per system. Future
+noise augmentation is currently unauthorized, would remain within its parent
+split, and would not create an additional independent system.
 
-## Development pool
+## Materialization sequence
 
-The 12,288-system development pool is fixed before materialization:
+| Stage | Materialization | Increment | Condition |
+|---|---|---:|---|
+| A | train 32,768 + validation 6,144 | 38,912 | future separate authorization |
+| B | add 32,768 training systems | 32,768 | only if the 32k rule continues to 65k |
+| C | calibration 4,096 + SBC 2,048 + final 20,480 | 26,624 | after size and architecture lock |
 
-| Split | Count | Permitted role |
-|---|---:|---|
-| validation | 6,144 | learning-curve stopping and architecture selection |
-| calibration_fit | 4,096 | post-hoc calibration after size/architecture freeze |
-| sbc_diagnostic | 2,048 | independent SBC after calibration freeze |
+Stage A's first 16,384 ranked training systems form the probe subset. Stage C
+cannot begin early unless a separately reviewed sealed-materialization gate is
+created.
 
-The three splits are group-disjoint. Calibration cases cannot drive scale or
-architecture selection. SBC cases never fit a calibration map.
+The achievable completed scientific totals are therefore:
 
-## Final evaluation pool
-
-The 20,480-system final pool is fixed by IDs, seeds, distributions and split
-assignments before training, but its default materialization point is after
-training size and architecture lock:
-
-| Split | Count |
-|---|---:|
-| IID test | 8,192 |
-| balanced tail | 4,096 |
-| cross-family misspecification | 2,048 |
-| parameter-region OOD | 2,048 |
-| waveform mismatch | 2,048 |
-| PSD mismatch | 2,048 |
-
-No final-pool result may affect learning-curve stopping, architecture
-selection, calibration fitting or proposal tuning. If final evidence fails,
-the current claim is downgraded or a new preregistration is required; the
-current model is not retuned against that evidence.
-
-## Total scientific size by stopping point
-
-Phase 3A pairs are excluded from all totals.
-
-| Locked training rung | Training | Development | Final | Total |
+| Locked training size | Training | Development | Final | Total |
 |---|---:|---:|---:|---:|
-| train_16k | 16,384 | 12,288 | 20,480 | 49,152 |
-| train_32k | 32,768 | 12,288 | 20,480 | 65,536 |
-| train_65k | 65,536 | 12,288 | 20,480 | 98,304 |
+| 32k | 32,768 | 12,288 | 20,480 | 65,536 |
+| 65k | 65,536 | 12,288 | 20,480 | 98,304 |
 
-## Model-selection sequence
+The development pool is validation 6,144, calibration-fit 4,096 and independent
+SBC 2,048. The final pool is IID 8,192, balanced tail 4,096 and four 2,048-case
+cross-family/OOD/waveform/PSD splits. All groups remain disjoint.
 
-One fixed probe model—10 flow transforms and conditioner width 256—is trained
-from scratch at each rung for seeds 0, 1 and 2 using the identical budget. It
-uses validation only and no post-hoc calibration.
+## Training proposal and posterior target
 
-After training size is locked, the four existing transform/width combinations
-are fit at that size for all three seeds. Architecture is selected by mean
-validation NLP across seeds; no best seed is selected. Calibration, SBC and
-final evaluation each remain behind later individual execution gates.
+The scientific target is `p_eval(theta)`. A separately qualified efficient
+training proposal `q_train(theta)` may sample training systems, but ordinary
+unweighted NPE training under a changed proposal is forbidden. The frozen
+objective is
 
-## Measured RC.5 resource projection
+```text
+sum_i w_i [-log r_phi(mu_i | x_i)] / sum_i w_i,
+log w_i = log p_eval(theta_i) - log q_train(theta_i).
+```
 
-The projection linearly scales the Phase 3A measurements of 1,455,699 attempts,
-21,404.39 active seconds and 4,450,694,559 published bytes per 4,096 accepted
-pairs. Conservative peak storage adds 5% retained failure evidence, a 20 GB
-run/cache reserve and one active 128-pair shard.
+Weights use the complete latent proposal/evaluation state, are globally
+normalized to mean one within each rung, are never clipped, and remain
+privileged provenance rather than deployable inputs. Finite-weight and ESS
+summaries are mandatory overall, by lens family and by EM cell.
 
-| Total systems | Attempts | Active hours | Published bytes | Peak bytes | Free bytes after peak |
-|---:|---:|---:|---:|---:|---:|
-| 49,152 | 17,468,388 | 71.35 | 53,408,334,708 | 76,217,835,649 | 254,232,768,383 |
-| 65,536 | 23,291,184 | 95.13 | 71,211,112,944 | 94,910,752,797 | 235,539,851,235 |
-| 98,304 | 34,936,776 | 142.70 | 106,816,669,416 | 132,296,587,092 | 198,154,016,940 |
+Validation, calibration-fit, SBC and IID are direct draws from their declared
+evaluation generative target. In particular, SBC cannot use uncorrected
+proposal-v2 draws. OOD and mismatch splits retain their separately declared
+diagnostic distributions.
 
-A hypothetical exact 2× proposal improvement would halve attempts and active
-time while leaving per-pair storage unchanged. That scenario is unmeasured and
-cannot be presented as a result. Future production must persist continuous
-process-tree/cgroup peak RSS, time-integrated CPU use and peak staging bytes.
+## Evaluation commitment
 
-## Authorization sequence
+Accepted IDs do not exist before selection runs. Before training, the project
+instead finalizes and hashes a deterministic generation commitment containing
+the future generator commit, RC.2 hash, root and split seed domains,
+attempt-stream and accepted-rank rules, counts, distribution identities,
+versions, grouping rules and manifest validators. The design template is
+`results/phase3b/final_evaluation_commitment.json`.
 
-Phase 3B authorizes design only. Later human reviews must separately decide:
+After authorized materialization, accepted IDs and manifests must reproduce
+that commitment exactly. This separates reproducibility and sealing from the
+false claim that unknown accepted IDs were frozen in advance.
 
-1. whether to run the 512-pair proposal-efficiency qualification;
-2. which scientific rung may be generated;
-3. whether probe training may begin;
-4. whether calibration and SBC may open after size/architecture lock;
-5. whether final IID/OOD/mismatch evaluation may be unsealed;
-6. whether a separate real-noise/GWOSC/GWTC protocol may execute.
+## Model and proposal decisions
 
-No item follows automatically from acceptance of this document.
+The fixed 10-transform, width-256 probe is trained at each required rung with
+seeds 0, 1 and 2 using validation only. At the locked rung, these three fits
+must be reused in the final 12-result architecture comparison if their data,
+objective, optimizer and budget match. At most nine new fits are then needed.
+
+Proposal-v2 adoption requires the lower bound of a frozen 95% confidence
+interval for accepted pairs per active hour relative to RC.5 to be at least
+2.0. Acceptance is secondary and cannot authorize adoption alone. Before even
+authorizing the 512-pair A/B gate, every proposal component needs a reviewed,
+executable sampler and exact normalized density specification. Phase 3B.1 does
+not implement or run it.
+
+## Resource projection and authorization
+
+RC.5 baseline projections are 56.48 active hours for Stage A, 47.57 for the
+conditional Stage B increment and 38.65 for Stage C. Completed totals project
+to 95.13 hours/71.21 GB at 32k lock or 142.70 hours/106.82 GB at 65k lock.
+
+The proposal-v2 scenario is explicitly unmeasured and applies only to training
+systems. Assuming exactly 2× training throughput while direct-target nontraining
+splits retain RC.5 rate gives 71.35 and 95.13 hours for the two completed
+totals. It is not an observed result.
+
+Every later action requires a new human gate. RC.2 authorizes no pair,
+training fit, calibration, SBC, final evaluation, real-noise work, GWOSC/GWTC
+access or Phase 3C execution.

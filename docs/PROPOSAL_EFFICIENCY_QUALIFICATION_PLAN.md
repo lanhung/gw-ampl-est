@@ -1,42 +1,51 @@
 # Proposal-efficiency qualification plan
 
-Status: future engineering design only; the 512-pair run is unauthorized.
+Status: future engineering design only; proposal-v2 and its 512-pair A/B run
+are unauthorized.
 
-## Motivation and invariant target
+## Invariant target and training correction
 
-Phase 3A accepted 0.2814% of proposals: 1,026,090 attempts lacked two physical
-images and 425,513 lacked two images passing synthetic selection. These are
-engineering measurements, not a scientific population.
+Proposal v2 may improve training-system sampling but cannot change the RC.5
+evaluation target. Training under proposal `q_train(theta)` must minimize the
+importance-weighted conditional NLP with
+`log w = log p_eval(theta) - log q_train(theta)` over the complete latent
+state. Weights are global mean-one per rung, unclipped, finite, privileged and
+never model inputs. Validation, calibration, SBC and IID use direct target
+draws; SBC may not use uncorrected proposal draws.
 
-Proposal v2 may change sampling efficiency but not the frozen RC.5 evaluation
-target. It must record exact normalized proposal/evaluation log densities and
-importance weights for every attempt.
+## Executable specification before authorization
 
-## Support-preserving mixture
+The current caustic-aware and distance/magnification-stratified labels are
+concepts, not executable probability distributions. Before any 512-pair
+authorization, a separate review must freeze for every component its sampling
+algorithm, exact normalized log-density evaluator, support, truncation and
+normalization constants, mixture-variable semantics, conditionals,
+deterministic seed domains, full latent-variable coverage, numerical
+normalization tests and boundary tests.
 
-The candidate is an exact mixture with weight 0.8 on a caustic-aware and
-distance/magnification-stratified efficient component and weight 0.2 on the
-complete RC.5 broad proposal. The normalized density is evaluated with
-log-sum-exp. The positive RC.5 safety component supplies support wherever the
-frozen benchmark has support; finite samples alone are not used to claim
-support completeness.
+The final mixture must retain weight 0.2 on the RC.5 broad-support safety
+component and evaluate its exact normalized density with log-sum-exp.
 
-## Future 512-pair gate
+## Future A/B gate
 
-All 512 accepted pairs are engineering-only and use a new dataset ID,
-authorization and generator commit. Adoption requires:
+The mandatory primary endpoint is accepted pairs per active hour. RC.5 control
+and proposal-v2 candidate each produce 512 engineering-only accepted pairs on
+the same hardware, environment, worker count and code path where possible.
+Each arm has sixteen matched blocks of 32 accepted pairs. Arm order alternates
+deterministically with even/odd reversal. Active time excludes only declared
+operator pauses. A 10,000-replicate bootstrap resamples matched block indices
+using seed domain `proposal_v2_throughput_ab_bootstrap_v1`, recomputes the ratio
+of aggregate candidate and control accepted-pair rates, and forms a percentile
+95% interval in log-rate-ratio space before exponentiating. The lower bound
+must be at least 2.0.
 
-- at least 2× RC.5 acceptance rate or accepted-pair throughput under a
-  comparable pinned environment;
-- finite importance weights;
-- relative weight ESS at least 0.50 overall, 0.40 in each lens family and 0.25
-  in every EM cell;
-- no single normalized weight above 0.05;
-- passed lens-family, multiplicity, EM-cell and frozen-tail support checks;
-- no density-normalization, duplicate-ID, bounded-memory or resume failure.
+Acceptance-rate ratio, attempts per accepted pair, CPU seconds per accepted
+pair, lens-solver time and proposal-density time are secondary. An acceptance
+gain without the required throughput gain cannot authorize adoption. Endpoint
+switching after results is forbidden; an interval crossing 2.0 is
+inconclusive/failing and retains RC.5.
 
-An incomparable environment, confidence interval crossing 2×, support failure
-or ESS failure is inconclusive/failing and retains RC.5. No threshold may be
-relaxed after seeing the 512-pair result.
-
-Phase 3B does not run this gate.
+The candidate must additionally pass finite-weight, relative-ESS,
+maximum-weight, support, bounded-memory, duplicate-ID and resume gates. No
+threshold may be relaxed after observation. Phase 3B.1 runs none of these
+procedures.
