@@ -1,0 +1,21 @@
+{
+  "interpretation": "diagnostic_marginals_not_unique_sequential_decomposition",
+  "proposal_v3": {
+    "bbh_mass": {"relative_ess": 1.0, "log_weight_standard_deviation": 0.0},
+    "complete_latent": {"relative_ess": 0.7853205715205146, "log_weight_standard_deviation": 1.200450740805736},
+    "external_convergence": {"relative_ess": 0.9543793602710088, "log_weight_standard_deviation": 0.35794465715985513},
+    "lens_structural": {"relative_ess": 0.9009968584940365, "log_weight_standard_deviation": 0.9065678800224956},
+    "redshifts": {"relative_ess": 1.0, "log_weight_standard_deviation": 0.0},
+    "source_plane": {"relative_ess": 0.9141204126620066, "log_weight_standard_deviation": 0.3556682320606875},
+    "spin_orientation": {"relative_ess": 1.0, "log_weight_standard_deviation": 0.0}
+  },
+  "rc5": {
+    "bbh_mass": {"relative_ess": 1.0, "log_weight_standard_deviation": 0.0},
+    "complete_latent": {"relative_ess": 0.11776258208979214, "log_weight_standard_deviation": 2.7331270094598548},
+    "external_convergence": {"relative_ess": 0.5868222008622198, "log_weight_standard_deviation": 1.3406455083742141},
+    "lens_structural": {"relative_ess": 0.19855185020048952, "log_weight_standard_deviation": 2.3797024696787763},
+    "redshifts": {"relative_ess": 1.0, "log_weight_standard_deviation": 0.0},
+    "source_plane": {"relative_ess": 1.0, "log_weight_standard_deviation": 0.0},
+    "spin_orientation": {"relative_ess": 1.0, "log_weight_standard_deviation": 0.0}
+  }
+}

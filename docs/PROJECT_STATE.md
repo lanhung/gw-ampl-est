@@ -6,8 +6,8 @@ Human review accepted Phase 3B and PR #5 merged at
 `80c795a36b902798fe52598262f8b0328755cfac`. Adaptive preregistration RC.3
 remains frozen at hash
 `6082475631539d3069edacc52f41b37fb8fe725ccd7c6bc9980cc3008795a927`.
-Phase 3C-0 implemented exact proposal-v2 RC.1 but its latent preflight failed
-the frozen overall and family ESS gates. The phase is stopped for human review.
+Phase 3C-0.2 preserved that failure and implemented target-anchored proposal-v3
+RC.1. Its latent preflight passed every frozen gate and now stops for review.
 
 Zero waveform pairs were generated. Proposal A/B, scientific data, training,
 calibration, SBC, final evaluation, real noise, GWOSC/GWTC and Phase 3C-A remain
@@ -145,6 +145,11 @@ unauthorized. The next action is human review, not execution.
   finite density, support, weight and replay evidence;
 - hard-stopped proposal-v2 RC.1 after overall/family relative ESS failed the
   frozen thresholds; no post-result tuning or A/B generation occurred.
+- merged Phase 3C-0 PR #6 after CI while retaining its negative evidence;
+- implemented exact evaluation-target sampling and target-anchored proposal-v3;
+- certified population ESS >=0.55 and empirically measured 0.78532 overall;
+- measured RC.5 baseline ESS 0.11776 as diagnostic-only evidence;
+- kept A/B, waveform generation, training and external access closed.
 
 ## Not started by design
 
@@ -158,8 +163,6 @@ unauthorized. The next action is human review, not execution.
 
 ## Next recommended phase
 
-Human review should inspect the Phase 3C-0 latent ESS failure. Proposal-v2 RC.1
-cannot enter A/B. Review may either retain RC.5 and proceed under a separately
-authorized scientific-production decision, or preregister a new proposal
-version that also addresses the concentrated evaluation-target lens factors.
-Neither path is automatic.
+Human review should inspect proposal-v3 latent evidence and may separately
+authorize the frozen 512+512 A/B. Proposal-v2 remains rejected and RC.5's low
+diagnostic ESS should be considered in any direct-production decision.

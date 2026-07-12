@@ -1,0 +1,21 @@
+{
+  "assumptions": [
+    "all_component_densities_exactly_normalized",
+    "target_support_complete",
+    "target_component_positive_with_weight_0p55",
+    "pre_selection_density_without_acceptance_conditioning",
+    "common_equal_lens_family_probabilities"
+  ],
+  "derivation": [
+    "q_v3(theta) >= anchor * p_eval(theta)",
+    "w(theta)=p_eval(theta)/q_v3(theta) <= 1/anchor",
+    "E_q[w]=1",
+    "E_q[w^2] <= (1/anchor)*E_q[w] = 1/anchor",
+    "relative_ESS=1/E_q[w^2] >= anchor"
+  ],
+  "maximum_importance_weight": 1.8181818181818181,
+  "per_family_bound": 0.55,
+  "population_relative_ess_lower_bound": 0.55,
+  "status": "passed",
+  "target_component_weight": 0.55
+}

@@ -1,0 +1,27 @@
+{
+  "accepted_pair_generator_called": false,
+  "component_counts": {"rc5_broad": 200000},
+  "deterministic_replay_sha256": "790be7147717c64b87f9b6ab9ee07720af2f6f84a7bc541e08964446aff112c7",
+  "draw_count": 200000,
+  "finite_fraction": {"log_p": 1.0, "log_q": 1.0, "weight": 1.0},
+  "interpretation": "diagnostic_only_no_retrospective_gate",
+  "label": "rc5",
+  "maximum_normalized_weight": 0.0002570633964531573,
+  "mean_unnormalized_importance_weight": 0.9923864138256626,
+  "overall_relative_ess": 0.11776258208979214,
+  "proposal_ab_qualification_run": false,
+  "relative_ess_by_lens_family": {
+    "epl_external_shear": 0.09484327358580846,
+    "sie_external_shear": 0.15222276451143021
+  },
+  "waveform_pair_count": 0,
+  "weight_quantiles": {
+    "0.0": 1.3000744449248786e-7,
+    "0.01": 0.00008342627807457436,
+    "0.05": 0.0006662678725445928,
+    "0.5": 0.09725416489339772,
+    "0.95": 5.244959376755731,
+    "0.99": 13.787111751938445,
+    "1.0": 51.02124442639866
+  }
+}

@@ -486,3 +486,20 @@ deterministic replay checks but achieved only 0.09202 overall relative ESS,
 Proposal-v2 RC.1 is therefore rejected before waveform generation. It may not
 be tuned in place or enter the 1,024-pair A/B run. RC.5 remains the qualified
 fallback; a new candidate requires a new version and human review.
+
+## D058 — Proposal-v3 anchors 55% of mass to the evaluation target
+
+The new immutable candidate is 0.20 RC.5 + 0.55 evaluation target + 0.25
+central-source evaluation target. This guarantees `q>=0.55p`, weight at most
+1/0.55 and population relative ESS at least 0.55 overall and per family.
+
+Empirical 200,000-draw ESS was 0.78532 overall and above 0.778 by family, with
+zero anchor failures. Passing opens only a human decision about A/B; it does not
+authorize pair generation.
+
+## D059 — RC.5 generator qualification is distinct from weighted ESS
+
+The diagnostic RC.5 latent ESS was 0.11776 overall and 0.09484 for EPL. No
+retrospective gate is applied, but this evidence prohibits treating engineering
+generator qualification as proof of statistically efficient weighted NPE
+training. Lens structural mismatch is the dominant diagnostic marginal.

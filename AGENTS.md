@@ -139,15 +139,27 @@ weights were finite, mean weight was 1.01044, support holes were zero and replay
 was byte-identical. No mixture parameter may be tuned inside this frozen
 proposal version.
 
-Phase 3C-0 may retain only implementation code, configurations, unit tests,
-latent-only evidence, dry-run A/B validation and documentation. It must now
-stop for human review.
+Human review accepted the Phase 3C-0 stop, PR #6 merged its immutable negative
+result at `9b9a6a3fcad1487622a2ec1d37e592fe0301e4e6`, and separately authorized
+Phase 3C-0.2 latent-only work.
+
+Phase 3C-0.2 implemented
+`proposal-v3-target-anchored-mixture-1.0.0-rc.1`, configuration hash
+`2d7998ca099c1ecddbb5d9cb1d824f37d3d398826a88831b2bccddbda814cbf4`.
+Its 200,000-draw preflight passed: mean weight 0.99836, overall ESS 0.78532,
+SIE/EPL ESS 0.79184/0.77886, zero anchor failures and byte-identical replay.
+The theoretical population ESS lower bound is 0.55.
+
+The separate RC.5 diagnostic measured overall ESS 0.11776 and SIE/EPL ESS
+0.15222/0.09484; this is not a retrospective pass/fail gate. Phase 3C-0.2 must
+now stop for human review.
 
 During and after this hard stop, do not:
 
 - generate any additional pair from the qualification or scientific plan;
 - run the 1,024-pair proposal A/B qualification;
-- authorize or adopt proposal-v2 RC.1;
+- authorize or adopt rejected proposal-v2 RC.1;
+- run proposal-v3 A/B without a new human authorization;
 - start any scientific production rung;
 - train or tune any neural model;
 - download GWOSC or GWTC products;
