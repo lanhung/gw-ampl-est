@@ -118,7 +118,7 @@ def phase2_config():
 
 def test_phase2_preregistration_is_fail_closed_and_hash_frozen():
     config = phase2_config()
-    assert config["status"] == "automatic_review_passed"
+    assert config["status"] == "human_source_plane_contract_approved"
     for field in (
         "execution_enabled",
         "scientific_data_generation_authorized",
@@ -129,8 +129,43 @@ def test_phase2_preregistration_is_fail_closed_and_hash_frozen():
         assert config[field] is False
     assert config["splits"]["real_noise_test"] == 0
     assert configuration_hash(config) == (
-        "a7d475150b1c01d8e539a3fd5eb8d83f2ce696c5d78125f4c435c7519803aef1"
+        "16a75327df5aacafa1fb4459e19429cc08d3350cd3056986356ef3c57864c1e8"
     )
+
+
+def test_rc3_source_plane_density_is_exact_and_shared() -> None:
+    config = phase2_config()
+    measure = config["source_plane_measure"]
+    assert measure["support"]["area_dimensionless"] == 25.0
+    assert measure["normalized_log_density_formula"] == (
+        "-log(25.0)-2*log(einstein_radius_arcsec)"
+    )
+    theta_e = 1.7
+    angular_area = 25.0 * theta_e**2
+    angular_density = 1.0 / (25.0 * theta_e**2)
+    assert angular_area * angular_density == pytest.approx(1.0)
+    source_id = measure["id"]
+    assert config["proposal_distribution"]["source_plane_sampling"] == source_id
+    assert config["evaluation_distribution"]["source_plane_sampling"] == source_id
+    assert measure["density_evaluation_stage"] == (
+        "before_lens_multiplicity_and_detection_selection"
+    )
+
+
+def test_rc3_solver_and_support_audit_are_frozen() -> None:
+    contract = phase2_config()["lens_solver"]["numerical_contract"]
+    assert contract["solver"] == "deterministic_union"
+    grid = contract["primary_components"][1]
+    assert grid["search_window_over_einstein_radius"] == 8.0
+    assert grid["minimum_image_separation_over_einstein_radius"] == 0.02
+    assert grid["initial_guess_cut"] is False
+    assert contract["precision_limit_arcsec"] == 1.0e-10
+    assert contract["random_initial_guesses"] == 0
+    audit = contract["support_audit"]
+    reference_grid = audit["reference_components"][1]
+    assert reference_grid["search_window_over_einstein_radius"] == 12.0
+    assert reference_grid["minimum_image_separation_over_einstein_radius"] == 0.005
+    assert audit["failure_action"] == "hard_stop_before_microbenchmark"
 
 
 def test_phase2_counts_and_storage_arithmetic_are_exact():
