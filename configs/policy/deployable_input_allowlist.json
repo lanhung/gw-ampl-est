@@ -1,14 +1,13 @@
 {
-  "policy_version": "1.0.0",
+  "policy_version": "1.1.0",
   "fields": [
     "gw_strain_primary",
     "gw_strain_secondary",
     "detector_availability_mask",
     "detector_identity",
     "sample_rate_hz",
-    "observed_event_time_difference_seconds",
-    "observed_image_positions_arcsec",
-    "observed_image_position_covariance_arcsec2",
+    "observed_time_difference",
+    "observed_image_astrometry",
     "observed_lens_center_arcsec",
     "observed_lens_center_covariance_arcsec2",
     "observed_einstein_radius_arcsec",

@@ -10,11 +10,11 @@ import json
 import math
 from dataclasses import asdict, dataclass
 from enum import Enum
-from typing import Any, Dict, Mapping, Optional, Sequence, Tuple
+from typing import Any, Dict, Mapping, Optional, Sequence, Tuple, cast
 
 from .physics.quantities import ImageParity, LensFamily, MorseClass, PrimaryDefinition
 
-SCHEMA_VERSION = "2.0.0-alpha.1"
+SCHEMA_VERSION = "2.0.0-alpha.2"
 DETECTOR_SLOTS = ("H1", "L1", "V1")
 
 
@@ -34,6 +34,30 @@ class ArrayProductRole(str, Enum):
     NOISY_STRAIN = "noisy_strain"
     CLEAN_INJECTED_SIGNAL = "clean_injected_signal"
     NOISE_REALIZATION = "noise_realization"
+
+
+@dataclass(frozen=True)
+class TimingObservation:
+    value_seconds: float
+    standard_deviation_seconds: float
+    measurement_method: str
+    reference: Optional[str]
+    deterministic_control: bool = False
+
+    def validate(self) -> None:
+        _finite(self.value_seconds, "observed time difference")
+        uncertainty = _finite(
+            self.standard_deviation_seconds,
+            "observed time-difference standard deviation",
+        )
+        if uncertainty < 0:
+            raise ValueError("timing-observation uncertainty must be nonnegative")
+        if uncertainty == 0 and not self.deterministic_control:
+            raise ValueError("zero timing uncertainty requires deterministic_control=true")
+        if self.deterministic_control and uncertainty != 0:
+            raise ValueError("deterministic timing controls must have zero uncertainty")
+        if not self.measurement_method.strip():
+            raise ValueError("timing observation requires a measurement method")
 
 
 def _finite(value: float, name: str) -> float:
@@ -168,14 +192,45 @@ class LensTruth:
             raise ValueError("lens truth requires at least two uniquely identified physical images")
         for image in self.physical_images:
             image.validate()
+        images_by_id = {image.image_id: image for image in self.physical_images}
         selected = {pair.primary_image_id, pair.secondary_image_id}
         if not selected <= set(ids):
             raise ValueError("selected pair is not contained in physical images")
-        extra = set(self.unselected_image_ids) | set(self.censored_image_ids)
-        if not extra <= set(ids) - selected:
-            raise ValueError("extra/censored images must be non-selected physical images")
-        if set(self.unselected_image_ids) & set(self.censored_image_ids):
+        unselected = set(self.unselected_image_ids)
+        censored = set(self.censored_image_ids)
+        if len(unselected) != len(self.unselected_image_ids) or len(censored) != len(
+            self.censored_image_ids
+        ):
+            raise ValueError("non-selected image status lists must not contain duplicates")
+        if unselected & censored:
             raise ValueError("an image cannot be both unselected and censored")
+        expected_extra = set(ids) - selected
+        reported_extra = unselected | censored
+        if reported_extra != expected_extra:
+            missing = sorted(expected_extra - reported_extra)
+            unknown = sorted(reported_extra - expected_extra)
+            raise ValueError(
+                "every non-selected physical image requires exactly one status; "
+                f"missing={missing}, invalid={unknown}"
+            )
+        primary = images_by_id[pair.primary_image_id]
+        secondary = images_by_id[pair.secondary_image_id]
+        if pair.primary_definition is PrimaryDefinition.EARLIEST_ARRIVING:
+            if primary.arrival_time_seconds > secondary.arrival_time_seconds and not math.isclose(
+                primary.arrival_time_seconds,
+                secondary.arrival_time_seconds,
+                rel_tol=1e-12,
+                abs_tol=1e-9,
+            ):
+                raise ValueError("earliest-arriving primary is later than secondary")
+        elif pair.primary_definition is PrimaryDefinition.BRIGHTEST:
+            if primary.mu_abs < secondary.mu_abs and not math.isclose(
+                primary.mu_abs, secondary.mu_abs, rel_tol=1e-12, abs_tol=1e-12
+            ):
+                raise ValueError("brightest primary is fainter than secondary")
+        elif pair.primary_definition is PrimaryDefinition.MINIMUM_IMAGE:
+            if primary.morse_class is not MorseClass.MINIMUM:
+                raise ValueError("minimum-image primary does not have minimum Morse class")
         if len(self.external_shear) != 2:
             raise ValueError("external shear requires exactly two components")
         for component in self.external_shear:
@@ -214,7 +269,7 @@ class GWObservation:
     sample_rate_hz: int
     sample_count: int
     segment_start_gps: Tuple[float, float]
-    observed_event_time_difference_seconds: float
+    observed_time_difference: TimingObservation
     preprocessing_version: str
     psd_reference: str
     calibration_reference: Optional[str]
@@ -240,7 +295,7 @@ class GWObservation:
                 raise ValueError("array sample dimension disagrees with GW metadata")
         if not self.preprocessing_version or not self.psd_reference:
             raise ValueError("preprocessing and PSD references are required")
-        _finite(self.observed_event_time_difference_seconds, "observed time difference")
+        self.observed_time_difference.validate()
         for start in self.segment_start_gps:
             _finite(start, "segment start GPS")
 
@@ -256,11 +311,24 @@ class ScalarObservation:
 
 
 @dataclass(frozen=True)
+class ImageAstrometryObservation:
+    image_id: str
+    position_arcsec: Tuple[float, float]
+    covariance_arcsec2: Tuple[Tuple[float, float], Tuple[float, float]]
+
+    def validate(self) -> None:
+        if not self.image_id:
+            raise ValueError("astrometry observation requires an image ID")
+        if len(self.position_arcsec) != 2:
+            raise ValueError("astrometry position must be two-dimensional")
+        for coordinate in self.position_arcsec:
+            _finite(coordinate, "observed image position")
+        validate_covariance(self.covariance_arcsec2, 2)
+
+
+@dataclass(frozen=True)
 class EMObservation:
-    observed_image_positions_arcsec: Optional[Tuple[Tuple[float, float], ...]]
-    image_position_covariances_arcsec2: Optional[
-        Tuple[Tuple[Tuple[float, float], Tuple[float, float]], ...]
-    ]
+    observed_image_astrometry: Optional[Tuple[ImageAstrometryObservation, ...]]
     observed_lens_center_arcsec: Optional[Tuple[float, float]]
     lens_center_covariance_arcsec2: Optional[Tuple[Tuple[float, float], Tuple[float, float]]]
     einstein_radius_arcsec: Optional[ScalarObservation]
@@ -270,10 +338,11 @@ class EMObservation:
     modality_availability_mask: Mapping[str, bool]
     censoring_flags: Mapping[str, bool]
     aperture_metadata: Mapping[str, float]
+    redshift_ordering_valid: Optional[bool]
 
-    def validate(self) -> None:
+    def validate(self, lens_truth: LensTruth) -> None:
         values: Dict[str, Any] = {
-            "image_positions": self.observed_image_positions_arcsec,
+            "image_astrometry": self.observed_image_astrometry,
             "lens_center": self.observed_lens_center_arcsec,
             "einstein_radius": self.einstein_radius_arcsec,
             "lens_redshift": self.lens_redshift,
@@ -285,19 +354,18 @@ class EMObservation:
         for name, value in values.items():
             if self.modality_availability_mask[name] != (value is not None):
                 raise ValueError(f"modality mask is inconsistent for {name}")
-        if self.observed_image_positions_arcsec is not None:
-            covariance = self.image_position_covariances_arcsec2
-            if covariance is None or len(covariance) != len(self.observed_image_positions_arcsec):
-                raise ValueError("each observed image position requires one covariance")
-            for matrix in covariance:
-                validate_covariance(matrix, 2)
-            for position in self.observed_image_positions_arcsec:
-                if len(position) != 2:
-                    raise ValueError("each observed image position must be two-dimensional")
-                for coordinate in position:
-                    _finite(coordinate, "observed image position")
-        elif self.image_position_covariances_arcsec2 is not None:
-            raise ValueError("image-position covariance exists without observations")
+        if self.observed_image_astrometry is not None:
+            astrometry_ids = [item.image_id for item in self.observed_image_astrometry]
+            if len(astrometry_ids) != len(set(astrometry_ids)):
+                raise ValueError("astrometry image IDs must be unique")
+            physical_ids = {image.image_id for image in lens_truth.physical_images}
+            unknown_ids = set(astrometry_ids) - physical_ids
+            if unknown_ids:
+                raise ValueError(
+                    f"astrometry references unknown physical images: {sorted(unknown_ids)}"
+                )
+            for item in self.observed_image_astrometry:
+                item.validate()
         if self.observed_lens_center_arcsec is not None:
             if self.lens_center_covariance_arcsec2 is None:
                 raise ValueError("observed lens center requires covariance")
@@ -306,14 +374,29 @@ class EMObservation:
                 _finite(coordinate, "observed lens center")
         elif self.lens_center_covariance_arcsec2 is not None:
             raise ValueError("lens-center covariance exists without observation")
-        for scalar in (
-            self.einstein_radius_arcsec,
-            self.lens_redshift,
-            self.source_redshift,
-            self.velocity_dispersion_km_s,
+        if self.einstein_radius_arcsec is not None:
+            self.einstein_radius_arcsec.validate()
+            _positive(self.einstein_radius_arcsec.value, "observed Einstein radius")
+        for redshift_name, redshift in (
+            ("lens", self.lens_redshift),
+            ("source", self.source_redshift),
         ):
-            if scalar is not None:
-                scalar.validate()
+            if redshift is not None:
+                redshift.validate()
+                if redshift.value < 0:
+                    raise ValueError(f"observed {redshift_name} redshift must be nonnegative")
+        if self.velocity_dispersion_km_s is not None:
+            self.velocity_dispersion_km_s.validate()
+            _positive(
+                self.velocity_dispersion_km_s.value,
+                "observed velocity dispersion",
+            )
+        if self.lens_redshift is not None and self.source_redshift is not None:
+            expected_ordering = self.lens_redshift.value < self.source_redshift.value
+            if self.redshift_ordering_valid is not expected_ordering:
+                raise ValueError("redshift_ordering_valid disagrees with observed point estimates")
+        elif self.redshift_ordering_valid is not None:
+            raise ValueError("redshift ordering flag requires both redshift observations")
 
 
 @dataclass(frozen=True)
@@ -334,6 +417,31 @@ class DistributionMetadata:
 
 
 @dataclass(frozen=True)
+class DetectorNoiseReference:
+    image_id: str
+    detector: str
+    segment_id: Optional[str]
+    available: bool
+    noise_source: str
+
+    def validate(self) -> None:
+        if not self.image_id or self.detector not in DETECTOR_SLOTS:
+            raise ValueError("noise reference requires an image ID and known detector")
+        if not self.noise_source.strip():
+            raise ValueError("noise reference requires an explicit noise source")
+        if self.available:
+            if self.segment_id is None or not self.segment_id.strip():
+                raise ValueError("available detector-noise slot requires a segment ID")
+            if self.noise_source == "unavailable":
+                raise ValueError("available detector-noise slot cannot use unavailable source")
+        else:
+            if self.segment_id is not None:
+                raise ValueError("unavailable detector-noise slot must not have a segment ID")
+            if self.noise_source != "unavailable":
+                raise ValueError("unavailable detector-noise slot must use unavailable source")
+
+
+@dataclass(frozen=True)
 class Provenance:
     generator_git_commit: str
     configuration_hash: str
@@ -343,11 +451,19 @@ class Provenance:
     solver_version: str
     waveform_model: str
     detector_labels: Tuple[str, str, str]
-    noise_segment_ids: Tuple[str, str]
+    detector_noise_references: Tuple[DetectorNoiseReference, ...]
     source_data_release: Optional[str]
     distribution: DistributionMetadata
 
-    def validate(self) -> None:
+    @property
+    def used_noise_segment_ids(self) -> Tuple[str, ...]:
+        return tuple(
+            reference.segment_id
+            for reference in self.detector_noise_references
+            if reference.segment_id is not None
+        )
+
+    def validate(self, pair: PairIndex, gw_observation: GWObservation) -> None:
         if len(self.generator_git_commit) != 40 or any(
             character not in "0123456789abcdef" for character in self.generator_git_commit.lower()
         ):
@@ -358,8 +474,30 @@ class Provenance:
             raise ValueError("configuration_hash must be SHA-256 hex")
         if self.detector_labels != DETECTOR_SLOTS:
             raise ValueError("provenance detector labels disagree with schema slots")
-        if len(set(self.noise_segment_ids)) != 2:
-            raise ValueError("the two selected images require independent noise segment IDs")
+        expected_keys = tuple(
+            (image_id, detector)
+            for image_id in (pair.primary_image_id, pair.secondary_image_id)
+            for detector in DETECTOR_SLOTS
+        )
+        actual_keys = tuple(
+            (reference.image_id, reference.detector) for reference in self.detector_noise_references
+        )
+        if actual_keys != expected_keys:
+            raise ValueError(
+                "detector-noise references must be image-major and cover primary/secondary H1/L1/V1"
+            )
+        for image_index in range(2):
+            for detector_index in range(3):
+                reference = self.detector_noise_references[image_index * 3 + detector_index]
+                reference.validate()
+                if (
+                    reference.available
+                    != gw_observation.detector_availability_mask[image_index][detector_index]
+                ):
+                    raise ValueError("detector-noise availability disagrees with GW detector mask")
+        used_ids = self.used_noise_segment_ids
+        if len(used_ids) != len(set(used_ids)):
+            raise ValueError("available image-detector slots require unique noise segment IDs")
         self.distribution.validate()
 
 
@@ -380,8 +518,8 @@ class V2Record:
         self.source_truth.validate()
         self.lens_truth.validate(self.pair)
         self.gw_observation.validate()
-        self.em_observation.validate()
-        self.provenance.validate()
+        self.em_observation.validate(self.lens_truth)
+        self.provenance.validate(self.pair, self.gw_observation)
 
     def to_dict(self) -> Dict[str, Any]:
         def convert(value: Any) -> Any:
@@ -437,15 +575,36 @@ class V2Record:
             tuple(row) for row in gw_data["detector_availability_mask"]
         )
         gw_data["segment_start_gps"] = tuple(gw_data["segment_start_gps"])
+        if "observed_event_time_difference_seconds" in gw_data:
+            raise ValueError("bare observed time differences are forbidden; use TimingObservation")
+        gw_data["observed_time_difference"] = TimingObservation(
+            **gw_data["observed_time_difference"]
+        )
         em_data = dict(data["em_observation"])
-        if em_data["observed_image_positions_arcsec"] is not None:
-            em_data["observed_image_positions_arcsec"] = tuple(
-                tuple(position) for position in em_data["observed_image_positions_arcsec"]
+        if (
+            "observed_image_positions_arcsec" in em_data
+            or "image_position_covariances_arcsec2" in em_data
+        ):
+            raise ValueError(
+                "implicit positional astrometry is forbidden; explicit image IDs are required"
             )
-            em_data["image_position_covariances_arcsec2"] = tuple(
-                tuple(tuple(row) for row in matrix)
-                for matrix in em_data["image_position_covariances_arcsec2"]
-            )
+        if em_data["observed_image_astrometry"] is not None:
+            try:
+                em_data["observed_image_astrometry"] = tuple(
+                    ImageAstrometryObservation(
+                        image_id=item["image_id"],
+                        position_arcsec=tuple(item["position_arcsec"]),
+                        covariance_arcsec2=cast(
+                            Tuple[Tuple[float, float], Tuple[float, float]],
+                            tuple(tuple(row) for row in item["covariance_arcsec2"]),
+                        ),
+                    )
+                    for item in em_data["observed_image_astrometry"]
+                )
+            except (KeyError, TypeError) as error:
+                raise ValueError(
+                    "each astrometry observation requires image_id, position, and covariance"
+                ) from error
         if em_data["observed_lens_center_arcsec"] is not None:
             em_data["observed_lens_center_arcsec"] = tuple(em_data["observed_lens_center_arcsec"])
             em_data["lens_center_covariance_arcsec2"] = tuple(
@@ -461,7 +620,13 @@ class V2Record:
                 em_data[field] = ScalarObservation(**em_data[field])
         provenance_data = dict(data["provenance"])
         provenance_data["detector_labels"] = tuple(provenance_data["detector_labels"])
-        provenance_data["noise_segment_ids"] = tuple(provenance_data["noise_segment_ids"])
+        if "noise_segment_ids" in provenance_data:
+            raise ValueError(
+                "image-only noise IDs are forbidden; use detector-specific noise references"
+            )
+        provenance_data["detector_noise_references"] = tuple(
+            DetectorNoiseReference(**item) for item in provenance_data["detector_noise_references"]
+        )
         provenance_data["distribution"] = DistributionMetadata(**provenance_data["distribution"])
         record = cls(
             schema_version=str(data["schema_version"]),
@@ -489,6 +654,69 @@ def v2_json_schema() -> Dict[str, Any]:
         "title": "GWLens-MM v2 metadata record",
         "type": "object",
         "additionalProperties": False,
+        "$defs": {
+            "ImageAstrometryObservation": {
+                "type": "object",
+                "additionalProperties": False,
+                "required": ["image_id", "position_arcsec", "covariance_arcsec2"],
+                "properties": {
+                    "image_id": {"type": "string", "minLength": 1},
+                    "position_arcsec": {
+                        "type": "array",
+                        "minItems": 2,
+                        "maxItems": 2,
+                        "items": {"type": "number"},
+                    },
+                    "covariance_arcsec2": {
+                        "type": "array",
+                        "minItems": 2,
+                        "maxItems": 2,
+                        "items": {
+                            "type": "array",
+                            "minItems": 2,
+                            "maxItems": 2,
+                            "items": {"type": "number"},
+                        },
+                    },
+                },
+            },
+            "TimingObservation": {
+                "type": "object",
+                "additionalProperties": False,
+                "required": [
+                    "value_seconds",
+                    "standard_deviation_seconds",
+                    "measurement_method",
+                    "reference",
+                    "deterministic_control",
+                ],
+                "properties": {
+                    "value_seconds": {"type": "number"},
+                    "standard_deviation_seconds": {"type": "number", "minimum": 0},
+                    "measurement_method": {"type": "string", "minLength": 1},
+                    "reference": {"type": ["string", "null"]},
+                    "deterministic_control": {"type": "boolean"},
+                },
+            },
+            "DetectorNoiseReference": {
+                "type": "object",
+                "additionalProperties": False,
+                "required": [
+                    "image_id",
+                    "detector",
+                    "segment_id",
+                    "available",
+                    "noise_source",
+                ],
+                "properties": {
+                    "image_id": {"type": "string", "minLength": 1},
+                    "detector": {"enum": list(DETECTOR_SLOTS)},
+                    "segment_id": {"type": ["string", "null"]},
+                    "available": {"type": "boolean"},
+                    "noise_source": {"type": "string", "minLength": 1},
+                },
+            },
+        },
         "required": [
             "schema_version",
             "pair",
@@ -503,8 +731,44 @@ def v2_json_schema() -> Dict[str, Any]:
             "pair": {"type": "object"},
             "source_truth": {"type": "object"},
             "lens_truth": {"type": "object"},
-            "gw_observation": {"type": "object"},
-            "em_observation": {"type": "object"},
-            "provenance": {"type": "object"},
+            "gw_observation": {
+                "type": "object",
+                "required": ["observed_time_difference", "detector_availability_mask"],
+                "not": {"required": ["observed_event_time_difference_seconds"]},
+                "properties": {
+                    "observed_time_difference": {"$ref": "#/$defs/TimingObservation"},
+                    "detector_availability_mask": {"type": "array"},
+                },
+            },
+            "em_observation": {
+                "type": "object",
+                "required": ["observed_image_astrometry", "modality_availability_mask"],
+                "not": {
+                    "anyOf": [
+                        {"required": ["observed_image_positions_arcsec"]},
+                        {"required": ["image_position_covariances_arcsec2"]},
+                    ]
+                },
+                "properties": {
+                    "observed_image_astrometry": {
+                        "type": ["array", "null"],
+                        "items": {"$ref": "#/$defs/ImageAstrometryObservation"},
+                    },
+                    "modality_availability_mask": {"type": "object"},
+                },
+            },
+            "provenance": {
+                "type": "object",
+                "required": ["detector_noise_references"],
+                "not": {"required": ["noise_segment_ids"]},
+                "properties": {
+                    "detector_noise_references": {
+                        "type": "array",
+                        "minItems": 6,
+                        "maxItems": 6,
+                        "items": {"$ref": "#/$defs/DetectorNoiseReference"},
+                    }
+                },
+            },
         },
     }

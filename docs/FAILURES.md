@@ -37,3 +37,20 @@ These are documented limitations, not reasons to alter or discard legacy files.
 
 No Phase 1A failure was hidden by generating data or weakening a physics
 constraint.
+
+## Phase 1A.1
+
+- No external non-SIS solver was installed or executed; no SIE/EPL numerical
+  result is claimed.
+- Strain zero-fill and decomposition semantics passed only small in-memory
+  tests. Zarr shard publication, interruption/resume, and dataset-level checks
+  remain Phase 1B work.
+- The JSON boundary now covers the changed association objects and rejects old
+  fields, but cross-record physics remains authoritative in typed Python.
+- Isolated `python -m build` succeeded but warned that the repository lacks a
+  conventional package README.
+- No PR-triggered GitHub Actions result is claimed before a PR exists.
+
+The Phase 1A positional astrometry, image-only noise provenance, bare timing,
+and incomplete extra-image status weaknesses were resolved before data
+materialization.

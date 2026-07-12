@@ -47,9 +47,19 @@ interchangeable. The primary/secondary ordering of one selected pair does not
 discard other physical images. Extra images remain present and are marked
 unselected or censored.
 
+Metadata validation enforces the declared semantics: earliest means primary
+arrival time is not later, brightest means primary `mu_abs` is not lower, and
+minimum means the primary Morse class is minimum. Equality uses `1e-9` seconds
+absolute tolerance for arrival time and `1e-12` relative/absolute tolerance
+for magnification. Catalog anchor deliberately imposes neither ordering.
+
 Arrival times are physical times in seconds when a dimensional model is
 available. `signed_time_delay = arrival_time_secondary -
 arrival_time_primary`; its absolute value is a separately derived quantity.
+The corresponding deployable timing input is not this truth difference: it is
+a `TimingObservation` with value, uncertainty, measurement method, and optional
+reference. Ordinary observations require positive uncertainty. Zero is allowed
+only for an explicitly labeled deterministic analytic control.
 
 ## Parity and Morse class
 

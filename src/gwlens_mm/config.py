@@ -8,6 +8,7 @@ from typing import Any, Dict, Mapping
 import yaml
 
 from .physics.quantities import LensFamily
+from .schema import SCHEMA_VERSION
 
 
 def load_yaml(path: Path) -> Dict[str, Any]:
@@ -18,6 +19,8 @@ def load_yaml(path: Path) -> Dict[str, Any]:
 
 
 def validate_smoke_configuration(config: Mapping[str, Any]) -> None:
+    if config.get("schema_version") != SCHEMA_VERSION:
+        raise ValueError(f"smoke specification must use schema {SCHEMA_VERSION}")
     if config.get("execution_authorized") is not False:
         raise ValueError("Phase 1A smoke specification must not authorize execution")
     accepted = config["accepted_pairs"]
@@ -36,7 +39,24 @@ def validate_smoke_configuration(config: Mapping[str, Any]) -> None:
     required_products = {"noisy_strain", "clean_injected_signal", "noise_realization"}
     if set(gw["separate_products"]) != required_products:
         raise ValueError("smoke arrays must preserve noisy, clean, and noise separately")
+    if gw.get("unavailable_detector_fill_value") != 0.0:
+        raise ValueError("unavailable detector slots must be zero-filled")
+    if gw.get("require_noisy_equals_clean_plus_noise") is not True:
+        raise ValueError("smoke validation must require noisy = clean + noise")
+    timing = gw.get("timing_observation_model", {})
+    if not timing.get("measurement_method"):
+        raise ValueError("smoke timing observation requires a measurement method")
+    if timing.get("deterministic_control") is not False:
+        raise ValueError("smoke timing observation is not a deterministic control")
+    if (
+        not isinstance(timing.get("standard_deviation_seconds"), (int, float))
+        or timing["standard_deviation_seconds"] <= 0
+    ):
+        raise ValueError("smoke timing observation requires positive uncertainty")
     if config["count_control"] != "accepted_count":
         raise ValueError("smoke generation must use accepted-count control")
+    modalities = set(config["em"]["modalities"])
+    if "image_astrometry" not in modalities or "image_positions" in modalities:
+        raise ValueError("smoke EM astrometry must be image-ID keyed")
     if config["output_root"] != "/root/autodl-tmp/lensing-4/data_v2/smoke":
         raise ValueError("smoke output root is outside the approved AutoDL project")

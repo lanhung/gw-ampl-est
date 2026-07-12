@@ -2,8 +2,8 @@
 
 ## Current phase
 
-Phase 1A complete on `phase1/physics-schema`, pending human review. No smoke
-generation is authorized by this state update.
+Phase 1A.1 schema hardening is complete on `phase1/physics-schema`, pending PR
+and human review. No smoke generation is authorized by this state update.
 
 ## Completed
 
@@ -21,7 +21,14 @@ generation is authorized by this state update.
 - implemented the v2 logical metadata schema, provenance, seeds, and manifests;
 - accepted ADR-001 for Zarr v2 plus Parquet smoke storage;
 - validated an execution-disabled 48-pair smoke specification;
-- passed 65 pytest cases, Ruff, mypy, and an AutoDL SIS import contract.
+- hardened EM astrometry with explicit physical image IDs;
+- aligned detector-noise provenance to every selected image and detector slot;
+- replaced the bare timing float with a typed uncertainty-bearing product;
+- enforced complete extra-image status and primary-definition semantics;
+- added zero-fill/decomposition and complete-manifest validators;
+- upgraded the unmaterialized schema to `2.0.0-alpha.2`;
+- passed 93 pytest cases, Ruff, mypy, package build, the prior AutoDL SIS
+  contract, and the AutoDL alpha.2 metadata contract.
 
 ## Not started by design
 
@@ -33,7 +40,7 @@ generation is authorized by this state update.
 
 ## Next recommended phase
 
-Human review of `docs/reports/PHASE1A_REPORT.md` and the eight specified gate
-checks. Only after approval, open Phase 1B to implement pinned SIE/EPL solver
-adapters and generate exactly 48 accepted smoke pairs under the new AutoDL
-project root. Stop before any model training.
+Open a PR from `phase1/physics-schema`, require GitHub Actions, and review the
+alpha.2 schema diff plus `docs/reports/PHASE1A1_SCHEMA_HARDENING_REPORT.md`.
+Only after merge to main should a new Phase 1B branch authorize pinned SIE/EPL
+solver adapters and exactly 48 accepted smoke pairs. Stop before training.

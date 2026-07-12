@@ -74,3 +74,33 @@ publication. A switch to sharded HDF5 plus Parquet requires an ADR amendment.
 
 The 48-pair YAML is execution-disabled. Human acceptance of Phase 1A is
 required before SIE/EPL integration or any smoke waveform generation.
+
+## D015 — Observation associations
+
+EM astrometry is keyed by physical image ID. Timing is an uncertainty-bearing
+observation product. Noise provenance is a six-slot primary/secondary by
+H1/L1/V1 grid aligned exactly with the detector mask.
+
+## D016 — Image and primary completeness
+
+Every physical image outside the selected pair has exactly one unselected or
+censored status. Earliest, brightest, and minimum primary claims are checked;
+catalog anchor imposes no physical ordering.
+
+## D017 — Missing detector convention
+
+Unavailable noisy, clean, and noise slots are float32 zeros and must be ignored
+using the mandatory mask. NaN is not a normal missing value. Available slots
+must satisfy noisy equals clean plus noise within tolerance.
+
+## D018 — EM domains and redshift ordering
+
+Einstein radius and velocity dispersion are positive; observed redshifts are
+nonnegative. Point-estimate `z_l < z_s` is recorded as a quality flag rather
+than a hard cut because photometric posteriors may overlap.
+
+## D019 — Alpha.2 before materialization
+
+Schema `2.0.0-alpha.2` supersedes metadata-only alpha.1. No migration is needed
+because no v2 dataset was generated. Complete manifests require target count
+and every published artifact checksum to be complete.

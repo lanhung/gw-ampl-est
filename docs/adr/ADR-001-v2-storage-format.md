@@ -39,6 +39,11 @@ Nested physical-image information may use a separate image table keyed by
 physical-system/image ID rather than forcing two image columns. A small JSON
 manifest remains the authoritative inventory and checksum index.
 
+Unavailable detector slots in noisy, clean, and noise arrays are exactly
+`0.0` and are excluded by the mandatory mask. NaN is prohibited as the normal
+missing representation. Available slots must satisfy the numerical identity
+`noisy = clean + noise`; `gwlens_mm.arrays` validates this before publication.
+
 Zarr and a Parquet engine are not installed on Vultr and were not installed in
 Phase 1A. Phase 1B must pin mutually compatible versions on AutoDL and record
 them. If this environment check fails, the fallback is sharded HDF5 plus

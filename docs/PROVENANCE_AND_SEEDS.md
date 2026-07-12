@@ -35,7 +35,7 @@ change existing child seeds.
 ## Manifest contract
 
 `DatasetManifest` records dataset identity, schema and code/config versions,
-root seed, accepted and attempted counts, all grouping IDs, artifacts, and
+root seed, planned/accepted/attempted counts, all grouping IDs, artifacts, and
 generation status. It rejects:
 
 - accepted counts not accounted for by pair IDs;
@@ -45,6 +45,11 @@ generation status. It rejects:
 - complete artifacts without byte size and SHA-256;
 - duplicate dataset IDs across a registry.
 
+A complete dataset additionally requires accepted count equal to planned count
+and every published artifact complete with byte size and SHA-256. Pending
+staging artifacts are allowed only while planned/running and cannot appear in a
+published complete manifest.
+
 Artifacts may be `pending` in a Phase 1A plan. A completed generation must
 replace placeholders with hashes and byte counts. Rejected attempts and their
 reasons are separate append-only provenance records.
@@ -52,5 +57,8 @@ reasons are separate append-only provenance records.
 ## External versions
 
 Future manifests must include solver, waveform, preprocessing, detector, PSD,
-calibration/DQ, data-release, and package versions. The Phase 1A metadata
-example is explicitly marked as planned and is not evidence of generation.
+calibration/DQ, data-release, and package versions. Every non-null
+image-detector segment ID is flattened into manifest and split-leakage checks.
+Synthetic IDs are explicitly labeled synthetic; GWOSC references must later
+carry detector and public product/GPS provenance. The metadata example is
+planned and is not evidence of generation.

@@ -38,7 +38,10 @@ least two images.
 `SelectedPair` records two distinct physical image IDs, the explicit primary
 definition, selection reason, per-detector visibility, unselected images, and
 censored images. Validation rejects unknown IDs, overlapping status labels,
-or selected images repeated as extras.
+selected images repeated as extras, or any non-selected physical image without
+exactly one unselected/censored status. Schema validation also checks earliest,
+brightest, and minimum primary claims against physical-image truth; catalog
+anchor deliberately has no physical ordering constraint.
 
 ## Implemented and planned adapters
 

@@ -17,7 +17,7 @@ def policy():
 
 def test_allowlisted_observations_pass(policy):
     assert policy.validate_model_inputs(
-        ["gw_strain_primary", "observed_image_positions_arcsec", "em_modality_availability_mask"]
+        ["gw_strain_primary", "observed_image_astrometry", "observed_time_difference"]
     )
 
 
@@ -35,6 +35,7 @@ def test_allowlisted_observations_pass(policy):
         "trueMu",
         "oracleLensParameter",
         "cleanWaveform",
+        "true_time_delay_seconds",
     ],
 )
 def test_forbidden_exact_and_alias_fields_fail_closed(policy, field):

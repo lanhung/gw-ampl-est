@@ -1,5 +1,5 @@
 {
-  "policy_version": "1.0.0",
+  "policy_version": "1.1.0",
   "exact_fields": [
     "source_position_y_true",
     "source_position_u_true",
@@ -15,6 +15,7 @@
     "lens_center_true",
     "image_positions_true",
     "time_delay_true_seconds",
+    "true_time_delay_seconds",
     "clean_strain",
     "noise_strain",
     "optimal_snr",
@@ -38,6 +39,7 @@
     "true_mu",
     "true_beta",
     "true_y",
+    "true_time_delay",
     "clean_waveform",
     "isolated_noise",
     "oracle",

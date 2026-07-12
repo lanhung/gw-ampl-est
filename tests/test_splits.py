@@ -1,6 +1,9 @@
+import json
+from pathlib import Path
+
 import pytest
 
-from gwlens_mm.schema import SplitName
+from gwlens_mm.schema import SplitName, V2Record
 from gwlens_mm.splits import SplitAssignment, SplitLeakageError, validate_grouped_splits
 
 
@@ -41,3 +44,16 @@ def test_corrupted_grouped_splits_are_rejected(override):
     ]
     with pytest.raises(SplitLeakageError, match="leaks"):
         validate_grouped_splits(records)
+
+
+def test_record_assignment_includes_every_available_detector_noise_segment():
+    example = Path(__file__).resolve().parents[1] / "examples/v2_metadata_example.json"
+    record = V2Record.from_dict(json.loads(example.read_text(encoding="utf-8")))
+    assignment_record = SplitAssignment.from_v2_record(record)
+    assert assignment_record.noise_segment_ids == (
+        "synthetic-image0-H1",
+        "synthetic-image0-L1",
+        "synthetic-image2-H1",
+        "synthetic-image2-L1",
+        "synthetic-image2-V1",
+    )

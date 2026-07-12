@@ -1,6 +1,9 @@
 # V2 logical schema specification
 
-Schema version: `2.0.0-alpha.1`.
+Schema version: `2.0.0-alpha.2`.
+
+Alpha.1 contained metadata examples only and was never materialized as a v2
+dataset. Alpha.2 supersedes it without a physical data migration.
 
 ## Design boundary
 
@@ -47,16 +50,33 @@ quantities for consistency.
 Every reference has logical shape `(2 selected images, 3 detector slots,
 samples)`. Detector slots are always `H1, L1, V1`; availability is a separate
 `(2, 3)` mask. Metadata stores sample rate/count, one start time per selected
-image, observed event-time difference, preprocessing, PSD, calibration, and DQ
-references. Clean/noise arrays are validation artifacts, not model inputs.
+image, preprocessing, PSD, calibration, and DQ references. The observed event
+time difference is a typed product with value, uncertainty, measurement method,
+and optional reference. Ordinary observations require positive uncertainty;
+zero is reserved for an explicitly declared deterministic control.
+
+Noise provenance is an image-major six-slot grid over primary/secondary and
+H1/L1/V1. Available slots require distinct nonempty detector-qualified segment
+IDs and an explicit source; unavailable slots require a null ID and source
+`unavailable`. The grid must agree element-by-element with the detector mask.
+Synthetic IDs are provenance identifiers, not GWOSC segment claims.
 
 ### EM observations
 
-`EMObservation` contains noisy image positions, lens center, Einstein scale,
-lens/source redshift, velocity dispersion, covariances/standard deviations,
-aperture metadata, censoring flags, and a complete availability mask. A missing
-modality is `null` and has a false mask; exact truth is never imputed.
+`EMObservation` contains image-ID-keyed `ImageAstrometryObservation` records,
+lens center, Einstein scale, lens/source redshift, velocity dispersion,
+uncertainties, aperture metadata, censoring flags, and a complete availability
+mask. Astrometry may include selected and non-selected physical images; tuple
+order never defines identity. IDs are unique and must exist in lens truth. A
+missing modality is `null` with a false mask; exact truth is never imputed.
 Covariances must be finite, symmetric, and positive definite.
+
+Einstein radius and velocity dispersion must be positive; redshifts must be
+nonnegative. `redshift_ordering_valid` records whether point summaries satisfy
+`z_l < z_s`. It is a quality flag, not a hard rejection, because broad
+photometric posteriors can overlap for a physically valid system. Later
+likelihood code must use the observation model rather than treat this flag as
+truth.
 
 ### Proposal/evaluation metadata
 
@@ -68,8 +88,9 @@ astrophysical prior.
 ### Provenance
 
 `Provenance` requires a full generator Git commit, SHA-256 configuration hash,
-package/solver/waveform versions, seed hierarchy, detector labels, independent
-noise-segment IDs, optional source release, and distribution metadata.
+package/solver/waveform versions, seed hierarchy, detector labels,
+image-detector noise references, optional source release, and distribution
+metadata.
 
 ## Artifacts
 
@@ -80,10 +101,10 @@ noise-segment IDs, optional source release, and distribution metadata.
 - `configs/data/v2_smoke.yaml` is an execution-disabled Phase 1B
   specification.
 
-The JSON Schema is intentionally a boundary/shape overview in this alpha
-version. Scientific invariants are enforced by typed Python validators and
-tests. Before an external producer is supported, nested JSON Schema definitions
-must be expanded or a validated code-generated schema library adopted.
+The generated JSON boundary defines astrometry, timing, and detector-noise
+objects and explicitly rejects removed alpha.1 positional, bare timing, and
+image-only noise fields. Cross-record scientific invariants remain enforced by
+typed validators and tests.
 
 ## Round trip and versioning
 
@@ -91,9 +112,22 @@ must be expanded or a validated code-generated schema library adopted.
 runs every validator, and `to_dict()` returns canonical JSON-compatible values.
 Tests require exact field-preserving round trips.
 
-Schema versions use semantic-style identifiers. Patch versions may clarify
-validation without changing stored fields. Minor versions may add optional
-fields with explicit defaults. Removing/renaming fields or changing units
-requires a major version and a pure, tested migration function. Migrations
-must preserve the original manifest and record source/target schema versions;
+Schema versions use semantic-style identifiers. Before stable v2.0, an alpha
+revision may make a breaking correction only while no physical dataset exists;
+the decision must be recorded as it is for alpha.1 to alpha.2. After any v2
+dataset is materialized, patch versions may only clarify validation, minor
+versions may add optional fields with defaults, and removing/renaming fields or
+changing units requires a major version plus a pure tested migration.
+Migrations preserve the original manifest and record source/target versions;
 in-place mutation of immutable datasets is prohibited.
+
+## Cross-record invariants
+
+- every non-selected physical image is exactly one of unselected or censored;
+- earliest, brightest, and minimum primary definitions are checked against
+  truth with tight equality tolerances; catalog anchor adds no ordering claim;
+- astrometry IDs belong to the physical image set;
+- detector-noise availability equals the GW mask;
+- unavailable noisy/clean/noise slots are exactly zero-filled;
+- available slots satisfy `noisy = clean + noise` within tolerance;
+- NaN is never the routine missing-detector representation.

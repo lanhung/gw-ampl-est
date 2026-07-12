@@ -24,12 +24,13 @@ No identifier may cross logical splits for:
 - source realization;
 - lens realization and physical lens system;
 - selected pair;
-- detector-noise segment;
+- every non-null image-detector noise segment;
 - augmentation parent.
 
 Multiple selected pairs from one physical system must stay in the same split.
-Augmentations inherit their parent's split. The two selected images use
-independent noise segments, and neither segment may appear in another split.
+Augmentations inherit their parent's split. Every available H1/L1/V1 slot for
+both images has a detector-qualified segment ID, and none may cross splits.
+Unavailable null slots do not create fake grouping IDs.
 
 `validate_grouped_splits()` fails with the identifier and conflicting split.
 It also rejects duplicate pair rows. Tests deliberately corrupt source, lens,

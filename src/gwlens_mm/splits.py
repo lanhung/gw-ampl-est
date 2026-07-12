@@ -5,7 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Dict, Iterable, Optional, Tuple
 
-from .schema import SplitName
+from .schema import SplitName, V2Record
 
 
 class SplitLeakageError(ValueError):
@@ -21,6 +21,21 @@ class SplitAssignment:
     physical_system_id: str
     noise_segment_ids: Tuple[str, ...]
     augmentation_parent_id: Optional[str] = None
+
+    @classmethod
+    def from_v2_record(cls, record: V2Record) -> "SplitAssignment":
+        """Include every non-null image-detector noise segment in split checks."""
+
+        record.validate()
+        return cls(
+            split=record.pair.split,
+            pair_id=record.pair.pair_id,
+            source_id=record.pair.source_id,
+            lens_id=record.pair.lens_id,
+            physical_system_id=record.pair.physical_system_id,
+            noise_segment_ids=record.provenance.used_noise_segment_ids,
+            augmentation_parent_id=record.pair.augmentation_parent_id,
+        )
 
 
 def validate_grouped_splits(assignments: Iterable[SplitAssignment]) -> None:

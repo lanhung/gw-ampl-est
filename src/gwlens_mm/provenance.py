@@ -94,6 +94,7 @@ class DatasetManifest:
     generator_git_commit: str
     configuration_hash: str
     root_seed: int
+    planned_pair_count: int
     accepted_pair_count: int
     attempted_pair_count: int
     pair_ids: Tuple[str, ...]
@@ -106,7 +107,11 @@ class DatasetManifest:
     def validate(self) -> None:
         if not self.dataset_id or self.root_seed < 0:
             raise ValueError("dataset identity and nonnegative root seed are required")
-        if self.accepted_pair_count < 0 or self.attempted_pair_count < self.accepted_pair_count:
+        if self.planned_pair_count <= 0:
+            raise ValueError("planned pair count must be positive")
+        if self.accepted_pair_count < 0 or self.accepted_pair_count > self.planned_pair_count:
+            raise ValueError("accepted pair count cannot exceed planned count")
+        if self.attempted_pair_count < self.accepted_pair_count:
             raise ValueError("attempt/accepted counts are inconsistent")
         if len(self.pair_ids) != self.accepted_pair_count:
             raise ValueError("pair IDs must account for every accepted pair")
@@ -122,6 +127,15 @@ class DatasetManifest:
             raise ValueError("unsupported generation status")
         for artifact in self.artifacts:
             artifact.validate()
+        if self.generation_status == "complete":
+            if self.accepted_pair_count != self.planned_pair_count:
+                raise ValueError(
+                    "complete generation requires accepted count to equal planned count"
+                )
+            if not self.artifacts or any(
+                artifact.status != "complete" for artifact in self.artifacts
+            ):
+                raise ValueError("complete generation requires every published artifact complete")
 
     def to_dict(self) -> Dict[str, Any]:
         return asdict(self)

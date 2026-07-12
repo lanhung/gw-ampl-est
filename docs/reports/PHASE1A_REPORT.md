@@ -1,5 +1,8 @@
 # Phase 1A report — physics API, v2 schema, and leakage safeguards
 
+> Historical gate report: schema alpha.1 was metadata-only and was superseded
+> by the Phase 1A.1 alpha.2 hardening before any v2 data were generated.
+
 Date: 2026-07-12
 Branch: `phase1/physics-schema`
 Gate checkpoint: `166f781`
