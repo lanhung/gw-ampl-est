@@ -41,6 +41,9 @@ def example_manifest(identifier="gwlens-v2-example"):
         noise_segment_ids=("noise-1", "noise-2"),
         artifacts=(ArtifactChecksum("arrays/strain.zarr", None, None),),
         generation_status="planned",
+        dataset_purpose="engineering_smoke",
+        scientific_use_authorized=False,
+        authorizing_git_commit="c" * 40,
     )
 
 
@@ -93,9 +96,16 @@ def test_storage_size_calculation(pairs, expected_bytes):
     assert strain_storage_estimate(pairs).bytes == expected_bytes
 
 
-def test_smoke_configuration_validates_but_is_not_authorized():
+def test_phase1b_smoke_configuration_is_explicitly_authorized():
     config = load_yaml(ROOT / "configs/data/v2_smoke.yaml")
-    validate_smoke_configuration(config)
-    assert config["execution_authorized"] is False
+    validate_smoke_configuration(config, expected_execution_authorized=True)
+    assert config["execution_authorized"] is True
     assert sum(config["accepted_pairs"].values()) == 48
     assert config["schema_version"] == SCHEMA_VERSION == "2.0.0-alpha.2"
+
+
+def test_engineering_manifest_rejects_scientific_authorization():
+    data = example_manifest().to_dict()
+    data["scientific_use_authorized"] = True
+    with pytest.raises(ValueError, match="cannot be authorized"):
+        DatasetManifest.from_json(json.dumps(data))

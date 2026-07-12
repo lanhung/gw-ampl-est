@@ -25,13 +25,16 @@ Each `PhysicalImage` provides:
 - stable image ID;
 - two-dimensional angular position;
 - signed magnification;
-- dimensionless Fermat/arrival-time coordinate or documented arrival time;
+- optional dimensionless Fermat potential with explicit unitless naming;
+- optional physical arrival-time delay in seconds with explicit units;
 - parity and Morse class;
 - validity flag and reason.
 
 The system result provides lens family, solver name/version, validity, and all
-images. Image IDs must be unique and a valid strong-lensing result contains at
-least two images.
+images. At least one of the two time coordinates is required and every supplied
+value must be finite. Image IDs must be unique and a valid strong-lensing result
+contains at least two images. A solver result must provide one common coordinate
+across all images so ordering can be checked without inspecting the solver name.
 
 ## Pair selection contract
 
@@ -53,11 +56,14 @@ anchor deliberately has no physical ordering constraint.
 - external convergence or a model-discrepancy parameter is passed explicitly,
   never folded invisibly into a magnification.
 
-`validate_solver_contract()` checks family consistency, finite arrival
-coordinates, unique IDs, and valid images. It is not a replacement for
-physics comparison against trusted reference configurations. Phase 1B must
-add deterministic reference fixtures for the selected external solver before
-generation.
+`validate_solver_contract()` checks family consistency, explicit common
+ordering coordinates, sorted output, unique IDs, and valid images. It is not a
+replacement for physics comparison against trusted reference configurations.
+The Lenstronomy adapter supplies both the raw dimensionless Fermat potential
+and an earliest-normalized physical delay in seconds. The analytic SIS control
+supplies the dimensionless coordinate only; any physical SIS time scale belongs
+in a separate generator model and must never be inferred from the solver field
+name.
 
 ## SIS details
 

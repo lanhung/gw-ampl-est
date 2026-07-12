@@ -78,34 +78,39 @@ generator audit and approving a v2 schema.
 
 ## Current phase gate
 
-Phase 0 is complete and frozen at Git commit
-`38c76016b66eda3a4b72d5a7ca3fb1e90957abef`.
+Phase 0, Phase 1A, Phase 1A.1, and Phase 1B are complete.
 
-The currently authorized phase is Phase 1A:
+The reviewed Phase 1B engineering artifact is frozen as:
 
-- define the v2 physics API and quantity conventions;
-- define the privileged-variable denylist and deployable-input allowlist;
-- define the logical v2 dataset schema;
-- define source/lens/noise grouped split rules;
-- define provenance and manifest schemas;
-- implement unit and contract tests;
-- create a reviewed smoke-generation specification.
+`gwlens-v2-2.0.0-alpha.2-ae86beab1c132682`
 
-During Phase 1A, do not:
+Human review accepted Phase 1B and authorized the narrow Phase 1B.1 solver-time
+cleanup. No data regeneration is authorized.
+
+Phase 1B.1 may only:
+
+- separate dimensionless Fermat coordinates from physical arrival seconds;
+- correct deterministic fixture diagnostics;
+- update solver documentation, tests, and fixture evidence;
+- merge the reviewed Phase 1B branch and freeze its generator/data artifacts.
+
+During Phase 1B.1, do not:
 
 - train any neural model;
-- generate a full dataset;
-- generate more than metadata-only schema examples;
+- generate additional waveform pairs;
 - download GWTC or GWOSC data;
-- launch long GPU jobs;
-- write the scientific manuscript;
+- call synthetic Gaussian noise real detector noise;
 - modify any legacy file;
-- treat legacy data as v2 training or final test data.
+- use the smoke dataset for scientific performance claims;
+- start manuscript writing;
+- proceed to medium- or large-scale generation.
 
-Phase 1A must stop after the physics API, schema, policies and tests pass.
+All smoke outputs must be written only below:
 
-Generating 10–100 v2 smoke pairs is Phase 1B and requires review of the
-Phase 1A report before execution.
+`/root/autodl-tmp/lensing-4/data_v2/smoke`
+
+The 48-pair smoke dataset is engineering-only and may never be used for
+training, calibration, scientific testing, or reported performance claims.
 
 ## Scientific integrity
 

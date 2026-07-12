@@ -1,6 +1,6 @@
 schema_version: 2.0.0-alpha.2
 specification_version: 1
-execution_authorized: false
+execution_authorized: true
 output_root: /root/autodl-tmp/lensing-4/data_v2/smoke
 root_seed: 20260712
 count_control: accepted_count

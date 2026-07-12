@@ -5,6 +5,10 @@ Schema version: `2.0.0-alpha.2`.
 Alpha.1 contained metadata examples only and was never materialized as a v2
 dataset. Alpha.2 supersedes it without a physical data migration.
 
+Phase 1B adds `engineering_smoke` as an explicit non-scientific split value.
+It prevents engineering records from being mistaken for training or
+evaluation data; the dataset manifest independently denies scientific use.
+
 ## Design boundary
 
 The schema describes logical metadata and references to arrays. It does not

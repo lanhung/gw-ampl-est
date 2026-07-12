@@ -110,6 +110,13 @@ def test_every_extra_physical_image_requires_explicit_status():
         V2Record.from_dict(data)
 
 
+def test_censored_image_requires_reason():
+    data = json.loads(EXAMPLE.read_text(encoding="utf-8"))
+    data["lens_truth"]["physical_images"][2]["censoring_reason"] = None
+    with pytest.raises(ValueError, match="censoring reason"):
+        V2Record.from_dict(data)
+
+
 def test_noise_references_align_with_detector_mask():
     data = json.loads(EXAMPLE.read_text(encoding="utf-8"))
     data["provenance"]["detector_noise_references"][0]["available"] = False

@@ -1,0 +1,15 @@
+{
+  "family_counts": {
+    "epl_external_shear": 12,
+    "sie_external_shear": 12,
+    "sis": 24
+  },
+  "matched_response_max_relative_error": 1.850266557252657e-16,
+  "model_input_policy": "passed",
+  "morse_phase_max_relative_error": 1.9938245703229228e-16,
+  "pair_count": 48,
+  "preprocessing_max_relative_error": 1.850266557252657e-16,
+  "raw_cross_image_ratio_used": false,
+  "resume_test": "passed: first staged subset reused without changed bytes",
+  "status": "passed"
+}

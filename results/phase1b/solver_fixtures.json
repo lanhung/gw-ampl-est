@@ -1,0 +1,205 @@
+{
+  "fixtures": [
+    {
+      "fixture": "sis_double",
+      "image_count": 2,
+      "images": [
+        {
+          "arrival_time_seconds": null,
+          "fermat_potential_dimensionless": -1.0,
+          "image_id": "sis_plus",
+          "morse_class": "minimum",
+          "mu_signed": 3.0,
+          "parity": "positive",
+          "position_arcsec": [
+            1.5,
+            0.0
+          ]
+        },
+        {
+          "arrival_time_seconds": null,
+          "fermat_potential_dimensionless": 0.0,
+          "image_id": "sis_minus",
+          "morse_class": "saddle",
+          "mu_signed": -1.0,
+          "parity": "negative",
+          "position_arcsec": [
+            -0.5,
+            -0.0
+          ]
+        }
+      ],
+      "lens_family": "sis",
+      "selected_image_ids": [
+        "sis_plus",
+        "sis_minus"
+      ],
+      "selected_pair_is_first_two": true,
+      "solver": "gwlens_mm.SISSolver",
+      "solver_version": "1"
+    },
+    {
+      "fixture": "sie_double",
+      "image_count": 2,
+      "images": [
+        {
+          "arrival_time_seconds": 0.0,
+          "fermat_potential_dimensionless": -1.1006588624071387,
+          "image_id": "image_0",
+          "morse_class": "minimum",
+          "mu_signed": 4.4047208133324975,
+          "parity": "positive",
+          "position_arcsec": [
+            1.5980599239491196,
+            0.07049257305069559
+          ]
+        },
+        {
+          "arrival_time_seconds": 9085238.611623779,
+          "fermat_potential_dimensionless": -0.01004936698077541,
+          "image_id": "image_1",
+          "morse_class": "saddle",
+          "mu_signed": -0.7403947331960326,
+          "parity": "negative",
+          "position_arcsec": [
+            -0.5234111115255401,
+            -0.11854860844315691
+          ]
+        }
+      ],
+      "lens_family": "sie_external_shear",
+      "selected_image_ids": [
+        "image_0",
+        "image_1"
+      ],
+      "selected_pair_is_first_two": true,
+      "solver": "lenstronomy",
+      "solver_version": "1.13.6"
+    },
+    {
+      "fixture": "sie_quad_nonconsecutive",
+      "image_count": 4,
+      "images": [
+        {
+          "arrival_time_seconds": 0.0,
+          "fermat_potential_dimensionless": -0.6581907837819894,
+          "image_id": "image_0",
+          "morse_class": "minimum",
+          "mu_signed": 6.594191326453374,
+          "parity": "positive",
+          "position_arcsec": [
+            -0.25908527986210494,
+            1.102736764727077
+          ]
+        },
+        {
+          "arrival_time_seconds": 103858.72526435964,
+          "fermat_potential_dimensionless": -0.6457233828915745,
+          "image_id": "image_1",
+          "morse_class": "minimum",
+          "mu_signed": 6.731337510793361,
+          "parity": "positive",
+          "position_arcsec": [
+            0.6818783084320981,
+            -0.9153356682782582
+          ]
+        },
+        {
+          "arrival_time_seconds": 637707.9770731792,
+          "fermat_potential_dimensionless": -0.581639093195093,
+          "image_id": "image_2",
+          "morse_class": "saddle",
+          "mu_signed": -6.264865340203596,
+          "parity": "negative",
+          "position_arcsec": [
+            1.0290213098120373,
+            0.35802873321969864
+          ]
+        },
+        {
+          "arrival_time_seconds": 1254561.6877219279,
+          "fermat_potential_dimensionless": -0.5075907888102427,
+          "image_id": "image_3",
+          "morse_class": "saddle",
+          "mu_signed": -4.174284991633812,
+          "parity": "negative",
+          "position_arcsec": [
+            -0.9367709277676187,
+            -0.39146527713525175
+          ]
+        }
+      ],
+      "lens_family": "sie_external_shear",
+      "selected_image_ids": [
+        "image_0",
+        "image_2"
+      ],
+      "selected_pair_is_first_two": false,
+      "solver": "lenstronomy",
+      "solver_version": "1.13.6"
+    },
+    {
+      "fixture": "epl_quad",
+      "image_count": 4,
+      "images": [
+        {
+          "arrival_time_seconds": 0.0,
+          "fermat_potential_dimensionless": -0.7819440422417738,
+          "image_id": "image_0",
+          "morse_class": "minimum",
+          "mu_signed": 7.653693355382901,
+          "parity": "positive",
+          "position_arcsec": [
+            -0.26139007632954714,
+            1.0870343118283468
+          ]
+        },
+        {
+          "arrival_time_seconds": 63207.12492899466,
+          "fermat_potential_dimensionless": -0.7743565375461936,
+          "image_id": "image_1",
+          "morse_class": "minimum",
+          "mu_signed": 7.567974305429355,
+          "parity": "positive",
+          "position_arcsec": [
+            0.7733306914479926,
+            -0.8326396807835037
+          ]
+        },
+        {
+          "arrival_time_seconds": 441799.11924726487,
+          "fermat_potential_dimensionless": -0.7289096272836889,
+          "image_id": "image_2",
+          "morse_class": "saddle",
+          "mu_signed": -7.871831729265217,
+          "parity": "negative",
+          "position_arcsec": [
+            1.0205745701351918,
+            0.4204473844168128
+          ]
+        },
+        {
+          "arrival_time_seconds": 1075414.0923476918,
+          "fermat_potential_dimensionless": -0.6528492687562268,
+          "image_id": "image_3",
+          "morse_class": "saddle",
+          "mu_signed": -4.7185938428875,
+          "parity": "negative",
+          "position_arcsec": [
+            -0.9346265304029029,
+            -0.44652679958380453
+          ]
+        }
+      ],
+      "lens_family": "epl_external_shear",
+      "selected_image_ids": [
+        "image_0",
+        "image_1"
+      ],
+      "selected_pair_is_first_two": true,
+      "solver": "lenstronomy",
+      "solver_version": "1.13.6"
+    }
+  ],
+  "status": "passed"
+}

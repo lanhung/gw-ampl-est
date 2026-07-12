@@ -54,3 +54,46 @@ constraint.
 The Phase 1A positional astrometry, image-only noise provenance, bare timing,
 and incomplete extra-image status weaknesses were resolved before data
 materialization.
+
+## Phase 1B
+
+- The first five-pair staging command contained a manually mistyped generator
+  commit. The hash did not identify a Git object. Publication was never
+  attempted; the staging directory is retained under the new AutoDL project
+  root with an `ABANDONED_FAILED_STAGING.txt` marker and is excluded from every
+  result and count.
+- The first resume test with the initial generator commit failed because Bilby
+  2.6 design-PSD noise uses `bilby.core.utils.random.Generator`, not NumPy's
+  legacy global RNG. The byte mismatch stopped publication automatically. The
+  generator was fixed to seed Bilby's RNG explicitly, an independent
+  determinism check passed, and a new generator commit/dataset ID was used.
+- The published smoke artifact uses synthetic Bilby design-PSD Gaussian noise,
+  identity float32 preprocessing, and a fixed engineering lens/source grid. It
+  is not evidence for real-noise performance, population performance, posterior
+  calibration, or any scientific inference claim.
+- The SIS smoke delay uses a documented one-day engineering conversion of the
+  analytic dimensionless Fermat coordinate. It is a schema/windowing control,
+  not an astrophysical time-delay population model.
+- Initial Phase 1B branch CI failed only under the Python 3.9 runner because
+  newer NumPy typing inferred a division result too broadly for `float()`.
+  A dedicated float-returning safe-norm helper resolved the cross-version
+  NumPy stub ambiguity; no runtime algorithm or published dataset bytes
+  changed.
+
+Both failed staging states remain immutable evidence; neither was published or
+silently removed.
+
+## Phase 1B.1 review findings
+
+- `selected_pair_is_first_two` compared against hard-coded Lenstronomy IDs, so
+  the SIS double was incorrectly reported as false. The diagnostic now uses the
+  actual first two returned image IDs; this was an evidence-file defect only.
+- `PhysicalImage.arrival_time_dimensionless` held dimensionless SIS Fermat
+  coordinates but physical seconds for Lenstronomy. The overloaded field was
+  removed and replaced with explicit optional dimensionless and seconds
+  quantities. The frozen dataset had already handled these paths explicitly,
+  so no published array or record changed.
+- The repository-wide command `ruff check scripts` also scans the frozen Phase
+  0 manifest-builder script, which contains pre-existing long audit-table lines.
+  Phase 1B.1 therefore ran Ruff on `src`, `tests`, all `scripts/phase1b`, and the
+  schema generator. The exclusion is explicit; no new lint failure was hidden.

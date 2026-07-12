@@ -18,11 +18,15 @@ def load_yaml(path: Path) -> Dict[str, Any]:
     return data
 
 
-def validate_smoke_configuration(config: Mapping[str, Any]) -> None:
+def validate_smoke_configuration(
+    config: Mapping[str, Any], *, expected_execution_authorized: bool
+) -> None:
     if config.get("schema_version") != SCHEMA_VERSION:
         raise ValueError(f"smoke specification must use schema {SCHEMA_VERSION}")
-    if config.get("execution_authorized") is not False:
-        raise ValueError("Phase 1A smoke specification must not authorize execution")
+    if config.get("execution_authorized") is not expected_execution_authorized:
+        raise ValueError(
+            "smoke execution authorization does not match the current phase gate"
+        )
     accepted = config["accepted_pairs"]
     expected = {
         LensFamily.SIS.value: 24,
