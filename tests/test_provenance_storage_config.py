@@ -41,6 +41,9 @@ def example_manifest(identifier="gwlens-v2-example"):
         noise_segment_ids=("noise-1", "noise-2"),
         artifacts=(ArtifactChecksum("arrays/strain.zarr", None, None),),
         generation_status="planned",
+        dataset_purpose="engineering_smoke",
+        scientific_use_authorized=False,
+        authorizing_git_commit="c" * 40,
     )
 
 

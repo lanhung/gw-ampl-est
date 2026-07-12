@@ -103,10 +103,22 @@ class DatasetManifest:
     noise_segment_ids: Tuple[str, ...]
     artifacts: Tuple[ArtifactChecksum, ...]
     generation_status: str
+    dataset_purpose: str
+    scientific_use_authorized: bool
+    authorizing_git_commit: str
 
     def validate(self) -> None:
         if not self.dataset_id or self.root_seed < 0:
             raise ValueError("dataset identity and nonnegative root seed are required")
+        if self.dataset_purpose != "engineering_smoke":
+            raise ValueError("Phase 1B manifest must identify an engineering smoke dataset")
+        if self.scientific_use_authorized:
+            raise ValueError("engineering smoke data cannot be authorized for scientific use")
+        if len(self.authorizing_git_commit) != 40 or any(
+            character not in "0123456789abcdef"
+            for character in self.authorizing_git_commit.lower()
+        ):
+            raise ValueError("authorizing_git_commit must be a full hexadecimal Git hash")
         if self.planned_pair_count <= 0:
             raise ValueError("planned pair count must be positive")
         if self.accepted_pair_count < 0 or self.accepted_pair_count > self.planned_pair_count:

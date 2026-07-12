@@ -19,6 +19,7 @@ DETECTOR_SLOTS = ("H1", "L1", "V1")
 
 
 class SplitName(str, Enum):
+    ENGINEERING_SMOKE = "engineering_smoke"
     TRAIN = "train"
     VALIDATION = "validation"
     CALIBRATION = "calibration"
@@ -213,6 +214,10 @@ class LensTruth:
                 "every non-selected physical image requires exactly one status; "
                 f"missing={missing}, invalid={unknown}"
             )
+        for image_id in censored:
+            reason = images_by_id[image_id].censoring_reason
+            if reason is None or not reason.strip():
+                raise ValueError("every censored image requires a censoring reason")
         primary = images_by_id[pair.primary_image_id]
         secondary = images_by_id[pair.secondary_image_id]
         if pair.primary_definition is PrimaryDefinition.EARLIEST_ARRIVING:
@@ -533,7 +538,7 @@ class V2Record:
 
         return convert(asdict(self))
 
-    def to_json(self, *, indent: int = 2) -> str:
+    def to_json(self, *, indent: Optional[int] = 2) -> str:
         return json.dumps(self.to_dict(), indent=indent, sort_keys=True) + "\n"
 
     @classmethod
