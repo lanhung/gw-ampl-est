@@ -280,3 +280,17 @@ multiply imaged at finite square boundaries. RC.4 therefore makes no claim that
 normalized benchmark support. The boundary hard gate is agreement between the
 primary and finer reference solver unions, including image multiplicity and
 positions. This clarification changes no density formula or finite support.
+
+## D041 — Waveform publication uses a fixed long-grid construction
+
+RC.5 keeps the scientific product at 8 seconds and 2048 Hz but eliminates the
+failed comparison between independently constructed 8-second and 32-second
+frequency grids. The canonical response is generated on a 64-second grid,
+converted with Bilby's normalized inverse transform, cropped to internal
+seconds 56--64, and deterministically edge-conditioned. Selection SNR is
+computed from the exact conditioned clean product that is stored.
+
+A 128-second construction is the frozen numerical reference. The reviewed
+0.005 relative-difference and outside-crop limits, 0.999 energy-retention floor,
+exact zero guards and transform-normalization check are disclosed post-RC.4
+choices and may not be changed after RC.5 execution begins.

@@ -1,9 +1,9 @@
 phase: "2"
-preregistration_version: "1.0.0-rc.4"
+preregistration_version: "1.0.0-rc.5"
 scientific_schema_version: "2.0.0-alpha.3"
 frozen_engineering_schema_version: "2.0.0-alpha.2"
 root_seed: 2026071202
-status: human_finite_source_support_approved
+status: human_waveform_window_contract_approved
 execution_enabled: false
 scientific_data_generation_authorized: false
 training_authorized: false
@@ -265,6 +265,35 @@ gw_observation_model:
   duration_seconds: 8
   sample_rate_hz: 2048
   sample_count: 16384
+  merger_offset_seconds: 6.0
+  waveform_window_contract:
+    id: fixed_long_grid_crop_and_condition_v1
+    construction_duration_seconds: 64
+    construction_merger_offset_seconds: 62.0
+    crop_start_seconds: 56.0
+    crop_duration_seconds: 8
+    construction_sample_count: 131072
+    crop_start_sample: 114688
+    crop_stop_sample_exclusive: 131072
+    inverse_transform: bilby.core.utils.infft
+    zero_guard_seconds_per_edge: 0.25
+    zero_guard_samples_per_edge: 512
+    raised_cosine_transition_seconds_per_edge: 0.25
+    raised_cosine_transition_samples_per_edge: 512
+    raised_cosine_definition: half_cosine_zero_to_one_excluding_transition_endpoints
+    selection_snr_signal: conditioned_published_clean_strain
+    selection_snr_transform: bilby.core.utils.nfft
+    numerical_reference_duration_seconds: 128
+    numerical_reference_merger_offset_seconds: 126.0
+    maximum_conditioned_reference_relative_difference: 0.005
+    maximum_construction_energy_outside_crop_fraction: 0.005
+    minimum_conditioned_crop_energy_retained_fraction: 0.999
+    require_exact_zero_guard_energy: true
+    require_finite_frequency_and_time_products: true
+    require_inverse_transform_normalization_test: true
+    require_stored_clean_selection_snr_agreement: true
+    require_detector_frame_chirp_time_report: true
+    post_result_threshold_change_forbidden: true
   dtype: float32
   detector_slots: [H1, L1, V1]
   psd_curves:
@@ -283,6 +312,8 @@ gw_observation_model:
     - derive_network_input_from_declared_detector_psd
     - verify_finite_unit_scale_whitened_noise_on_qualification_split
     - reject_wraparound_or_edge_truncated_waveforms
+    - normalize_inverse_transform_with_sampling_frequency
+    - compute_selection_snr_from_conditioned_published_clean_strain
   synthetic_noise_label: synthetic_gaussian_curve_conditioned
   label_noise_as_real: false
 

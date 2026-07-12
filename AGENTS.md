@@ -78,17 +78,29 @@ generator audit and approving a v2 schema.
 
 ## Current phase gate
 
-Phase 0, Phase 1A, Phase 1A.1, Phase 1B, and the Phase 1B.1 cleanup are
-complete. Review of Phase 2 release candidate 1 requested changes. Phase 2.1
-preregistration hardening produced release candidate 2 on
-`phase2/preregistration`, and automatic review passed. Phase 3A remains
-unauthorized until a separate explicit execution decision.
+Phase 0, Phase 1A, Phase 1A.1, Phase 1B, Phase 1B.1 and Phase 2 through the
+human-approved RC.5 waveform-window amendment are complete.
+
+The frozen scientific design is:
+
+- preregistration version: `1.0.0-rc.5`;
+- preregistration configuration:
+  `configs/statistics/phase2_preregistration.yaml`;
+- canonical configuration hash:
+  `4dde279cf1bea78d1ddbd4fab99d88e88e334c80c180dc7850679736c5e53edb`;
+- scientific schema: `2.0.0-alpha.3`;
+- frozen engineering-smoke schema: `2.0.0-alpha.2`.
+
+RC.5 freezes the 64-second internal waveform construction, 8-second
+conditioned publication and 128-second numerical reference. It does not itself
+authorize execution. Phase 3A remains fail-closed until a separate execution
+authorization names this exact version, hash and merged main commit.
 
 The reviewed Phase 1B engineering artifact is frozen as:
 
 `gwlens-v2-2.0.0-alpha.2-ae86beab1c132682`
 
-Phase 2 is documentation and design only. It may cover literature,
+Phase 2 and its amendments are documentation and design only. They may cover literature,
 identifiability, estimands, priors, observation models, selection effects,
 splits, calibration tests, baselines, ablations, compute estimates, and the
 next execution gate.

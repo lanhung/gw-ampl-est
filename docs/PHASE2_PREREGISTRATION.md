@@ -1,6 +1,6 @@
 # Phase 2 statistical preregistration
 
-Status: `1.0.0-rc.4`, finite source-support contract approved by the human
+Status: `1.0.0-rc.5`, waveform-window contract approved by the human
 project owner; this file alone authorizes no execution.
 The machine-readable authority is
 `configs/statistics/phase2_preregistration.yaml`.
@@ -72,8 +72,23 @@ is forbidden.
 
 ## GW, selection and EM observation models
 
-The baseline is eight seconds at 2048 Hz in H1/L1/V1, IMRPhenomXPHM, and the
-detector-specific synthetic Gaussian curves named and hashed in the config.
+The published baseline remains eight seconds at 2048 Hz in H1/L1/V1,
+IMRPhenomXPHM, and the detector-specific synthetic Gaussian curves named and
+hashed in the config. RC.5 constructs each detector response on a fixed
+64-second frequency grid, uses Bilby's sampling-frequency-normalized inverse
+transform, crops internal seconds 56--64 so merger remains at published second
+6, zeros each 0.25-second edge guard and uses an adjacent 0.25-second raised
+cosine transition. Synthetic selection SNR is recomputed from this exact
+conditioned published clean signal.
+
+A separately generated 128-second response is the numerical reference. Frozen
+boundary criteria require finite products, exact zero guard energy,
+64-to-128-second conditioned relative difference no greater than 0.005,
+outside-crop construction energy no greater than 0.005, and conditioned crop
+energy retention of at least 0.999. Detector-frame chirp time and normalized
+forward/inverse-transform consistency are required evidence. Thresholds cannot
+change after observing RC.5 results.
+
 SEOBNRv4PHM supplies waveform mismatch. PSD mismatch separately uses the
 verified zero-detuned-high-power H1/L1 curve while holding V1 fixed.
 
