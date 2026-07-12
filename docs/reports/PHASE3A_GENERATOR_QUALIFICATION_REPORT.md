@@ -85,3 +85,13 @@ all eight tested square corners/edge midpoints. RC.3 is therefore superseded
 before generation. RC.4 must retain the finite normalized square while labeling
 it a truncated benchmark, with primary/reference classification agreement—not
 absence of multiple imaging—as the boundary criterion.
+
+## RC.4 source-boundary gate
+
+RC.4 replaces the impossible full-cross-section claim with a finite truncated
+benchmark and primary/reference solver agreement. The committed gate evaluated
+eight extreme SIE/EPL cases at 124 unique square-boundary points each. All 992
+comparisons passed: maximum position difference was
+`2.814339822894673e-11 arcsec` and maximum relative magnification difference was
+`4.0990360870580904e-10`. Runtime was 461.36 seconds with 16 process workers.
+This is solver-contract evidence only; no waveform pair or shard was generated.

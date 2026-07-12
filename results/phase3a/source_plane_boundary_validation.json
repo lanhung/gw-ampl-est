@@ -1,0 +1,13 @@
+{
+  "boundary_points_per_case": 124,
+  "case_count": 8,
+  "comparison_count": 992,
+  "failure_count": 0,
+  "failures": [],
+  "maximum_position_difference_arcsec": 2.814339822894673e-11,
+  "maximum_relative_magnification_difference": 4.0990360870580904e-10,
+  "preregistration_version": "1.0.0-rc.4",
+  "status": "passed",
+  "walltime_seconds": 461.36311053298414,
+  "workers": 16
+}
