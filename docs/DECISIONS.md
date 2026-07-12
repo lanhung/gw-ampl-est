@@ -283,3 +283,12 @@ EPL/SIE solver and a deterministic grid search, so shallow-EPL demagnified
 central images are not discarded. A finer, wider union is the frozen reference.
 A failed support audit blocks Phase 3A; implementation may not change these
 tolerances after seeing qualification results.
+
+## D040 — Finite source support is a truncated benchmark
+
+The RC.3 boundary probe showed that steep singular EPL models can remain
+multiply imaged at finite square boundaries. RC.4 therefore makes no claim that
+`[-2.5,2.5)^2` contains the full multiply-imaged cross-section. It is a finite,
+normalized benchmark support. The boundary hard gate is agreement between the
+primary and finer reference solver unions, including image multiplicity and
+positions. This clarification changes no density formula or finite support.

@@ -201,3 +201,12 @@ silently choose a solver search window or approximate caustic area.
   source square a deliberately truncated benchmark support and test primary
   versus reference solver classification on its boundary rather than require
   absence of multiple images there.
+
+## Phase 2.3 finite-support clarification
+
+- RC.3's first extreme probe found steep EPL doubles on every tested finite
+  source-square boundary point. No dataset output was created.
+- RC.4 corrects the claim boundary: the exact square is a deliberately
+  truncated benchmark and does not purport to contain the complete strong-lens
+  cross-section. Primary/reference solver agreement replaces the impossible
+  no-multiple-images-at-boundary requirement.

@@ -1,9 +1,9 @@
 phase: "2"
-preregistration_version: "1.0.0-rc.3"
+preregistration_version: "1.0.0-rc.4"
 scientific_schema_version: "2.0.0-alpha.3"
 frozen_engineering_schema_version: "2.0.0-alpha.2"
 root_seed: 2026071202
-status: human_source_plane_contract_approved
+status: human_finite_source_support_approved
 execution_enabled: false
 scientific_data_generation_authorized: false
 training_authorized: false
@@ -47,10 +47,11 @@ source_plane_measure:
   lens_multiplicity_conditioning: explicit_selection_event
   detection_conditioning: explicit_selection_event
   proposal_evaluation_source_factor: identical_and_cancels_in_importance_ratio
-  cross_section_interpretation: >-
+  support_interpretation: deliberately_truncated_finite_benchmark
+  full_multiply_imaged_cross_section_claim: false
+  conditional_interpretation: >-
     conditional_on_the_multiple_image_event_the_constant_base_density_is_uniform
-    over_the_intersection_of_the_declared_support_and_multiply_imaged_region
-  full_cross_section_claim_requires_support_audit: true
+    over_the_multiply_imaged_subset_inside_the_declared_finite_support
 
 proposal_distribution:
   id: broad_support_v1
@@ -195,7 +196,8 @@ lens_solver:
       maximum_position_difference_arcsec: 1.0e-6
       maximum_relative_magnification_difference: 1.0e-5
       boundary_source_points_per_edge: 32
-      require_no_multiple_images_on_source_support_boundary: true
+      boundary_requirement: identical_primary_reference_classification_and_images
+      require_no_multiple_images_on_source_support_boundary: false
       failure_action: hard_stop_before_microbenchmark
   external_convergence_forward_model:
     id: mass_sheet_transform_v1

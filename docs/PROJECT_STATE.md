@@ -2,12 +2,14 @@
 
 ## Current phase
 
-Phase 1B and Phase 1B.1 are merged and frozen. Phase 3A correctly stopped
-before generation on the incomplete RC.2 source-plane density. The human
-project owner then approved RC.3, now merged into main at
-`8e14d927146ac3b2223343eaca89a323c58d5e13`. Phase 3A may resume only after
-its independent authorization names this commit and RC.3 hash. Full production,
-training, calibration, scientific testing and GWOSC/GWTC remain unauthorized.
+Phase 1B and Phase 1B.1 are merged and frozen. RC.3 resolved the normalized
+source-plane measure but its first Phase 3A probe exposed an invalid
+full-cross-section boundary expectation for steep singular EPL. The human
+project owner approved RC.4's finite truncated benchmark interpretation, now
+merged into main at `c5efd0e3aacfeda65881de5a63e92d72b87fa0bb`. RC.4 remains
+execution-disabled pending an updated separate Phase 3A authorization. Full
+production, training, calibration, scientific testing and GWOSC/GWTC access
+remain unauthorized.
 
 ## Completed
 
@@ -92,6 +94,9 @@ training, calibration, scientific testing and GWOSC/GWTC remain unauthorized.
 - defined the exact RC.3 source-plane preselection measure, normalized angular
   log density, selection-conditioning boundary and deterministic Lenstronomy
   numerical/support-audit contract.
+- corrected the finite source square's claim boundary in RC.4 after a
+  pre-generation steep-EPL probe; boundary validation now requires
+  primary/reference solver agreement rather than absence of multiple images.
 
 ## Not started by design
 
@@ -101,7 +106,6 @@ training, calibration, scientific testing and GWOSC/GWTC remain unauthorized.
 
 ## Next recommended phase
 
-Update the independent Phase 3A authorization to RC.3 commit/hash, then rerun
-all preflight and support gates before the microbenchmark. Full production
-remains gated on measured qualification throughput, solver acceptance,
-dynamics convergence, disk and resume evidence.
+Update the independent Phase 3A authorization to RC.4 commit/hash, then rerun
+all preflight and solver-agreement gates. Full production remains gated on measured qualification
+throughput, solver acceptance, dynamics convergence, disk and resume evidence.
