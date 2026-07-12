@@ -2,11 +2,12 @@
 
 ## Current phase
 
-Phase 1B and Phase 1B.1 are merged and frozen. Phase 2.1 RC.2 was merged. The
-human project owner approved the RC.3 source-plane execution contract on the
-dedicated Phase 2.2 branch. RC.3 remains execution-disabled; its exact commit
-and hash must be named by the separate Phase 3A authorization before generator
-qualification resumes. Full production, training, calibration, scientific
+Phase 1B and Phase 1B.1 are merged and frozen. RC.3 resolved the normalized
+source-plane measure but its first Phase 3A probe exposed an invalid
+full-cross-section boundary expectation for steep singular EPL. The human
+project owner approved RC.4's finite truncated benchmark interpretation on the
+Phase 2.3 branch. RC.4 remains execution-disabled pending an updated separate
+Phase 3A authorization. Full production, training, calibration, scientific
 testing and GWOSC/GWTC access remain unauthorized.
 
 ## Completed
@@ -83,6 +84,9 @@ testing and GWOSC/GWTC access remain unauthorized.
 - defined the exact RC.3 source-plane preselection measure, normalized angular
   log density, selection-conditioning boundary and deterministic Lenstronomy
   numerical/support-audit contract.
+- corrected the finite source square's claim boundary in RC.4 after a
+  pre-generation steep-EPL probe; boundary validation now requires
+  primary/reference solver agreement rather than absence of multiple images.
 
 ## Not started by design
 
@@ -92,7 +96,7 @@ testing and GWOSC/GWTC access remain unauthorized.
 
 ## Next recommended phase
 
-Validate and merge RC.3, then update the independent Phase 3A authorization to
+Validate and merge RC.4, then update the independent Phase 3A authorization to
 its exact commit and canonical hash. Qualification must rerun all preflight and
-support gates. Full production remains gated on measured qualification
+solver-agreement gates. Full production remains gated on measured qualification
 throughput, solver acceptance, dynamics convergence, disk and resume evidence.
