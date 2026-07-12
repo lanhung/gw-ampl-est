@@ -317,3 +317,17 @@ A 128-second construction is the frozen numerical reference. The reviewed
 0.005 relative-difference and outside-crop limits, 0.999 energy-retention floor,
 exact zero guards and transform-normalization check are disclosed post-RC.4
 choices and may not be changed after RC.5 execution begins.
+
+## D044 — Qualification parallelism is shard-deterministic
+
+The 4,096-pair run assigns each of 32 shards an interleaved global attempt-ID
+stream `shard_index + 32 * local_attempt`. Sixteen process workers execute these
+streams without sharing Bilby or Galkin global RNG state. Accepted indices and
+all scientific/observation seeds are fixed by shard, not scheduling. The same
+shard can therefore be reproduced independently, while complete shard
+directories remain immutable across interruption and resume.
+
+The 32-pair microbenchmark uses eight analogous process streams and is excluded
+from the final dataset. Its measured aggregate throughput is projected to the
+reviewed 16-worker qualification configuration; no unmeasured GPU acceleration
+or physics-fidelity reduction is credited.

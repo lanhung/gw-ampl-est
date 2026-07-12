@@ -2,7 +2,12 @@ import numpy as np
 
 from gwlens_mm.physics.quantities import ImageParity, MorseClass
 from gwlens_mm.physics.solver import PhysicalImage
-from gwlens_mm.production.gw import ImageProjection, select_earliest_detectable_images
+from gwlens_mm.production.gw import (
+    ImageProjection,
+    detector_frame_newtonian_chirp_time_seconds,
+    raised_cosine_guard_window,
+    select_earliest_detectable_images,
+)
 
 
 def projection(identifier: str, arrival: float, snrs: tuple[float, float, float]):
@@ -35,3 +40,25 @@ def test_selection_rejects_when_fewer_than_two_images_pass() -> None:
     )
     assert result.selected is None
     assert result.rejection_reason == "fewer_than_two_images_pass_synthetic_selection"
+
+
+def test_rc5_conditioning_window_has_exact_guards_and_symmetric_transition() -> None:
+    window = raised_cosine_guard_window(16384, 512, 512)
+    assert window.shape == (16384,)
+    assert np.all(window[:512] == 0.0)
+    assert np.all(window[-512:] == 0.0)
+    assert np.all(window[1024:-1024] == 1.0)
+    assert np.all(np.diff(window[512:1024]) > 0.0)
+    assert np.array_equal(window[512:1024], window[-1024:-512][::-1])
+
+
+def test_rc5_conditioning_window_rejects_invalid_geometry() -> None:
+    for values in ((0, 1, 1), (10, 0, 1), (10, 1, 0), (8, 2, 2)):
+        with np.testing.assert_raises(ValueError):
+            raised_cosine_guard_window(*values)
+
+
+def test_detector_frame_chirp_time_is_positive_and_decreases_with_mass() -> None:
+    low_mass = detector_frame_newtonian_chirp_time_seconds(30.0, 15.0, 20.0)
+    high_mass = detector_frame_newtonian_chirp_time_seconds(320.0, 320.0, 20.0)
+    assert low_mass > high_mass > 0.0

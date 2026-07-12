@@ -222,6 +222,11 @@ silently choose a solver search window or approximate caustic area.
   rather than Bilby's `infft`. At 2048 Hz this would suppress clean strain by a
   factor of 2048 relative to stored noise. This must be corrected under a new
   reviewed waveform contract before any official generation.
+- RC.5 corrects this before execution by using Bilby's normalized `infft`, a
+  fixed 64-second construction, conditioned 8-second publication and
+  stored-clean selection SNR. Precommit AutoDL diagnostics passed all four
+  128-second reference comparisons; these remain non-authoritative until rerun
+  on the clean generator commit.
 
 ## Phase 2.3 finite-support clarification
 

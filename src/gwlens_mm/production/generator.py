@@ -12,7 +12,7 @@ import numpy as np
 from ..physics.lenstronomy_adapter import LenstronomyAdapter
 from ..physics.quantities import Magnification, PrimaryDefinition
 from ..physics.solver import apply_mass_sheet_transform
-from ..provenance import SEED_DOMAINS, configuration_hash, derive_seed
+from ..provenance import configuration_hash, derive_seed
 from ..schema import (
     DETECTOR_SLOTS,
     ArrayProductRole,
@@ -210,9 +210,9 @@ class QualificationGenerator:
             "availability_cells"
         ][em_cell]
         kinematics = None
+        kinematics_seed = derive_seed(self.root_seed, "stellar_kinematics", system_id)
         started = time.perf_counter()
         if "velocity_dispersion" in set(cell_specification["modalities"]):
-            kinematics_seed = derive_seed(self.root_seed, "stellar_kinematics", system_id)
             effective_radius, anisotropy_ratio = sample_kinematics_nuisance(
                 np.random.default_rng(kinematics_seed)
             )
@@ -296,20 +296,57 @@ class QualificationGenerator:
             None,
         )
         waveform_parameters = self.waveforms.source_parameters(draw)
+        seed_hierarchy = {
+            "lens": lens_seed,
+            "source": source_seed,
+            "pair_selection": derive_seed(self.root_seed, "pair_selection", pair_id),
+            "em_measurement_noise": em_seed,
+            "missing_modalities": derive_seed(
+                self.root_seed, "missing_modalities", system_id
+            ),
+            "stellar_kinematics": kinematics_seed,
+            "augmentation": derive_seed(self.root_seed, "augmentation", pair_id),
+        }
+        seed_hierarchy.update(
+            {
+                f"detector_noise:{projection.image.image_id}:{detector}": derive_seed(
+                    self.root_seed,
+                    "detector_noise",
+                    pair_id,
+                    projection.image.image_id,
+                    detector,
+                )
+                for projection in selected
+                for detector in DETECTOR_SLOTS
+            }
+        )
         record = V2Record(
             str(self.config["schema_version"]),
             pair,
             SourceTruth(
                 float(waveform_parameters["luminosity_distance"]),
                 {
-                    "mass_1_source_msun": float(draw.source_parameters["mass_1_source"]),
-                    "mass_2_source_msun": float(draw.source_parameters["mass_2_source"]),
-                    "a_1": float(draw.source_parameters["a_1"]),
-                    "a_2": float(draw.source_parameters["a_2"]),
+                    key: float(draw.source_parameters[key])
+                    for key in (
+                        "mass_1_source",
+                        "mass_2_source",
+                        "mass_ratio",
+                        "a_1",
+                        "a_2",
+                        "tilt_1",
+                        "tilt_2",
+                        "phi_12",
+                        "phi_jl",
+                    )
                 },
                 {
                     key: float(draw.source_parameters[key])
-                    for key in ("ra", "dec", "psi", "theta_jn")
+                    for key in ("ra", "dec", "psi", "theta_jn", "phase")
+                }
+                | {
+                    "source_redshift": float(draw.z_source),
+                    "mass_1_detector": float(waveform_parameters["mass_1"]),
+                    "mass_2_detector": float(waveform_parameters["mass_2"]),
                 },
                 str(self.config["gw"]["waveform"]),
                 importlib.metadata.version("lalsuite"),
@@ -319,7 +356,7 @@ class QualificationGenerator:
                     **{
                         key: float(value)
                         for key, value in draw.lens_parameters.items()
-                        if key not in {"z_lens", "z_source", "external_convergence"}
+                        if key != "external_convergence"
                     },
                     "source_beta_x_arcsec": transformed_source[0],
                     "source_beta_y_arcsec": transformed_source[1],
@@ -342,7 +379,7 @@ class QualificationGenerator:
                 int(self.config["gw"]["sample_count"]),
                 (selected[0].segment_start, selected[1].segment_start),
                 observations.timing,
-                "bilby_psd_whiten_v1",
+                str(self.config["gw"]["preprocessing_version"]),
                 "detector_specific_synthetic_gaussian_curve_conditioned",
                 None,
                 None,
@@ -359,10 +396,7 @@ class QualificationGenerator:
                     name: importlib.metadata.version(name)
                     for name in ("numpy", "bilby", "lalsuite", "lenstronomy", "astropy")
                 },
-                {
-                    domain: derive_seed(self.root_seed, domain, pair_id)
-                    for domain in SEED_DOMAINS
-                },
+                seed_hierarchy,
                 transformed.solver_name,
                 transformed.solver_version,
                 str(self.config["gw"]["waveform"]),

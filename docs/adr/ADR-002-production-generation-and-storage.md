@@ -59,6 +59,20 @@ of a complete shard is a hard failure; it is not silently regenerated under the
 same dataset ID. Recovery requires retaining evidence and beginning a reviewed
 new run identity if byte identity cannot be proven.
 
+Qualification uses 16 process workers and one owned generator/RNG context per
+worker. Shard `s` draws attempt IDs `s + 32 k`, so the 32 streams are disjoint,
+unbounded and deterministic regardless of scheduling. Accepted indices remain
+the fixed contiguous range `128 s` through `128 s + 127`; therefore IDs, EM
+cells, seeds and shard membership do not depend on worker completion order.
+Microbenchmark workers use the analogous eight-way interleaving and publish no
+qualification shard.
+
+The intentional interruption target is exactly the immutable prefix of shards
+0--2. Resume verifies their manifests and complete tree hashes before launching
+any other shard, and verifies those hashes again before publication. A partial
+directory or a journal without its complete shard is retained and stops the run;
+it is never silently deleted or regenerated under the same dataset ID.
+
 ## Memory and disk bounds
 
 At most one generated pair plus one 128-pair shard writer buffer may be resident

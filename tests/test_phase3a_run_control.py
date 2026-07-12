@@ -41,3 +41,16 @@ def test_attempt_journal_rejects_gap_and_duplicate_system(tmp_path: Path) -> Non
         duplicate = AttemptRecord(**{**attempt(1).__dict__, "physical_system_id": "system-0"})
         with pytest.raises(ValueError, match="already exists"):
             journal.append(duplicate)
+
+
+def test_attempt_journal_supports_deterministic_interleaved_worker_ids(
+    tmp_path: Path,
+) -> None:
+    path = tmp_path / "worker-03.jsonl"
+    with AttemptJournal(path, first_attempt_id=3, attempt_stride=8) as journal:
+        assert journal.next_attempt_id == 3
+        journal.append(AttemptRecord(**{**attempt(3).__dict__, "attempt_id": 3}))
+        assert journal.next_attempt_id == 11
+        journal.append(AttemptRecord(**{**attempt(11).__dict__, "attempt_id": 11}))
+    with AttemptJournal(path, first_attempt_id=3, attempt_stride=8) as journal:
+        assert journal.next_attempt_id == 19

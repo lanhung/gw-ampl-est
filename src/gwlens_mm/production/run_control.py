@@ -53,17 +53,28 @@ class AttemptRecord:
 class AttemptJournal:
     """Durable JSONL journal that refuses non-contiguous or changed resume."""
 
-    def __init__(self, path: Path) -> None:
+    def __init__(
+        self,
+        path: Path,
+        *,
+        first_attempt_id: int = 0,
+        attempt_stride: int = 1,
+    ) -> None:
+        if first_attempt_id < 0 or attempt_stride <= 0:
+            raise ValueError("attempt journal sequence must be nonnegative and increasing")
         path.parent.mkdir(parents=True, exist_ok=True)
         self.path = path
-        self._last_id = -1
+        self._first_attempt_id = first_attempt_id
+        self._attempt_stride = attempt_stride
+        self._last_id = first_attempt_id - attempt_stride
         self._seen_systems: set[str] = set()
         if path.exists():
             for line_number, line in enumerate(path.read_text(encoding="utf-8").splitlines()):
                 data = json.loads(line)
                 record = AttemptRecord(**data)
                 record.validate()
-                if record.attempt_id != line_number:
+                expected_id = first_attempt_id + line_number * attempt_stride
+                if record.attempt_id != expected_id:
                     raise ValueError("attempt journal IDs are not contiguous")
                 if record.physical_system_id in self._seen_systems:
                     raise ValueError("attempt journal contains duplicate physical-system IDs")
@@ -73,7 +84,7 @@ class AttemptJournal:
 
     @property
     def next_attempt_id(self) -> int:
-        return self._last_id + 1
+        return self._last_id + self._attempt_stride
 
     def append(self, record: AttemptRecord) -> None:
         record.validate()

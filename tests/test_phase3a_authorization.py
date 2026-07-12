@@ -3,12 +3,14 @@ from pathlib import Path
 import pytest
 import yaml
 
+from gwlens_mm.config import load_yaml
 from gwlens_mm.production.authorization import load_qualification_authorization
 from gwlens_mm.provenance import ArtifactChecksum, DatasetManifest
 
 ROOT = Path(__file__).resolve().parents[1]
 AUTH = ROOT / "configs/execution/phase3a_qualification_authorization.yaml"
-AUTH_COMMIT = "81e5a6bcbfed5f67f1ff511593f8dc4153485e5e"
+AUTH_COMMIT = "bba0cdd6a750ff367674a85b8722432e613586d8"
+CONFIG = ROOT / "configs/data/phase3a_qualification.yaml"
 
 
 def test_phase3a_authorization_matches_frozen_preregistration() -> None:
@@ -21,6 +23,29 @@ def test_phase3a_authorization_matches_frozen_preregistration() -> None:
     assert authorization.accepted_pair_count == 4096
     assert authorization.shard_pair_count == 128
     assert authorization.shard_count == 32
+
+
+def test_phase3a_execution_config_matches_rc5_and_bounded_parallel_plan() -> None:
+    config = load_yaml(CONFIG)
+    assert config["preregistration"] == {
+        "path": "configs/statistics/phase2_preregistration.yaml",
+        "version": "1.0.0-rc.5",
+        "canonical_hash": (
+            "4dde279cf1bea78d1ddbd4fab99d88e88e334c80c180dc7850679736c5e53edb"
+        ),
+        "base_main_commit": "80167ea690914bb18be1fd1994b4dc626490e146",
+    }
+    assert config["authorization"]["authorizing_git_commit"] == AUTH_COMMIT
+    assert config["accepted_pair_count"] == 4096
+    assert config["shard_count"] == 32
+    assert config["pairs_per_shard"] == 128
+    assert config["microbenchmark"]["accepted_pair_count"] == 32
+    assert config["microbenchmark"]["worker_processes"] == 8
+    assert config["execution"]["qualification_worker_processes"] == 16
+    assert config["execution"]["attempt_id_stride"] == 32
+    assert config["interruption_test"]["stop_after_complete_shards"] == 3
+    assert config["resource_gates"]["maximum_output_bytes"] == 10_000_000_000
+    assert config["resource_gates"]["maximum_projected_walltime_hours"] == 24
 
 
 def test_phase3a_authorization_fails_closed_on_training(tmp_path: Path) -> None:

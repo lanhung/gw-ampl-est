@@ -1,4 +1,4 @@
-"""Frozen RC.4 proposal/evaluation population sampling and exact log densities."""
+"""Frozen RC.5 proposal/evaluation population sampling and exact log densities."""
 
 from __future__ import annotations
 

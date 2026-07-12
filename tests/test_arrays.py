@@ -32,6 +32,16 @@ def test_available_slot_requires_noisy_clean_noise_identity():
         validate_strain_array_semantics(noisy, clean, noise, mask)
 
 
+def test_physical_strain_scale_corruption_cannot_hide_behind_absolute_tolerance():
+    mask = np.ones((2, 3), dtype=bool)
+    clean = np.full((2, 3, 8), 2.0e-22, dtype=np.float32)
+    noise = np.full_like(clean, 5.0e-23)
+    noisy = (clean + noise).astype(np.float32)
+    noisy[0, 0, 0] = np.nextafter(noisy[0, 0, 0], np.float32(np.inf))
+    with pytest.raises(ValueError, match=r"noisy = clean \+ noise"):
+        validate_strain_array_semantics(noisy, clean, noise, mask)
+
+
 def test_nan_is_not_a_missing_detector_representation():
     noisy, clean, noise, mask = valid_products()
     noisy[0, 2, 0] = np.nan

@@ -2,17 +2,16 @@
 
 ## Current phase
 
-Phase 3A is blocked before microbenchmark by the frozen RC.4 waveform-boundary
-gate. Source-boundary solver agreement passed, but all four 8-second waveform
-fixtures failed the predeclared 32-second-reference and edge-energy criteria.
-No qualification shard or publication exists. A reviewed waveform-window
-revision is required before Phase 3A restarts. Full production, training,
-calibration, scientific testing and GWOSC/GWTC remain unauthorized.
-
-A non-authoritative RC.5 waveform-window proposal now records the diagnosed
-frequency-grid behavior, the clean-strain inverse-transform normalization bug,
-and an exact 64-second construction/128-second reference candidate for human
-review. It does not reopen execution.
+Human review approved RC.5, now merged to main at
+`80167ea690914bb18be1fd1994b4dc626490e146`, with canonical hash
+`4dde279cf1bea78d1ddbd4fab99d88e88e334c80c180dc7850679736c5e53edb`.
+The independent Phase 3A authorization is frozen at
+`bba0cdd6a750ff367674a85b8722432e613586d8`. Production-generator,
+parallel-shard, resume, streaming-validation and numerical-gate code is
+implemented and awaiting a clean pre-execution code freeze and formal gate
+rerun. No official microbenchmark pair, qualification shard or publication
+exists. Full production, training, calibration, scientific testing and
+GWOSC/GWTC remain unauthorized.
 
 ## Completed
 
@@ -109,8 +108,8 @@ review. It does not reopen execution.
 
 ## Next recommended phase
 
-Review the waveform-boundary failure and freeze a new duration/placement and
-numerical acceptance contract. The candidate is documented in
-`docs/reports/PHASE3A_WAVEFORM_WINDOW_CONTRACT_PROPOSAL.md`. Then issue a new
-Phase 3A authorization and rerun every physics gate. Full production remains
-closed.
+Freeze the exact executable generator commit, recreate a clean AutoDL code copy,
+and rerun every formal preflight/physics/numerical gate. Run the 32-pair
+microbenchmark only if they pass, and proceed to the reviewed interruption and
+4,096-pair run only if every microbenchmark resource gate passes. Full
+production remains closed.
