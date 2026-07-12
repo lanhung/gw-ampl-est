@@ -46,6 +46,12 @@ def test_allowlisted_observations_pass(policy):
         "external_convergence_true",
         "kappa_ext_true",
         "stellar_anisotropy_true",
+        "proposal_component_index",
+        "component_log_densities",
+        "evaluation_log_probability",
+        "log_importance_weight",
+        "normalized_training_weight",
+        "proposal_rng_seed",
     ],
 )
 def test_forbidden_exact_and_alias_fields_fail_closed(policy, field):

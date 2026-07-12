@@ -1,0 +1,61 @@
+{
+  "accepted_pair_generator_called": false,
+  "component_counts": {
+    "low_z": 19920,
+    "narrow": 19902,
+    "rc5_broad": 39574,
+    "wide": 120604
+  },
+  "deterministic_replay_sha256": "02c1d1dae179703478b7c2250385912cf5c09fdb262b405f75440c0bac46703d",
+  "draw_count": 200000,
+  "failure_reasons": [
+    "overall_relative_ess_below_frozen_minimum",
+    "lens_family_relative_ess_below_frozen_minimum"
+  ],
+  "finite_fraction": {
+    "log_p": 1.0,
+    "log_q": 1.0,
+    "weight": 1.0
+  },
+  "frozen_thresholds": {
+    "mean_weight_bounds": [
+      0.98,
+      1.02
+    ],
+    "overall_relative_ess_minimum": 0.5,
+    "per_lens_family_relative_ess_minimum": 0.4
+  },
+  "log_weight_quantiles": {
+    "0.0": -15.528419346719687,
+    "0.01": -9.61066441054541,
+    "0.05": -7.470749297482835,
+    "0.5": -2.438036989273627,
+    "0.95": 1.6286633549277583,
+    "0.99": 2.7152821843862487,
+    "1.0": 4.849682763044177
+  },
+  "maximum_normalized_weight": 0.0006318993798256598,
+  "mean_unnormalized_importance_weight": 1.0104446718718243,
+  "overall_relative_ess": 0.09201560401993437,
+  "proposal_ab_qualification_run": false,
+  "proposal_configuration_hash": "e4e249da3f177202960e8a6f6c0c347a25aa572abb818b6d0e172469a75e45b5",
+  "proposal_version": "proposal-v2-exact-mixture-1.0.0-rc.1",
+  "relative_ess_by_lens_family": {
+    "epl_external_shear": 0.0743262794330093,
+    "sie_external_shear": 0.11969200642236003
+  },
+  "replay_byte_identical": true,
+  "seed": 2026071204,
+  "status": "failed_hard_stop",
+  "support_hole_count": 0,
+  "waveform_pair_count": 0,
+  "weight_quantiles": {
+    "0.0": 1.8034045664940425e-07,
+    "0.01": 0.00006701028716868745,
+    "0.05": 0.0005695014109979606,
+    "0.5": 0.08733211720455385,
+    "0.95": 5.097057207655771,
+    "0.99": 15.108872959324875,
+    "1.0": 127.6998723007896
+  }
+}

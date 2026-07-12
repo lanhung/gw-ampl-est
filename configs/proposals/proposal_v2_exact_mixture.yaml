@@ -1,0 +1,169 @@
+phase: "3C-0"
+proposal_version: "proposal-v2-exact-mixture-1.0.0-rc.1"
+status: implementation_only_execution_disabled
+root_seed: 2026071204
+
+authorization:
+  path: configs/execution/phase3c0_proposal_v2_design_authorization.yaml
+  waveform_pair_generation_authorized: false
+  proposal_ab_qualification_authorized: false
+  scientific_data_generation_authorized: false
+  model_training_authorized: false
+  gwosc_gwtc_access_authorized: false
+
+frozen_scientific_target:
+  adaptive_preregistration_version: "1.1.0-rc.3"
+  adaptive_preregistration_path: configs/statistics/adaptive_scientific_production_preregistration.yaml
+  adaptive_preregistration_hash: 6082475631539d3069edacc52f41b37fb8fe725ccd7c6bc9980cc3008795a927
+  parent_preregistration_version: "1.0.0-rc.5"
+  parent_preregistration_path: configs/statistics/phase2_preregistration.yaml
+  parent_preregistration_hash: 4dde279cf1bea78d1ddbd4fab99d88e88e334c80c180dc7850679736c5e53edb
+  evaluation_distribution_id: balanced_literature_informed_benchmark_v1
+  evaluation_target_modified: false
+
+density_measure:
+  stage: pre_lens_multiplicity_and_detection_selection
+  coordinates:
+    - lens_family
+    - z_lens
+    - z_source
+    - einstein_radius_arcsec
+    - axis_ratio
+    - position_angle_rad
+    - shear_amplitude
+    - shear_angle_rad
+    - epl_density_slope_when_applicable
+    - external_convergence
+    - source_position_arcsec_x
+    - source_position_arcsec_y
+    - primary_mass_source_frame_msun
+    - mass_ratio
+    - spin_magnitude_1
+    - spin_magnitude_2
+    - spin_tilt_1
+    - spin_tilt_2
+    - spin_azimuth_12
+    - spin_azimuth_jl
+    - inclination
+    - orbital_phase
+    - right_ascension
+    - declination
+    - polarization
+  multiple_imaging_conditioning: false
+  detection_conditioning: false
+  accepted_pair_conditioning: false
+
+mixture:
+  density_evaluation: stable_logsumexp
+  components:
+    rc5_broad:
+      weight: 0.2
+      source_plane: uniform_rc5
+      source_redshift: uniform_rc5
+      broad_support_safety_component: true
+    wide:
+      weight: 0.6
+      source_plane: truncated_normal_sigma_1p5
+      source_redshift: uniform_rc5
+      broad_support_safety_component: false
+    narrow:
+      weight: 0.1
+      source_plane: truncated_normal_sigma_0p8
+      source_redshift: uniform_rc5
+      broad_support_safety_component: false
+    low_z:
+      weight: 0.1
+      source_plane: truncated_normal_sigma_1p5
+      source_redshift: scaled_beta_1_2
+      broad_support_safety_component: false
+
+source_plane:
+  lower: -2.5
+  upper: 2.5
+  lower_inclusive: true
+  upper_inclusive: false
+  wide_sigma: 1.5
+  narrow_sigma: 0.8
+  angular_jacobian_log_formula: -2*log(einstein_radius_arcsec)
+
+low_redshift:
+  z_max: 3.0
+  z_min_formula: max(0.5,z_lens+0.1)
+  beta_alpha: 1.0
+  beta_beta: 2.0
+  support: half_open
+  invalid_range_action: hard_fail
+
+inherited_rc5_factors:
+  lens_family: true
+  lens_parameters_except_declared_changes: true
+  bbh_source_masses: true
+  spins_and_sky_orientation: true
+  external_convergence: true
+  em_cell_assignment: true
+  noise_and_detector_provenance: true
+
+normalization_tests:
+  quadrature_points: 200001
+  absolute_tolerance: 1.0e-6
+  logsumexp_absolute_tolerance: 1.0e-12
+  support_boundary_tolerance: 0.0
+
+latent_preflight:
+  draw_count: 200000
+  seed: 2026071204
+  replay_seed: 2026071204
+  mean_weight_minimum: 0.98
+  mean_weight_maximum: 1.02
+  overall_relative_ess_minimum: 0.50
+  per_lens_family_relative_ess_minimum: 0.40
+  all_log_densities_finite: true
+  support_holes_allowed: false
+  deterministic_replay_required: true
+  post_failure_parameter_tuning_authorized: false
+
+privileged_provenance:
+  - proposal_component_index
+  - component_log_densities
+  - proposal_log_probability
+  - evaluation_log_probability
+  - log_importance_weight
+  - normalized_training_weight
+  - proposal_rng_seed
+
+future_ab_skeleton:
+  dry_run_only: true
+  arm_count: 2
+  accepted_pairs_per_arm: 512
+  total_accepted_pairs: 1024
+  blocks_per_arm: 16
+  accepted_pairs_per_block: 32
+  block_order: deterministic_alternating_with_even_odd_reversal
+  execution_order: sequential_arm_blocks
+  distinct_dataset_ids: true
+  distinct_arm_manifests_and_checksums: true
+  one_parent_comparison_manifest: true
+  identical_environment_workers_and_telemetry: true
+  caps:
+    maximum_attempts_per_arm: 1000000
+    maximum_active_hours_per_arm: 6.0
+    maximum_accepted_pairs_per_arm: 512
+    maximum_accepted_pairs_total: 1024
+    candidate_cap_action: fail_or_inconclusive_retain_rc5
+    control_cap_action: invalidate_comparison_and_require_review
+    partial_or_capped_block_omission_authorized: false
+  telemetry:
+    - active_wall_seconds_per_block
+    - attempts_per_block
+    - accepted_pairs_per_block
+    - cpu_seconds
+    - process_tree_or_cgroup_peak_rss
+    - time_integrated_cpu_utilization
+    - lens_solver_time
+    - proposal_sample_time
+    - proposal_log_density_time
+    - waveform_time
+    - kinematics_time
+    - storage_and_checksum_time
+    - peak_staging_bytes
+    - environment_identity

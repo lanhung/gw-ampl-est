@@ -292,3 +292,17 @@ silently choose a solver search window or approximate caustic area.
 - No proposal was implemented, no pair was generated and no resource was
   consumed. RC.3 resolves the design before PR review by freezing 512 pairs per
   arm, 1,024 total, distinct arm identities and a double-RC.5 resource gate.
+
+## Phase 3C-0 proposal-v2 latent ESS hard failure
+
+- Exact proposal-v2 RC.1 produced finite log densities/weights for all 200,000
+  latent draws, mean importance weight 1.01044, zero support holes and
+  byte-identical replay.
+- Overall relative ESS was 0.09202 against 0.50. SIE/EPL ESS was 0.11969/0.07433
+  against 0.40. The frozen gate therefore failed before any waveform pair or
+  A/B artifact was created.
+- The failure is consistent with leaving the broad RC.5 lens-factor proposal
+  unchanged while targeting concentrated evaluation distributions. This is a
+  diagnostic explanation, not permission to retune the frozen mixture.
+- Proposal-v2 RC.1 remains unauthorized and RC.5 remains the fallback. A new
+  reviewed proposal version is required for further work.
