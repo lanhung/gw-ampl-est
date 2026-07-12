@@ -251,3 +251,44 @@ silently choose a solver search window or approximate caustic area.
   commit and force a full rerun.
 - These reporting/tooling limitations did not alter the 4,096-pair validation,
   byte-identical resume result, 10 GB output gate or 100 GB free-space gate.
+
+## Phase 3B design uncertainties and deferred evidence
+
+- RC.5 resource projections assume linear scaling of Phase 3A attempts, active
+  time and published bytes. They are planning estimates, not measured
+  scientific-production performance.
+- The proposal-v2 2× scenario is explicitly hypothetical. No caustic-aware
+  proposal was implemented or run, and its ESS thresholds have no execution
+  result.
+- Future scientific IDs and manifest commitments are specified by deterministic
+  assignment rules but are not materialized in Phase 3B.
+- The proposed 91-event catalog size is not treated as immutable. Release,
+  inclusion rules and event-list hash remain future human-review inputs.
+- No model exists for the newly frozen learning-curve thresholds; their first
+  use requires separate training authorization and cannot inspect final tests.
+
+## Phase 3B RC.1 statistical request changes
+
+- RC.1 listed 49,152 as a possible final total even though its first stopping
+  decision required the 32k fit. No execution occurred. RC.2 removes the
+  impossible 16k lock and retains 16k only as probe evidence.
+- RC.1 recorded proposal/evaluation weights but did not freeze how a model
+  trained under a changed proposal would retain the evaluation posterior.
+  No model was trained. RC.2 requires the full-latent importance-weighted
+  conditional likelihood and direct-target validation/calibration/SBC/IID.
+- RC.1 said final accepted IDs would be frozen before materialization, although
+  selection history determines them. No final data existed or were viewed.
+  RC.2 instead provides a deterministic generation commitment template whose
+  placeholder must be finalized and hashed before training.
+- RC.1 allowed acceptance or throughput to pass proposal-v2. No proposal was
+  implemented or tested. RC.2 makes a 2× throughput lower confidence bound
+  mandatory and requires an executable density specification before any gate.
+
+## Phase 3B.1 A/B count ambiguity
+
+- RC.2 declared a 512-pair proposal qualification while its two-arm design
+  separately required 512 accepted pairs in each arm. That would make the
+  actual total 1,024 and could exceed a literal 512-pair authorization.
+- No proposal was implemented, no pair was generated and no resource was
+  consumed. RC.3 resolves the design before PR review by freezing 512 pairs per
+  arm, 1,024 total, distinct arm identities and a double-RC.5 resource gate.

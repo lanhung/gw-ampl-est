@@ -1,0 +1,114 @@
+{
+  "commitment_status": "design_template_unfinalized",
+  "must_be_finalized_and_hashed_before_training": true,
+  "accepted_ids_known_before_materialization": false,
+  "future_scientific_generator_commit": {
+    "value": null,
+    "required_length": 40,
+    "resolution_requires_separate_human_authorization": true
+  },
+  "preregistration": {
+    "version": "1.1.0-rc.3",
+    "path": "configs/statistics/adaptive_scientific_production_preregistration.yaml",
+    "canonical_hash": "6082475631539d3069edacc52f41b37fb8fe725ccd7c6bc9980cc3008795a927",
+    "parent_version": "1.0.0-rc.5",
+    "parent_hash": "4dde279cf1bea78d1ddbd4fab99d88e88e334c80c180dc7850679736c5e53edb"
+  },
+  "schema_version": "2.0.0-alpha.3",
+  "root_seed": 2026071203,
+  "split_specific_seed_domains": {
+    "iid_test": "adaptive_rc2_iid_test_v1",
+    "balanced_tail_diagnostic": "adaptive_rc2_balanced_tail_v1",
+    "cross_family_misspecification_test": "adaptive_rc2_cross_family_v1",
+    "parameter_region_ood": "adaptive_rc2_parameter_ood_v1",
+    "waveform_mismatch_test": "adaptive_rc2_waveform_mismatch_v1",
+    "psd_mismatch_test": "adaptive_rc2_psd_mismatch_v1"
+  },
+  "attempt_stream_namespaces": {
+    "rule": "phase3b-final-evaluation/{split_name}/{stream_index}",
+    "namespace_version": "adaptive_final_attempt_stream_v1",
+    "cross_split_reuse_forbidden": true
+  },
+  "attempt_id_allocation_rule": {
+    "formula": "stream_index + stream_count * local_attempt_index",
+    "local_attempt_index_origin": 0,
+    "stream_count": null,
+    "stream_count_must_be_frozen_before_materialization": true
+  },
+  "accepted_rank_allocation_rule": {
+    "ordering": "ascending_attempt_id_within_split",
+    "accepted_rank_origin": 0,
+    "include_when": "full_declared_solver_and_selection_contract_accepts_attempt",
+    "stop_when": "accepted_rank_equals_split_count_minus_one"
+  },
+  "split_counts": {
+    "iid_test": 8192,
+    "balanced_tail_diagnostic": 4096,
+    "cross_family_misspecification_test": 2048,
+    "parameter_region_ood": 2048,
+    "waveform_mismatch_test": 2048,
+    "psd_mismatch_test": 2048,
+    "total": 20480
+  },
+  "distribution_ids": {
+    "iid_test": {
+      "proposal": "direct_evaluation_generative_distribution_v1",
+      "evaluation": "balanced_literature_informed_benchmark_v1"
+    },
+    "balanced_tail_diagnostic": {
+      "proposal": "balanced_tail_diagnostic_rc5",
+      "evaluation": "balanced_tail_diagnostic_rc5"
+    },
+    "cross_family_misspecification_test": {
+      "proposal": "cross_family_misspecification_rc5",
+      "evaluation": "cross_family_misspecification_rc5"
+    },
+    "parameter_region_ood": {
+      "proposal": "parameter_region_ood_rc5",
+      "evaluation": "parameter_region_ood_rc5"
+    },
+    "waveform_mismatch_test": {
+      "proposal": "waveform_mismatch_seobnrv4phm_rc5",
+      "evaluation": "waveform_mismatch_seobnrv4phm_rc5"
+    },
+    "psd_mismatch_test": {
+      "proposal": "psd_mismatch_zero_det_high_p_rc5",
+      "evaluation": "psd_mismatch_zero_det_high_p_rc5"
+    }
+  },
+  "version_identities": {
+    "waveform_baseline": "IMRPhenomXPHM",
+    "waveform_mismatch": "SEOBNRv4PHM",
+    "waveform_window_contract": "fixed_long_grid_crop_and_condition_v1",
+    "baseline_psd_observation": "gaussian_curve_conditioned_h1_l1_v1_v1",
+    "em_observation": "balanced_eight_cell_benchmark_v2",
+    "selection": "synthetic_matched_filter_pair_selection_v1",
+    "source_plane": "dimensionless_einstein_square_preselection_v1"
+  },
+  "grouping_rules": {
+    "group_disjoint_from_training_and_development": true,
+    "disjoint_identifiers": [
+      "source_id",
+      "lens_id",
+      "physical_system_id",
+      "pair_id",
+      "noise_segment_id",
+      "augmentation_parent_id"
+    ],
+    "phase3a_dataset_id_forbidden": "gwlens-v2-2.0.0-alpha.3-7081b2e8be3a84e1",
+    "one_stored_gaussian_noise_realization_per_physical_system": true
+  },
+  "expected_manifest_validation_rules": [
+    "generator_commit_matches_finalized_commitment",
+    "preregistration_hash_matches",
+    "root_and_split_seed_domains_match",
+    "attempt_stream_and_accepted_rank_replay_matches",
+    "actual_accepted_ids_are_deterministic_outputs_not_predeclared_inputs",
+    "split_counts_match_exactly",
+    "all_group_identifiers_are_unique_and_disjoint",
+    "phase3a_ids_are_absent",
+    "distribution_and_version_identities_match",
+    "artifact_checksums_and_byte_counts_verify",
+    "final_evaluation_remained_sealed_during_development"
+  ]
+}

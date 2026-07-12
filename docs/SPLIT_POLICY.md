@@ -56,3 +56,31 @@ and record the split in the manifest. Row-wise random splitting is prohibited.
 The mapping and root seed are frozen with the dataset configuration. Creating
 an OOD split is a population-design decision, not a later reassignment of
 inconvenient test cases.
+
+## Adaptive-production overlay (`1.1.0-rc.2`)
+
+The adaptive plan assigns all future groups before materialization and uses
+strict cumulative rank cutoffs for 16,384, 32,768 and 65,536 training systems.
+The 16,384 members are a probe subset, not a final lock; only 32,768 and 65,536
+are lockable sizes.
+The 12,288 development systems and 20,480 final systems never change when a
+training rung grows.
+
+Only the 6,144 validation systems may inform learning-curve stopping or
+architecture selection. Calibration-fit and SBC remain mutually disjoint and
+cannot inform scale. Final IID, tail, cross-family, parameter OOD, waveform and
+PSD sets are sealed until training size and architecture lock; none may inform
+stopping, proposal tuning or calibration fitting. Before training, a hashed
+generation commitment freezes seed/attempt domains, allocation rules and
+validators. Concrete accepted IDs are verified only after deterministic
+materialization because they cannot be known before selection.
+
+The Phase 3A dataset ID and all qualification ID prefixes are permanently
+forbidden from scientific assignments. Noise augmentations inherit the parent
+physical-system split and are not counted as independent systems. Exactly one
+Gaussian noise realization is stored per independent physical system in the
+current design; any augmentation policy requires a later frozen gate.
+
+The future proposal-efficiency A/B datasets are also excluded: the 512-pair
+RC.5 control arm and 512-pair proposal-v2 candidate arm are engineering-only,
+and their combined 1,024 pairs contribute to no scientific split.

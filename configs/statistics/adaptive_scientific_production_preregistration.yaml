@@ -1,0 +1,511 @@
+phase: "3B"
+preregistration_version: "1.1.0-rc.3"
+status: awaiting_human_review
+parent_preregistration:
+  version: "1.0.0-rc.5"
+  path: configs/statistics/phase2_preregistration.yaml
+  canonical_hash: 4dde279cf1bea78d1ddbd4fab99d88e88e334c80c180dc7850679736c5e53edb
+scientific_schema_version: "2.0.0-alpha.3"
+root_seed: 2026071203
+
+authorization:
+  design_work_authorized: true
+  execution_enabled: false
+  scientific_data_generation_authorized: false
+  proposal_efficiency_qualification_authorized: false
+  model_training_authorized: false
+  model_tuning_authorized: false
+  calibration_fit_authorized: false
+  sbc_authorized: false
+  iid_evaluation_authorized: false
+  ood_evaluation_authorized: false
+  mismatch_evaluation_authorized: false
+  real_noise_authorized: false
+  gwosc_gwtc_access_authorized: false
+  catalog_scan_authorized: false
+  phase3c_or_later_authorized: false
+
+phase3a_qualification_evidence:
+  accepted_by_human_review: true
+  generator_commit: fbcd0616611d9cdf915ef0af030e6061c1be7f59
+  dataset_id: gwlens-v2-2.0.0-alpha.3-7081b2e8be3a84e1
+  accepted_pair_count: 4096
+  attempt_count: 1455699
+  acceptance_rate: 0.002813768505714437
+  accepted_pairs_per_hour: 688.9055221817074
+  published_bytes: 4450694559
+  remaining_free_bytes: 330450604032
+  publication_tree_sha256: 25b0a0d45c030c90da7037ac5f820dced4d602019f0ae2b8ce3a9d4a2d9ac133
+  resume_byte_identical: true
+  scientific_use_authorized: false
+  permanent_exclusion_from_all_scientific_splits: true
+  forbidden_id_prefixes:
+    - qualification-pair-
+    - qualification-source-
+    - qualification-lens-
+    - qualification-system-
+    - synthetic-qualification-
+
+scientific_population_contract:
+  inherit_parent_rc5_estimands: true
+  inherit_parent_rc5_evaluation_distribution: true
+  inherit_parent_rc5_observation_models: true
+  inherit_parent_rc5_selection_model: true
+  evaluation_target_change_authorized: false
+
+group_assignment:
+  assignment_before_materialization: true
+  method: deterministic_rank_of_sha256
+  rank_key_fields: [root_seed, physical_system_id]
+  seed_domain: adaptive_scientific_split_assignment_v1
+  disjoint_identifiers:
+    - source_id
+    - lens_id
+    - physical_system_id
+    - pair_id
+    - noise_segment_id
+    - augmentation_parent_id
+  all_noise_realizations_inherit_physical_system_split: true
+  phase3a_dataset_ids_forbidden:
+    - gwlens-v2-2.0.0-alpha.3-7081b2e8be3a84e1
+
+nested_training_ladder:
+  unit: accepted_physical_systems
+  cumulative: true
+  membership_rule: stable_rank_less_than_rung_count
+  rungs:
+    train_16k_probe_subset: 16384
+    train_32k: 32768
+    train_65k: 65536
+  strict_subset_relations:
+    - [train_16k_probe_subset, train_32k]
+    - [train_32k, train_65k]
+  independently_lockable_final_rungs: [train_32k, train_65k]
+  train_16k_probe_subset_is_final_lock: false
+  automatic_extension_above_65536: false
+  above_65536_action: hard_stop_and_new_preregistration
+  augmentation_counts_as_new_physical_system: false
+
+development_pool:
+  total: 12288
+  splits:
+    validation:
+      count: 6144
+      allowed_uses: [learning_curve_stopping, architecture_selection]
+      em_cell_target_count: 768
+    calibration_fit:
+      count: 4096
+      allowed_uses: [posthoc_calibration_after_size_and_architecture_freeze]
+      forbidden_uses: [learning_curve_stopping, architecture_selection, sbc]
+      em_cell_target_count: 512
+    sbc_diagnostic:
+      count: 2048
+      allowed_uses: [sbc_after_size_architecture_and_calibration_freeze]
+      forbidden_uses: [learning_curve_stopping, architecture_selection, calibration_fit]
+      fixed_replicates: 1024
+  group_disjoint: true
+
+final_evaluation_pool:
+  total: 20480
+  group_disjoint: true
+  group_disjoint_from_training_and_development: true
+  sealed_during_scale_and_architecture_selection: true
+  default_materialization_stage: after_training_size_and_architecture_lock
+  early_materialization_authorized: false
+  concrete_accepted_ids_known_before_materialization: false
+  deterministic_generation_commitment_required_before_training: true
+  commitment_template: results/phase3b/final_evaluation_commitment.json
+  commitment_sha256_record: results/phase3b/final_evaluation_commitment.sha256
+  forbidden_uses:
+    - learning_curve_stopping
+    - architecture_selection
+    - calibration_fit
+    - proposal_tuning
+  splits:
+    iid_test:
+      count: 8192
+      em_cell_target_count: 1024
+    balanced_tail_diagnostic:
+      count: 4096
+      strata: 4
+      cases_per_stratum: 1024
+    cross_family_misspecification_test:
+      count: 2048
+      cells: 4
+      cases_per_cell: 512
+    parameter_region_ood:
+      count: 2048
+      strata: 4
+      cases_per_stratum: 512
+    waveform_mismatch_test:
+      count: 2048
+    psd_mismatch_test:
+      count: 2048
+
+materialization_sequence:
+  stage_a_scale_selection:
+    train_32k: 32768
+    validation: 6144
+    total: 38912
+    train_16k_probe_subset: first_16384_ranked_members_of_train_32k
+    generation_continues_to_train_32k_regardless_of_16k_probe_result: true
+  stage_b_conditional_extension:
+    additional_training_systems: 32768
+    cumulative_training_systems: 65536
+    condition: comparison_16k_to_32k_requires_continuation
+    automatic: false
+  stage_c_post_lock:
+    calibration_fit: 4096
+    sbc_diagnostic: 2048
+    final_evaluation: 20480
+    total: 26624
+    requires_training_size_and_architecture_lock: true
+    early_sealed_materialization_requires_separate_review: true
+
+total_scientific_counts_by_stop:
+  train_32k: 65536
+  train_65k: 98304
+  achievable_final_totals: [65536, 98304]
+  train_16k_probe_subset_final_total: null
+  phase3a_qualification_excluded_from_totals: true
+
+scientific_sampling_targets:
+  evaluation_target_id: balanced_literature_informed_benchmark_v1
+  training_proposal_id: proposal_v2_if_separately_qualified_else_rc5_broad_support_v1
+  training_target_correction:
+    required_when_training_proposal_differs_from_evaluation_target: true
+    objective: importance_weighted_conditional_negative_log_probability
+    formula: sum_i(w_i*(-log_r_phi_mu_i_given_x_i))/sum_i(w_i)
+    log_weight_formula: log_p_eval_full_theta_i_minus_log_q_train_full_theta_i
+    full_latent_proposal_and_evaluation_variables_required: true
+    normalized_globally_within_each_rung_to_mean: 1.0
+    clipping_authorized: false
+    all_weights_finite_required: true
+    stored_as_privileged_provenance: true
+    deployable_model_input: false
+    batch_policy: uniform_examples_with_frozen_per_example_weights
+    equivalent_weighted_sampler_requires_separate_review: true
+    identical_semantics_across_rungs: true
+    diagnostics:
+      - overall_relative_ess
+      - per_lens_family_relative_ess
+      - per_em_cell_relative_ess
+      - maximum_normalized_weight
+      - log_weight_distribution
+  direct_target_splits:
+    validation: direct_evaluation_generative_distribution
+    calibration_fit: direct_evaluation_generative_distribution
+    sbc_diagnostic: direct_evaluation_generative_model
+    iid_test: direct_evaluation_generative_distribution
+  sbc_uncorrected_proposal_draws_forbidden: true
+  ood_and_mismatch_use_individually_declared_distributions: true
+
+learning_curve_probe:
+  model_id: mask_aware_multimessenger_nsf_probe_v1
+  posterior_family: conditional_neural_spline_flow
+  flow_transforms: 10
+  conditioner_width: 256
+  gw_encoder: inherit_parent_mask_aware_gw_encoder
+  em_encoder: inherit_parent_mask_aware_em_encoder
+  seeds: [0, 1, 2]
+  train_each_rung_from_scratch: true
+  posthoc_calibration_during_scale_selection: false
+  optimizer:
+    name: AdamW
+    learning_rate: 0.0003
+    betas: [0.9, 0.999]
+    weight_decay: 0.00001
+    gradient_clip_norm: 5.0
+  training_budget:
+    maximum_epochs: 200
+    batch_size: 256
+    early_stopping_metric: validation_nlp_nat_per_target_dimension
+    early_stopping_patience_epochs: 20
+    early_stopping_minimum_delta: 0.001
+    restore_best_epoch: true
+    identical_across_rungs: true
+  comparison_cases: identical_validation_physical_system_ids
+  primary_metric: validation_nlp_nat_per_target_dimension
+  secondary_metrics:
+    - median_crps
+    - maximum_raw_marginal_coverage_error
+    - joint_coverage_error
+    - em_cell_conditional_coverage
+    - validation_internal_tail_views
+    - interval_width
+  forbidden_metric_sources:
+    - calibration_fit
+    - sbc_diagnostic
+    - iid_test
+    - balanced_tail_diagnostic
+    - cross_family_misspecification_test
+    - parameter_region_ood
+    - waveform_mismatch_test
+    - psd_mismatch_test
+  validation_internal_tail_views:
+    definitions_inherit_parent_balanced_tail_boundaries: true
+    reuse_final_tail_ids: false
+    minimum_cases_per_view: 128
+    insufficient_cases_action: continue_to_next_rung
+
+paired_bootstrap:
+  resampling_unit: physical_system_id
+  paired_across_rungs: true
+  paired_across_metrics: true
+  replicates: 10000
+  confidence_level: 0.95
+  seed_domain: adaptive_learning_curve_bootstrap_v1
+  improvement_direction: smaller_model_metric_minus_larger_model_metric
+
+stopping_rule:
+  comparison_16k_to_32k:
+    nlp_improvement_ci_upper_max_nat_per_target_dimension: 0.01
+    median_crps_relative_improvement_max: 0.01
+    maximum_marginal_coverage_error_improvement_max: 0.005
+    development_em_cell_maximum_absolute_coverage_error: 0.04
+    development_joint_maximum_absolute_coverage_error: 0.05
+    maximum_em_cell_coverage_degradation: 0.02
+    seed_agreement: all_three_seed_point_estimates_below_nlp_and_crps_thresholds
+    require_all_conditions: true
+    gray_zone_action: continue_to_train_65k
+    meaningful_improvement_action: continue_to_train_65k
+    saturation_action: lock_train_32k
+  comparison_32k_to_65k:
+    thresholds_identical_to_16k_to_32k: true
+    require_all_conditions: true
+    saturation_action: lock_train_65k
+    meaningful_improvement_action: stop_data_limited_and_new_preregistration
+    gray_zone_action: stop_inconclusive_and_new_preregistration
+  final_evaluation_may_affect_stopping: false
+
+final_architecture_selection:
+  begins_only_after_training_size_lock: true
+  flow_transforms: [6, 10]
+  conditioner_widths: [128, 256]
+  seeds: [0, 1, 2]
+  maximum_architecture_results: 12
+  reuse_probe_fits_at_locked_rung: true
+  maximum_new_architecture_fits_after_lock: 9
+  identical_probe_retraining_without_declared_failure_forbidden: true
+  selection_metric: mean_validation_nlp_across_three_seeds
+  best_seed_selection_forbidden: true
+  report_all_seeds: true
+  tie_break: lower_parameter_count
+  open_calibration_sbc_or_final_evaluation_automatically: false
+
+proposal_efficiency_future_gate:
+  qualification_id: proposal_v2_engineering_ab_qualification_v1
+  arm_count: 2
+  accepted_pair_count_per_arm: 512
+  total_accepted_pair_count: 1024
+  control_accepted_pair_count: 512
+  candidate_accepted_pair_count: 512
+  paired_blocks_per_arm: 16
+  accepted_pairs_per_block: 32
+  hard_maximum_accepted_pairs_across_both_arms: 1024
+  authorized_in_phase3b: false
+  scientific_use_authorized: false
+  training_use_authorized: false
+  calibration_use_authorized: false
+  test_use_authorized: false
+  permanent_exclusion_from_all_scientific_splits: true
+  evaluation_target_unchanged: true
+  artifact_identity_contract:
+    parent_ab_run_id_template: proposal-v2-engineering-ab-{authorization_commit_12}-{config_hash_12}
+    control_dataset_id_template: "{parent_ab_run_id}-rc5-control"
+    candidate_dataset_id_template: "{parent_ab_run_id}-proposal-v2-candidate"
+    dataset_ids_must_differ: true
+    parent_comparison_manifest_template: manifests/proposal_v2/{parent_ab_run_id}/comparison_manifest.json
+    control_manifest_template: manifests/proposal_v2/{parent_ab_run_id}/rc5_control/manifest.json
+    candidate_manifest_template: manifests/proposal_v2/{parent_ab_run_id}/proposal_v2_candidate/manifest.json
+    separate_arm_manifests: true
+    separate_arm_checksums: true
+    identical_environment: true
+    identical_worker_count: true
+    identical_telemetry_contract: true
+    identities_resolved_once_by_future_authorization: true
+  candidate_mixture:
+    efficient_component_weight: 0.8
+    rc5_broad_support_safety_component_weight: 0.2
+    normalized_density: logsumexp_of_component_log_densities
+    support_guarantee: rc5_safety_component_positive_everywhere_on_frozen_benchmark
+  candidate_components:
+    - caustic_aware_source_plane
+    - distance_magnification_stratified
+    - rc5_broad_support_safety
+  adoption_gates:
+    primary_mandatory_endpoint: accepted_pairs_per_active_hour_ratio_vs_rc5
+    rate_ratio_confidence_interval_method: paired_log_rate_ratio_bootstrap_by_ab_block
+    confidence_level: 0.95
+    minimum_lower_confidence_bound: 2.0
+    confidence_interval_crossing_threshold_action: fail_or_inconclusive_retain_rc5
+    secondary_endpoints:
+      - acceptance_rate_ratio
+      - attempts_per_accepted_pair
+      - cpu_seconds_per_accepted_pair
+      - lens_solver_time
+      - proposal_density_evaluation_time
+    acceptance_gain_without_throughput_gain_authorizes_adoption: false
+    ab_design:
+      same_hardware_and_environment: true
+      same_worker_count: true
+      same_generator_code_path_where_possible: true
+      arms: [rc5_control, proposal_v2_candidate]
+      budget: fixed_accepted_count_per_arm
+      accepted_pair_count_per_arm: 512
+      block_order: deterministic_alternating_arm_order_with_even_odd_reversal
+      active_time_definition: wall_seconds_excluding_declared_operator_pause
+      bootstrap:
+        replicates: 10000
+        seed_domain: proposal_v2_throughput_ab_bootstrap_v1
+        resampling_unit: matched_block_index
+        statistic: candidate_sum_accepted_over_sum_active_seconds_divided_by_control_equivalent
+        interval: percentile_interval_on_log_rate_ratio_then_exponentiate
+      endpoint_switching_after_results_forbidden: true
+    all_importance_weights_finite: true
+    overall_relative_weight_ess_minimum: 0.50
+    per_lens_family_relative_weight_ess_minimum: 0.40
+    per_em_cell_relative_weight_ess_minimum: 0.25
+    maximum_single_normalized_weight: 0.05
+    lens_family_multiplicity_em_cell_and_tail_support_checks: true
+    failed_or_inconclusive_action: retain_rc5_proposal
+  executable_specification_required_before_authorization:
+    separately_reviewed: true
+    requirements:
+      - sample_algorithm_for_every_component
+      - exact_normalized_log_density_evaluator
+      - support
+      - truncation_and_normalization_constants
+      - mixture_variable_semantics
+      - all_conditionals
+      - deterministic_seed_domains
+      - numerical_normalization_tests
+      - boundary_tests
+      - full_latent_variable_coverage
+    conceptual_component_names_are_not_executable_specification: true
+  phase3a_rejection_data_role: engineering_baseline_only
+  conservative_resource_gate:
+    projection_basis: phase3a_rc5_measured_rate_and_bytes_for_both_arms
+    control_projected_attempts: 181963
+    candidate_projected_attempts: 181963
+    combined_projected_attempts: 363926
+    control_projected_active_hours: 0.743207861621631
+    candidate_conservative_projected_active_hours: 0.743207861621631
+    combined_conservative_active_hours: 1.48641572324326
+    combined_projected_publication_bytes: 1112673640
+    retained_failed_evidence_reserve_bytes: 55633682
+    run_checkpoint_and_cache_reserve_bytes: 20000000000
+    two_active_arm_shards_reserve_bytes: 278168410
+    temporary_and_staging_reserve_bytes: 20333802092
+    projected_peak_bytes: 21446475732
+    minimum_post_peak_free_bytes: 100000000000
+    minimum_prelaunch_free_bytes: 121446475732
+    hypothetical_candidate_two_x_active_hours: 0.371603930810816
+    hypothetical_combined_active_hours: 1.11481179243245
+    hypothetical_speedup_may_reduce_prelaunch_gate: false
+
+resource_projection:
+  model_id: phase3a_measured_linear_rc5_v1
+  baseline:
+    accepted_pairs: 4096
+    attempts: 1455699
+    active_seconds: 21404.38641470298
+    accepted_pairs_per_hour: 688.9055221817074
+    published_bytes: 4450694559
+    free_bytes_after_phase3a: 330450604032
+  peak_storage_model:
+    formula: published_bytes_plus_5_percent_failed_evidence_plus_20GB_reserve_plus_one_128_pair_active_shard
+    retained_failed_evidence_fraction: 0.05
+    run_checkpoint_and_cache_reserve_bytes: 20000000000
+    active_shard_bytes: 139084205
+    minimum_post_peak_free_bytes: 100000000000
+  staged_rc5_baseline_projections:
+    stage_a_38912:
+      incremental_accepted_systems: 38912
+      projected_attempts: 13829141
+      projected_active_hours: 56.483797483244
+      projected_published_bytes: 42281598311
+    stage_b_add_32768:
+      incremental_accepted_systems: 32768
+      projected_attempts: 11645592
+      projected_active_hours: 47.5653031437844
+      projected_published_bytes: 35605556472
+    stage_c_add_26624:
+      incremental_accepted_systems: 26624
+      projected_attempts: 9462044
+      projected_active_hours: 38.6468088043248
+      projected_published_bytes: 28929514634
+  achievable_final_rc5_baseline_projections:
+    total_65536:
+      projected_attempts: 23291184
+      projected_active_hours: 95.1306062875688
+      projected_published_bytes: 71211112944
+      projected_peak_bytes: 94910752797
+      projected_remaining_free_bytes: 235539851235
+    total_98304:
+      projected_attempts: 34936776
+      projected_active_hours: 142.6959094313532
+      projected_published_bytes: 106816669416
+      projected_peak_bytes: 132296587092
+      projected_remaining_free_bytes: 198154016940
+  proposal_v2_hypothetical_training_only_two_x_scenario:
+    measured: false
+    assumption: training_system_attempts_and_active_time_halved_but_direct_target_nontraining_splits_unchanged
+    total_65536: {projected_attempts: 17468388, projected_active_hours: 71.3479547156766}
+    total_98304: {projected_attempts: 23291184, projected_active_hours: 95.1306062875688}
+    storage_same_as_rc5_baseline: true
+    may_be_reported_as_completed_measurement: false
+  future_telemetry_requirements:
+    continuous_process_tree_or_cgroup_peak_rss: true
+    time_integrated_cpu_utilization: true
+    peak_staging_bytes: true
+    publication_bytes: true
+
+physical_system_and_noise_semantics:
+  independent_sample_unit: accepted_physical_system
+  stored_gaussian_noise_realizations_per_accepted_physical_system: 1
+  additional_training_time_noise_augmentation_authorized: false
+  future_augmentation_requirements:
+    inherit_parent_physical_system_split: true
+    count_as_additional_physical_system: false
+    identical_policy_across_training_rungs: true
+    validation_or_final_identity_leakage_forbidden: true
+    policy_must_be_frozen_before_training_authorization: true
+
+real_noise_and_catalog_future_protocol:
+  authorized_in_phase3b: false
+  separate_authorization_required: true
+  sequence:
+    - gaussian_scientific_benchmark
+    - real_noise_injections
+    - counterfactual_companion_injections
+    - catalog_pair_scan
+    - absolute_magnification_only_with_declared_em_lens_candidate
+  proposed_91_event_count_is_fixed_fact: false
+  required_future_freezes:
+    - gwtc_release_and_product_versions
+    - exact_event_inclusion_exclusion_rules
+    - event_name_list_and_sha256
+    - detector_and_data_quality_rules
+    - psd_and_off_source_noise_protocol
+    - ranking_statistic
+    - pair_background
+    - multiple_testing_correction
+    - null_result_policy
+
+hard_stops:
+  - any_execution_flag_true
+  - phase3a_id_in_scientific_split
+  - non_nested_training_membership
+  - grouped_split_leakage
+  - final_evaluation_used_for_stopping
+  - unweighted_training_under_non_evaluation_proposal
+  - uncorrected_proposal_draw_used_for_sbc
+  - unknown_accepted_ids_claimed_frozen_before_materialization
+  - calibration_fit_used_for_sbc
+  - automatic_extension_above_65536
+  - proposal_v2_qualification_without_new_authorization
+  - proposal_v2_adopted_without_two_x_throughput_lower_confidence_bound
+  - proposal_v2_authorized_without_executable_density_specification
+  - gwosc_or_gwtc_access_without_separate_authorization
+  - phase3c_execution_without_new_human_review
