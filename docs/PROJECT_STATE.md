@@ -2,16 +2,15 @@
 
 ## Current phase
 
-Human review approved RC.5, now merged to main at
-`80167ea690914bb18be1fd1994b4dc626490e146`, with canonical hash
-`4dde279cf1bea78d1ddbd4fab99d88e88e334c80c180dc7850679736c5e53edb`.
-The independent Phase 3A authorization is frozen at
-`bba0cdd6a750ff367674a85b8722432e613586d8`. Production-generator,
-parallel-shard, resume, streaming-validation and numerical-gate code is
-implemented and awaiting a clean pre-execution code freeze and formal gate
-rerun. No official microbenchmark pair, qualification shard or publication
-exists. Full production, training, calibration, scientific testing and
-GWOSC/GWTC remain unauthorized.
+Human review accepted Phase 3A and PR #4 merged at
+`589b6a554d5bf8213c3014b5cb6f3b0e0f4edd5e`. The 4,096-pair qualification
+artifact remains permanently non-scientific. Phase 3B is open for design only
+on adaptive preregistration `1.1.0-rc.1`, canonical hash
+`ba5dae2aa769331b917d3f622bfc967c607700f9908521576301841cb71d804b`.
+
+No scientific pair, proposal-v2 qualification pair or model may be generated
+or trained. Calibration, SBC, final evaluation, real noise, GWOSC/GWTC and
+Phase 3C remain unauthorized.
 
 ## Completed
 
@@ -109,19 +108,28 @@ GWOSC/GWTC remain unauthorized.
 - retained 330,450,604,032 free bytes after a 4,450,694,559-byte publication;
 - stopped Phase 3A with full production, staged scientific production,
   training, calibration, scientific testing and GWOSC/GWTC still closed.
+- merged accepted Phase 3A PR #4 after CI using merge commit
+  `589b6a554d5bf8213c3014b5cb6f3b0e0f4edd5e`;
+- opened Phase 3B as design-only adaptive-production preregistration work;
+- froze a nested 16k/32k/65k ladder, development-only stopping evidence and a
+  separately sealed 20,480-system final evaluation pool;
+- designed but did not authorize a support-preserving 512-pair proposal-v2
+  engineering qualification and a separate real-noise/catalog boundary.
 
 ## Not started by design
 
+- proposal-v2 engineering qualification;
+- scientific data materialization;
 - model or posterior training;
+- calibration, SBC or final scientific evaluation;
 - GWOSC/GWTC download;
+- real-noise injection or catalog scan;
 - manuscript work.
 
 ## Next recommended phase
 
-Human review should inspect the Phase 3A qualification report and small
-evidence before any new execution decision. A later design-only amendment may
-compare a staged 16,384/32,768/65,536 scientific-training ladder with the
-historical 118,784-pair plan and freeze learning-curve stopping rules. It must
-use a new preregistration version/hash, keep the Phase 3A data outside all
-scientific splits, and leave real-noise/GWOSC/GWTC work behind a separate gate.
-No scientific production or training is currently authorized.
+Human review should inspect Phase 3B's allocation, learning-curve thresholds,
+proposal-v2 ESS gates and resource model. Review may next authorize either the
+512-pair proposal-efficiency qualification or a separately configured first
+scientific production rung. Neither execution follows automatically, and
+training remains a later independent gate.

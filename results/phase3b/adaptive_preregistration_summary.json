@@ -1,0 +1,22 @@
+{
+  "status": "design_complete_execution_disabled",
+  "preregistration_version": "1.1.0-rc.1",
+  "configuration_path": "configs/statistics/adaptive_scientific_production_preregistration.yaml",
+  "canonical_hash": "ba5dae2aa769331b917d3f622bfc967c607700f9908521576301841cb71d804b",
+  "parent_version": "1.0.0-rc.5",
+  "parent_hash": "4dde279cf1bea78d1ddbd4fab99d88e88e334c80c180dc7850679736c5e53edb",
+  "training_rungs": [16384, 32768, 65536],
+  "development_pool_count": 12288,
+  "final_evaluation_pool_count": 20480,
+  "scientific_totals_by_stop": [49152, 65536, 98304],
+  "phase3a_qualification_pair_count": 4096,
+  "phase3a_scientific_use_authorized": false,
+  "execution_enabled": false,
+  "scientific_data_generation_authorized": false,
+  "proposal_efficiency_qualification_authorized": false,
+  "training_authorized": false,
+  "calibration_authorized": false,
+  "scientific_evaluation_authorized": false,
+  "gwosc_gwtc_access_authorized": false,
+  "phase3c_or_later_authorized": false
+}

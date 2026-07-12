@@ -355,3 +355,44 @@ new version and canonical hash before implementation.
 Physical-system counts and noise augmentations must be reported separately.
 Synthetic OOD evaluation and real-noise/GWOSC/GWTC evaluation must not share an
 implicit authorization. The latter remains behind its own future gate.
+
+## D047 — Scale decisions use development evidence only
+
+Preregistration `1.1.0-rc.1` replaces the single planned training size with
+strictly nested 16,384, 32,768 and 65,536 physical-system rungs. The fixed
+6,144-system validation split alone may drive learning-curve stopping and
+architecture selection. Calibration-fit, SBC and every final IID/OOD/mismatch
+split are inaccessible to scale selection.
+
+The 12,288-system development pool and 20,480-system final pool remain fixed
+across rungs. Phase 3A's 4,096 engineering pairs are excluded from all counts
+and can never be relabeled.
+
+## D048 — Data-limited evidence at 65k forces a new preregistration
+
+The probe model, three seeds, paired bootstrap and stopping thresholds are
+frozen before training. A gray 16k-to-32k result continues to 65k. Meaningful
+improvement or uncertainty at 65k stops the workflow; it does not convert
+historical evaluation allocations into training data and does not authorize a
+larger rung.
+
+Only after size lock does the four-architecture by three-seed selection run at
+one size. No best seed is selected.
+
+## D049 — Proposal efficiency preserves support through an RC.5 mixture
+
+A future proposal-v2 candidate must retain a positive 0.2 RC.5 broad-support
+safety component and evaluate the exact normalized mixture density. This is the
+support argument; a 512-pair finite sample cannot prove absence of holes.
+
+The future engineering gate requires at least 2× acceptance or throughput,
+finite weights and frozen relative-ESS/support checks. It remains unauthorized
+in Phase 3B, and failure or ambiguity retains RC.5.
+
+## D050 — Catalog counts and external data are versioned future inputs
+
+A proposed 91-event analysis is not frozen fact. Any real-noise or catalog
+phase needs a separate release/product freeze, exact event-list hash, data-
+quality and PSD rules, ranking statistic, background, multiple-testing
+correction and null-result policy. Synthetic OOD permission cannot open
+GWOSC/GWTC access.

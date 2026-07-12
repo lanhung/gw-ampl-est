@@ -78,14 +78,12 @@ generator audit and approving a v2 schema.
 
 ## Current phase gate
 
-Phase 0, Phase 1A, Phase 1A.1, Phase 1B, Phase 1B.1 and Phase 2 through the
-human-approved RC.5 waveform-window amendment are complete and merged into
-main at:
+Phase 0 through Phase 3A are complete. Human review accepted Phase 3A and PR #4
+merged it into main at:
 
-`80167ea690914bb18be1fd1994b4dc626490e146`
+`589b6a554d5bf8213c3014b5cb6f3b0e0f4edd5e`
 
-The separately authorized Phase 3A generator qualification has completed on
-the review branch. Its immutable execution identities are:
+The immutable Phase 3A execution identities are:
 
 - authorizing commit:
   `bba0cdd6a750ff367674a85b8722432e613586d8`;
@@ -94,7 +92,7 @@ the review branch. Its immutable execution identities are:
 - dataset ID:
   `gwlens-v2-2.0.0-alpha.3-7081b2e8be3a84e1`.
 
-The frozen scientific design is:
+The Phase 3A parent scientific design remains:
 
 - preregistration version: `1.0.0-rc.5`;
 - preregistration configuration:
@@ -107,15 +105,28 @@ The frozen scientific design is:
 RC.5 freezes the 64-second internal waveform construction, 8-second
 conditioned publication and 128-second numerical reference. Phase 3A published
 exactly 4,096 accepted engineering pairs in 32 atomic shards of 128. The first
-three shard hashes were byte-identical across interruption and resume. The
-qualification report and small evidence are the only remaining review inputs.
+three shard hashes were byte-identical across interruption and resume.
 
 The Phase 3A dataset is engineering qualification data only. It may never
 be used for model training, post-hoc calibration, SBC, IID testing, OOD
 testing or reported scientific performance.
 
-The Phase 3A execution authorization is now exhausted. Until a new reviewed,
-versioned preregistration and separate human authorization exist, do not:
+Human review now authorizes Phase 3B design work only on the adaptive scientific
+production preregistration release candidate:
+
+- version: `1.1.0-rc.1`;
+- configuration:
+  `configs/statistics/adaptive_scientific_production_preregistration.yaml`;
+- canonical hash:
+  `ba5dae2aa769331b917d3f622bfc967c607700f9908521576301841cb71d804b`.
+
+Phase 3B may only write configurations, statistical decision rules, resource
+projections, safety tests, documentation and small design evidence. It may
+preregister a nested 16,384/32,768/65,536 training ladder, a 12,288-system
+development pool, a sealed 20,480-system final evaluation pool and a future
+512-pair proposal-efficiency qualification gate.
+
+During Phase 3B, do not:
 
 - generate any additional pair from the qualification or scientific plan;
 - start the frozen 118,784-pair plan or any proposed staged replacement;
@@ -128,17 +139,17 @@ versioned preregistration and separate human authorization exist, do not:
 - call synthetic Gaussian noise real detector noise;
 - modify any legacy file;
 - start manuscript writing;
-- proceed to Phase 3B or later phases.
+- authorize or proceed to Phase 3C or later phases.
 
 All Phase 3A remote outputs must remain under:
 
 `/root/autodl-tmp/lensing-4/data_v2/production`
 
-Full production, staged scientific production, model training, calibration,
-scientific testing, GWOSC/GWTC access and Phase 3B remain closed. Human review
-is required before any next phase. Planning may compare a staged
-16,384/32,768/65,536 training ladder with the historical 118,784-pair plan,
-but planning does not authorize execution and must not reuse Phase 3A data.
+Full production, staged scientific production, proposal-v2 qualification,
+model training, calibration, SBC, scientific IID/OOD/mismatch testing,
+real-noise work, GWOSC/GWTC access and Phase 3C remain closed. Phase 3B must stop
+after its preregistration report and human-review gate. The Phase 3A artifact
+must never enter any scientific split.
 
 ## Scientific integrity
 

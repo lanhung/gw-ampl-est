@@ -251,3 +251,18 @@ silently choose a solver search window or approximate caustic area.
   commit and force a full rerun.
 - These reporting/tooling limitations did not alter the 4,096-pair validation,
   byte-identical resume result, 10 GB output gate or 100 GB free-space gate.
+
+## Phase 3B design uncertainties and deferred evidence
+
+- RC.5 resource projections assume linear scaling of Phase 3A attempts, active
+  time and published bytes. They are planning estimates, not measured
+  scientific-production performance.
+- The proposal-v2 2× scenario is explicitly hypothetical. No caustic-aware
+  proposal was implemented or run, and its ESS thresholds have no execution
+  result.
+- Future scientific IDs and manifest commitments are specified by deterministic
+  assignment rules but are not materialized in Phase 3B.
+- The proposed 91-event catalog size is not treated as immutable. Release,
+  inclusion rules and event-list hash remain future human-review inputs.
+- No model exists for the newly frozen learning-curve thresholds; their first
+  use requires separate training authorization and cannot inspect final tests.
