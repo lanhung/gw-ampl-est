@@ -192,16 +192,14 @@ class SmokeGenerator:
 
     def _noise(self, detector: str, start: float, seed: int) -> np.ndarray:
         interferometer = self._bilby.gw.detector.get_empty_interferometer(detector)
-        state = np.random.get_state()
-        np.random.seed(seed % (2**32 - 1))
-        try:
-            interferometer.set_strain_data_from_power_spectral_density(
-                self.sample_rate, self.duration, start_time=start
-            )
-            result = np.asarray(interferometer.strain_data.time_domain_strain, dtype=np.float64)
-        finally:
-            np.random.set_state(state)
-        return result
+        # Bilby 2.6 draws PSD noise from bilby.core.utils.random.Generator,
+        # not NumPy's legacy global RNG.  Seed that generator explicitly so
+        # interrupted staging runs reproduce byte-identical float32 arrays.
+        self._bilby.core.utils.random.seed(seed)
+        interferometer.set_strain_data_from_power_spectral_density(
+            self.sample_rate, self.duration, start_time=start
+        )
+        return np.asarray(interferometer.strain_data.time_domain_strain, dtype=np.float64)
 
     def _strain_products(
         self,

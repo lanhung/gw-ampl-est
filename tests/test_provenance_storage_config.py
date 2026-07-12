@@ -102,3 +102,10 @@ def test_phase1b_smoke_configuration_is_explicitly_authorized():
     assert config["execution_authorized"] is True
     assert sum(config["accepted_pairs"].values()) == 48
     assert config["schema_version"] == SCHEMA_VERSION == "2.0.0-alpha.2"
+
+
+def test_engineering_manifest_rejects_scientific_authorization():
+    data = example_manifest().to_dict()
+    data["scientific_use_authorized"] = True
+    with pytest.raises(ValueError, match="cannot be authorized"):
+        DatasetManifest.from_json(json.dumps(data))
