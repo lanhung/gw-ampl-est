@@ -74,6 +74,10 @@ materialization.
 - The SIS smoke delay uses a documented one-day engineering conversion of the
   analytic dimensionless Fermat coordinate. It is a schema/windowing control,
   not an astrophysical time-delay population model.
+- Initial Phase 1B branch CI failed only under the Python 3.9 runner because
+  newer NumPy typing inferred a division result too broadly for `float()`.
+  Intermediate norm values were made explicitly scalar before division; no
+  runtime algorithm or published dataset bytes changed.
 
 Both failed staging states remain immutable evidence; neither was published or
 silently removed.

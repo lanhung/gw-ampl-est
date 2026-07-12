@@ -227,15 +227,17 @@ class SmokeGenerator:
                 lensed_fd = self._project(lensed, image_parameters, detector)
                 expected_fd = reference_fd * factor
                 denominator = max(float(np.linalg.norm(expected_fd)), np.finfo(float).tiny)
-                relative_errors.append(float(np.linalg.norm(lensed_fd - expected_fd) / denominator))
-                morse_errors.append(
-                    float(
-                        np.linalg.norm(
-                            lensed_fd / image.amplitude_factor
-                            - reference_fd * self._morse_factor(image.morse_class)
-                        )
-                        / max(float(np.linalg.norm(reference_fd)), np.finfo(float).tiny)
+                response_error = float(np.linalg.norm(lensed_fd - expected_fd))
+                relative_errors.append(response_error / denominator)
+                morse_error = float(
+                    np.linalg.norm(
+                        lensed_fd / image.amplitude_factor
+                        - reference_fd * self._morse_factor(image.morse_class)
                     )
+                )
+                morse_errors.append(
+                    morse_error
+                    / max(float(np.linalg.norm(reference_fd)), np.finfo(float).tiny)
                 )
                 clean_time = np.fft.irfft(lensed_fd, n=self.sample_count)
                 noise_time = self._noise(
