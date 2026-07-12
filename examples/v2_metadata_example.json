@@ -133,6 +133,21 @@
     ],
     "package_versions": {"gwlens_mm": "0.1.0", "lenstronomy": "1.13.6"},
     "seed_hierarchy": {"lens": 2, "source": 1},
+    "selection": {
+      "passing_image_ids": ["image_0", "image_2"],
+      "per_image_detector_optimal_snr": {
+        "image_0": {"H1": 12.0, "L1": 10.0, "V1": 3.0},
+        "image_2": {"H1": 9.0, "L1": 8.0, "V1": 6.0},
+        "image_3": {"H1": 2.0, "L1": 1.5, "V1": 1.0}
+      },
+      "per_image_network_optimal_snr": {
+        "image_0": 15.905973720586866,
+        "image_2": 13.45362404707371,
+        "image_3": 2.692582403567252
+      },
+      "rejection_reason": null,
+      "selected_pair_rule": "earliest_two_images_passing_detection"
+    },
     "solver_name": "metadata-example",
     "solver_version": "planned-1",
     "source_data_release": null,

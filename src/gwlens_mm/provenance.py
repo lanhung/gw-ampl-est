@@ -15,6 +15,7 @@ SEED_DOMAINS = (
     "detector_noise",
     "em_measurement_noise",
     "missing_modalities",
+    "stellar_kinematics",
     "augmentation",
 )
 

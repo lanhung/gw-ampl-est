@@ -124,7 +124,10 @@ def _evaluation_lens_log(draw: Dict[str, float], family: LensFamily) -> float:
     return result
 
 
-def sample_population(rng: np.random.Generator) -> PopulationDraw:
+def sample_population(
+    rng: np.random.Generator,
+    source_rng: np.random.Generator | None = None,
+) -> PopulationDraw:
     family = (
         LensFamily.SIE_EXTERNAL_SHEAR
         if rng.random() < 0.5
@@ -171,16 +174,17 @@ def sample_population(rng: np.random.Generator) -> PopulationDraw:
     if family is LensFamily.EPL_EXTERNAL_SHEAR:
         proposal_lens_log += _uniform_log(density_slope, 1.6, 2.5)
 
-    mass_1 = _power_law_sample(rng, -2.3, 20.0, 80.0)
+    source_generator = rng if source_rng is None else source_rng
+    mass_1 = _power_law_sample(source_generator, -2.3, 20.0, 80.0)
     q_lower = max(0.25, 10.0 / mass_1)
-    mass_ratio = float(rng.uniform(q_lower, 1.0))
+    mass_ratio = float(source_generator.uniform(q_lower, 1.0))
     mass_2 = mass_1 * mass_ratio
-    a_1 = float(0.99 * rng.beta(2.0, 5.0))
-    a_2 = float(0.99 * rng.beta(2.0, 5.0))
-    tilt_1 = float(math.acos(rng.uniform(-1.0, 1.0)))
-    tilt_2 = float(math.acos(rng.uniform(-1.0, 1.0)))
-    theta_jn = float(math.acos(rng.uniform(-1.0, 1.0)))
-    dec = float(math.asin(rng.uniform(-1.0, 1.0)))
+    a_1 = float(0.99 * source_generator.beta(2.0, 5.0))
+    a_2 = float(0.99 * source_generator.beta(2.0, 5.0))
+    tilt_1 = float(math.acos(source_generator.uniform(-1.0, 1.0)))
+    tilt_2 = float(math.acos(source_generator.uniform(-1.0, 1.0)))
+    theta_jn = float(math.acos(source_generator.uniform(-1.0, 1.0)))
+    dec = float(math.asin(source_generator.uniform(-1.0, 1.0)))
     source = {
         "mass_1_source": mass_1,
         "mass_2_source": mass_2,
@@ -189,13 +193,13 @@ def sample_population(rng: np.random.Generator) -> PopulationDraw:
         "a_2": a_2,
         "tilt_1": tilt_1,
         "tilt_2": tilt_2,
-        "phi_12": float(rng.uniform(0.0, 2.0 * math.pi)),
-        "phi_jl": float(rng.uniform(0.0, 2.0 * math.pi)),
+        "phi_12": float(source_generator.uniform(0.0, 2.0 * math.pi)),
+        "phi_jl": float(source_generator.uniform(0.0, 2.0 * math.pi)),
         "theta_jn": theta_jn,
-        "phase": float(rng.uniform(0.0, 2.0 * math.pi)),
-        "ra": float(rng.uniform(0.0, 2.0 * math.pi)),
+        "phase": float(source_generator.uniform(0.0, 2.0 * math.pi)),
+        "ra": float(source_generator.uniform(0.0, 2.0 * math.pi)),
         "dec": dec,
-        "psi": float(rng.uniform(0.0, math.pi)),
+        "psi": float(source_generator.uniform(0.0, math.pi)),
     }
     source_log = (
         _power_law_log(mass_1, -2.3, 20.0, 80.0)

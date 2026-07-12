@@ -102,6 +102,41 @@
       ],
       "type": "object"
     },
+    "SelectionMetadata": {
+      "additionalProperties": false,
+      "properties": {
+        "passing_image_ids": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "per_image_detector_optimal_snr": {
+          "type": "object"
+        },
+        "per_image_network_optimal_snr": {
+          "type": "object"
+        },
+        "rejection_reason": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "selected_pair_rule": {
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "per_image_detector_optimal_snr",
+        "per_image_network_optimal_snr",
+        "passing_image_ids",
+        "selected_pair_rule",
+        "rejection_reason"
+      ],
+      "type": "object"
+    },
     "TimingObservation": {
       "additionalProperties": false,
       "properties": {
@@ -265,10 +300,14 @@
           "maxItems": 6,
           "minItems": 6,
           "type": "array"
+        },
+        "selection": {
+          "$ref": "#/$defs/SelectionMetadata"
         }
       },
       "required": [
-        "detector_noise_references"
+        "detector_noise_references",
+        "selection"
       ],
       "type": "object"
     },

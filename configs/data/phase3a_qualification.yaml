@@ -41,6 +41,7 @@ gw:
   sample_count: 16384
   minimum_frequency_hz: 20
   reference_frequency_hz: 50
+  merger_offset_seconds: 6.0
   detector_slots: [H1, L1, V1]
   dtype: float32
   psd_curves:

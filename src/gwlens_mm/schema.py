@@ -494,6 +494,37 @@ class DetectorNoiseReference:
 
 
 @dataclass(frozen=True)
+class SelectionMetadata:
+    per_image_detector_optimal_snr: Mapping[str, Mapping[str, float]]
+    per_image_network_optimal_snr: Mapping[str, float]
+    passing_image_ids: Tuple[str, ...]
+    selected_pair_rule: str
+    rejection_reason: Optional[str]
+
+    def validate(self) -> None:
+        if not self.selected_pair_rule.strip():
+            raise ValueError("selection metadata requires a selected-pair rule")
+        if set(self.per_image_detector_optimal_snr) != set(
+            self.per_image_network_optimal_snr
+        ):
+            raise ValueError("selection SNR maps must cover identical physical images")
+        for image_id, detector_values in self.per_image_detector_optimal_snr.items():
+            if not image_id or set(detector_values) != set(DETECTOR_SLOTS):
+                raise ValueError("selection detector SNR must cover H1/L1/V1")
+            for value in detector_values.values():
+                if _finite(value, "detector optimal SNR") < 0:
+                    raise ValueError("optimal SNR must be nonnegative")
+            if _finite(
+                self.per_image_network_optimal_snr[image_id], "network optimal SNR"
+            ) < 0:
+                raise ValueError("network optimal SNR must be nonnegative")
+        if len(self.passing_image_ids) != len(set(self.passing_image_ids)):
+            raise ValueError("passing image IDs must be unique")
+        if not set(self.passing_image_ids) <= set(self.per_image_network_optimal_snr):
+            raise ValueError("passing image IDs must have selection statistics")
+
+
+@dataclass(frozen=True)
 class Provenance:
     generator_git_commit: str
     configuration_hash: str
@@ -506,6 +537,7 @@ class Provenance:
     detector_noise_references: Tuple[DetectorNoiseReference, ...]
     source_data_release: Optional[str]
     distribution: DistributionMetadata
+    selection: Optional[SelectionMetadata] = None
 
     @property
     def used_noise_segment_ids(self) -> Tuple[str, ...]:
@@ -551,6 +583,8 @@ class Provenance:
         if len(used_ids) != len(set(used_ids)):
             raise ValueError("available image-detector slots require unique noise segment IDs")
         self.distribution.validate()
+        if self.selection is not None:
+            self.selection.validate()
 
 
 @dataclass(frozen=True)
@@ -589,6 +623,7 @@ class V2Record:
             del result["em_observation"]["tracer_effective_radius_arcsec"]
             del result["em_observation"]["dynamics_model_reference"]
             del result["gw_observation"]["detector_psd_references"]
+            del result["provenance"]["selection"]
         return result
 
     def to_json(self, *, indent: Optional[int] = 2) -> str:
@@ -690,6 +725,10 @@ class V2Record:
             DetectorNoiseReference(**item) for item in provenance_data["detector_noise_references"]
         )
         provenance_data["distribution"] = DistributionMetadata(**provenance_data["distribution"])
+        if provenance_data.get("selection") is not None:
+            selection = dict(provenance_data["selection"])
+            selection["passing_image_ids"] = tuple(selection["passing_image_ids"])
+            provenance_data["selection"] = SelectionMetadata(**selection)
         record = cls(
             schema_version=str(data["schema_version"]),
             pair=PairIndex(**pair_data),
@@ -797,6 +836,24 @@ def v2_json_schema() -> Dict[str, Any]:
                     "noise_source": {"type": "string", "minLength": 1},
                 },
             },
+            "SelectionMetadata": {
+                "type": "object",
+                "additionalProperties": False,
+                "required": [
+                    "per_image_detector_optimal_snr",
+                    "per_image_network_optimal_snr",
+                    "passing_image_ids",
+                    "selected_pair_rule",
+                    "rejection_reason",
+                ],
+                "properties": {
+                    "per_image_detector_optimal_snr": {"type": "object"},
+                    "per_image_network_optimal_snr": {"type": "object"},
+                    "passing_image_ids": {"type": "array", "items": {"type": "string"}},
+                    "selected_pair_rule": {"type": "string", "minLength": 1},
+                    "rejection_reason": {"type": ["string", "null"]},
+                },
+            },
         },
         "required": [
             "schema_version",
@@ -870,7 +927,7 @@ def v2_json_schema() -> Dict[str, Any]:
             },
             "provenance": {
                 "type": "object",
-                "required": ["detector_noise_references"],
+                "required": ["detector_noise_references", "selection"],
                 "not": {"required": ["noise_segment_ids"]},
                 "properties": {
                     "detector_noise_references": {
@@ -878,7 +935,8 @@ def v2_json_schema() -> Dict[str, Any]:
                         "minItems": 6,
                         "maxItems": 6,
                         "items": {"$ref": "#/$defs/DetectorNoiseReference"},
-                    }
+                    },
+                    "selection": {"$ref": "#/$defs/SelectionMetadata"},
                 },
             },
         },
