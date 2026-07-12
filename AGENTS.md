@@ -111,8 +111,11 @@ The Phase 3A dataset is engineering qualification data only. It may never
 be used for model training, post-hoc calibration, SBC, IID testing, OOD
 testing or reported scientific performance.
 
-Human review now authorizes Phase 3B design work only on the adaptive scientific
-production preregistration hardening release candidate:
+Human review accepted Phase 3B RC.3 and PR #5 merged it into main at:
+
+`80c795a36b902798fe52598262f8b0328755cfac`
+
+The frozen adaptive scientific-production preregistration is:
 
 - version: `1.1.0-rc.3`;
 - configuration:
@@ -120,19 +123,32 @@ production preregistration hardening release candidate:
 - canonical hash:
   `6082475631539d3069edacc52f41b37fb8fe725ccd7c6bc9980cc3008795a927`.
 
-Phase 3B may only write configurations, statistical decision rules, resource
-projections, safety tests, documentation and small design evidence. It may
-preregister a 16,384-system probe subset nested in the independently lockable
-32,768/65,536 training ladder, a staged 12,288-system development pool, a
-sealed 20,480-system final evaluation commitment and a future two-arm
-proposal-efficiency qualification gate with 512 accepted pairs per arm and
-1,024 accepted engineering pairs total. RC.3 may freeze importance-weighted
-training-target correction, but may not execute it.
+Human review authorized Phase 3C-0 design and implementation only through:
 
-During Phase 3B, do not:
+`configs/execution/phase3c0_proposal_v2_design_authorization.yaml`
+
+Phase 3C-0 implemented proposal
+`proposal-v2-exact-mixture-1.0.0-rc.1`, configuration hash:
+
+`e4e249da3f177202960e8a6f6c0c347a25aa572abb818b6d0e172469a75e45b5`
+
+The authorized 200,000-draw latent-only preflight hard-failed its frozen ESS
+gates: overall relative ESS was 0.09202, SIE ESS 0.11969 and EPL ESS 0.07433.
+The required minima were 0.50 overall and 0.40 per family. All densities and
+weights were finite, mean weight was 1.01044, support holes were zero and replay
+was byte-identical. No mixture parameter may be tuned inside this frozen
+proposal version.
+
+Phase 3C-0 may retain only implementation code, configurations, unit tests,
+latent-only evidence, dry-run A/B validation and documentation. It must now
+stop for human review.
+
+During and after this hard stop, do not:
 
 - generate any additional pair from the qualification or scientific plan;
-- start the frozen 118,784-pair plan or any proposed staged replacement;
+- run the 1,024-pair proposal A/B qualification;
+- authorize or adopt proposal-v2 RC.1;
+- start any scientific production rung;
 - train or tune any neural model;
 - download GWOSC or GWTC products;
 - generate real-noise data;
@@ -142,7 +158,7 @@ During Phase 3B, do not:
 - call synthetic Gaussian noise real detector noise;
 - modify any legacy file;
 - start manuscript writing;
-- authorize or proceed to Phase 3C or later phases.
+- authorize or proceed to Phase 3C-A or later phases.
 
 All Phase 3A remote outputs must remain under:
 
@@ -150,9 +166,9 @@ All Phase 3A remote outputs must remain under:
 
 Full production, staged scientific production, proposal-v2 qualification,
 model training, calibration, SBC, scientific IID/OOD/mismatch testing,
-real-noise work, GWOSC/GWTC access and Phase 3C remain closed. Phase 3B must stop
-after its Phase 3B.2 consistency report and human-review gate. The Phase 3A artifact
-must never enter any scientific split.
+real-noise work, GWOSC/GWTC access and Phase 3C-A remain closed. RC.5 remains
+the only qualified proposal. The Phase 3A artifact and all future engineering
+A/B artifacts must never enter any scientific split.
 
 ## Scientific integrity
 

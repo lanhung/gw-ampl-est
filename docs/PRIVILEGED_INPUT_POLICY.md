@@ -28,7 +28,8 @@ The machine-readable denylist includes:
 - clean injected signal and isolated noise realization;
 - optimal SNR and simulation-only quality/oracle fields;
 - source, lens, system, pair, noise-segment, and augmentation IDs;
-- proposal/prior log probability and importance/population weights.
+- proposal component identity, RNG seed, component/full proposal or evaluation
+  log probability, and importance/population weights.
 
 Aliases such as `mu0`, `mu1`, `A21`, `trueMu`, `oracle*`, and
 `cleanWaveform` are also rejected. The alias detector is a defense-in-depth
@@ -47,7 +48,9 @@ a future model.
 
 The clean/noise products remain required dataset artifacts for validation but
 are not deployable inputs. Group IDs remain required for leakage-safe splitting
-but are not neural features. Proposal weights remain evaluation metadata.
+but are not neural features. Proposal component indices, component log
+densities, proposal/evaluation log probabilities, log/normalized weights and
+proposal seeds remain privileged provenance under policy version `1.3.0`.
 
 ## Change control
 

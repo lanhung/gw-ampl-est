@@ -464,3 +464,25 @@ The two arms have distinct dataset identities, manifests and checksums under
 one parent A/B run and comparison manifest. Both are permanently excluded from
 science. Prelaunch planning assumes RC.5 throughput for both arms; a future
 candidate speedup cannot reduce the resource gate before it is measured.
+
+## D056 — Proposal-v2 RC.1 uses an exact analytic central-source mixture
+
+Phase 3C-0 implements the reviewed 0.2 RC.5, 0.6 wide, 0.1 narrow and 0.1
+low-redshift mixture without acceptance conditioning. Wide/narrow source
+coordinates are exact truncated normals; low-z uses an exact scaled Beta(1,2)
+conditional. The complete density includes every inherited RC.5 latent factor,
+angular source Jacobian and conditional normalization.
+
+The 0.2 RC.5 component supplies full support. Stable log-sum-exp, caller-owned
+RNG, half-open support and privileged-provenance rules are executable rather
+than conceptual. The A/B runner remains dry-run-only.
+
+## D057 — Frozen latent ESS failure rejects proposal-v2 RC.1 before A/B
+
+The 200,000-draw preflight passed density finiteness, mean-weight, support and
+deterministic replay checks but achieved only 0.09202 overall relative ESS,
+0.11969 for SIE and 0.07433 for EPL. These fail the frozen 0.50/0.40 thresholds.
+
+Proposal-v2 RC.1 is therefore rejected before waveform generation. It may not
+be tuned in place or enter the 1,024-pair A/B run. RC.5 remains the qualified
+fallback; a new candidate requires a new version and human review.

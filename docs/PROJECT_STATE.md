@@ -2,16 +2,16 @@
 
 ## Current phase
 
-Human review accepted Phase 3A and PR #4 merged at
-`589b6a554d5bf8213c3014b5cb6f3b0e0f4edd5e`. The 4,096-pair qualification
-artifact remains permanently non-scientific. Phase 3B.2 has completed its
-design-only A/B count correction and is awaiting human review on adaptive
-preregistration `1.1.0-rc.3`, canonical hash
+Human review accepted Phase 3B and PR #5 merged at
+`80c795a36b902798fe52598262f8b0328755cfac`. Adaptive preregistration RC.3
+remains frozen at hash
 `6082475631539d3069edacc52f41b37fb8fe725ccd7c6bc9980cc3008795a927`.
+Phase 3C-0 implemented exact proposal-v2 RC.1 but its latent preflight failed
+the frozen overall and family ESS gates. The phase is stopped for human review.
 
-No scientific pair, proposal-v2 qualification pair or model may be generated
-or trained. Calibration, SBC, final evaluation, real noise, GWOSC/GWTC and
-Phase 3C remain unauthorized. The next action is human review, not execution.
+Zero waveform pairs were generated. Proposal A/B, scientific data, training,
+calibration, SBC, final evaluation, real noise, GWOSC/GWTC and Phase 3C-A remain
+unauthorized. The next action is human review, not execution.
 
 ## Completed
 
@@ -138,6 +138,13 @@ Phase 3C remain unauthorized. The next action is human review, not execution.
   1,112,673,640 publication bytes and 121,446,475,732 minimum free bytes;
 - upgraded the design to RC.3 and refreshed the final-evaluation commitment
   reference without resolving its future generator placeholder.
+- merged Phase 3B PR #5 after its PR-triggered CI passed;
+- implemented exact proposal-v2 RC.1 sampling, full latent densities,
+  deterministic replay, privileged policy and a dry-run-only A/B skeleton;
+- ran exactly 200,000 latent-only draws with zero waveform pairs and recorded
+  finite density, support, weight and replay evidence;
+- hard-stopped proposal-v2 RC.1 after overall/family relative ESS failed the
+  frozen thresholds; no post-result tuning or A/B generation occurred.
 
 ## Not started by design
 
@@ -151,9 +158,8 @@ Phase 3C remain unauthorized. The next action is human review, not execution.
 
 ## Next recommended phase
 
-Human review should inspect Phase 3B.2 RC.3's explicit 512-per-arm/1,024-total
-contract, distinct artifact identities and conservative resource gate. No PR
-merge or subsequent execution follows automatically. If accepted, proposal-v2
-still needs an executable density specification before the separately
-authorized A/B engineering qualification; scientific Stage A and training
-remain independent later gates.
+Human review should inspect the Phase 3C-0 latent ESS failure. Proposal-v2 RC.1
+cannot enter A/B. Review may either retain RC.5 and proceed under a separately
+authorized scientific-production decision, or preregister a new proposal
+version that also addresses the concentrated evaluation-target lens factors.
+Neither path is automatic.

@@ -1,5 +1,5 @@
 {
-  "policy_version": "1.2.0",
+  "policy_version": "1.3.0",
   "exact_fields": [
     "source_position_y_true",
     "source_position_u_true",
@@ -32,7 +32,13 @@
     "augmentation_parent_id",
     "proposal_log_probability",
     "evaluation_prior_log_probability",
-    "importance_weight"
+    "importance_weight",
+    "proposal_component_index",
+    "component_log_densities",
+    "evaluation_log_probability",
+    "log_importance_weight",
+    "normalized_training_weight",
+    "proposal_rng_seed"
   ],
   "suspicious_alias_tokens": [
     "mu0",
