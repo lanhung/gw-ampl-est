@@ -1,0 +1,19 @@
+{
+  "accepted_pair_count_completed_before_stop": 64,
+  "accepted_pair_count_per_complete_arm_block": 32,
+  "candidate_dataset_id": "gwlens-v2-2.0.0-alpha.3-17bb6106d0192dcd-v3",
+  "complete_candidate_blocks": 1,
+  "complete_control_blocks": 1,
+  "control_dataset_id": "gwlens-v2-2.0.0-alpha.3-79588465a35421e2-control",
+  "error": "DistributionMetadata has no attribute evaluation_log_probability; schema field is evaluation_prior_log_probability",
+  "error_type": "AttributeError",
+  "generator_commit": "185e68d4346d84edc118a9197ffb8bceeb026ee4",
+  "gwosc_gwtc_accessed": false,
+  "parent_run_id": "phase3ca-185e68d4346d-0ed6958442da",
+  "publication_created": false,
+  "scientific_use_authorized": false,
+  "stage_a_authorized": false,
+  "status": "execution_failed",
+  "throughput_endpoint_computed": false,
+  "training_use_authorized": false
+}

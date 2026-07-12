@@ -196,6 +196,18 @@ human adoption review; it does not authorize scientific production. The Phase
 3A artifact and both engineering A/B artifacts must never enter any scientific
 split. Phase 3C-A must stop after its report and pushed review branch.
 
+Phase 3C-A generator commit
+`185e68d4346d84edc118a9197ffb8bceeb026ee4` passed all pre-execution gates,
+but the official run stopped fail-closed after exactly one complete 32-pair
+block per arm. The first matched-block health validator referenced a
+nonexistent distribution-metadata attribute. Machine state is
+`execution_failed`; no publication, throughput bootstrap or post-selection ESS
+decision exists. Both blocks remain engineering-only staging evidence.
+
+Do not patch or resume this artifact identity. Human review must approve a new
+generator commit and new parent/control/candidate identities before any retry.
+Stage A, training and GWOSC/GWTC remain closed.
+
 ## Scientific integrity
 
 - Never fabricate results, citations, completed runs or calibration.

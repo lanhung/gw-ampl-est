@@ -503,3 +503,14 @@ The diagnostic RC.5 latent ESS was 0.11776 overall and 0.09484 for EPL. No
 retrospective gate is applied, but this evidence prohibits treating engineering
 generator qualification as proof of statistically efficient weighted NPE
 training. Lens structural mismatch is the dominant diagnostic marginal.
+
+## D060 — A health-validator defect invalidates the Phase 3C-A run identity
+
+The first official matched block completed atomically in both arms, but the
+new health validator referenced a nonexistent alpha.3 metadata attribute. The
+fail-closed runner stopped with `execution_failed` before further generation.
+
+No throughput inference may be drawn from the retained first blocks. They stay
+engineering-only and cannot be combined with a retry. Correcting the validator
+requires a new generator commit, parent run ID and two new arm dataset IDs,
+followed by full preflight and human review. Stage A remains unauthorized.
