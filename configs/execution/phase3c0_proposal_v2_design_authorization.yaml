@@ -1,0 +1,29 @@
+phase: "3C-0"
+authorization_status: authorized_design_and_implementation_only
+authorized_by: human_project_owner
+authorization_date: "2026-07-12"
+
+base_main_commit: "80c795a36b902798fe52598262f8b0328755cfac"
+
+frozen_adaptive_preregistration:
+  version: "1.1.0-rc.3"
+  path: "configs/statistics/adaptive_scientific_production_preregistration.yaml"
+  canonical_hash: "6082475631539d3069edacc52f41b37fb8fe725ccd7c6bc9980cc3008795a927"
+
+authorization:
+  proposal_design_authorized: true
+  proposal_sampler_implementation_authorized: true
+  proposal_log_density_implementation_authorized: true
+  latent_only_normalization_tests_authorized: true
+  ab_runner_skeleton_authorized: true
+
+  waveform_pair_generation_authorized: false
+  proposal_ab_qualification_authorized: false
+  scientific_data_generation_authorized: false
+  model_training_authorized: false
+  calibration_authorized: false
+  scientific_evaluation_authorized: false
+  gwosc_gwtc_access_authorized: false
+  phase3c_a_or_later_authorized: false
+
+stop_after_phase3c0: true
