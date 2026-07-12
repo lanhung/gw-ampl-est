@@ -1,161 +1,136 @@
 # Phase 2 statistical preregistration
 
-Status: `1.0.0-rc.1`, awaiting human review; no execution authorized.
-
-## Scientific question and estimands
-
-For a candidate galaxy-scale lensed GW pair with declared EM information,
-estimate the joint posterior of
-`(log_abs_mu_primary, log_abs_mu_secondary)`. The posterior is conditional on
-the lens family and all declared population, cosmology, external-convergence,
-selection, waveform, noise and EM observation models.
-
-Preregistered derived quantities are the log absolute-magnification difference,
-relative absolute magnification, and relative strain amplitude. An observed EM
-flux ratio is not silently equated to the macro-model magnification ratio;
-source variability, extinction, microlensing and its measurement model would
-need explicit treatment. Signed magnification, parity and Morse index remain
-distinct quantities.
-
-## Frozen benchmark population and proposal
-
-The machine-readable values are authoritative in
+Status: `1.0.0-rc.2`, automatic review passed; no execution authorized.
+The machine-readable authority is
 `configs/statistics/phase2_preregistration.yaml`.
 
-The broad proposal covers SIE+shear and EPL+shear equally, lens redshift
-`0.1–1.0`, source redshift `0.5–3.0` with `z_s-z_l >= 0.1`, Einstein radius
-`0.3–3.0 arcsec`, axis ratio `0.4–1.0`, shear amplitude `0–0.15`, EPL slope
-`1.6–2.5`, and external convergence `-0.15–0.15`.
+## Estimand and claim boundary
 
-The evaluation distribution is a balanced, literature-informed benchmark, not
-an inferred astrophysical rate population. In particular, its EPL slope is a
-truncated normal with mean 2.08 and standard deviation 0.16, while external
-convergence remains an explicit truncated nuisance. The BBH benchmark uses a
-broad source-frame mass and spin distribution and derives luminosity distance
-from source redshift and the declared cosmology. It is not labeled as the
-GWTC population.
+For a candidate galaxy-scale lensed GW pair with declared EM information,
+estimate the model-conditional joint posterior
+`p(log|mu_primary|, log|mu_secondary| | GW, EM, selection, M)`, where `M`
+includes the lens family, cosmology, external-convergence treatment, population
+and observation models. This is not a model-independent absolute-
+magnification measurement.
 
-Proposal draws must cover every evaluation population and tail. Proposal
-metadata and weights are evaluation-only and remain denylisted as deployable
-inputs.
+Derived targets are the log-magnification difference, relative absolute macro
+magnification and relative strain amplitude. An observed EM flux ratio is not
+identified with the macro ratio without explicit variability, extinction,
+microlensing and measurement models.
 
-## Observation, selection and missingness models
+## Proposal, evaluation population and source support
 
-The baseline is an eight-second, 2048 Hz H1/L1/V1 observation using
-IMRPhenomXPHM and the detector-specific frozen curves named and hashed in the
-configuration. SEOBNRv4PHM is the waveform mismatch case supported by the
-pinned LALSuite environment. Every output remains explicitly synthetic
-Gaussian curve-conditioned noise.
+The broad proposal covers SIE+shear and EPL+shear equally, `z_l=0.1–1.0`,
+`z_s=0.5–3.0` with `z_s-z_l>=0.1`, Einstein radius `0.3–3.0 arcsec`, axis
+ratio `0.4–1.0`, shear `0–0.15`, EPL slope `1.6–2.5`, and external convergence
+`-0.15–0.15`. The balanced evaluation population is a benchmark, not an
+inferred astrophysical rate population.
 
-A pair enters the benchmark population only when both selected images pass
-the preregistered synthetic matched-filter surrogate: network SNR at least 10,
-at least two detectors per image, and per-contributing-detector SNR at least 4.
-These privileged selection statistics are never model inputs. The posterior
-and evaluation prior are conditional on this selection.
+The BBH joint support is normalized rather than rejection-sampled: draw `m1`
+from the declared power law, then `q` uniformly on
+`[max(0.25,10/m1),1]`. Thus `m2>=10 Msun` by construction and the conditional
+normalization is present in proposal and evaluation log densities.
 
-EM availability is assigned deterministically and equally across eight named
-scenarios ranging from full spectroscopic information to sparse
-astrometry/timing. The mixture is a benchmark stress design, not a claim about
-survey missingness frequencies. Exact latent values are never substituted for
-missing measurements.
+## External convergence and dynamics
 
-## Splits, sizes and leakage control
+External convergence enters the forward model through
+`lambda_mst=1-kappa_ext`. Source coordinates and Fermat/time-delay differences
+scale by lambda, image positions stay invariant, and signed magnifications
+scale by `lambda^-2`. The alpha.3 schema stores a deployable environment
+observation as posterior mean and standard deviation, never latent truth.
 
-Use the existing grouped split policy. Freeze stable group assignments before
-materialization. `validation` selects architecture/hyperparameters;
-`calibration` fits any post-hoc correction; `iid_test` is untouched until both
-are frozen. Tail and OOD tests are reported separately and never pooled to
-conceal failures.
+Velocity dispersion uses Lenstronomy 1.13.6 Galkin with a circularized
+spherical power-law dynamics mass model, Hernquist tracer light,
+Osipkov--Merritt anisotropy, a one-arcsecond circular aperture, and 0.7-arcsec
+Gaussian seeing. The exact light/anisotropy priors, sample count and Phase 3A
+convergence tolerance are frozen. Direct inversion from Einstein radius alone
+is forbidden.
 
-The fixed counts are 65,536 train; 8,192 validation; 8,192 calibration; 16,384
-IID test; and 4,096 each for balanced-tail, lens-family OOD, parameter-region
-OOD, and waveform/PSD mismatch. A separate 4,096-pair generator qualification
-set is engineering-only. The real-noise split has count zero and requires a
-separate GWOSC authorization.
+## GW, selection and EM observation models
 
-At 95% normal approximation, 16,384 IID cases give worst-case binomial
-half-width 0.0077; 2,048 cases in each of eight EM cells give 0.0217; 1,024
-cases per tail stratum give 0.0306. Report Wilson intervals rather than relying
-on the approximation.
+The baseline is eight seconds at 2048 Hz in H1/L1/V1, IMRPhenomXPHM, and the
+detector-specific synthetic Gaussian curves named and hashed in the config.
+SEOBNRv4PHM supplies waveform mismatch. PSD mismatch separately uses the
+verified zero-detuned-high-power H1/L1 curve while holding V1 fixed.
 
-## Methods to compare
+Both selected images must pass the synthetic selection surrogate: network SNR
+at least 10, at least two detectors, and per-contributing-detector SNR at least
+4. Selection statistics are privileged and never deployable inputs.
 
-- joint GW+EM amortized posterior estimator;
-- same estimator with GW-only inputs;
-- same estimator with EM-only inputs;
-- deterministic SIS point-regression legacy baseline, labeled out of domain;
-- non-neural lens-posterior baseline under matched priors;
-- likelihood-based GW reference on the fixed gold subset;
-- oracle diagnostics only in a separate privileged analysis path.
+Eight EM cells explicitly enumerate modalities, errors, spectroscopic or
+photometric redshift mode, timing uncertainty, environment state and
+kinematics state. Informative/weak environment observations use external-
+convergence posterior standard deviations 0.02/0.06; unavailable is null and
+masked. The equal cell mixture is a stress benchmark, not a survey frequency.
 
-The primary estimator is a mask-aware conditional neural-spline flow over the
-two log absolute magnifications. It combines a shared-weight per-image/per-
-detector 1D ResNet with an image-keyed DeepSets EM encoder. The fixed model-
-selection grid is flow transforms `{6, 10}` by conditioner widths `{128, 256}`
-and three training seeds, for at most 12 fits. Validation negative log
-probability selects the candidate; exact ties choose fewer parameters. GW-only
-and EM-only ablations reuse the same eligible backbone rather than receiving a
-different tuning budget.
+## Splits and leakage control
 
-## Calibration and accuracy endpoints
+Fixed accepted counts are:
 
-Primary endpoints on the untouched IID test are marginal empirical coverage at
-50%, 80%, 90% and 95% for both log absolute magnifications, plus joint-region
-coverage from the flow log-density rank. Report Wilson 95% intervals and raw
-counts for every endpoint.
+- train 65,536; validation 8,192;
+- calibration-fit 6,144; SBC-diagnostic 2,048;
+- IID test 16,384;
+- balanced-tail 4,096; cross-family misspecification 4,096;
+- parameter-region OOD 4,096;
+- waveform mismatch 2,048; PSD mismatch 2,048;
+- engineering qualification 4,096; real-noise zero.
 
-The marginal acceptance tolerance is the larger of 0.01 and three binomial
-standard errors. The joint tolerance is the larger of 0.015 and three standard
-errors. Each EM cell uses the larger of 0.04 and three standard errors; each
-balanced-tail stratum uses 0.06. These rules are fixed before any estimator is
-trained.
+The total remains 118,784. Calibration-fit and SBC-diagnostic groups are
+disjoint in source, lens, physical system, pair, noise segment and augmentation
+parent. SBC never fits a calibration map. IID is untouched until architecture
+and calibration are frozen.
 
-Secondary endpoints are interval width/sharpness, bias and RMSE of posterior
-means, proper scoring rules, posterior correlation, tail conditional coverage,
-1,024-case SBC rank diagnostics, and importance sampling on a 256-case gold
-subset. At least 95% of gold cases must have importance-sampling efficiency at
-least 0.10.
+## Estimator and seed aggregation
 
-No single average metric can override a failed preregistered coverage stratum.
-Post-hoc calibration is fitted only on `calibration`, versioned, and then
-applied once to IID/OOD tests.
+The primary estimator is a mask-aware conditional neural-spline flow combining
+a shared-weight image/detector 1D ResNet and an image-keyed DeepSets EM encoder.
+The 2-by-2 architecture grid and three seeds produce at most 12 fits.
 
-## Ablations and stress tests
+Architecture selection uses mean validation negative log probability across
+all three seeds; median is a robustness statistic. No best seed is selected.
+All three selected-architecture seeds proceed to IID/OOD and all individual
+values, mean and dispersion are reported. Exact ties choose fewer parameters.
+GW-only and EM-only ablations receive the same tuning budget.
 
-- remove each EM modality and exercise naturally missing combinations;
-- withhold velocity dispersion or external-convergence information;
-- train/evaluate across SIE versus EPL family mismatch;
-- waveform and PSD mismatch;
-- detector dropout and SNR/magnification tails;
-- perturbed redshift/astrometry uncertainty and selection functions;
-- prior sensitivity for density slope, external convergence and population.
+## Calibration and likelihood gold subsets
 
-## Failure and stopping rules
+Primary coverage levels are 50%, 80%, 90% and 95% for each log magnification
+and the joint density-rank region. Wilson intervals and raw counts are always
+reported. The frozen marginal, joint, EM-cell and tail tolerances are encoded
+in the config; no average metric overrides a failed preregistered stratum.
 
-Invalid solver states, nonfinite weights, proposal-support failures, cross-split
-group leakage, privileged-input access, incomplete manifests, undeclared
-PSD/waveform versions, waveform truncation, resume mismatch, or mismatch
-between declared and executed priors are hard failures. Coverage failure is a
-scientific result, not permission to retune on the test set.
+Post-hoc correction uses only `calibration_fit`. SBC uses 1,024 deterministic
+realizations drawn only from `sbc_diagnostic`. A 256-case validation gold subset
+may trigger development changes. A separate 256-case IID gold subset is
+reported once after freeze and cannot trigger retuning; failure downgrades the
+claim or requires a new preregistration version.
 
-## Storage, runtime and resume boundary
+## Diagnostic, OOD and mismatch definitions
 
-At three `(2, 3, 16384)` float32 products, one pair occupies 1,179,648 raw
-bytes. All 118,784 planned pairs, including qualification, require
-140,123,308,032 raw bytes. A 30% reserve gives 182,160,300,442 bytes; against
-342,407,888,896 bytes measured free on AutoDL, the projected remainder is
-160,247,588,454 bytes.
+Balanced-tail cases are priority-assigned to four fixed strata: absolute
+magnification at least 20; selected-image min/max ratio at most 0.10; secondary
+network SNR in `[10,12)`; or extreme profile/environment values. Cross-family
+tests fix two wrong-family and two family-marginalized cells. Parameter OOD
+fixes slope outside training, `q=0.25–0.40`, shear `0.15–0.25`, and
+`|kappa_ext|=0.15–0.25`. Exact interval endpoints and counts are in YAML.
 
-Phase 3A must run only the 4,096-pair qualification stage first. Its raw arrays
-are 4,831,838,208 bytes, below the 10 GB safety threshold. Shards contain 128
-pairs, publish atomically, write append-only attempts, and must pass a
-byte-identical interruption/resume test. The qualification report must measure
-accepted-pair throughput and use it to estimate wall time before any job that
-may exceed one hour. No production run may start from the current document.
+## Storage and resume boundary
 
-## Remaining external gate
+Raw arrays require 140,123,308,032 bytes. Peak disk separately includes 10%
+metadata/chunk overhead, 5% retained-failure cap, 20 GB run/checkpoint/cache
+reserve, and one active shard: 181,292,799,182 bytes. Publication is an atomic
+same-filesystem rename, not a second full copy. Pre-launch free space must
+exceed 281,292,799,182 bytes, preserving a 100 GB post-peak floor.
 
-The numerical and procedural choices are frozen in release-candidate form.
-Phase 3A remains blocked on human review of the Phase 2 report and explicit
-authorization. Full production remains additionally blocked on the Phase 3A
-throughput, solver acceptance-rate, storage and resume evidence.
+Phase 3A remains separately gated at 4,096 engineering pairs, 4,831,838,208
+raw bytes and 5,807,608,883 projected peak bytes. It must measure acceptance,
+throughput, waveform boundaries, whitening, dynamics convergence, actual disk
+amplification and byte-identical resume before any larger authorization.
+
+## Hard stops
+
+No data generation, training, GWOSC/GWTC download, or Phase 3A authorization
+follows from this release candidate or its merge. Privileged-input access,
+group leakage, disconnected external convergence, dynamics shortcuts,
+undeclared waveform/PSD versions, invalid weights, incomplete manifests,
+waveform truncation or resume mismatch are hard failures.

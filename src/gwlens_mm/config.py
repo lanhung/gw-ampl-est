@@ -8,7 +8,7 @@ from typing import Any, Dict, Mapping
 import yaml
 
 from .physics.quantities import LensFamily
-from .schema import SCHEMA_VERSION
+from .schema import FROZEN_SMOKE_SCHEMA_VERSION
 
 
 def load_yaml(path: Path) -> Dict[str, Any]:
@@ -21,8 +21,10 @@ def load_yaml(path: Path) -> Dict[str, Any]:
 def validate_smoke_configuration(
     config: Mapping[str, Any], *, expected_execution_authorized: bool
 ) -> None:
-    if config.get("schema_version") != SCHEMA_VERSION:
-        raise ValueError(f"smoke specification must use schema {SCHEMA_VERSION}")
+    if config.get("schema_version") != FROZEN_SMOKE_SCHEMA_VERSION:
+        raise ValueError(
+            f"smoke specification must use frozen schema {FROZEN_SMOKE_SCHEMA_VERSION}"
+        )
     if config.get("execution_authorized") is not expected_execution_authorized:
         raise ValueError(
             "smoke execution authorization does not match the current phase gate"

@@ -1,9 +1,17 @@
 # V2 logical schema specification
 
-Schema version: `2.0.0-alpha.2`.
+Current scientific schema version: `2.0.0-alpha.3`.
+
+Frozen Phase 1B engineering schema version: `2.0.0-alpha.2`.
 
 Alpha.1 contained metadata examples only and was never materialized as a v2
 dataset. Alpha.2 supersedes it without a physical data migration.
+
+Alpha.3 adds an optional-valued but explicitly masked environment observation
+for external convergence. It is the first schema for future scientific data.
+The immutable alpha.2 smoke dataset is not migrated or regenerated; the reader
+retains alpha.2 compatibility and round-trips it without inserting alpha.3
+fields.
 
 Phase 1B adds `engineering_smoke` as an explicit non-scientific split value.
 It prevents engineering records from being mistaken for training or
@@ -69,11 +77,14 @@ Synthetic IDs are provenance identifiers, not GWOSC segment claims.
 
 `EMObservation` contains image-ID-keyed `ImageAstrometryObservation` records,
 lens center, Einstein scale, lens/source redshift, velocity dispersion,
-uncertainties, aperture metadata, censoring flags, and a complete availability
-mask. Astrometry may include selected and non-selected physical images; tuple
-order never defines identity. IDs are unique and must exist in lens truth. A
-missing modality is `null` with a false mask; exact truth is never imputed.
-Covariances must be finite, symmetric, and positive definite.
+an `ExternalConvergenceObservation`, uncertainties, aperture metadata,
+censoring flags, and a complete availability mask. The environment observation
+stores posterior mean, positive posterior standard deviation, inference method
+and optional reference. It never exposes `LensTruth.external_convergence`.
+Astrometry may include selected and non-selected physical images; tuple order
+never defines identity. IDs are unique and must exist in lens truth. A missing
+modality is `null` with a false mask; exact truth is never imputed. Covariances
+must be finite, symmetric, and positive definite.
 
 Einstein radius and velocity dispersion must be positive; redshifts must be
 nonnegative. `redshift_ordering_valid` records whether point summaries satisfy
@@ -98,8 +109,9 @@ metadata.
 
 ## Artifacts
 
-- `examples/v2_metadata_example.json` is one metadata-only, deliberately
-  ungenerated example containing three physical images and a selected pair.
+- `examples/v2_metadata_example.json` is one alpha.3 metadata-only,
+  deliberately ungenerated example containing three physical images, a
+  selected pair and an environment observation.
 - `examples/v2_metadata_schema.json` is generated logically by
   `v2_json_schema()` and tested for equality.
 - `configs/data/v2_smoke.yaml` is an execution-disabled Phase 1B
@@ -116,14 +128,11 @@ typed validators and tests.
 runs every validator, and `to_dict()` returns canonical JSON-compatible values.
 Tests require exact field-preserving round trips.
 
-Schema versions use semantic-style identifiers. Before stable v2.0, an alpha
-revision may make a breaking correction only while no physical dataset exists;
-the decision must be recorded as it is for alpha.1 to alpha.2. After any v2
-dataset is materialized, patch versions may only clarify validation, minor
-versions may add optional fields with defaults, and removing/renaming fields or
-changing units requires a major version plus a pure tested migration.
-Migrations preserve the original manifest and record source/target versions;
-in-place mutation of immutable datasets is prohibited.
+Schema versions use semantic-style identifiers. Alpha.3 does not redefine or
+mutate the materialized alpha.2 engineering artifact. Readers accept both and
+serialize according to the record's original version. Future scientific data
+start directly at alpha.3. Migrations preserve original manifests and record
+source/target versions; in-place mutation is prohibited.
 
 ## Cross-record invariants
 
@@ -131,6 +140,8 @@ in-place mutation of immutable datasets is prohibited.
 - earliest, brightest, and minimum primary definitions are checked against
   truth with tight equality tolerances; catalog anchor adds no ordering claim;
 - astrometry IDs belong to the physical image set;
+- alpha.3 environment availability equals presence of the typed environment
+  observation, whose uncertainty is positive;
 - detector-noise availability equals the GW mask;
 - unavailable noisy/clean/noise slots are exactly zero-filled;
 - available slots satisfy `noisy = clean + noise` within tolerance;

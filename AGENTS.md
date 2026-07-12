@@ -79,8 +79,10 @@ generator audit and approving a v2 schema.
 ## Current phase gate
 
 Phase 0, Phase 1A, Phase 1A.1, Phase 1B, and the Phase 1B.1 cleanup are
-complete. Phase 2 preregistration is frozen as release candidate 1 on
-`phase2/preregistration` and awaits human review.
+complete. Review of Phase 2 release candidate 1 requested changes. Phase 2.1
+preregistration hardening produced release candidate 2 on
+`phase2/preregistration`, and automatic review passed. Phase 3A remains
+unauthorized until a separate explicit execution decision.
 
 The reviewed Phase 1B engineering artifact is frozen as:
 

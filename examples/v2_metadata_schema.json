@@ -37,6 +37,35 @@
       ],
       "type": "object"
     },
+    "ExternalConvergenceObservation": {
+      "additionalProperties": false,
+      "properties": {
+        "inference_method": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "posterior_mean": {
+          "type": "number"
+        },
+        "posterior_standard_deviation": {
+          "exclusiveMinimum": 0,
+          "type": "number"
+        },
+        "reference": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "posterior_mean",
+        "posterior_standard_deviation",
+        "inference_method",
+        "reference"
+      ],
+      "type": "object"
+    },
     "ImageAstrometryObservation": {
       "additionalProperties": false,
       "properties": {
@@ -107,7 +136,7 @@
       "type": "object"
     }
   },
-  "$id": "https://example.invalid/gwlens-mm/v2/2.0.0-alpha.2",
+  "$id": "https://example.invalid/gwlens-mm/v2/2.0.0-alpha.3",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "additionalProperties": false,
   "properties": {
@@ -127,6 +156,16 @@
         ]
       },
       "properties": {
+        "external_convergence_observation": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/ExternalConvergenceObservation"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "modality_availability_mask": {
           "type": "object"
         },
@@ -142,6 +181,7 @@
       },
       "required": [
         "observed_image_astrometry",
+        "external_convergence_observation",
         "modality_availability_mask"
       ],
       "type": "object"
@@ -194,7 +234,7 @@
       "type": "object"
     },
     "schema_version": {
-      "const": "2.0.0-alpha.2"
+      "const": "2.0.0-alpha.3"
     },
     "source_truth": {
       "type": "object"

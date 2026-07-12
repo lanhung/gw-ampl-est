@@ -132,3 +132,27 @@ silently removed.
   therefore reported 108 passes by running both copies. The authoritative
   Vultr file set passed 104 tests remotely with the stale path explicitly
   ignored. No AutoDL source file was edited or deleted.
+
+## Phase 2.1 request-changes review
+
+- RC.1 used one calibration split both to fit post-hoc correction and to source
+  SBC, so corrected calibration could not be treated as independent evidence.
+  RC.2 creates group-disjoint fitting and diagnostic splits at fixed total
+  size.
+- RC.1 sourced the likelihood gold subset only from IID test and did not forbid
+  revision after failure. RC.2 separates development and report-once final
+  subsets.
+- RC.1 could be interpreted as selecting the best of twelve architecture/seed
+  fits. RC.2 selects architectures by their three-seed mean and reports every
+  seed.
+- External convergence, velocity dispersion and named OOD/mismatch sets were
+  under-specified in RC.1. RC.2 connects external convergence through an MST,
+  freezes an actual Galkin model and fixes diagnostic boundaries.
+- The initial literature list was adequate for identifiability but inadequate
+  for a publication novelty claim. RC.2 adds a source-linked comparison matrix
+  and explicitly declines an unsupported “first” claim.
+- Vultr still lacks Lenstronomy, so the local optional adapter and dynamics
+  tests remain skipped. The final declared dynamics fixture passed read-only on
+  the pinned AutoDL environment: 4,000/16,000-sample values were 237.720593 and
+  237.937421 km/s (relative difference about 0.00091, below 0.02). This is a
+  numerical contract check, not a simulated dataset or performance result.

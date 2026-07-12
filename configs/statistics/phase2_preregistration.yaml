@@ -1,7 +1,9 @@
 phase: "2"
-preregistration_version: "1.0.0-rc.1"
+preregistration_version: "1.0.0-rc.2"
+scientific_schema_version: "2.0.0-alpha.3"
+frozen_engineering_schema_version: "2.0.0-alpha.2"
 root_seed: 2026071202
-status: awaiting_human_review
+status: automatic_review_passed
 execution_enabled: false
 scientific_data_generation_authorized: false
 training_authorized: false
@@ -110,8 +112,22 @@ source_population:
     exponent: -2.3
     minimum: 20.0
     maximum: 80.0
-  mass_ratio: {distribution: uniform, minimum: 0.25, maximum: 1.0}
+  mass_ratio:
+    distribution: conditional_uniform
+    lower_bound_formula: max(0.25, 10.0 / primary_mass_source_frame_msun)
+    maximum: 1.0
   secondary_mass_source_frame_minimum_msun: 10.0
+  invalid_secondary_mass_policy: impossible_by_conditional_support_not_rejected
+  mass_joint_log_density_formula: >-
+    log((-1.3)/(80**(-1.3)-20**(-1.3))) - 2.3*log(m1)
+    - log(1-max(0.25,10/m1))
+  evaluation_source_mass_distribution: identical_to_proposal_source_mass_distribution
+  importance_weighting:
+    proposal_mass_log_density: mass_joint_log_density_formula
+    evaluation_mass_log_density: mass_joint_log_density_formula
+    source_mass_log_weight: 0.0
+    log_weight: evaluation_log_density_minus_proposal_log_density
+    evaluate_both_normalized_densities_before_selection_conditioning: true
   spin_magnitude: {distribution: beta, alpha: 2.0, beta: 5.0, maximum: 0.99}
   spin_orientation: isotropic
   sky_orientation: isotropic
@@ -124,6 +140,60 @@ lens_solver:
   families: [sie_external_shear, epl_external_shear]
   analytic_control: sis
   retain_all_physical_images: true
+  external_convergence_forward_model:
+    id: mass_sheet_transform_v1
+    lambda_formula: 1.0 - external_convergence
+    allowed_external_convergence: [-0.25, 0.25]
+    source_position_transform: beta_prime_equals_lambda_times_beta
+    internal_deflection_transform: alpha_internal_prime_equals_lambda_times_alpha_internal
+    surface_density_transform: kappa_prime_equals_lambda_times_kappa_internal_plus_one_minus_lambda
+    image_position_transform: invariant
+    signed_magnification_transform: mu_prime_equals_mu_divided_by_lambda_squared
+    fermat_difference_transform: delta_phi_prime_equals_lambda_times_delta_phi
+    time_delay_transform: delta_t_prime_equals_lambda_times_delta_t
+    additive_fermat_constant: irrelevant_and_not_stored_as_observable
+    required_phase3a_contracts:
+      - source_scaling
+      - image_position_invariance
+      - signed_and_absolute_magnification_scaling
+      - fermat_difference_scaling
+      - physical_delay_scaling
+
+stellar_kinematics_forward_model:
+  id: lenstronomy_galkin_spherical_powerlaw_hernquist_om_v1
+  package: lenstronomy
+  version: "1.13.6"
+  imaging_mass_model: declared_sie_or_epl_external_shear
+  dynamics_mass_model: circularized_spherical_power_law
+  dynamics_density_slope:
+    sie_external_shear: 2.0
+    epl_external_shear: use_epl_density_slope
+  light_model: HERNQUIST
+  effective_radius_arcsec:
+    distribution: log_uniform
+    minimum: 0.3
+    maximum: 2.0
+  hernquist_scale_formula: effective_radius_arcsec / 1.8153
+  anisotropy_model: Osipkov_Merritt
+  anisotropy_radius_over_effective_radius:
+    distribution: log_uniform
+    minimum: 0.5
+    maximum: 5.0
+  aperture:
+    type: shell
+    inner_radius_arcsec: 0.0
+    outer_radius_arcsec: 1.0
+  psf:
+    type: GAUSSIAN
+    fwhm_arcsec: 0.7
+  line_of_sight_averaging: luminosity_weighted_aperture_average
+  external_convergence_treatment: line_of_sight_mass_sheet_excluded_from_bound_stellar_dynamics
+  monte_carlo_samples: 4000
+  seed_domain: stellar_kinematics
+  phase3a_convergence_check:
+    reference_samples: 16000
+    maximum_relative_difference: 0.02
+  shortcut_forbidden: direct_inversion_from_einstein_radius_alone
 
 gw_observation_model:
   id: gaussian_curve_conditioned_h1_l1_v1_v1
@@ -168,39 +238,127 @@ selection_model:
   rejected_attempts_append_only: true
 
 em_observation_model:
-  id: balanced_eight_cell_benchmark_v1
+  id: balanced_eight_cell_benchmark_v2
   assignment: deterministic_balanced_hash_by_physical_system
   claim_boundary: scenario_mixture_not_survey_missingness_rate
-  base_uncertainties:
-    astrometry_std_arcsec: [0.005, 0.02]
-    lens_center_std_arcsec: [0.01, 0.03]
-    einstein_radius_fractional_std: [0.03, 0.10]
-    spectroscopic_redshift_std_scale_1_plus_z: 0.001
-    photometric_redshift_std_scale_1_plus_z: 0.05
-    velocity_dispersion_fractional_std: [0.05, 0.10]
-    timing_std_seconds: [0.001, 0.01]
+  environment_observation:
+    representation: posterior_mean_standard_deviation
+    latent_quantity: external_convergence
+    informative_standard_deviation: 0.02
+    weak_standard_deviation: 0.06
+    observation_likelihood: posterior_mean_given_truth_is_normal_with_declared_standard_deviation
+    covariance_assumption: scalar_independent_of_other_em_measurement_errors
+    unavailable_value: null
+    availability_mask_name: environment_convergence
   availability_cells:
-    - full_precise_spectroscopic
-    - full_photometric_redshifts
-    - no_velocity_dispersion
-    - no_source_redshift
-    - no_lens_redshift
-    - astrometry_redshifts_only
-    - astrometry_kinematics_no_einstein_scale
-    - sparse_astrometry_timing_only
+    full_precise_spectroscopic:
+      modalities: [image_astrometry, lens_center, einstein_radius, lens_redshift, source_redshift, velocity_dispersion, environment_convergence]
+      astrometry_std_arcsec: 0.005
+      lens_center_std_arcsec: 0.01
+      einstein_radius_fractional_std: 0.03
+      lens_redshift: {mode: spectroscopic, standard_deviation_scale_1_plus_z: 0.001}
+      source_redshift: {mode: spectroscopic, standard_deviation_scale_1_plus_z: 0.001}
+      velocity_dispersion_fractional_std: 0.05
+      environment_state: informative
+      uncertainty_covariance: diagonal
+      timing_std_seconds: 0.001
+    full_photometric_redshifts:
+      modalities: [image_astrometry, lens_center, einstein_radius, lens_redshift, source_redshift, velocity_dispersion, environment_convergence]
+      astrometry_std_arcsec: 0.02
+      lens_center_std_arcsec: 0.03
+      einstein_radius_fractional_std: 0.10
+      lens_redshift: {mode: photometric, standard_deviation_scale_1_plus_z: 0.05}
+      source_redshift: {mode: photometric, standard_deviation_scale_1_plus_z: 0.05}
+      velocity_dispersion_fractional_std: 0.10
+      environment_state: weak
+      uncertainty_covariance: diagonal
+      timing_std_seconds: 0.01
+    no_velocity_dispersion:
+      modalities: [image_astrometry, lens_center, einstein_radius, lens_redshift, source_redshift, environment_convergence]
+      astrometry_std_arcsec: 0.01
+      lens_center_std_arcsec: 0.02
+      einstein_radius_fractional_std: 0.05
+      lens_redshift: {mode: spectroscopic, standard_deviation_scale_1_plus_z: 0.001}
+      source_redshift: {mode: spectroscopic, standard_deviation_scale_1_plus_z: 0.001}
+      velocity_dispersion_fractional_std: null
+      environment_state: informative
+      uncertainty_covariance: diagonal
+      timing_std_seconds: 0.002
+    no_source_redshift:
+      modalities: [image_astrometry, lens_center, einstein_radius, lens_redshift, velocity_dispersion, environment_convergence]
+      astrometry_std_arcsec: 0.01
+      lens_center_std_arcsec: 0.02
+      einstein_radius_fractional_std: 0.05
+      lens_redshift: {mode: spectroscopic, standard_deviation_scale_1_plus_z: 0.001}
+      source_redshift: null
+      velocity_dispersion_fractional_std: 0.10
+      environment_state: weak
+      uncertainty_covariance: diagonal
+      timing_std_seconds: 0.002
+    no_lens_redshift:
+      modalities: [image_astrometry, lens_center, einstein_radius, source_redshift, velocity_dispersion, environment_convergence]
+      astrometry_std_arcsec: 0.01
+      lens_center_std_arcsec: 0.02
+      einstein_radius_fractional_std: 0.05
+      lens_redshift: null
+      source_redshift: {mode: spectroscopic, standard_deviation_scale_1_plus_z: 0.001}
+      velocity_dispersion_fractional_std: 0.10
+      environment_state: weak
+      uncertainty_covariance: diagonal
+      timing_std_seconds: 0.002
+    astrometry_redshifts_only:
+      modalities: [image_astrometry, lens_center, lens_redshift, source_redshift]
+      astrometry_std_arcsec: 0.01
+      lens_center_std_arcsec: 0.02
+      einstein_radius_fractional_std: null
+      lens_redshift: {mode: spectroscopic, standard_deviation_scale_1_plus_z: 0.001}
+      source_redshift: {mode: spectroscopic, standard_deviation_scale_1_plus_z: 0.001}
+      velocity_dispersion_fractional_std: null
+      environment_state: unavailable
+      uncertainty_covariance: diagonal_over_available_modalities
+      timing_std_seconds: 0.002
+    astrometry_kinematics_no_einstein_scale:
+      modalities: [image_astrometry, lens_center, lens_redshift, source_redshift, velocity_dispersion, environment_convergence]
+      astrometry_std_arcsec: 0.01
+      lens_center_std_arcsec: 0.02
+      einstein_radius_fractional_std: null
+      lens_redshift: {mode: spectroscopic, standard_deviation_scale_1_plus_z: 0.001}
+      source_redshift: {mode: spectroscopic, standard_deviation_scale_1_plus_z: 0.001}
+      velocity_dispersion_fractional_std: 0.10
+      environment_state: weak
+      uncertainty_covariance: diagonal
+      timing_std_seconds: 0.002
+    sparse_astrometry_timing_only:
+      modalities: [image_astrometry, lens_center]
+      astrometry_std_arcsec: 0.02
+      lens_center_std_arcsec: 0.03
+      einstein_radius_fractional_std: null
+      lens_redshift: null
+      source_redshift: null
+      velocity_dispersion_fractional_std: null
+      environment_state: unavailable
+      uncertainty_covariance: diagonal_over_available_modalities
+      timing_std_seconds: 0.01
 
 splits:
   generator_qualification: 4096
   train: 65536
   validation: 8192
-  calibration: 8192
+  calibration_fit: 6144
+  sbc_diagnostic: 2048
   iid_test: 16384
   balanced_tail_diagnostic: 4096
-  lens_family_ood: 4096
+  cross_family_misspecification_test: 4096
   parameter_region_ood: 4096
-  waveform_psd_mismatch_test: 4096
+  waveform_mismatch_test: 2048
+  psd_mismatch_test: 2048
   real_noise_test: 0
   real_noise_test_status: reserved_unset_requires_separate_gwosc_gate
+
+grouping_contract:
+  disjoint_identifiers: [source_id, lens_id, physical_system_id, pair_id, noise_segment_id, augmentation_parent_id]
+  calibration_fit_sbc_overlap_allowed: false
+  assignment_before_materialization: true
 
 estimator_design:
   id: mask_aware_multimessenger_nsf_v1
@@ -217,9 +375,17 @@ estimator_design:
   candidate_conditioner_widths: [128, 256]
   training_seeds: [0, 1, 2]
   selection_metric: validation_negative_log_probability
+  architecture_selection:
+    aggregate_across_seeds: mean_validation_negative_log_probability
+    robustness_statistic: median_validation_negative_log_probability
+    do_not_select_best_seed: true
+    report_all_seed_results: true
+    primary_summary: mean_and_standard_deviation_across_three_seeds
   tie_break: lower_parameter_count
   maximum_candidate_fits: 12
   posthoc_calibration_split_only: true
+  posthoc_calibration_source_split: calibration_fit
+  sbc_never_fits_calibration_map: true
   deployable_policy_validation_required: true
   baseline_ids:
     - gw_only_same_backbone
@@ -244,17 +410,64 @@ calibration_protocol:
   minimum_tail_stratum_count: 1024
   joint_region: flow_log_density_highest_density_rank
   simulation_based_calibration:
-    source_split: calibration
+    source_split: sbc_diagnostic
     replicates: 1024
     posterior_draws_per_replicate: 1024
     histogram_bins: 20
     familywise_test: holm_corrected_chi_square
     familywise_alpha: 0.01
-  gold_likelihood_subset:
-    source_split: iid_test
+  gold_development_subset:
+    source_split: validation
     cases: 256
+    may_trigger_method_revision: true
     minimum_importance_sampling_efficiency: 0.10
     required_fraction_meeting_efficiency: 0.95
+  gold_final_subset:
+    source_split: iid_test
+    cases: 256
+    may_trigger_method_revision: false
+    report_once_after_freeze: true
+    failure_action: downgrade_claim_or_new_preregistration_version
+    minimum_importance_sampling_efficiency: 0.10
+    required_fraction_meeting_efficiency: 0.95
+
+diagnostic_set_definitions:
+  balanced_tail_diagnostic:
+    assignment: priority_order_first_matching_stratum
+    cases_per_stratum: 1024
+    strata:
+      - {id: high_absolute_magnification, condition: max_selected_abs_mu_greater_equal_20}
+      - {id: extreme_relative_magnification, condition: not_prior_and_min_over_max_selected_abs_mu_less_equal_0.10}
+      - {id: second_image_near_threshold, condition: not_prior_and_secondary_network_snr_in_10_to_12}
+      - {id: extreme_profile_or_environment, condition: not_prior_and_abs_kappa_ext_greater_equal_0.10_or_slope_outside_1.75_to_2.40}
+  cross_family_misspecification_test:
+    cases_per_cell: 1024
+    cells:
+      - {truth: sie_external_shear, assumed: epl_external_shear_fixed_slope_2.08}
+      - {truth: epl_external_shear, assumed: sie_external_shear}
+      - {truth: sie_external_shear, assumed: family_marginalized_sie_epl}
+      - {truth: epl_external_shear, assumed: family_marginalized_sie_epl}
+  parameter_region_ood:
+    cases_per_stratum: 1024
+    strata:
+      - {id: slope_outside_training, epl_density_slope: "[1.4,1.6) union (2.5,2.7]", branch_probability: 0.5}
+      - {id: extreme_flattening, axis_ratio: "[0.25,0.40)"}
+      - {id: high_external_shear, shear_amplitude: "(0.15,0.25]"}
+      - {id: extreme_external_convergence, abs_external_convergence: "(0.15,0.25]", sign_probability: 0.5}
+  waveform_mismatch_test:
+    truth_waveform: SEOBNRv4PHM
+    assumed_waveform: IMRPhenomXPHM
+    cases: 2048
+  psd_mismatch_test:
+    cases: 2048
+    curve_package: bilby
+    package_version: "2.6.0"
+    package_relative_directory: bilby/gw/detector/noise_curves
+    truth_curves:
+      H1: {file: aLIGO_ZERO_DET_high_P_psd.txt, sha256: 98d7e2cc5610770cf04d91396d975af5b98299a3498c352c3d660a8992568aab}
+      L1: {file: aLIGO_ZERO_DET_high_P_psd.txt, sha256: 98d7e2cc5610770cf04d91396d975af5b98299a3498c352c3d660a8992568aab}
+      V1: {file: AdV_psd.txt, sha256: c2532150f63dbaa76d451e2c074390272e259e4e2eedc3e684d2205582aa0764}
+    assumed_curves: baseline_psd_curves
 
 storage_plan:
   format: zarr_v2_plus_parquet
@@ -263,11 +476,21 @@ storage_plan:
   bytes_per_pair_uncompressed: 1179648
   planned_pairs_including_qualification: 118784
   raw_array_bytes: 140123308032
-  reserve_multiplier: 1.30
-  reserved_bytes: 182160300442
+  publication_method: atomic_same_filesystem_directory_rename_no_dataset_copy
+  metadata_and_chunk_overhead_fraction: 0.10
+  metadata_and_chunk_overhead_bytes: 14012330804
+  retained_failed_shard_cap_fraction: 0.05
+  retained_failed_shard_cap_bytes: 7006165402
+  run_checkpoint_and_cache_reserve_bytes: 20000000000
+  active_temporary_shard_bytes: 150994944
+  projected_peak_bytes: 181292799182
+  minimum_post_peak_free_bytes: 100000000000
+  minimum_prelaunch_free_bytes: 281292799182
   measured_free_bytes_at_preregistration: 342407888896
-  projected_remaining_bytes: 160247588454
+  projected_remaining_bytes_at_peak: 161115089714
   qualification_raw_bytes: 4831838208
+  qualification_log_and_manifest_reserve_bytes: 100000000
+  qualification_projected_peak_bytes: 5807608883
 
 execution_plan:
   phase3a_qualification_first: true
@@ -295,5 +518,4 @@ hard_failures:
   - resume_byte_mismatch
 
 remaining_external_gate:
-  - human_review
   - explicit_phase3a_authorization

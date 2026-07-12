@@ -203,3 +203,57 @@ magnification, with a separately named relative strain amplitude. Phase 2 does
 not create a deployable EM flux-ratio product or identify it with the macro
 ratio; doing so would require an explicit variability, extinction,
 microlensing and measurement model.
+
+## D033 — Independent calibration evidence
+
+The former 8,192-case calibration split is replaced without changing total
+size by 6,144 `calibration_fit` cases and 2,048 `sbc_diagnostic` cases. The
+former alone may fit post-hoc correction; 1,024 fixed SBC replicates come from
+the latter. Their source, lens, physical-system, pair, noise and augmentation
+groups are disjoint.
+
+## D034 — Final evidence cannot tune the method
+
+The validation split supplies a 256-case gold development subset that may
+trigger revision. A distinct frozen 256-case IID subset is evaluated once
+after method and calibration freeze. Its failure downgrades the claim or
+requires a new preregistration; it cannot retune the current version.
+
+Architecture selection uses mean validation negative log probability over all
+three seeds. Median is diagnostic, and no individual seed is selected as the
+winner. All three selected-architecture seeds are reported.
+
+## D035 — External convergence is connected physics and data
+
+Future alpha.3 scientific records apply the declared mass-sheet transformation
+with `lambda = 1 - kappa_ext`: source and Fermat/time differences scale by
+lambda, image positions remain invariant, and signed magnification scales by
+`lambda^-2`. A deployable environment observation supplies posterior mean and
+standard deviation or explicit absence; truth remains privileged. Frozen
+alpha.2 smoke records remain readable and unchanged.
+
+## D036 — Kinematics uses a declared forward model
+
+Velocity dispersion is generated with Lenstronomy 1.13.6 Galkin using a
+circularized spherical power-law mass model, Hernquist light, an
+Osipkov–Merritt anisotropy prior, a one-arcsecond aperture, 0.7-arcsecond
+Gaussian PSF and luminosity weighting. External line-of-sight convergence is
+not treated as bound stellar mass. Direct inversion of Einstein radius is
+forbidden.
+
+## D037 — Diagnostic sets are frozen before results
+
+The misleading `lens_family_ood` and combined waveform/PSD split are replaced
+by exact cross-family misspecification, parameter-region OOD, waveform
+mismatch and PSD mismatch sets. Four balanced-tail strata use fixed physical
+boundaries and priority assignment. No boundary may be selected after model
+errors are observed.
+
+## D038 — Publication positioning is an intersection, not a “first” claim
+
+Phase 2.1 positions the work against GOLUM, Bayesian pair identification,
+Gravelamps, DINGO/DINGO-lensing, micro/millilensing NPE, multimessenger lens
+modeling and LVK catalog searches. The preregistered novelty is the evaluated
+intersection of separated galaxy images, GW+EM conditioning, model-conditional
+absolute magnification and calibration. Journal targeting does not substitute
+for validated results.

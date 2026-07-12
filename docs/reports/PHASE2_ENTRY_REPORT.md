@@ -2,10 +2,13 @@
 
 ## Outcome
 
-Phase 2 design work is complete as preregistration `1.0.0-rc.1` and awaits
-human review. No waveform pairs were generated, no model was trained, no
-GWOSC/GWTC product was downloaded, and no legacy or frozen smoke dataset file
-was modified.
+This report records release candidate 1. Review requested changes because its
+calibration/SBC evidence was not independent and several forward-model and
+diagnostic definitions were incomplete. It is superseded by preregistration
+`1.0.0-rc.2` and
+`docs/reports/PHASE2A_PREREGISTRATION_HARDENING_REPORT.md`. No waveform pairs
+were generated, no model was trained, no GWOSC/GWTC product was downloaded,
+and no legacy or frozen smoke dataset file was modified.
 
 ## Completed
 
@@ -55,8 +58,9 @@ no inference or generation.
 
 ## Deferred and external gates
 
-Human review is the only remaining Phase 2 gate. Approval must explicitly open
-Phase 3A; it does not authorize full production or training. Phase 3A must first
+RC.1 was not approved. RC.2 review is the remaining Phase 2 gate. Any later
+approval must explicitly open Phase 3A; it does not authorize full production
+or training. Phase 3A must first
 write its concrete manifest, measure solver acceptance and throughput, validate
 waveform boundaries and whitening, confirm actual storage, and demonstrate
 interruption/resume on the 4,096-pair engineering qualification set. Those

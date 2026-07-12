@@ -172,3 +172,59 @@ def validate_solver_contract(
             raise ValueError("solver images must be returned in arrival/Fermat order")
         if not all(image.valid for image in solution.physical_images):
             raise ValueError("contract case returned an invalid image")
+
+
+def apply_mass_sheet_transform(
+    solution: LensSystemSolution,
+    source_position: Tuple[float, float],
+    external_convergence: float,
+) -> Tuple[LensSystemSolution, Tuple[float, float]]:
+    """Apply the explicit alpha.3 mass-sheet convention.
+
+    ``lambda_mst = 1 - external_convergence``. Image positions, parity, and
+    Morse class are invariant; source coordinates and Fermat/time-delay
+    differences scale with lambda, and signed magnifications with lambda^-2.
+    """
+
+    kappa_ext = float(external_convergence)
+    if not math.isfinite(kappa_ext):
+        raise ValueError("external convergence must be finite")
+    lambda_mst = 1.0 - kappa_ext
+    if lambda_mst <= 0.0:
+        raise ValueError("mass-sheet lambda must be positive")
+    beta = tuple(lambda_mst * float(value) for value in source_position)
+    if len(beta) != 2 or not all(math.isfinite(value) for value in beta):
+        raise ValueError("source position must contain two finite values")
+    images = tuple(
+        PhysicalImage(
+            image_id=image.image_id,
+            position_arcsec=image.position_arcsec,
+            mu_signed=image.mu_signed / lambda_mst**2,
+            parity=image.parity,
+            morse_class=image.morse_class,
+            fermat_potential_dimensionless=(
+                None
+                if image.fermat_potential_dimensionless is None
+                else lambda_mst * image.fermat_potential_dimensionless
+            ),
+            arrival_time_seconds=(
+                None
+                if image.arrival_time_seconds is None
+                else lambda_mst * image.arrival_time_seconds
+            ),
+            valid=image.valid,
+            validity_reason=image.validity_reason,
+        )
+        for image in solution.physical_images
+    )
+    return (
+        LensSystemSolution(
+            lens_family=solution.lens_family,
+            physical_images=images,
+            solver_name=f"{solution.solver_name}+mass-sheet-transform",
+            solver_version=f"{solution.solver_version}+mst-v1",
+            valid=solution.valid,
+            validity_reason=solution.validity_reason,
+        ),
+        (beta[0], beta[1]),
+    )

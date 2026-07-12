@@ -14,7 +14,9 @@ from typing import Any, Dict, Mapping, Optional, Sequence, Tuple, cast
 
 from .physics.quantities import ImageParity, LensFamily, MorseClass, PrimaryDefinition
 
-SCHEMA_VERSION = "2.0.0-alpha.2"
+SCHEMA_VERSION = "2.0.0-alpha.3"
+FROZEN_SMOKE_SCHEMA_VERSION = "2.0.0-alpha.2"
+SUPPORTED_SCHEMA_VERSIONS = frozenset({FROZEN_SMOKE_SCHEMA_VERSION, SCHEMA_VERSION})
 DETECTOR_SLOTS = ("H1", "L1", "V1")
 
 
@@ -23,12 +25,17 @@ class SplitName(str, Enum):
     TRAIN = "train"
     VALIDATION = "validation"
     CALIBRATION = "calibration"
+    CALIBRATION_FIT = "calibration_fit"
+    SBC_DIAGNOSTIC = "sbc_diagnostic"
     IID_TEST = "iid_test"
     BALANCED_TAIL_DIAGNOSTIC = "balanced_tail_diagnostic"
     LENS_FAMILY_OOD = "lens_family_ood"
+    CROSS_FAMILY_MISSPECIFICATION_TEST = "cross_family_misspecification_test"
     PARAMETER_REGION_OOD = "parameter_region_ood"
     REAL_NOISE_TEST = "real_noise_test"
     WAVEFORM_PSD_MISMATCH_TEST = "waveform_psd_mismatch_test"
+    WAVEFORM_MISMATCH_TEST = "waveform_mismatch_test"
+    PSD_MISMATCH_TEST = "psd_mismatch_test"
 
 
 class ArrayProductRole(str, Enum):
@@ -316,6 +323,23 @@ class ScalarObservation:
 
 
 @dataclass(frozen=True)
+class ExternalConvergenceObservation:
+    posterior_mean: float
+    posterior_standard_deviation: float
+    inference_method: str
+    reference: Optional[str]
+
+    def validate(self) -> None:
+        _finite(self.posterior_mean, "external-convergence posterior mean")
+        _positive(
+            self.posterior_standard_deviation,
+            "external-convergence posterior standard deviation",
+        )
+        if not self.inference_method.strip():
+            raise ValueError("external-convergence observation requires an inference method")
+
+
+@dataclass(frozen=True)
 class ImageAstrometryObservation:
     image_id: str
     position_arcsec: Tuple[float, float]
@@ -344,8 +368,9 @@ class EMObservation:
     censoring_flags: Mapping[str, bool]
     aperture_metadata: Mapping[str, float]
     redshift_ordering_valid: Optional[bool]
+    external_convergence_observation: Optional[ExternalConvergenceObservation] = None
 
-    def validate(self, lens_truth: LensTruth) -> None:
+    def validate(self, lens_truth: LensTruth, schema_version: str) -> None:
         values: Dict[str, Any] = {
             "image_astrometry": self.observed_image_astrometry,
             "lens_center": self.observed_lens_center_arcsec,
@@ -354,6 +379,10 @@ class EMObservation:
             "source_redshift": self.source_redshift,
             "velocity_dispersion": self.velocity_dispersion_km_s,
         }
+        if schema_version == SCHEMA_VERSION:
+            values["environment_convergence"] = self.external_convergence_observation
+        elif self.external_convergence_observation is not None:
+            raise ValueError("alpha.2 records cannot contain external-convergence observations")
         if set(values) != set(self.modality_availability_mask):
             raise ValueError("modality mask must enumerate every EM modality exactly")
         for name, value in values.items():
@@ -396,6 +425,8 @@ class EMObservation:
                 self.velocity_dispersion_km_s.value,
                 "observed velocity dispersion",
             )
+        if self.external_convergence_observation is not None:
+            self.external_convergence_observation.validate()
         if self.lens_redshift is not None and self.source_redshift is not None:
             expected_ordering = self.lens_redshift.value < self.source_redshift.value
             if self.redshift_ordering_valid is not expected_ordering:
@@ -517,13 +548,13 @@ class V2Record:
     provenance: Provenance
 
     def validate(self) -> None:
-        if self.schema_version != SCHEMA_VERSION:
+        if self.schema_version not in SUPPORTED_SCHEMA_VERSIONS:
             raise ValueError(f"unsupported schema version: {self.schema_version}")
         self.pair.validate()
         self.source_truth.validate()
         self.lens_truth.validate(self.pair)
         self.gw_observation.validate()
-        self.em_observation.validate(self.lens_truth)
+        self.em_observation.validate(self.lens_truth, self.schema_version)
         self.provenance.validate(self.pair, self.gw_observation)
 
     def to_dict(self) -> Dict[str, Any]:
@@ -536,7 +567,10 @@ class V2Record:
                 return [convert(item) for item in value]
             return value
 
-        return convert(asdict(self))
+        result = convert(asdict(self))
+        if self.schema_version == FROZEN_SMOKE_SCHEMA_VERSION:
+            del result["em_observation"]["external_convergence_observation"]
+        return result
 
     def to_json(self, *, indent: Optional[int] = 2) -> str:
         return json.dumps(self.to_dict(), indent=indent, sort_keys=True) + "\n"
@@ -623,6 +657,10 @@ class V2Record:
         ):
             if em_data[field] is not None:
                 em_data[field] = ScalarObservation(**em_data[field])
+        if em_data.get("external_convergence_observation") is not None:
+            em_data["external_convergence_observation"] = ExternalConvergenceObservation(
+                **em_data["external_convergence_observation"]
+            )
         provenance_data = dict(data["provenance"])
         provenance_data["detector_labels"] = tuple(provenance_data["detector_labels"])
         if "noise_segment_ids" in provenance_data:
@@ -703,6 +741,25 @@ def v2_json_schema() -> Dict[str, Any]:
                     "deterministic_control": {"type": "boolean"},
                 },
             },
+            "ExternalConvergenceObservation": {
+                "type": "object",
+                "additionalProperties": False,
+                "required": [
+                    "posterior_mean",
+                    "posterior_standard_deviation",
+                    "inference_method",
+                    "reference",
+                ],
+                "properties": {
+                    "posterior_mean": {"type": "number"},
+                    "posterior_standard_deviation": {
+                        "type": "number",
+                        "exclusiveMinimum": 0,
+                    },
+                    "inference_method": {"type": "string", "minLength": 1},
+                    "reference": {"type": ["string", "null"]},
+                },
+            },
             "DetectorNoiseReference": {
                 "type": "object",
                 "additionalProperties": False,
@@ -747,7 +804,11 @@ def v2_json_schema() -> Dict[str, Any]:
             },
             "em_observation": {
                 "type": "object",
-                "required": ["observed_image_astrometry", "modality_availability_mask"],
+                "required": [
+                    "observed_image_astrometry",
+                    "external_convergence_observation",
+                    "modality_availability_mask",
+                ],
                 "not": {
                     "anyOf": [
                         {"required": ["observed_image_positions_arcsec"]},
@@ -758,6 +819,12 @@ def v2_json_schema() -> Dict[str, Any]:
                     "observed_image_astrometry": {
                         "type": ["array", "null"],
                         "items": {"$ref": "#/$defs/ImageAstrometryObservation"},
+                    },
+                    "external_convergence_observation": {
+                        "oneOf": [
+                            {"$ref": "#/$defs/ExternalConvergenceObservation"},
+                            {"type": "null"},
+                        ]
                     },
                     "modality_availability_mask": {"type": "object"},
                 },

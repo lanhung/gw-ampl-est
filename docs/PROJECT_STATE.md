@@ -2,10 +2,11 @@
 
 ## Current phase
 
-Phase 1B and Phase 1B.1 are merged and frozen. Phase 2 preregistration
-`1.0.0-rc.1` is complete on `phase2/preregistration` and awaits human review.
-No training, catalog download, or scientific data generation is authorized by
-this state.
+Phase 1B and Phase 1B.1 are merged and frozen. Phase 2 release candidate 1
+received a request-changes review; Phase 2.1 hardening has produced
+preregistration `1.0.0-rc.2` on `phase2/preregistration`, and the user-directed
+automatic review passed. No training, catalog download, Phase 3A execution, or
+scientific data generation is authorized by this state.
 
 ## Completed
 
@@ -64,6 +65,20 @@ this state.
   qualification gate, 128-pair atomic shards and byte-identical resume rules;
 - passed 99 local tests plus one optional skip and 104 AutoDL tests, Ruff,
   mypy, and package builds.
+- split post-hoc calibration fitting from independent SBC without changing the
+  118,784-pair total, and separated development from final gold diagnostics;
+- froze architecture selection across three-seed means and prohibited
+  best-seed selection;
+- froze an explicit mass-sheet transformation, an environment observation,
+  and an alpha.3 scientific schema while preserving alpha.2 smoke loading;
+- froze a Lenstronomy Galkin spherical-power-law/Hernquist/Osipkov–Merritt
+  kinematics forward model and prohibited an Einstein-radius shortcut;
+- replaced ambiguous OOD/mismatch names with exact pre-result strata and
+  detector-specific alternate-PSD hashes;
+- created a primary-source literature matrix, verified bibliography and
+  conservative novelty statement with no unsupported “first” claim;
+- expanded storage gating from raw capacity to peak staging/publication use
+  plus a 100 GB post-peak reserve.
 
 ## Not started by design
 
@@ -73,8 +88,9 @@ this state.
 
 ## Next recommended phase
 
-Review `docs/reports/PHASE2_ENTRY_REPORT.md` and the preregistration. If
-accepted, explicitly authorize only Phase 3A generator
-qualification. Full production remains gated on measured qualification
-throughput, solver acceptance, storage and interruption/resume evidence. Do not
-reuse the engineering smoke artifact scientifically.
+RC.2 may be merged after CI. A later, separate decision may explicitly
+authorize only Phase 3A generator qualification; rc.2 itself does not grant
+that authorization. Full production remains gated on measured
+qualification throughput, solver acceptance, dynamics convergence, peak-disk
+amplification, storage and interruption/resume evidence. Do not reuse the
+engineering smoke artifact scientifically.

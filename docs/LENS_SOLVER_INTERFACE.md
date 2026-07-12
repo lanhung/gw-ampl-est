@@ -1,5 +1,20 @@
 # Lens solver interface
 
+## External convergence in future alpha.3 data
+
+`apply_mass_sheet_transform` is the Phase 2.1 reference convention for a
+line-of-sight convergence sheet. For `lambda = 1 - kappa_ext`, it preserves
+image positions, parity and Morse class; multiplies source coordinates,
+dimensionless Fermat differences and physical delay differences by `lambda`;
+and divides signed magnifications by `lambda**2`. Absolute magnification and
+strain amplitude follow from the transformed signed value.
+
+The transformation is applied to a complete baseline lens solution, not merely
+stored as truth metadata. Its analytic contracts are mandatory in Phase 3A.
+The bound stellar-dynamics model excludes the line-of-sight sheet from its
+mass profile; environment data constrain it through a separate deployable
+observation.
+
 ## Separation of responsibilities
 
 `LensSolver.solve()` maps source position and lens parameters to one
