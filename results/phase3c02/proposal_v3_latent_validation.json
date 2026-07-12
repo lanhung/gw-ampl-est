@@ -1,0 +1,41 @@
+{
+  "accepted_pair_generator_called": false,
+  "component_counts": {
+    "central": 50331,
+    "evaluation_target": 109737,
+    "rc5_broad": 39932
+  },
+  "deterministic_replay_sha256": "650a9ca7831d1342b06cfb89ab645cf10c9294f4cd917ea49ccc1a25f70fc8d5",
+  "draw_count": 200000,
+  "failure_reasons": [],
+  "finite_fraction": {"log_p": 1.0, "log_q": 1.0, "weight": 1.0},
+  "maximum_importance_weight": 1.8053742450931092,
+  "maximum_normalized_weight": 9.041673005016142e-6,
+  "mean_unnormalized_importance_weight": 0.9983629379715031,
+  "overall_relative_ess": 0.7853205715205146,
+  "proposal_ab_qualification_run": false,
+  "proposal_configuration_hash": "2d7998ca099c1ecddbb5d9cb1d824f37d3d398826a88831b2bccddbda814cbf4",
+  "proposal_version": "proposal-v3-target-anchored-mixture-1.0.0-rc.1",
+  "relative_ess_by_lens_family": {
+    "epl_external_shear": 0.7788632896657042,
+    "sie_external_shear": 0.7918434618948831
+  },
+  "replay_byte_identical": true,
+  "status": "passed",
+  "support_hole_count": 0,
+  "target_anchor_failure_count": 0,
+  "target_anchor_failures_by_family": {
+    "epl_external_shear": 0,
+    "sie_external_shear": 0
+  },
+  "waveform_pair_count": 0,
+  "weight_quantiles": {
+    "0.0": 1.6564955789126956e-6,
+    "0.01": 0.0033080034171372274,
+    "0.05": 0.06123747507990418,
+    "0.5": 0.9907268155886303,
+    "0.95": 1.73417026803164,
+    "0.99": 1.7753699947033252,
+    "1.0": 1.8053742450931092
+  }
+}

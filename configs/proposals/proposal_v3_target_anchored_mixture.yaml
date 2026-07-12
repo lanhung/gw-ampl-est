@@ -1,0 +1,76 @@
+phase: "3C-0.2"
+proposal_version: "proposal-v3-target-anchored-mixture-1.0.0-rc.1"
+status: latent_only_execution_disabled
+root_seed: 2026071205
+
+authorization:
+  path: configs/execution/phase3c02_target_anchored_proposal_authorization.yaml
+  waveform_pair_generation_authorized: false
+  accepted_pair_generator_authorized: false
+  proposal_ab_qualification_authorized: false
+  scientific_data_generation_authorized: false
+  model_training_authorized: false
+  gwosc_gwtc_access_authorized: false
+
+immutable_inputs:
+  adaptive_rc3_hash: 6082475631539d3069edacc52f41b37fb8fe725ccd7c6bc9980cc3008795a927
+  parent_rc5_hash: 4dde279cf1bea78d1ddbd4fab99d88e88e334c80c180dc7850679736c5e53edb
+  rejected_v2_config_hash: e4e249da3f177202960e8a6f6c0c347a25aa572abb818b6d0e172469a75e45b5
+  evaluation_distribution_id: balanced_literature_informed_benchmark_v1
+
+mixture:
+  density_evaluation: stable_logsumexp
+  components:
+    rc5_broad: {weight: 0.20, distribution: broad_support_v1}
+    evaluation_target: {weight: 0.55, distribution: balanced_literature_informed_benchmark_v1}
+    central: {weight: 0.25, distribution: evaluation_target_except_source_plane}
+
+central_source_plane:
+  distribution: independent_truncated_normal
+  mean: 0.0
+  sigma: 0.8
+  lower: -2.5
+  upper: 2.5
+  support: half_open
+  angular_jacobian: true
+  caustic_distribution_claim: false
+
+target_anchor_certificate:
+  target_component_weight: 0.55
+  required_log_inequality_tolerance: 1.0e-12
+  maximum_importance_weight: 1.8181818181818181
+  population_relative_ess_lower_bound: 0.55
+  assumptions:
+    - all_component_densities_exactly_normalized
+    - target_support_complete
+    - target_component_positive_with_weight_0p55
+    - pre_selection_density_without_acceptance_conditioning
+    - common_equal_lens_family_probabilities
+
+diagnostics:
+  draw_count: 200000
+  proposal_v3_seed: 2026071205
+  proposal_v3_replay_seed: 2026071205
+  rc5_baseline_seed: 2026071206
+  mean_weight_interval: [0.98, 1.02]
+  overall_relative_ess_minimum: 0.50
+  family_relative_ess_minimum: 0.40
+  factor_groups:
+    - lens_structural
+    - redshifts
+    - source_plane
+    - external_convergence
+    - bbh_mass
+    - spin_orientation
+    - complete_latent
+  post_result_tuning_authorized: false
+
+future_ab_skeleton:
+  dry_run_only: true
+  control_identity: rc5_control
+  candidate_identity: proposal_v3_target_anchored_rc1
+  accepted_pairs_per_arm: 512
+  total_accepted_pairs: 1024
+  blocks_per_arm: 16
+  accepted_pairs_per_block: 32
+  reuse_phase3c0_caps_and_telemetry: true

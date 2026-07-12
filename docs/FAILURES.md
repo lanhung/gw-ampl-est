@@ -306,3 +306,13 @@ silently choose a solver search window or approximate caustic area.
   diagnostic explanation, not permission to retune the frozen mixture.
 - Proposal-v2 RC.1 remains unauthorized and RC.5 remains the fallback. A new
   reviewed proposal version is required for further work.
+
+## Phase 3C-0.2 resolution and retained limitation
+
+- Target-anchored proposal-v3 passed all latent gates; the earlier RC.1 failure
+  remains immutable and was not tuned in place.
+- RC.5 baseline diagnostic ESS was only 0.11776 overall and 0.09484 for EPL.
+  This is not a retrospectively frozen failure gate, but it remains a material
+  warning against direct weighted training from broad RC.5 draws.
+- No A/B or waveform evidence exists for v3. Latent ESS passage cannot be
+  represented as a throughput result or execution authorization.
