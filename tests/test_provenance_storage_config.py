@@ -118,7 +118,7 @@ def phase2_config():
 
 def test_phase2_preregistration_is_fail_closed_and_hash_frozen():
     config = phase2_config()
-    assert config["status"] == "human_finite_source_support_approved"
+    assert config["status"] == "human_waveform_window_contract_approved"
     for field in (
         "execution_enabled",
         "scientific_data_generation_authorized",
@@ -129,8 +129,32 @@ def test_phase2_preregistration_is_fail_closed_and_hash_frozen():
         assert config[field] is False
     assert config["splits"]["real_noise_test"] == 0
     assert configuration_hash(config) == (
-        "1403f1f8cf96fbc34c2cfd99928bd7c24b5fde5495e54689d2a5ee7ec250c418"
+        "4dde279cf1bea78d1ddbd4fab99d88e88e334c80c180dc7850679736c5e53edb"
     )
+
+
+def test_rc5_waveform_window_contract_is_exact_and_fail_closed() -> None:
+    config = phase2_config()
+    gw = config["gw_observation_model"]
+    contract = gw["waveform_window_contract"]
+    assert gw["duration_seconds"] == 8
+    assert gw["sample_rate_hz"] == 2048
+    assert gw["sample_count"] == 16384
+    assert gw["merger_offset_seconds"] == 6.0
+    assert contract["construction_duration_seconds"] == 64
+    assert contract["construction_merger_offset_seconds"] == 62.0
+    assert contract["construction_sample_count"] == 131072
+    assert contract["crop_start_sample"] == 114688
+    assert contract["crop_stop_sample_exclusive"] == 131072
+    assert contract["inverse_transform"] == "bilby.core.utils.infft"
+    assert contract["zero_guard_samples_per_edge"] == 512
+    assert contract["raised_cosine_transition_samples_per_edge"] == 512
+    assert contract["selection_snr_signal"] == "conditioned_published_clean_strain"
+    assert contract["numerical_reference_duration_seconds"] == 128
+    assert contract["maximum_conditioned_reference_relative_difference"] == 0.005
+    assert contract["maximum_construction_energy_outside_crop_fraction"] == 0.005
+    assert contract["minimum_conditioned_crop_energy_retained_fraction"] == 0.999
+    assert contract["post_result_threshold_change_forbidden"] is True
 
 
 def test_rc3_source_plane_density_is_exact_and_shared() -> None:
