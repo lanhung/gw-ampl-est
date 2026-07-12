@@ -1,0 +1,48 @@
+phase: "3A"
+authorization_status: authorized
+authorized_by: human_project_owner
+authorization_date: "2026-07-12"
+
+base_main_commit: "5f4d75698ccbd131710fa3705b677db5fa765c9c"
+
+frozen_preregistration:
+  version: "1.0.0-rc.2"
+  path: "configs/statistics/phase2_preregistration.yaml"
+  canonical_hash: "a7d475150b1c01d8e539a3fd5eb8d83f2ce696c5d78125f4c435c7519803aef1"
+  scientific_schema_version: "2.0.0-alpha.3"
+
+authorization:
+  generator_qualification_authorized: true
+  exact_accepted_pair_count: 4096
+  shard_pair_count: 128
+
+  full_production_authorized: false
+  model_training_authorized: false
+  posthoc_calibration_authorized: false
+  sbc_authorized: false
+  scientific_testing_authorized: false
+  gwosc_gwtc_download_authorized: false
+  real_noise_generation_authorized: false
+  manuscript_authorized: false
+
+dataset_policy:
+  dataset_purpose: generator_qualification
+  scientific_use_authorized: false
+  training_use_authorized: false
+  calibration_use_authorized: false
+  test_use_authorized: false
+
+remote_paths:
+  staging_root: "/root/autodl-tmp/lensing-4/data_v2/production/staging"
+  publication_root: "/root/autodl-tmp/lensing-4/data_v2/production/published"
+  manifest_root: "/root/autodl-tmp/lensing-4/manifests/phase3"
+  log_root: "/root/autodl-tmp/lensing-4/logs/phase3"
+
+resource_gates:
+  qualification_projected_peak_bytes: 5807608883
+  minimum_post_run_free_bytes: 100000000000
+  minimum_prelaunch_free_bytes: 105807608883
+  maximum_phase3a_output_bytes: 10000000000
+  maximum_projected_walltime_hours_without_new_review: 24
+
+stop_after_phase3a: true
