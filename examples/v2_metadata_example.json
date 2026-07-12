@@ -1,14 +1,23 @@
 {
   "em_observation": {
     "aperture_metadata": {
-      "seeing_fwhm_arcsec": 0.7
+      "aperture_inner_radius_arcsec": 0.0,
+      "aperture_outer_radius_arcsec": 1.0,
+      "seeing_fwhm_arcsec": 0.7,
+      "tracer_effective_radius_arcsec": 1.0
     },
     "censoring_flags": {
-      "velocity_dispersion": true
+      "velocity_dispersion": false
     },
     "einstein_radius_arcsec": {
       "standard_deviation": 0.02,
       "value": 1.01
+    },
+    "external_convergence_observation": {
+      "inference_method": "synthetic_line_of_sight_posterior_v1",
+      "posterior_mean": 0.018,
+      "posterior_standard_deviation": 0.02,
+      "reference": "environment-example-0001"
     },
     "observed_image_astrometry": [
       {
@@ -31,16 +40,17 @@
     "lens_redshift": {"standard_deviation": 0.001, "value": 0.5},
     "modality_availability_mask": {
       "einstein_radius": true,
+      "environment_convergence": true,
       "image_astrometry": true,
       "lens_center": true,
       "lens_redshift": true,
       "source_redshift": true,
-      "velocity_dispersion": false
+      "velocity_dispersion": true
     },
     "observed_lens_center_arcsec": [0.002, -0.003],
     "redshift_ordering_valid": true,
     "source_redshift": {"standard_deviation": 0.01, "value": 1.2},
-    "velocity_dispersion_km_s": null
+    "velocity_dispersion_km_s": {"standard_deviation": 12.5, "value": 250.0}
   },
   "gw_observation": {
     "array_products": [
@@ -80,7 +90,7 @@
   },
   "pair": {
     "augmentation_parent_id": null,
-    "dataset_version": "v2-smoke-alpha.2-planned",
+    "dataset_version": "v2-scientific-alpha.3-planned",
     "evaluation_prior_id": "interface-only-prior",
     "lens_family": "sie_external_shear",
     "lens_id": "lens-example-0001",
@@ -107,21 +117,21 @@
     },
     "generator_git_commit": "38c76016b66eda3a4b72d5a7ca3fb1e90957abef",
     "detector_noise_references": [
-      {"available": true, "detector": "H1", "image_id": "image_0", "noise_source": "synthetic_gaussian_design_psd", "segment_id": "synthetic-image0-H1"},
-      {"available": true, "detector": "L1", "image_id": "image_0", "noise_source": "synthetic_gaussian_design_psd", "segment_id": "synthetic-image0-L1"},
+      {"available": true, "detector": "H1", "image_id": "image_0", "noise_source": "synthetic_gaussian_curve_conditioned", "segment_id": "synthetic-image0-H1"},
+      {"available": true, "detector": "L1", "image_id": "image_0", "noise_source": "synthetic_gaussian_curve_conditioned", "segment_id": "synthetic-image0-L1"},
       {"available": false, "detector": "V1", "image_id": "image_0", "noise_source": "unavailable", "segment_id": null},
-      {"available": true, "detector": "H1", "image_id": "image_2", "noise_source": "synthetic_gaussian_design_psd", "segment_id": "synthetic-image2-H1"},
-      {"available": true, "detector": "L1", "image_id": "image_2", "noise_source": "synthetic_gaussian_design_psd", "segment_id": "synthetic-image2-L1"},
-      {"available": true, "detector": "V1", "image_id": "image_2", "noise_source": "synthetic_gaussian_design_psd", "segment_id": "synthetic-image2-V1"}
+      {"available": true, "detector": "H1", "image_id": "image_2", "noise_source": "synthetic_gaussian_curve_conditioned", "segment_id": "synthetic-image2-H1"},
+      {"available": true, "detector": "L1", "image_id": "image_2", "noise_source": "synthetic_gaussian_curve_conditioned", "segment_id": "synthetic-image2-L1"},
+      {"available": true, "detector": "V1", "image_id": "image_2", "noise_source": "synthetic_gaussian_curve_conditioned", "segment_id": "synthetic-image2-V1"}
     ],
-    "package_versions": {"gwlens_mm": "0.1.0"},
+    "package_versions": {"gwlens_mm": "0.1.0", "lenstronomy": "1.13.6"},
     "seed_hierarchy": {"lens": 2, "source": 1},
     "solver_name": "metadata-example",
     "solver_version": "planned-1",
     "source_data_release": null,
     "waveform_model": "planned-smoke-waveform"
   },
-  "schema_version": "2.0.0-alpha.2",
+  "schema_version": "2.0.0-alpha.3",
   "source_truth": {
     "extrinsic_parameters": {"inclination": 0.7},
     "intrinsic_parameters": {"mass_1_source_msun": 35.0, "mass_2_source_msun": 25.0},

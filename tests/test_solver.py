@@ -11,6 +11,7 @@ from gwlens_mm.physics.solver import (
     PhysicalImage,
     SelectedPair,
     SISSolver,
+    apply_mass_sheet_transform,
     validate_solver_contract,
 )
 
@@ -114,3 +115,55 @@ def test_physical_image_requires_an_explicit_time_coordinate():
             parity=ImageParity.POSITIVE,
             morse_class=MorseClass.MINIMUM,
         )
+
+
+def test_mass_sheet_transform_scales_source_magnification_and_fermat_difference():
+    original = SISSolver().solve((0.5, 0.0), {"einstein_radius_arcsec": 1.0})
+    transformed, source = apply_mass_sheet_transform(original, (0.5, 0.0), 0.2)
+    assert source == pytest.approx((0.4, 0.0))
+    for before, after in zip(original.physical_images, transformed.physical_images):
+        assert after.position_arcsec == before.position_arcsec
+        assert after.mu_signed == pytest.approx(before.mu_signed / 0.8**2)
+        assert after.parity is before.parity
+        assert after.morse_class is before.morse_class
+    before_values = [image.fermat_potential_dimensionless for image in original.physical_images]
+    after_values = [
+        image.fermat_potential_dimensionless for image in transformed.physical_images
+    ]
+    before_delta = float(before_values[1]) - float(before_values[0])
+    after_delta = float(after_values[1]) - float(after_values[0])
+    assert after_delta == pytest.approx(0.8 * before_delta)
+
+
+def test_mass_sheet_transform_scales_physical_delay():
+    solution = LensSystemSolution(
+        lens_family=LensFamily.SIE_EXTERNAL_SHEAR,
+        physical_images=(
+            PhysicalImage(
+                image_id="minimum",
+                position_arcsec=(1.0, 0.0),
+                mu_signed=2.0,
+                parity=ImageParity.POSITIVE,
+                morse_class=MorseClass.MINIMUM,
+                arrival_time_seconds=0.0,
+            ),
+            PhysicalImage(
+                image_id="saddle",
+                position_arcsec=(-1.0, 0.0),
+                mu_signed=-1.0,
+                parity=ImageParity.NEGATIVE,
+                morse_class=MorseClass.SADDLE,
+                arrival_time_seconds=100.0,
+            ),
+        ),
+        solver_name="fixture",
+        solver_version="1",
+    )
+    transformed, _ = apply_mass_sheet_transform(solution, (0.1, 0.0), -0.1)
+    assert transformed.physical_images[1].arrival_time_seconds == pytest.approx(110.0)
+
+
+def test_mass_sheet_transform_rejects_nonpositive_lambda():
+    solution = SISSolver().solve((0.5, 0.0), {"einstein_radius_arcsec": 1.0})
+    with pytest.raises(ValueError, match="lambda must be positive"):
+        apply_mass_sheet_transform(solution, (0.5, 0.0), 1.0)

@@ -104,6 +104,36 @@ strain. The DC factor is real.
 Exact source coordinates, lens truth, and magnifications belong to truth or
 diagnostic roles and are prohibited as deployable neural inputs.
 
+## External convergence and mass-sheet convention
+
+Scientific alpha.3 simulations use `lambda_mst = 1 - kappa_ext` and apply the
+mass-sheet transform to the baseline SIE/EPL solution:
+
+```text
+beta'          = lambda_mst * beta
+theta_i'       = theta_i
+mu_i'          = mu_i / lambda_mst^2
+Delta phi_ij'  = lambda_mst * Delta phi_ij
+Delta t_ij'    = lambda_mst * Delta t_ij
+```
+
+Only Fermat differences are physical; an additive potential constant is
+irrelevant. Parity and Morse class are unchanged for positive lambda. The
+latent `kappa_ext` is not deployable. When environment information exists, the
+input is a noisy posterior mean/standard deviation product with an availability
+mask. When absent, inference marginalizes the declared prior.
+
+## Stellar kinematics convention
+
+The alpha.3 design does not derive velocity dispersion from Einstein radius by
+an invertible shortcut. It uses Lenstronomy Galkin with a circularized spherical
+power-law dynamics mass profile, Hernquist light, Osipkov--Merritt anisotropy,
+luminosity-weighted line-of-sight averaging, a one-arcsecond circular aperture,
+and 0.7-arcsec Gaussian seeing. SIE uses dynamics slope 2; EPL uses its sampled
+slope. Light effective radius and anisotropy radius are latent nuisance
+variables. Aperture, PSF, light, anisotropy, package version and numerical
+sampling are provenance.
+
 ## SIS analytic control
 
 For `0 < y < 1`, the adopted plus/minus solution is:

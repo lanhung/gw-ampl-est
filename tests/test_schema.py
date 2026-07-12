@@ -48,9 +48,47 @@ def test_invalid_covariances_are_rejected(matrix):
 
 def test_missing_modality_mask_mismatch_is_rejected():
     data = json.loads(EXAMPLE.read_text(encoding="utf-8"))
-    data["em_observation"]["modality_availability_mask"]["velocity_dispersion"] = True
+    data["em_observation"]["modality_availability_mask"]["velocity_dispersion"] = False
     with pytest.raises(ValueError, match="modality mask"):
         V2Record.from_dict(data)
+
+
+def test_alpha3_environment_observation_round_trips():
+    record = V2Record.from_json(EXAMPLE.read_text(encoding="utf-8"))
+    observation = record.em_observation.external_convergence_observation
+    assert observation is not None
+    assert observation.posterior_mean == pytest.approx(0.018)
+    assert observation.posterior_standard_deviation == pytest.approx(0.02)
+
+
+def test_environment_observation_requires_matching_modality_mask():
+    data = json.loads(EXAMPLE.read_text(encoding="utf-8"))
+    data["em_observation"]["modality_availability_mask"][
+        "environment_convergence"
+    ] = False
+    with pytest.raises(ValueError, match="environment_convergence"):
+        V2Record.from_dict(data)
+
+
+def test_environment_observation_requires_positive_uncertainty():
+    data = json.loads(EXAMPLE.read_text(encoding="utf-8"))
+    data["em_observation"]["external_convergence_observation"][
+        "posterior_standard_deviation"
+    ] = 0.0
+    with pytest.raises(ValueError, match="posterior standard deviation"):
+        V2Record.from_dict(data)
+
+
+def test_frozen_alpha2_record_remains_loadable_without_migration():
+    data = json.loads(EXAMPLE.read_text(encoding="utf-8"))
+    data["schema_version"] = "2.0.0-alpha.2"
+    del data["em_observation"]["external_convergence_observation"]
+    del data["em_observation"]["modality_availability_mask"][
+        "environment_convergence"
+    ]
+    record = V2Record.from_dict(data)
+    assert record.schema_version == "2.0.0-alpha.2"
+    assert "external_convergence_observation" not in record.to_dict()["em_observation"]
 
 
 def test_detector_mask_rejects_an_unobserved_selected_image():

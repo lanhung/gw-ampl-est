@@ -23,6 +23,7 @@ The machine-readable denylist includes:
 - exact `y`, `u`, beta/source-plane coordinates;
 - true signed/absolute magnification, flux ratio, and amplitude ratio;
 - exact source, lens, lens-center, image-position, or noise truth;
+- exact external convergence, stellar anisotropy, or latent light profile;
 - exact time delay where a typed timing observation is intended;
 - clean injected signal and isolated noise realization;
 - optimal SNR and simulation-only quality/oracle fields;
@@ -38,9 +39,11 @@ introduced.
 
 The current allowlist contains GW pair strain observations, detector masks and
 identity, typed timing, image-ID-keyed astrometry, other noisy EM measurements
-with uncertainty, modality masks/censoring, and preprocessing/PSD/calibration/DQ
-metadata. Exact `true_time_delay_seconds` and aliases remain denylisted. It does
-not mean every allowed field must be used by a future model.
+with uncertainty, external-convergence posterior mean/standard deviation and
+its availability flag, modality masks/censoring, and preprocessing/PSD/
+calibration/DQ metadata. Exact `true_time_delay_seconds`, `kappa_ext_true` and
+aliases remain denylisted. It does not mean every allowed field must be used by
+a future model.
 
 The clean/noise products remain required dataset artifacts for validation but
 are not deployable inputs. Group IDs remain required for leakage-safe splitting

@@ -78,23 +78,22 @@ generator audit and approving a v2 schema.
 
 ## Current phase gate
 
-Phase 0, Phase 1A, Phase 1A.1, and Phase 1B are complete.
+Phase 0, Phase 1A, Phase 1A.1, Phase 1B, and the Phase 1B.1 cleanup are
+complete. Review of Phase 2 release candidate 1 requested changes. Phase 2.1
+preregistration hardening produced release candidate 2 on
+`phase2/preregistration`, and automatic review passed. Phase 3A remains
+unauthorized until a separate explicit execution decision.
 
 The reviewed Phase 1B engineering artifact is frozen as:
 
 `gwlens-v2-2.0.0-alpha.2-ae86beab1c132682`
 
-Human review accepted Phase 1B and authorized the narrow Phase 1B.1 solver-time
-cleanup. No data regeneration is authorized.
+Phase 2 is documentation and design only. It may cover literature,
+identifiability, estimands, priors, observation models, selection effects,
+splits, calibration tests, baselines, ablations, compute estimates, and the
+next execution gate.
 
-Phase 1B.1 may only:
-
-- separate dimensionless Fermat coordinates from physical arrival seconds;
-- correct deterministic fixture diagnostics;
-- update solver documentation, tests, and fixture evidence;
-- merge the reviewed Phase 1B branch and freeze its generator/data artifacts.
-
-During Phase 1B.1, do not:
+During Phase 2, do not:
 
 - train any neural model;
 - generate additional waveform pairs;
@@ -104,6 +103,9 @@ During Phase 1B.1, do not:
 - use the smoke dataset for scientific performance claims;
 - start manuscript writing;
 - proceed to medium- or large-scale generation.
+
+No Phase 3 execution is authorized until the Phase 2 report and
+preregistration receive human review.
 
 All smoke outputs must be written only below:
 

@@ -31,11 +31,16 @@ Read-only legacy evidence on AutoDL
 - `scripts/remote/sync_to_autodl.sh` excludes Git metadata, credentials and large
   data; it deliberately omits `--delete`.
 - `scripts/remote/sync_results_back.sh` accepts only lightweight result types.
+- Executable repository commands on AutoDL run from
+  `/root/autodl-tmp/lensing-4/repo`, not the containing project root.
 - `configs/remote/autodl.env` is mode 600 and ignored by Git; the committed file
   is `autodl.env.example`.
 - A full hash of the approximately 1 TB relevant legacy waveform corpus was not
   attempted. At a sustained 200–500 MB/s it would require roughly 0.6–1.4 hours
   of ideal sequential I/O, excluding contention and metadata overhead.
+- The Phase 1B publication directory is frozen read-only (`0555` directories,
+  `0444` ordinary files). Its three closeout evidence hashes match the
+  pre-Phase-1B.1 values.
 
 ## Resolved path relationships
 

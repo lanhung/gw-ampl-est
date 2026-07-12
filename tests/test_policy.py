@@ -17,7 +17,14 @@ def policy():
 
 def test_allowlisted_observations_pass(policy):
     assert policy.validate_model_inputs(
-        ["gw_strain_primary", "observed_image_astrometry", "observed_time_difference"]
+        [
+            "gw_strain_primary",
+            "observed_image_astrometry",
+            "observed_time_difference",
+            "observed_external_convergence_mean",
+            "observed_external_convergence_std",
+            "environment_modality_available",
+        ]
     )
 
 
@@ -36,6 +43,9 @@ def test_allowlisted_observations_pass(policy):
         "oracleLensParameter",
         "cleanWaveform",
         "true_time_delay_seconds",
+        "external_convergence_true",
+        "kappa_ext_true",
+        "stellar_anisotropy_true",
     ],
 )
 def test_forbidden_exact_and_alias_fields_fail_closed(policy, field):

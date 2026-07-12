@@ -1,5 +1,5 @@
 {
-  "policy_version": "1.1.0",
+  "policy_version": "1.2.0",
   "exact_fields": [
     "source_position_y_true",
     "source_position_u_true",
@@ -12,6 +12,10 @@
     "relative_flux_magnification_true",
     "relative_strain_amplitude_true",
     "lens_parameters_true",
+    "external_convergence_true",
+    "kappa_ext_true",
+    "stellar_anisotropy_true",
+    "stellar_light_profile_true",
     "lens_center_true",
     "image_positions_true",
     "time_delay_true_seconds",

@@ -17,7 +17,6 @@ from ..physics.solver import LensSystemSolution, PhysicalImage, SISSolver
 from ..provenance import SEED_DOMAINS, configuration_hash, derive_seed
 from ..schema import (
     DETECTOR_SLOTS,
-    SCHEMA_VERSION,
     ArrayProductRole,
     ArrayReference,
     DetectorNoiseReference,
@@ -460,7 +459,7 @@ class SmokeGenerator:
             data_quality_reference=None,
         )
         record = V2Record(
-            schema_version=SCHEMA_VERSION,
+            schema_version=str(self.config["schema_version"]),
             pair=pair,
             source_truth=source_truth,
             lens_truth=lens_truth,
