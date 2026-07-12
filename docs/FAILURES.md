@@ -202,6 +202,22 @@ silently choose a solver search window or approximate caustic area.
   versus reference solver classification on its boundary rather than require
   absence of multiple images there.
 
+## Phase 3A RC.4 waveform-boundary hard failure
+
+- The frozen generator commit
+  `a2b8a02b4631e86c39e1b682e4424ecc2f2c5ca9` evaluated four deterministic
+  8-second IMRPhenomXPHM boundary fixtures against aligned 32-second references.
+- All arrays were finite, but all four cases failed. Relative differences were
+  0.0338--0.0609 against a `1e-5` limit. Leading/trailing 0.25-second energy
+  fractions were `6.19e-5`--`3.04e-4` against a `1e-6` limit.
+- The 32-accepted-pair microbenchmark and 4,096-pair run were not started. The
+  frozen criteria cannot be relaxed after observing this result; a separately
+  reviewed waveform-window/configuration revision is required.
+- An additional non-publication 1,000-attempt acceptance probe found 2 accepted
+  systems and projected roughly 224.8 hours for 4,096 at the measured serial
+  rate, independently exceeding the 24-hour gate. This probe is diagnostic,
+  not a substitute for the prohibited formal microbenchmark.
+
 ## Phase 2.3 finite-support clarification
 
 - RC.3's first extreme probe found steep EPL doubles on every tested finite

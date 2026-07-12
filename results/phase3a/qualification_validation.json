@@ -1,21 +1,24 @@
 {
   "accepted_pair_count": 0,
-  "authorizing_git_commit": "a7be12c5c0dce7c0570911749f6e431c2033c020",
-  "blocker": "RC.3 full-cross-section support audit is incompatible with steep singular EPL boundary behavior",
+  "authorizing_git_commit": "81e5a6bcbfed5f67f1ff511593f8dc4153485e5e",
+  "blocker": "The frozen RC.4 waveform-boundary gate failed all four deterministic fixtures",
   "complete_shard_count": 0,
-  "generator_checkpoint": "2bb1ea43cb50f0fbaf8eea9f88750a90603b596a",
+  "generator_checkpoint": "a2b8a02b4631e86c39e1b682e4424ecc2f2c5ca9",
   "microbenchmark_accepted_pair_count": 0,
-  "preregistration_hash": "16a75327df5aacafa1fb4459e19429cc08d3350cd3056986356ef3c57864c1e8",
+  "preregistration_hash": "1403f1f8cf96fbc34c2cfd99928bd7c24b5fde5495e54689d2a5ee7ec250c418",
   "publication_created": false,
-  "verification": {
-    "autodl_pytest_passed": 126,
-    "build_passed": true,
-    "local_optional_skipped": 2,
-    "local_pytest_passed": 120,
-    "maintained_scope_mypy_passed": true,
-    "maintained_scope_ruff_passed": true
-  },
-  "stage": "pre_generation_gap_audit",
+  "stage": "pre_microbenchmark_waveform_boundary",
   "status": "blocked",
-  "training_or_scientific_use": false
+  "training_or_scientific_use": false,
+  "verification": {
+    "build_passed_at_generator_freeze": true,
+    "local_optional_skipped_at_generator_freeze": 3,
+    "local_pytest_passed_at_generator_freeze": 132,
+    "maintained_scope_mypy_passed_at_generator_freeze": true,
+    "maintained_scope_ruff_passed_at_generator_freeze": true,
+    "source_plane_boundary_cases": 992,
+    "source_plane_boundary_failures": 0,
+    "waveform_boundary_cases": 4,
+    "waveform_boundary_failures": 4
+  }
 }

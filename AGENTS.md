@@ -85,6 +85,12 @@ Phase 2.1 are complete and merged into main at:
 
 Human review explicitly authorizes Phase 3A only.
 
+Phase 3A execution is currently stopped before microbenchmark: the frozen RC.4
+waveform-boundary gate failed all four fixtures on generator commit
+`a2b8a02b4631e86c39e1b682e4424ecc2f2c5ca9`. Do not resume execution or relax
+the observed criteria without a separately reviewed, versioned waveform-window
+contract and renewed Phase 3A authorization.
+
 The frozen scientific design is:
 
 - preregistration version: `1.0.0-rc.4`;

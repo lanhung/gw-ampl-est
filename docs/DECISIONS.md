@@ -284,7 +284,7 @@ central images are not discarded. A finer, wider union is the frozen reference.
 A failed support audit blocks Phase 3A; implementation may not change these
 tolerances after seeing qualification results.
 
-## D040 — Finite source support is a truncated benchmark
+## D041 — Finite source support is a truncated benchmark
 
 The RC.3 boundary probe showed that steep singular EPL models can remain
 multiply imaged at finite square boundaries. RC.4 therefore makes no claim that
@@ -292,3 +292,14 @@ multiply imaged at finite square boundaries. RC.4 therefore makes no claim that
 normalized benchmark support. The boundary hard gate is agreement between the
 primary and finer reference solver unions, including image multiplicity and
 positions. This clarification changes no density formula or finite support.
+
+## D042 — Frozen waveform-boundary failure stops Phase 3A
+
+The exact pre-execution generator commit
+`a2b8a02b4631e86c39e1b682e4424ecc2f2c5ca9` failed all four predeclared
+8-second waveform fixtures against the aligned 32-second reference and
+edge-energy limits. Phase 3A therefore stops before the 32-pair microbenchmark.
+The observed thresholds may not be relaxed in place. Any duration, placement,
+taper, alignment or numerical-acceptance change requires a separately reviewed
+versioned configuration, a new clean generator commit, and repetition of every
+pre-execution gate.

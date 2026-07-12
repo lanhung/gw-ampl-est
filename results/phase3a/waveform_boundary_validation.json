@@ -1,0 +1,76 @@
+{
+  "cases": [
+    {
+      "a_1": 0.0,
+      "a_2": 0.0,
+      "finite": true,
+      "id": "minimum_mass_sie",
+      "leading_edge_energy_fraction": 6.338008658847369e-05,
+      "lens_family": "sie_external_shear",
+      "mass_1_source": 20.0,
+      "mass_2_source": 10.0,
+      "passed": false,
+      "reference_relative_difference": 0.04014330084565564,
+      "source_redshift": 0.5,
+      "tilt_1": 0.0,
+      "tilt_2": 0.0,
+      "trailing_edge_energy_fraction": 6.192765214933496e-05
+    },
+    {
+      "a_1": 0.99,
+      "a_2": 0.99,
+      "finite": true,
+      "id": "minimum_mass_epl_precessing",
+      "leading_edge_energy_fraction": 7.283077535364775e-05,
+      "lens_family": "epl_external_shear",
+      "mass_1_source": 20.0,
+      "mass_2_source": 10.0,
+      "passed": false,
+      "reference_relative_difference": 0.036381661319320024,
+      "source_redshift": 0.5,
+      "tilt_1": 1.2,
+      "tilt_2": 2.0,
+      "trailing_edge_energy_fraction": 8.178012620562074e-05
+    },
+    {
+      "a_1": 0.9,
+      "a_2": 0.8,
+      "finite": true,
+      "id": "extreme_ratio_high_z",
+      "leading_edge_energy_fraction": 7.611734128389396e-05,
+      "lens_family": "sie_external_shear",
+      "mass_1_source": 80.0,
+      "mass_2_source": 20.0,
+      "passed": false,
+      "reference_relative_difference": 0.03383229125031328,
+      "source_redshift": 3.0,
+      "tilt_1": 0.2,
+      "tilt_2": 2.5,
+      "trailing_edge_energy_fraction": 9.174970308071368e-05
+    },
+    {
+      "a_1": 0.99,
+      "a_2": 0.99,
+      "finite": true,
+      "id": "maximum_mass_high_z",
+      "leading_edge_energy_fraction": 0.0002499622467439091,
+      "lens_family": "epl_external_shear",
+      "mass_1_source": 80.0,
+      "mass_2_source": 80.0,
+      "passed": false,
+      "reference_relative_difference": 0.060908652353552854,
+      "source_redshift": 3.0,
+      "tilt_1": 1.0,
+      "tilt_2": 2.0,
+      "trailing_edge_energy_fraction": 0.00030428618551166914
+    }
+  ],
+  "criteria": {
+    "edge_guard_seconds": 0.25,
+    "maximum_edge_energy_fraction": 1e-06,
+    "maximum_reference_relative_difference": 1e-05,
+    "reference_duration_seconds": 32
+  },
+  "failure_count": 4,
+  "status": "failed"
+}

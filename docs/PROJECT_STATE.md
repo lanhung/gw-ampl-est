@@ -2,14 +2,12 @@
 
 ## Current phase
 
-Phase 1B and Phase 1B.1 are merged and frozen. RC.3 resolved the normalized
-source-plane measure but its first Phase 3A probe exposed an invalid
-full-cross-section boundary expectation for steep singular EPL. The human
-project owner approved RC.4's finite truncated benchmark interpretation, now
-merged into main at `c5efd0e3aacfeda65881de5a63e92d72b87fa0bb`. RC.4 remains
-execution-disabled pending an updated separate Phase 3A authorization. Full
-production, training, calibration, scientific testing and GWOSC/GWTC access
-remain unauthorized.
+Phase 3A is blocked before microbenchmark by the frozen RC.4 waveform-boundary
+gate. Source-boundary solver agreement passed, but all four 8-second waveform
+fixtures failed the predeclared 32-second-reference and edge-energy criteria.
+No qualification shard or publication exists. A reviewed waveform-window
+revision is required before Phase 3A restarts. Full production, training,
+calibration, scientific testing and GWOSC/GWTC remain unauthorized.
 
 ## Completed
 
@@ -106,6 +104,6 @@ remain unauthorized.
 
 ## Next recommended phase
 
-Update the independent Phase 3A authorization to RC.4 commit/hash, then rerun
-all preflight and solver-agreement gates. Full production remains gated on measured qualification
-throughput, solver acceptance, dynamics convergence, disk and resume evidence.
+Review the waveform-boundary failure and freeze a new duration/placement and
+numerical acceptance contract. Then issue a new Phase 3A authorization and
+rerun every physics gate. Full production remains closed.
