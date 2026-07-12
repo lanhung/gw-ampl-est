@@ -24,12 +24,12 @@ Work only on:
 
 The frozen authoritative preregistration is:
 
-- version: `1.0.0-rc.2`;
+- version: `1.0.0-rc.3`;
 - configuration hash:
-  `a7d475150b1c01d8e539a3fd5eb8d83f2ce696c5d78125f4c435c7519803aef1`;
+  `16a75327df5aacafa1fb4459e19429cc08d3350cd3056986356ef3c57864c1e8`;
 - scientific schema: `2.0.0-alpha.3`;
 - base main commit:
-  `5f4d75698ccbd131710fa3705b677db5fa765c9c`.
+  `8e14d927146ac3b2223343eaca89a323c58d5e13`.
 
 Do not change the frozen RC.2 distributions merely to make the generator
 pass. A contradiction or unimplementable requirement is a hard failure and
@@ -56,7 +56,7 @@ Before modifying production code:
 5. Recompute the canonical preregistration hash.
 6. Require an exact match to:
 
-   `a7d475150b1c01d8e539a3fd5eb8d83f2ce696c5d78125f4c435c7519803aef1`
+   `16a75327df5aacafa1fb4459e19429cc08d3350cd3056986356ef3c57864c1e8`
 
 7. Confirm:
    - exact accepted count is 4096;

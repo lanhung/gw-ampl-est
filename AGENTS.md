@@ -81,17 +81,17 @@ generator audit and approving a v2 schema.
 Phase 0, Phase 1A, Phase 1A.1, Phase 1B, Phase 1B.1, Phase 2 and
 Phase 2.1 are complete and merged into main at:
 
-`5f4d75698ccbd131710fa3705b677db5fa765c9c`
+`8e14d927146ac3b2223343eaca89a323c58d5e13`
 
 Human review explicitly authorizes Phase 3A only.
 
 The frozen scientific design is:
 
-- preregistration version: `1.0.0-rc.2`;
+- preregistration version: `1.0.0-rc.3`;
 - preregistration configuration:
   `configs/statistics/phase2_preregistration.yaml`;
 - canonical configuration hash:
-  `a7d475150b1c01d8e539a3fd5eb8d83f2ce696c5d78125f4c435c7519803aef1`;
+  `16a75327df5aacafa1fb4459e19429cc08d3350cd3056986356ef3c57864c1e8`;
 - scientific schema: `2.0.0-alpha.3`;
 - frozen engineering-smoke schema: `2.0.0-alpha.2`.
 
@@ -119,7 +119,7 @@ During Phase 3A, do not:
 - download GWOSC or GWTC products;
 - generate real-noise data;
 - alter the frozen Phase 1B smoke artifact;
-- alter the frozen RC.2 scientific distributions merely to make generation pass;
+- alter the frozen RC.3 scientific distributions merely to make generation pass;
 - call synthetic Gaussian noise real detector noise;
 - modify any legacy file;
 - start manuscript writing;
