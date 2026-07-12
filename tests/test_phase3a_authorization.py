@@ -8,7 +8,7 @@ from gwlens_mm.provenance import ArtifactChecksum, DatasetManifest
 
 ROOT = Path(__file__).resolve().parents[1]
 AUTH = ROOT / "configs/execution/phase3a_qualification_authorization.yaml"
-AUTH_COMMIT = "46df8bb23ad99ce153e3fc9dc3b4fe46962f41f9"
+AUTH_COMMIT = "81e5a6bcbfed5f67f1ff511593f8dc4153485e5e"
 
 
 def test_phase3a_authorization_matches_frozen_preregistration() -> None:
@@ -16,7 +16,7 @@ def test_phase3a_authorization_matches_frozen_preregistration() -> None:
         AUTH, repository_root=ROOT, authorizing_git_commit=AUTH_COMMIT
     )
     assert authorization.preregistration_hash == (
-        "16a75327df5aacafa1fb4459e19429cc08d3350cd3056986356ef3c57864c1e8"
+        "1403f1f8cf96fbc34c2cfd99928bd7c24b5fde5495e54689d2a5ee7ec250c418"
     )
     assert authorization.accepted_pair_count == 4096
     assert authorization.shard_pair_count == 128
