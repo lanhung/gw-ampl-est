@@ -1,0 +1,36 @@
+phase: "3C-0.2"
+authorization_status: authorized_latent_only_design_and_implementation
+authorized_by: human_project_owner
+authorization_date: "2026-07-12"
+
+base_main_commit: "9b9a6a3fcad1487622a2ec1d37e592fe0301e4e6"
+
+frozen_adaptive_preregistration:
+  version: "1.1.0-rc.3"
+  path: "configs/statistics/adaptive_scientific_production_preregistration.yaml"
+  canonical_hash: "6082475631539d3069edacc52f41b37fb8fe725ccd7c6bc9980cc3008795a927"
+
+superseded_candidate:
+  version: "proposal-v2-exact-mixture-1.0.0-rc.1"
+  status: rejected_latent_ess
+  implementation_commit: "2c8b587dd9eb949a3683d995c6338f97372c3a7c"
+  parameter_tuning_in_place_authorized: false
+
+authorization:
+  new_proposal_version_authorized: true
+  evaluation_target_sampler_implementation_authorized: true
+  rc5_latent_baseline_diagnostic_authorized: true
+  factorwise_weight_diagnostic_authorized: true
+  latent_only_preflight_authorized: true
+
+  waveform_pair_generation_authorized: false
+  accepted_pair_generator_authorized: false
+  proposal_ab_qualification_authorized: false
+  scientific_data_generation_authorized: false
+  model_training_authorized: false
+  calibration_authorized: false
+  scientific_evaluation_authorized: false
+  gwosc_gwtc_access_authorized: false
+  phase3c_a_or_later_authorized: false
+
+stop_after_phase3c02: true
