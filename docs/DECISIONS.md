@@ -257,3 +257,15 @@ modeling and LVK catalog searches. The preregistered novelty is the evaluated
 intersection of separated galaxy images, GW+EM conditioning, model-conditional
 absolute magnification and calibration. Journal targeting does not substitute
 for validated results.
+
+## D039 — Phase 3A source-plane density hard stop
+
+Phase 3A cannot invent an executable source-plane measure after RC.2 freeze.
+The proposal says uniform in an unspecified solver bounding region conditioned
+on multiple images; the evaluation population says uniform in the
+multiply-imaged cross-section; the execution prompt requires exact normalized
+proposal and evaluation log densities. No bounding limits, cross-section area
+definition, caustic/pseudo-caustic convention, numerical method or tolerance is
+frozen. Choosing any of these in implementation would alter the scientific
+distribution. Microbenchmark and qualification generation therefore stop
+before materialization pending a reviewed, versioned preregistration amendment.

@@ -2,11 +2,12 @@
 
 ## Current phase
 
-Phase 1B and Phase 1B.1 are merged and frozen. Phase 2 release candidate 1
-received a request-changes review; Phase 2.1 hardening has produced
-preregistration `1.0.0-rc.2` on `phase2/preregistration`, and the user-directed
-automatic review passed. No training, catalog download, Phase 3A execution, or
-scientific data generation is authorized by this state.
+Phase 1B and Phase 1B.1 are merged and frozen. Phase 2.1 preregistration
+`1.0.0-rc.2` is merged. Human review authorized Phase 3A qualification only,
+but its pre-generation gap audit found an unexecutable normalized source-plane
+density contract. Phase 3A is blocked before microbenchmark or data generation
+pending a reviewed specification amendment. Full production, training,
+calibration, scientific testing and GWOSC/GWTC access remain unauthorized.
 
 ## Completed
 
@@ -79,6 +80,15 @@ scientific data generation is authorized by this state.
   conservative novelty statement with no unsupported “first” claim;
 - expanded storage gating from raw capacity to peak staging/publication use
   plus a 100 GB post-peak reserve.
+- created the separate Phase 3A human authorization, bounded-memory shard
+  infrastructure, ADR-002, fail-closed attempt journal, PSD hash checks and
+  resource preflight;
+- verified the Phase 3A branch checkpoint, frozen preregistration hash,
+  authorization denials, authorizing commit, remote free space and absence of
+  existing Phase 3A staging/publication;
+- completed a section-by-section Phase 3A implementation gap audit and stopped
+  before generation when the normalized source-plane density could not be
+  implemented from the frozen specification.
 
 ## Not started by design
 
@@ -88,9 +98,8 @@ scientific data generation is authorized by this state.
 
 ## Next recommended phase
 
-RC.2 may be merged after CI. A later, separate decision may explicitly
-authorize only Phase 3A generator qualification; rc.2 itself does not grant
-that authorization. Full production remains gated on measured
-qualification throughput, solver acceptance, dynamics convergence, peak-disk
-amplification, storage and interruption/resume evidence. Do not reuse the
-engineering smoke artifact scientifically.
+Human review must amend and version the preregistration to define the proposal
+bounding region and the normalized multiply-imaged cross-section measure,
+including caustic/pseudo-caustic handling and numerical tolerances. After that
+review, Phase 3A must restart preflight and implementation audit from the new
+frozen hash. Full production remains gated on measured qualification evidence.

@@ -156,3 +156,23 @@ silently removed.
   the pinned AutoDL environment: 4,000/16,000-sample values were 237.720593 and
   237.937421 km/s (relative difference about 0.00091, below 0.02). This is a
   numerical contract check, not a simulated dataset or performance result.
+
+## Phase 3A pre-generation hard stop
+
+- The clean `2bb1ea43cb50f0fbaf8eea9f88750a90603b596a` checkpoint passed branch,
+  ancestry, authorization, frozen-hash and remote collision checks.
+- The frozen proposal specifies
+  `uniform_in_solver_bounding_region_then_condition_on_multiple_images`, but
+  neither the bounding region nor its relationship to lens scale is defined.
+- The frozen evaluation distribution specifies
+  `uniform_in_multiply_imaged_cross_section`, but the cross-section measure,
+  caustic/pseudo-caustic treatment, numerical integration method and tolerance
+  are undefined.
+- The Phase 3A prompt simultaneously requires normalized proposal/evaluation
+  log densities and forbids altering or completing frozen distributions merely
+  to make generation pass. Repository-wide search found no additional contract.
+
+No microbenchmark pair, qualification pair, staging directory or publication
+was created. This is a preregistration execution contradiction, not a runtime
+or solver failure. Human review must provide a versioned contract; code must not
+silently choose a solver search window or approximate caustic area.
