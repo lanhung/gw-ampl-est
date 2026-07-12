@@ -1,0 +1,17 @@
+{
+  "$id": "https://example.invalid/gwlens-mm/v2/2.0.0-alpha.1",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "em_observation": {"type": "object"},
+    "gw_observation": {"type": "object"},
+    "lens_truth": {"type": "object"},
+    "pair": {"type": "object"},
+    "provenance": {"type": "object"},
+    "schema_version": {"const": "2.0.0-alpha.1"},
+    "source_truth": {"type": "object"}
+  },
+  "required": ["schema_version", "pair", "source_truth", "lens_truth", "gw_observation", "em_observation", "provenance"],
+  "title": "GWLens-MM v2 metadata record",
+  "type": "object"
+}

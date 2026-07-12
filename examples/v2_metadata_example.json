@@ -1,0 +1,106 @@
+{
+  "em_observation": {
+    "aperture_metadata": {
+      "seeing_fwhm_arcsec": 0.7
+    },
+    "censoring_flags": {
+      "velocity_dispersion": true
+    },
+    "einstein_radius_arcsec": {
+      "standard_deviation": 0.02,
+      "value": 1.01
+    },
+    "image_position_covariances_arcsec2": [
+      [[0.0001, 0.0], [0.0, 0.0001]],
+      [[0.0001, 0.0], [0.0, 0.0001]]
+    ],
+    "lens_center_covariance_arcsec2": [[0.0004, 0.0], [0.0, 0.0004]],
+    "lens_redshift": {"standard_deviation": 0.001, "value": 0.5},
+    "modality_availability_mask": {
+      "einstein_radius": true,
+      "image_positions": true,
+      "lens_center": true,
+      "lens_redshift": true,
+      "source_redshift": true,
+      "velocity_dispersion": false
+    },
+    "observed_image_positions_arcsec": [[1.22, 0.01], [-0.79, -0.01]],
+    "observed_lens_center_arcsec": [0.002, -0.003],
+    "source_redshift": {"standard_deviation": 0.01, "value": 1.2},
+    "velocity_dispersion_km_s": null
+  },
+  "gw_observation": {
+    "array_products": [
+      {"checksum": null, "dataset_key": "noisy", "dtype": "float32", "product_role": "noisy_strain", "shape": [2, 3, 4096], "uri": "arrays/strain.zarr"},
+      {"checksum": null, "dataset_key": "clean", "dtype": "float32", "product_role": "clean_injected_signal", "shape": [2, 3, 4096], "uri": "arrays/strain.zarr"},
+      {"checksum": null, "dataset_key": "noise", "dtype": "float32", "product_role": "noise_realization", "shape": [2, 3, 4096], "uri": "arrays/strain.zarr"}
+    ],
+    "calibration_reference": null,
+    "data_quality_reference": null,
+    "detector_availability_mask": [[true, true, false], [true, true, true]],
+    "detector_slots": ["H1", "L1", "V1"],
+    "observed_event_time_difference_seconds": 86400.02,
+    "preprocessing_version": "planned-v2-smoke-1",
+    "psd_reference": "synthetic-design-psd:planned",
+    "sample_count": 4096,
+    "sample_rate_hz": 4096,
+    "segment_start_gps": [1400000000.0, 1400086400.02]
+  },
+  "lens_truth": {
+    "censored_image_ids": ["image_3"],
+    "external_convergence": 0.02,
+    "external_shear": [0.04, -0.01],
+    "lens_parameters": {"einstein_radius_arcsec": 1.0, "axis_ratio": 0.8},
+    "model_discrepancy_parameters": {"log_slope_offset": 0.0},
+    "physical_images": [
+      {"amplitude_factor": 1.7320508075688772, "arrival_time_seconds": 0.0, "censoring_reason": null, "image_id": "image_0", "morse_class": "minimum", "mu_abs": 3.0, "mu_signed": 3.0, "parity": "positive", "physically_detectable": true, "position_arcsec": [1.2, 0.0]},
+      {"amplitude_factor": 1.4142135623730951, "arrival_time_seconds": 86400.0, "censoring_reason": null, "image_id": "image_2", "morse_class": "saddle", "mu_abs": 2.0, "mu_signed": -2.0, "parity": "negative", "physically_detectable": true, "position_arcsec": [-0.8, 0.0]},
+      {"amplitude_factor": 0.5, "arrival_time_seconds": 90000.0, "censoring_reason": "below_detection_threshold", "image_id": "image_3", "morse_class": "maximum", "mu_abs": 0.25, "mu_signed": 0.25, "parity": "positive", "physically_detectable": false, "position_arcsec": [0.02, 0.01]}
+    ],
+    "unselected_image_ids": []
+  },
+  "pair": {
+    "augmentation_parent_id": null,
+    "dataset_version": "v2-smoke-planned",
+    "evaluation_prior_id": "interface-only-prior",
+    "lens_family": "sie_external_shear",
+    "lens_id": "lens-example-0001",
+    "pair_id": "pair-example-0001",
+    "physical_system_id": "system-example-0001",
+    "primary_definition": "earliest_arriving",
+    "primary_image_id": "image_0",
+    "proposal_distribution_id": "v2-smoke-proposal-1",
+    "root_seed": 20260712,
+    "secondary_image_id": "image_2",
+    "source_id": "source-example-0001",
+    "split": "train"
+  },
+  "provenance": {
+    "configuration_hash": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "detector_labels": ["H1", "L1", "V1"],
+    "distribution": {
+      "clipping_applied": false,
+      "clipping_reason": null,
+      "evaluation_prior_log_probability": -12.0,
+      "importance_weight": 1.0,
+      "proposal_log_probability": -12.0,
+      "weight_valid": true
+    },
+    "generator_git_commit": "38c76016b66eda3a4b72d5a7ca3fb1e90957abef",
+    "noise_segment_ids": ["noise-example-image0", "noise-example-image2"],
+    "package_versions": {"gwlens_mm": "0.1.0"},
+    "seed_hierarchy": {"lens": 2, "source": 1},
+    "solver_name": "metadata-example",
+    "solver_version": "planned-1",
+    "source_data_release": null,
+    "waveform_model": "planned-smoke-waveform"
+  },
+  "schema_version": "2.0.0-alpha.1",
+  "source_truth": {
+    "extrinsic_parameters": {"inclination": 0.7},
+    "intrinsic_parameters": {"mass_1_source_msun": 35.0, "mass_2_source_msun": 25.0},
+    "physical_luminosity_distance_mpc": 2500.0,
+    "waveform_model": "planned-smoke-waveform",
+    "waveform_model_version": "not-executed"
+  }
+}

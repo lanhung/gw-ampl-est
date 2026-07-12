@@ -39,3 +39,38 @@ GWTC work is authorized by Phase 0 completion.
 
 Any AutoDL action expected to create >10 GB requires a prior estimate, manifest,
 log path and resume plan. Current free space is 321 GB.
+
+## D009 — Quantity vocabulary
+
+Relative flux is always secondary over an explicitly identified primary. It is
+not implicitly faint over bright and may exceed one outside bounded analytic
+controls. `mu_rel`, `A21` and numbered-image shorthand are not v2 canonical
+fields.
+
+## D010 — Physical systems versus selected pairs
+
+Solvers and lens truth retain all physical images. A separate selected-pair
+object identifies the two GW image slots, primary definition, unselected
+images, and censored images.
+
+## D011 — Input policy
+
+Deployable inputs are fail-closed: exact allowlist membership is required and
+denylisted, suspicious-alias, duplicate, and unknown fields fail validation.
+Truth/target/diagnostic permission never implies input permission.
+
+## D012 — Split policy
+
+Model-selection validation, calibration, IID testing, diagnostics, and OOD
+tests are distinct. Source, lens/system, pair, noise segment, and augmentation
+groups cannot cross splits.
+
+## D013 — Phase 1B storage
+
+Use Zarr v2 plus Parquet with staged unique shards and single-writer manifest
+publication. A switch to sharded HDF5 plus Parquet requires an ADR amendment.
+
+## D014 — Phase 1A stop gate
+
+The 48-pair YAML is execution-disabled. Human acceptance of Phase 1A is
+required before SIE/EPL integration or any smoke waveform generation.

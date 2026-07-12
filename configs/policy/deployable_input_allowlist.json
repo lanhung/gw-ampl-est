@@ -1,0 +1,29 @@
+{
+  "policy_version": "1.0.0",
+  "fields": [
+    "gw_strain_primary",
+    "gw_strain_secondary",
+    "detector_availability_mask",
+    "detector_identity",
+    "sample_rate_hz",
+    "observed_event_time_difference_seconds",
+    "observed_image_positions_arcsec",
+    "observed_image_position_covariance_arcsec2",
+    "observed_lens_center_arcsec",
+    "observed_lens_center_covariance_arcsec2",
+    "observed_einstein_radius_arcsec",
+    "observed_einstein_radius_std_arcsec",
+    "observed_lens_redshift",
+    "observed_lens_redshift_std",
+    "observed_source_redshift",
+    "observed_source_redshift_std",
+    "observed_velocity_dispersion_km_s",
+    "observed_velocity_dispersion_std_km_s",
+    "em_modality_availability_mask",
+    "em_censoring_flags",
+    "calibration_metadata",
+    "data_quality_metadata",
+    "psd_reference",
+    "preprocessing_version"
+  ]
+}

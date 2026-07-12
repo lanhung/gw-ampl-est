@@ -1,0 +1,154 @@
+"""Implementation-independent lens solver and pair-selection contracts."""
+
+from __future__ import annotations
+
+import math
+from dataclasses import dataclass
+from typing import Any, Mapping, Protocol, Sequence, Tuple
+
+from .quantities import ImageParity, LensFamily, Magnification, MorseClass, PrimaryDefinition
+from .sis import sis_from_source_position
+
+
+@dataclass(frozen=True)
+class PhysicalImage:
+    image_id: str
+    position_arcsec: Tuple[float, float]
+    mu_signed: float
+    arrival_time_dimensionless: float
+    parity: ImageParity
+    morse_class: MorseClass
+    valid: bool = True
+    validity_reason: str = "valid"
+
+    def __post_init__(self) -> None:
+        if not self.image_id:
+            raise ValueError("image_id is required")
+        if len(self.position_arcsec) != 2 or not all(
+            math.isfinite(v) for v in self.position_arcsec
+        ):
+            raise ValueError("position_arcsec must contain two finite values")
+        magnification = Magnification(self.mu_signed)
+        if magnification.parity is not self.parity:
+            raise ValueError("parity is inconsistent with signed magnification")
+
+
+@dataclass(frozen=True)
+class LensSystemSolution:
+    lens_family: LensFamily
+    physical_images: Tuple[PhysicalImage, ...]
+    solver_name: str
+    solver_version: str
+    valid: bool = True
+    validity_reason: str = "valid"
+
+    def __post_init__(self) -> None:
+        ids = [image.image_id for image in self.physical_images]
+        if len(ids) != len(set(ids)):
+            raise ValueError("physical image IDs must be unique")
+        if self.valid and len(ids) < 2:
+            raise ValueError("a valid strong-lensing solution must contain at least two images")
+
+
+@dataclass(frozen=True)
+class SelectedPair:
+    primary_image_id: str
+    secondary_image_id: str
+    primary_definition: PrimaryDefinition
+    selection_reason: str
+    detector_visibility: Mapping[str, Tuple[bool, bool]]
+    unselected_image_ids: Tuple[str, ...] = ()
+    censored_image_ids: Tuple[str, ...] = ()
+
+    def __post_init__(self) -> None:
+        if self.primary_image_id == self.secondary_image_id:
+            raise ValueError("selected image IDs must differ")
+        if not self.selection_reason:
+            raise ValueError("selection_reason is required")
+
+    def validate_against(self, solution: LensSystemSolution) -> None:
+        physical = {image.image_id for image in solution.physical_images}
+        selected = {self.primary_image_id, self.secondary_image_id}
+        if not selected <= physical:
+            raise ValueError("selected pair references an unknown physical image")
+        extras = set(self.unselected_image_ids) | set(self.censored_image_ids)
+        if not extras <= physical - selected:
+            raise ValueError("unselected/censored IDs must be non-selected physical images")
+        if set(self.unselected_image_ids) & set(self.censored_image_ids):
+            raise ValueError("an extra image cannot be both unselected and censored")
+
+
+class LensSolver(Protocol):
+    """Adapter contract; implementations must return all physical images."""
+
+    @property
+    def lens_family(self) -> LensFamily: ...
+
+    def solve(
+        self, source_position: Tuple[float, float], parameters: Mapping[str, Any]
+    ) -> LensSystemSolution: ...
+
+
+class SISSolver:
+    """Dependency-free SIS control in angular units of theta_E."""
+
+    lens_family = LensFamily.SIS
+
+    def solve(
+        self, source_position: Tuple[float, float], parameters: Mapping[str, Any]
+    ) -> LensSystemSolution:
+        beta_x, beta_y = (float(value) for value in source_position)
+        theta_e = float(parameters.get("einstein_radius_arcsec", 1.0))
+        if not math.isfinite(theta_e) or theta_e <= 0:
+            raise ValueError("einstein_radius_arcsec must be positive and finite")
+        beta_radius = math.hypot(beta_x, beta_y)
+        if beta_radius == 0.0:
+            raise ValueError("the exactly aligned SIS Einstein ring is not a two-image solution")
+        y = beta_radius / theta_e
+        analytic = sis_from_source_position(y)
+        ux, uy = beta_x / beta_radius, beta_y / beta_radius
+        x_plus = theta_e * (y + 1.0)
+        x_minus = theta_e * (y - 1.0)
+        images = (
+            PhysicalImage(
+                image_id="sis_plus",
+                position_arcsec=(x_plus * ux, x_plus * uy),
+                mu_signed=analytic.plus.mu_signed,
+                arrival_time_dimensionless=-0.5 - y,
+                parity=ImageParity.POSITIVE,
+                morse_class=MorseClass.MINIMUM,
+            ),
+            PhysicalImage(
+                image_id="sis_minus",
+                position_arcsec=(x_minus * ux, x_minus * uy),
+                mu_signed=analytic.minus.mu_signed,
+                arrival_time_dimensionless=-0.5 + y,
+                parity=ImageParity.NEGATIVE,
+                morse_class=MorseClass.SADDLE,
+            ),
+        )
+        return LensSystemSolution(
+            lens_family=self.lens_family,
+            physical_images=images,
+            solver_name="gwlens_mm.SISSolver",
+            solver_version="1",
+        )
+
+
+def validate_solver_contract(
+    solver: LensSolver,
+    cases: Sequence[Tuple[Tuple[float, float], Mapping[str, Any]]],
+) -> None:
+    """Run lightweight structural checks for an optional non-SIS adapter."""
+
+    if solver.lens_family not in set(LensFamily):
+        raise ValueError("solver reports an unsupported lens family")
+    for source_position, parameters in cases:
+        solution = solver.solve(source_position, parameters)
+        if solution.lens_family is not solver.lens_family:
+            raise ValueError("solver result family does not match adapter family")
+        arrival_times = [image.arrival_time_dimensionless for image in solution.physical_images]
+        if not all(math.isfinite(value) for value in arrival_times):
+            raise ValueError("all image arrival-time coordinates must be finite")
+        if not all(image.valid for image in solution.physical_images):
+            raise ValueError("contract case returned an invalid image")

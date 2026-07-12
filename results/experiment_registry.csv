@@ -1,2 +1,3 @@
 experiment_id,phase,status,data_type,description,verified_result,limitations,artifact
 phase0_remote_audit_20260712,0,completed,legacy_metadata,"Read-only path, data, generator and PDF traceability audit","Three distinct lineages resolved; PDF checkpoint metrics verified","No full waveform hashing; missing historical Git/seed metadata",docs/audits/PHASE0_REMOTE_AUDIT.md
+phase1a_physics_schema_20260712,1A,completed,metadata_and_unit_tests,"Physics conventions; SIS/Fourier controls; solver and pair schema; input and split policies; provenance","65 pytest cases passed; Ruff passed; mypy passed for 12 source files; AutoDL SIS contract passed","No external non-SIS numerical solver available; no waveform or smoke data generated",docs/reports/PHASE1A_REPORT.md
