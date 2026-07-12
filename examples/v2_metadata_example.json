@@ -19,6 +19,7 @@
       "posterior_standard_deviation": 0.02,
       "reference": "environment-example-0001"
     },
+    "dynamics_model_reference": "lenstronomy-galkin-spherical-powerlaw-hernquist-om-v1",
     "observed_image_astrometry": [
       {
         "covariance_arcsec2": [[0.0001, 0.0], [0.0, 0.0001]],
@@ -50,6 +51,7 @@
     "observed_lens_center_arcsec": [0.002, -0.003],
     "redshift_ordering_valid": true,
     "source_redshift": {"standard_deviation": 0.01, "value": 1.2},
+    "tracer_effective_radius_arcsec": 1.0,
     "velocity_dispersion_km_s": {"standard_deviation": 12.5, "value": 250.0}
   },
   "gw_observation": {
@@ -61,6 +63,11 @@
     "calibration_reference": null,
     "data_quality_reference": null,
     "detector_availability_mask": [[true, true, false], [true, true, true]],
+    "detector_psd_references": {
+      "H1": "aLIGO_O4_high_asd.txt:eb5ec9b081c3d86d2f4257b9aff6a57566d168b8a95e5e57b7909eebad021780",
+      "L1": "aLIGO_O4_high_asd.txt:eb5ec9b081c3d86d2f4257b9aff6a57566d168b8a95e5e57b7909eebad021780",
+      "V1": "AdV_psd.txt:c2532150f63dbaa76d451e2c074390272e259e4e2eedc3e684d2205582aa0764"
+    },
     "detector_slots": ["H1", "L1", "V1"],
     "observed_time_difference": {
       "deterministic_control": false,
@@ -126,6 +133,21 @@
     ],
     "package_versions": {"gwlens_mm": "0.1.0", "lenstronomy": "1.13.6"},
     "seed_hierarchy": {"lens": 2, "source": 1},
+    "selection": {
+      "passing_image_ids": ["image_0", "image_2"],
+      "per_image_detector_optimal_snr": {
+        "image_0": {"H1": 12.0, "L1": 10.0, "V1": 3.0},
+        "image_2": {"H1": 9.0, "L1": 8.0, "V1": 6.0},
+        "image_3": {"H1": 2.0, "L1": 1.5, "V1": 1.0}
+      },
+      "per_image_network_optimal_snr": {
+        "image_0": 15.905973720586866,
+        "image_2": 13.45362404707371,
+        "image_3": 2.692582403567252
+      },
+      "rejection_reason": null,
+      "selected_pair_rule": "earliest_two_images_passing_detection"
+    },
     "solver_name": "metadata-example",
     "solver_version": "planned-1",
     "source_data_release": null,

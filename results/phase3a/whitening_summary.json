@@ -1,0 +1,105 @@
+{
+  "criteria": {
+    "aggregate_absolute_mean_maximum": 0.02,
+    "aggregate_standard_deviation_maximum": 1.05,
+    "aggregate_standard_deviation_minimum": 0.95,
+    "finite_fraction_required": 1.0,
+    "frequency_band_power_ratio_maximum": 1.5,
+    "frequency_band_power_ratio_minimum": 0.5,
+    "frequency_bands_hz": [
+      [
+        20,
+        64
+      ],
+      [
+        64,
+        256
+      ],
+      [
+        256,
+        1024
+      ]
+    ],
+    "method": "bilby_psd_frequency_domain_v1",
+    "per_event_observed_standard_deviation_normalization": false
+  },
+  "detectors": {
+    "H1": {
+      "finite_fraction": 1.0,
+      "frequency_band_power_ratios": {
+        "20-64": 1.007731841297678,
+        "256-1024": 1.0014297349067127,
+        "64-256": 0.9925091800757642
+      },
+      "mean": 4.912791094074942e-19,
+      "outlier_count_abs_gt_8": 0,
+      "passed": true,
+      "per_event_observed_standard_deviation_normalization": false,
+      "psd_sources": [
+        "/root/autodl-tmp/lensing-4/envs/phase1b-smoke/lib/python3.10/site-packages/bilby/gw/detector/noise_curves/aLIGO_O4_high_asd.txt"
+      ],
+      "quantiles": [
+        -3.067357772796524,
+        -2.3318192482352376,
+        0.002405464569077367,
+        2.311376426730418,
+        3.082916105416516
+      ],
+      "standard_deviation": 0.9976085163778905,
+      "synthetic_noise_label": "synthetic_gaussian_curve_conditioned",
+      "verified_psd": "/root/autodl-tmp/lensing-4/envs/phase1b-smoke/lib/python3.10/site-packages/bilby/gw/detector/noise_curves/aLIGO_O4_high_asd.txt:eb5ec9b081c3d86d2f4257b9aff6a57566d168b8a95e5e57b7909eebad021780"
+    },
+    "L1": {
+      "finite_fraction": 1.0,
+      "frequency_band_power_ratios": {
+        "20-64": 0.9770762155713246,
+        "256-1024": 1.0010620385723796,
+        "64-256": 1.0010052129753864
+      },
+      "mean": 2.515687853345272e-19,
+      "outlier_count_abs_gt_8": 0,
+      "passed": true,
+      "per_event_observed_standard_deviation_normalization": false,
+      "psd_sources": [
+        "/root/autodl-tmp/lensing-4/envs/phase1b-smoke/lib/python3.10/site-packages/bilby/gw/detector/noise_curves/aLIGO_O4_high_asd.txt"
+      ],
+      "quantiles": [
+        -3.088813701912873,
+        -2.326174718432185,
+        0.00038431209722524916,
+        2.329502627092736,
+        3.0891972014480853
+      ],
+      "standard_deviation": 0.9992541912986473,
+      "synthetic_noise_label": "synthetic_gaussian_curve_conditioned",
+      "verified_psd": "/root/autodl-tmp/lensing-4/envs/phase1b-smoke/lib/python3.10/site-packages/bilby/gw/detector/noise_curves/aLIGO_O4_high_asd.txt:eb5ec9b081c3d86d2f4257b9aff6a57566d168b8a95e5e57b7909eebad021780"
+    },
+    "V1": {
+      "finite_fraction": 1.0,
+      "frequency_band_power_ratios": {
+        "20-64": 1.000723701822975,
+        "256-1024": 0.9990112147617172,
+        "64-256": 1.0037892926186993
+      },
+      "mean": 5.082197683525802e-21,
+      "outlier_count_abs_gt_8": 0,
+      "passed": true,
+      "per_event_observed_standard_deviation_normalization": false,
+      "psd_sources": [
+        "/root/autodl-tmp/lensing-4/envs/phase1b-smoke/lib/python3.10/site-packages/bilby/gw/detector/noise_curves/AdV_psd.txt"
+      ],
+      "quantiles": [
+        -3.0898314448044792,
+        -2.3202837961366365,
+        0.0001745517617057395,
+        2.330929464469867,
+        3.1084802616307234
+      ],
+      "standard_deviation": 1.0018185472002457,
+      "synthetic_noise_label": "synthetic_gaussian_curve_conditioned",
+      "verified_psd": "/root/autodl-tmp/lensing-4/envs/phase1b-smoke/lib/python3.10/site-packages/bilby/gw/detector/noise_curves/AdV_psd.txt:c2532150f63dbaa76d451e2c074390272e259e4e2eedc3e684d2205582aa0764"
+    }
+  },
+  "realizations_per_detector": 16,
+  "status": "passed"
+}

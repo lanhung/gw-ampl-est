@@ -22,6 +22,7 @@ DETECTOR_SLOTS = ("H1", "L1", "V1")
 
 class SplitName(str, Enum):
     ENGINEERING_SMOKE = "engineering_smoke"
+    GENERATOR_QUALIFICATION = "generator_qualification"
     TRAIN = "train"
     VALIDATION = "validation"
     CALIBRATION = "calibration"
@@ -286,6 +287,7 @@ class GWObservation:
     psd_reference: str
     calibration_reference: Optional[str]
     data_quality_reference: Optional[str]
+    detector_psd_references: Optional[Mapping[str, str]] = None
 
     def validate(self) -> None:
         if self.detector_slots != DETECTOR_SLOTS:
@@ -307,6 +309,11 @@ class GWObservation:
                 raise ValueError("array sample dimension disagrees with GW metadata")
         if not self.preprocessing_version or not self.psd_reference:
             raise ValueError("preprocessing and PSD references are required")
+        if self.detector_psd_references is not None:
+            if set(self.detector_psd_references) != set(DETECTOR_SLOTS) or any(
+                not value.strip() for value in self.detector_psd_references.values()
+            ):
+                raise ValueError("detector PSD references must cover H1/L1/V1 exactly")
         self.observed_time_difference.validate()
         for start in self.segment_start_gps:
             _finite(start, "segment start GPS")
@@ -369,6 +376,8 @@ class EMObservation:
     aperture_metadata: Mapping[str, float]
     redshift_ordering_valid: Optional[bool]
     external_convergence_observation: Optional[ExternalConvergenceObservation] = None
+    tracer_effective_radius_arcsec: Optional[float] = None
+    dynamics_model_reference: Optional[str] = None
 
     def validate(self, lens_truth: LensTruth, schema_version: str) -> None:
         values: Dict[str, Any] = {
@@ -427,6 +436,13 @@ class EMObservation:
             )
         if self.external_convergence_observation is not None:
             self.external_convergence_observation.validate()
+        if self.tracer_effective_radius_arcsec is not None:
+            _positive(
+                self.tracer_effective_radius_arcsec,
+                "tracer effective radius",
+            )
+        if self.dynamics_model_reference is not None and not self.dynamics_model_reference.strip():
+            raise ValueError("dynamics model reference cannot be blank")
         if self.lens_redshift is not None and self.source_redshift is not None:
             expected_ordering = self.lens_redshift.value < self.source_redshift.value
             if self.redshift_ordering_valid is not expected_ordering:
@@ -478,6 +494,37 @@ class DetectorNoiseReference:
 
 
 @dataclass(frozen=True)
+class SelectionMetadata:
+    per_image_detector_optimal_snr: Mapping[str, Mapping[str, float]]
+    per_image_network_optimal_snr: Mapping[str, float]
+    passing_image_ids: Tuple[str, ...]
+    selected_pair_rule: str
+    rejection_reason: Optional[str]
+
+    def validate(self) -> None:
+        if not self.selected_pair_rule.strip():
+            raise ValueError("selection metadata requires a selected-pair rule")
+        if set(self.per_image_detector_optimal_snr) != set(
+            self.per_image_network_optimal_snr
+        ):
+            raise ValueError("selection SNR maps must cover identical physical images")
+        for image_id, detector_values in self.per_image_detector_optimal_snr.items():
+            if not image_id or set(detector_values) != set(DETECTOR_SLOTS):
+                raise ValueError("selection detector SNR must cover H1/L1/V1")
+            for value in detector_values.values():
+                if _finite(value, "detector optimal SNR") < 0:
+                    raise ValueError("optimal SNR must be nonnegative")
+            if _finite(
+                self.per_image_network_optimal_snr[image_id], "network optimal SNR"
+            ) < 0:
+                raise ValueError("network optimal SNR must be nonnegative")
+        if len(self.passing_image_ids) != len(set(self.passing_image_ids)):
+            raise ValueError("passing image IDs must be unique")
+        if not set(self.passing_image_ids) <= set(self.per_image_network_optimal_snr):
+            raise ValueError("passing image IDs must have selection statistics")
+
+
+@dataclass(frozen=True)
 class Provenance:
     generator_git_commit: str
     configuration_hash: str
@@ -490,6 +537,7 @@ class Provenance:
     detector_noise_references: Tuple[DetectorNoiseReference, ...]
     source_data_release: Optional[str]
     distribution: DistributionMetadata
+    selection: Optional[SelectionMetadata] = None
 
     @property
     def used_noise_segment_ids(self) -> Tuple[str, ...]:
@@ -535,6 +583,8 @@ class Provenance:
         if len(used_ids) != len(set(used_ids)):
             raise ValueError("available image-detector slots require unique noise segment IDs")
         self.distribution.validate()
+        if self.selection is not None:
+            self.selection.validate()
 
 
 @dataclass(frozen=True)
@@ -570,6 +620,10 @@ class V2Record:
         result = convert(asdict(self))
         if self.schema_version == FROZEN_SMOKE_SCHEMA_VERSION:
             del result["em_observation"]["external_convergence_observation"]
+            del result["em_observation"]["tracer_effective_radius_arcsec"]
+            del result["em_observation"]["dynamics_model_reference"]
+            del result["gw_observation"]["detector_psd_references"]
+            del result["provenance"]["selection"]
         return result
 
     def to_json(self, *, indent: Optional[int] = 2) -> str:
@@ -671,6 +725,10 @@ class V2Record:
             DetectorNoiseReference(**item) for item in provenance_data["detector_noise_references"]
         )
         provenance_data["distribution"] = DistributionMetadata(**provenance_data["distribution"])
+        if provenance_data.get("selection") is not None:
+            selection = dict(provenance_data["selection"])
+            selection["passing_image_ids"] = tuple(selection["passing_image_ids"])
+            provenance_data["selection"] = SelectionMetadata(**selection)
         record = cls(
             schema_version=str(data["schema_version"]),
             pair=PairIndex(**pair_data),
@@ -778,6 +836,24 @@ def v2_json_schema() -> Dict[str, Any]:
                     "noise_source": {"type": "string", "minLength": 1},
                 },
             },
+            "SelectionMetadata": {
+                "type": "object",
+                "additionalProperties": False,
+                "required": [
+                    "per_image_detector_optimal_snr",
+                    "per_image_network_optimal_snr",
+                    "passing_image_ids",
+                    "selected_pair_rule",
+                    "rejection_reason",
+                ],
+                "properties": {
+                    "per_image_detector_optimal_snr": {"type": "object"},
+                    "per_image_network_optimal_snr": {"type": "object"},
+                    "passing_image_ids": {"type": "array", "items": {"type": "string"}},
+                    "selected_pair_rule": {"type": "string", "minLength": 1},
+                    "rejection_reason": {"type": ["string", "null"]},
+                },
+            },
         },
         "required": [
             "schema_version",
@@ -795,11 +871,24 @@ def v2_json_schema() -> Dict[str, Any]:
             "lens_truth": {"type": "object"},
             "gw_observation": {
                 "type": "object",
-                "required": ["observed_time_difference", "detector_availability_mask"],
+                "required": [
+                    "observed_time_difference",
+                    "detector_availability_mask",
+                    "detector_psd_references",
+                ],
                 "not": {"required": ["observed_event_time_difference_seconds"]},
                 "properties": {
                     "observed_time_difference": {"$ref": "#/$defs/TimingObservation"},
                     "detector_availability_mask": {"type": "array"},
+                    "detector_psd_references": {
+                        "type": "object",
+                        "required": list(DETECTOR_SLOTS),
+                        "additionalProperties": False,
+                        "properties": {
+                            detector: {"type": "string", "minLength": 1}
+                            for detector in DETECTOR_SLOTS
+                        },
+                    },
                 },
             },
             "em_observation": {
@@ -808,6 +897,8 @@ def v2_json_schema() -> Dict[str, Any]:
                     "observed_image_astrometry",
                     "external_convergence_observation",
                     "modality_availability_mask",
+                    "tracer_effective_radius_arcsec",
+                    "dynamics_model_reference",
                 ],
                 "not": {
                     "anyOf": [
@@ -827,11 +918,16 @@ def v2_json_schema() -> Dict[str, Any]:
                         ]
                     },
                     "modality_availability_mask": {"type": "object"},
+                    "tracer_effective_radius_arcsec": {
+                        "type": ["number", "null"],
+                        "exclusiveMinimum": 0,
+                    },
+                    "dynamics_model_reference": {"type": ["string", "null"]},
                 },
             },
             "provenance": {
                 "type": "object",
-                "required": ["detector_noise_references"],
+                "required": ["detector_noise_references", "selection"],
                 "not": {"required": ["noise_segment_ids"]},
                 "properties": {
                     "detector_noise_references": {
@@ -839,7 +935,8 @@ def v2_json_schema() -> Dict[str, Any]:
                         "minItems": 6,
                         "maxItems": 6,
                         "items": {"$ref": "#/$defs/DetectorNoiseReference"},
-                    }
+                    },
+                    "selection": {"$ref": "#/$defs/SelectionMetadata"},
                 },
             },
         },

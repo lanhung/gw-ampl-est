@@ -12,9 +12,6 @@ def validate_strain_array_semantics(
     clean: np.ndarray,
     noise: np.ndarray,
     detector_availability_mask: Sequence[Sequence[bool]],
-    *,
-    relative_tolerance: float = 1e-5,
-    absolute_tolerance: float = 1e-6,
 ) -> None:
     """Validate decomposition and zero-fill semantics without writing data."""
 
@@ -36,10 +33,6 @@ def validate_strain_array_semantics(
         if np.any(array[unavailable] != 0.0):
             raise ValueError("unavailable detector slots must be exactly zero-filled")
     available = mask
-    if not np.allclose(
-        arrays[0][available],
-        arrays[1][available] + arrays[2][available],
-        rtol=relative_tolerance,
-        atol=absolute_tolerance,
-    ):
+    expected_noisy = (arrays[1] + arrays[2]).astype(np.float32)
+    if not np.array_equal(arrays[0][available], expected_noisy[available]):
         raise ValueError("available detector slots must satisfy noisy = clean + noise")

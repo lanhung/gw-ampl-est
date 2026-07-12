@@ -1,0 +1,20 @@
+{
+  "alias_fixtures": [
+    "trueMu",
+    "cleanWaveform",
+    "oracleLensParameter",
+    "sourcePlaneBetaTrue",
+    "optimalSNR"
+  ],
+  "all_alias_fixtures_rejected": true,
+  "all_exact_denials_rejected": true,
+  "allowed_field_count": 31,
+  "allowlist_sha256": "576621df150909c2111b4fb79d178f955a35a695905914330680dfa63fdb2e36",
+  "denied_field_count": 32,
+  "denylist_sha256": "286c9f2a2a4b00fa419034b5e7a35a5d456f716fe115e9c4705d60a26a188212",
+  "importance_weights_deployable": false,
+  "policy_version": "1.2.0",
+  "selection_statistics_deployable": false,
+  "status": "passed",
+  "truth_deployable": false
+}

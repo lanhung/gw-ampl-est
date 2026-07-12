@@ -1,0 +1,107 @@
+phase: "3A"
+schema_version: "2.0.0-alpha.3"
+preregistration:
+  path: "configs/statistics/phase2_preregistration.yaml"
+  version: "1.0.0-rc.5"
+  canonical_hash: "4dde279cf1bea78d1ddbd4fab99d88e88e334c80c180dc7850679736c5e53edb"
+  base_main_commit: "80167ea690914bb18be1fd1994b4dc626490e146"
+authorization:
+  path: "configs/execution/phase3a_qualification_authorization.yaml"
+  authorizing_git_commit: "bba0cdd6a750ff367674a85b8722432e613586d8"
+root_seed: 2026071202
+dataset_purpose: generator_qualification
+scientific_use_authorized: false
+training_use_authorized: false
+calibration_use_authorized: false
+test_use_authorized: false
+accepted_pair_count: 4096
+shard_count: 32
+pairs_per_shard: 128
+output:
+  staging_root: "/root/autodl-tmp/lensing-4/data_v2/production/staging"
+  publication_root: "/root/autodl-tmp/lensing-4/data_v2/production/published"
+  manifest_root: "/root/autodl-tmp/lensing-4/manifests/phase3"
+  log_root: "/root/autodl-tmp/lensing-4/logs/phase3"
+environment:
+  python: "3.10.12"
+  requirements: "configs/environment/phase1b-autodl-requirements.txt"
+  bilby: "2.6.0"
+  lalsuite: "7.26.1"
+  lenstronomy: "1.13.6"
+  astropy: "6.1.7"
+gps_schedule:
+  purpose: detector_antenna_response_engineering_exercise
+  astrophysical_observing_population: false
+  start_gps: 1126259462
+  stride_seconds: 100003
+gw:
+  waveform: IMRPhenomXPHM
+  duration_seconds: 8
+  sample_rate_hz: 2048
+  sample_count: 16384
+  minimum_frequency_hz: 20
+  reference_frequency_hz: 50
+  merger_offset_seconds: 6.0
+  construction_duration_seconds: 64
+  construction_sample_count: 131072
+  construction_merger_offset_seconds: 62.0
+  crop_start_sample: 114688
+  crop_stop_sample_exclusive: 131072
+  inverse_transform: bilby.core.utils.infft
+  zero_guard_samples_per_edge: 512
+  raised_cosine_transition_samples_per_edge: 512
+  selection_snr_signal: conditioned_published_clean_strain
+  preprocessing_version: rc5_long_grid_crop_condition_bilby_psd_whiten_v1
+  detector_slots: [H1, L1, V1]
+  dtype: float32
+  psd_curves:
+    H1: {file: aLIGO_O4_high_asd.txt, sha256: eb5ec9b081c3d86d2f4257b9aff6a57566d168b8a95e5e57b7909eebad021780}
+    L1: {file: aLIGO_O4_high_asd.txt, sha256: eb5ec9b081c3d86d2f4257b9aff6a57566d168b8a95e5e57b7909eebad021780}
+    V1: {file: AdV_psd.txt, sha256: c2532150f63dbaa76d451e2c074390272e259e4e2eedc3e684d2205582aa0764}
+waveform_boundary:
+  reference_duration_seconds: 128
+  reference_merger_offset_seconds: 126.0
+  maximum_conditioned_reference_relative_difference: 0.005
+  maximum_construction_energy_outside_crop_fraction: 0.005
+  minimum_conditioned_crop_energy_retained_fraction: 0.999
+  require_exact_zero_guard_energy: true
+  transform_roundtrip_relative_tolerance: 1.0e-12
+  stored_clean_snr_relative_tolerance: 1.0e-12
+whitening:
+  method: bilby_psd_frequency_domain_v1
+  per_event_observed_standard_deviation_normalization: false
+  finite_fraction_required: 1.0
+  aggregate_standard_deviation_minimum: 0.95
+  aggregate_standard_deviation_maximum: 1.05
+  aggregate_absolute_mean_maximum: 0.02
+  frequency_band_power_ratio_minimum: 0.5
+  frequency_band_power_ratio_maximum: 1.5
+  frequency_bands_hz: [[20, 64], [64, 256], [256, 1024]]
+kinematics:
+  samples: 4000
+  reference_samples: 16000
+  maximum_relative_difference: 0.02
+microbenchmark:
+  accepted_pair_count: 32
+  include_in_final_dataset: false
+  worker_processes: 8
+interruption_test:
+  stop_after_complete_shards: 3
+  require_byte_identical_resume: true
+execution:
+  qualification_worker_processes: 16
+  maximum_attempts_per_worker: 2000000
+  attempt_id_stride: 32
+diagnostics:
+  whitening_realizations_per_detector: 16
+resource_gates:
+  minimum_prelaunch_free_bytes: 105807608883
+  minimum_post_run_free_bytes: 100000000000
+  maximum_output_bytes: 10000000000
+  maximum_projected_walltime_hours: 24
+storage:
+  format: zarr_v2_plus_parquet
+  chunk_shape: [1, 2, 3, 16384]
+  compression: blosc_zstd_bitshuffle
+  atomic_same_filesystem_rename: true
+  checksum: sha256_all_published_artifacts

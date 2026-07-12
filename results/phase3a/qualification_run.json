@@ -1,0 +1,104 @@
+{
+  "acceptance_rate": 0.002813768505714437,
+  "accepted_pair_count": 4096,
+  "accepted_pairs_per_hour": 688.9055221817074,
+  "active_elapsed_seconds": 21404.38641470298,
+  "attempt_count": 1455699,
+  "dataset_id": "gwlens-v2-2.0.0-alpha.3-7081b2e8be3a84e1",
+  "em_cell_counts": {
+    "astrometry_kinematics_no_einstein_scale": 512,
+    "astrometry_redshifts_only": 512,
+    "full_photometric_redshifts": 512,
+    "full_precise_spectroscopic": 512,
+    "no_lens_redshift": 512,
+    "no_source_redshift": 512,
+    "no_velocity_dispersion": 512,
+    "sparse_astrometry_timing_only": 512
+  },
+  "family_accepted": {
+    "epl_external_shear": 2029,
+    "sie_external_shear": 2067
+  },
+  "family_attempts": {
+    "epl_external_shear": 727987,
+    "sie_external_shear": 727712
+  },
+  "image_multiplicity_counts": {
+    "2": 1924,
+    "3": 591,
+    "4": 1241,
+    "5": 340
+  },
+  "post_resume_hash_file": "/root/autodl-tmp/lensing-4/manifests/phase3/gwlens-v2-2.0.0-alpha.3-7081b2e8be3a84e1.post_resume_hashes.sha256",
+  "pre_resume_hash_file": "/root/autodl-tmp/lensing-4/manifests/phase3/gwlens-v2-2.0.0-alpha.3-7081b2e8be3a84e1.pre_resume_hashes.sha256",
+  "published_bytes": 4450694559,
+  "published_path": "/root/autodl-tmp/lensing-4/data_v2/production/published/gwlens-v2-2.0.0-alpha.3-7081b2e8be3a84e1",
+  "published_tree_sha256": "25b0a0d45c030c90da7037ac5f820dced4d602019f0ae2b8ce3a9d4a2d9ac133",
+  "rejection_counts": {
+    "fewer_than_two_images_pass_synthetic_selection": 425513,
+    "fewer_than_two_physical_images": 1026090
+  },
+  "remaining_free_bytes": 330450604032,
+  "resume_byte_identical": true,
+  "run_id": "phase3a-gwlens-v2-2.0.0-alpha.3-7081b2e8be3a84e1",
+  "shard_bytes": 3944326856,
+  "status": "published",
+  "timing_totals_seconds": {
+    "kinematics_seconds": 1421.496021354571,
+    "lens_solver_seconds": 144068.2638704367,
+    "noise_and_whitening_seconds": 223.34476522170007,
+    "waveform_and_projection_seconds": 71122.77244758047
+  },
+  "validation": {
+    "accepted_pair_count": 4096,
+    "all_groups_confined_to_generator_qualification": true,
+    "all_ids_unique": true,
+    "all_physical_images_retained": true,
+    "array_decomposition_exact_float32": true,
+    "attempt_count": 1455699,
+    "authorizing_git_commit": "bba0cdd6a750ff367674a85b8722432e613586d8",
+    "calibration_use_authorized": false,
+    "complete_shard_count": 32,
+    "configuration_hash": "f8920a89787ea94f634a080b8d4d70a7205f5f382417bd169077a6d562d2145c",
+    "deployable_input_policy": "passed",
+    "em_cell_counts": {
+      "astrometry_kinematics_no_einstein_scale": 512,
+      "astrometry_redshifts_only": 512,
+      "full_photometric_redshifts": 512,
+      "full_precise_spectroscopic": 512,
+      "no_lens_redshift": 512,
+      "no_source_redshift": 512,
+      "no_velocity_dispersion": 512,
+      "sparse_astrometry_timing_only": 512
+    },
+    "family_counts": {
+      "epl_external_shear": 2029,
+      "sie_external_shear": 2067
+    },
+    "generator_git_commit": "fbcd0616611d9cdf915ef0af030e6061c1be7f59",
+    "image_multiplicity_counts": {
+      "2": 1924,
+      "3": 591,
+      "4": 1241,
+      "5": 340
+    },
+    "lens_ids_sha256": "79c7c75ace58e5fcafd2cd02befe3f9dc30019fb986b07df7bc156b306aa174c",
+    "noise_segment_ids_sha256": "39665b13500bbe70207554824acf22eb6b204cdd63fb00067207e2e4ef94f8eb",
+    "pair_ids_sha256": "83f293eebd17dad94ea8182d157f26df65ad86df4813b55b4619c2aea976d9a1",
+    "pairs_per_shard": 128,
+    "physical_system_ids_sha256": "446b13878eff22e9348305a694792fbae3988ccdec6336ec0b8b5bb6c17dc514",
+    "preregistration_hash": "4dde279cf1bea78d1ddbd4fab99d88e88e334c80c180dc7850679736c5e53edb",
+    "preregistration_version": "1.0.0-rc.5",
+    "rejection_counts": {
+      "fewer_than_two_images_pass_synthetic_selection": 425513,
+      "fewer_than_two_physical_images": 1026090
+    },
+    "schema_version": "2.0.0-alpha.3",
+    "scientific_use_authorized": false,
+    "selected_pair_identity_valid": true,
+    "source_ids_sha256": "2d9402038afd798e88745926282c2d88c8c29eae8fa04be9cb496b805ae1430b",
+    "status": "passed",
+    "test_use_authorized": false,
+    "training_use_authorized": false
+  }
+}

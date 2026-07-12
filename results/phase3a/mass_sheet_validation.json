@@ -1,0 +1,13 @@
+{
+  "absolute_magnification_scaling_absolute_error": 0.0,
+  "absolute_tolerance": 1e-12,
+  "external_convergence_connected_to_magnification_and_delay": true,
+  "fermat_difference_scaling_absolute_error": 4.440892098500626e-16,
+  "image_position_invariance_absolute_error_arcsec": 0.0,
+  "kappa_ext": 0.12,
+  "lambda_mst": 0.88,
+  "physical_delay_scaling_absolute_error_seconds": 0.0,
+  "signed_magnification_scaling_absolute_error": 0.0,
+  "source_scaling_absolute_error": 0.0,
+  "status": "passed"
+}

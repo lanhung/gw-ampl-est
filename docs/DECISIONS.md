@@ -258,7 +258,19 @@ intersection of separated galaxy images, GW+EM conditioning, model-conditional
 absolute magnification and calibration. Journal targeting does not substitute
 for validated results.
 
-## D039 — Exact source-plane density precedes selection
+## D039 — Phase 3A source-plane density hard stop
+
+Phase 3A cannot invent an executable source-plane measure after RC.2 freeze.
+The proposal says uniform in an unspecified solver bounding region conditioned
+on multiple images; the evaluation population says uniform in the
+multiply-imaged cross-section; the execution prompt requires exact normalized
+proposal and evaluation log densities. No bounding limits, cross-section area
+definition, caustic/pseudo-caustic convention, numerical method or tolerance is
+frozen. Choosing any of these in implementation would alter the scientific
+distribution. Microbenchmark and qualification generation therefore stop
+before materialization pending a reviewed, versioned preregistration amendment.
+
+## D040 — Exact source-plane density precedes selection
 
 RC.3 resolves the RC.2 execution ambiguity by defining `u=beta/theta_E`
 uniformly on the half-open square `[-2.5,2.5)^2`. The normalized density with
@@ -272,7 +284,7 @@ central images are not discarded. A finer, wider union is the frozen reference.
 A failed support audit blocks Phase 3A; implementation may not change these
 tolerances after seeing qualification results.
 
-## D040 — Finite source support is a truncated benchmark
+## D041 — Finite source support is a truncated benchmark
 
 The RC.3 boundary probe showed that steep singular EPL models can remain
 multiply imaged at finite square boundaries. RC.4 therefore makes no claim that
@@ -281,7 +293,18 @@ normalized benchmark support. The boundary hard gate is agreement between the
 primary and finer reference solver unions, including image multiplicity and
 positions. This clarification changes no density formula or finite support.
 
-## D041 — Waveform publication uses a fixed long-grid construction
+## D042 — Frozen waveform-boundary failure stops Phase 3A
+
+The exact pre-execution generator commit
+`a2b8a02b4631e86c39e1b682e4424ecc2f2c5ca9` failed all four predeclared
+8-second waveform fixtures against the aligned 32-second reference and
+edge-energy limits. Phase 3A therefore stops before the 32-pair microbenchmark.
+The observed thresholds may not be relaxed in place. Any duration, placement,
+taper, alignment or numerical-acceptance change requires a separately reviewed
+versioned configuration, a new clean generator commit, and repetition of every
+pre-execution gate.
+
+## D043 — Waveform publication uses a fixed long-grid construction
 
 RC.5 keeps the scientific product at 8 seconds and 2048 Hz but eliminates the
 failed comparison between independently constructed 8-second and 32-second
@@ -294,3 +317,41 @@ A 128-second construction is the frozen numerical reference. The reviewed
 0.005 relative-difference and outside-crop limits, 0.999 energy-retention floor,
 exact zero guards and transform-normalization check are disclosed post-RC.4
 choices and may not be changed after RC.5 execution begins.
+
+## D044 — Qualification parallelism is shard-deterministic
+
+The 4,096-pair run assigns each of 32 shards an interleaved global attempt-ID
+stream `shard_index + 32 * local_attempt`. Sixteen process workers execute these
+streams without sharing Bilby or Galkin global RNG state. Accepted indices and
+all scientific/observation seeds are fixed by shard, not scheduling. The same
+shard can therefore be reproduced independently, while complete shard
+directories remain immutable across interruption and resume.
+
+The 32-pair microbenchmark uses eight analogous process streams and is excluded
+from the final dataset. Its measured aggregate throughput is projected to the
+reviewed 16-worker qualification configuration; no unmeasured GPU acceleration
+or physics-fidelity reduction is credited.
+
+## D045 — Phase 3A qualification data are published and permanently non-scientific
+
+The RC.5 generator commit
+`fbcd0616611d9cdf915ef0af030e6061c1be7f59` published exactly 4,096 accepted
+pairs in 32 shards. The dataset manifest denies scientific, training,
+calibration and test use. These denials are permanent: a later authorization
+cannot relabel the Phase 3A artifact as scientific data.
+
+The first three shard hashes were byte-identical across the reviewed
+interruption and resume sequence. Full production remains a separate human
+decision; passing Phase 3A does not open it.
+
+## D046 — Later scientific scale must be preregistered as a stopping rule
+
+The historical 118,784-pair plan is not automatically authorized by generator
+qualification. Human review may replace it with a cumulative
+16,384/32,768/65,536 training ladder, fixed disjoint evaluation sets and
+predeclared learning-curve/calibration stopping rules. Any replacement needs a
+new version and canonical hash before implementation.
+
+Physical-system counts and noise augmentations must be reported separately.
+Synthetic OOD evaluation and real-noise/GWOSC/GWTC evaluation must not share an
+implicit authorization. The latter remains behind its own future gate.

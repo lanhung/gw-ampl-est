@@ -79,7 +79,20 @@ generator audit and approving a v2 schema.
 ## Current phase gate
 
 Phase 0, Phase 1A, Phase 1A.1, Phase 1B, Phase 1B.1 and Phase 2 through the
-human-approved RC.5 waveform-window amendment are complete.
+human-approved RC.5 waveform-window amendment are complete and merged into
+main at:
+
+`80167ea690914bb18be1fd1994b4dc626490e146`
+
+The separately authorized Phase 3A generator qualification has completed on
+the review branch. Its immutable execution identities are:
+
+- authorizing commit:
+  `bba0cdd6a750ff367674a85b8722432e613586d8`;
+- generator commit:
+  `fbcd0616611d9cdf915ef0af030e6061c1be7f59`;
+- dataset ID:
+  `gwlens-v2-2.0.0-alpha.3-7081b2e8be3a84e1`.
 
 The frozen scientific design is:
 
@@ -92,39 +105,40 @@ The frozen scientific design is:
 - frozen engineering-smoke schema: `2.0.0-alpha.2`.
 
 RC.5 freezes the 64-second internal waveform construction, 8-second
-conditioned publication and 128-second numerical reference. It does not itself
-authorize execution. Phase 3A remains fail-closed until a separate execution
-authorization names this exact version, hash and merged main commit.
+conditioned publication and 128-second numerical reference. Phase 3A published
+exactly 4,096 accepted engineering pairs in 32 atomic shards of 128. The first
+three shard hashes were byte-identical across interruption and resume. The
+qualification report and small evidence are the only remaining review inputs.
 
-The reviewed Phase 1B engineering artifact is frozen as:
+The Phase 3A dataset is engineering qualification data only. It may never
+be used for model training, post-hoc calibration, SBC, IID testing, OOD
+testing or reported scientific performance.
 
-`gwlens-v2-2.0.0-alpha.2-ae86beab1c132682`
+The Phase 3A execution authorization is now exhausted. Until a new reviewed,
+versioned preregistration and separate human authorization exist, do not:
 
-Phase 2 and its amendments are documentation and design only. They may cover literature,
-identifiability, estimands, priors, observation models, selection effects,
-splits, calibration tests, baselines, ablations, compute estimates, and the
-next execution gate.
-
-During Phase 2, do not:
-
-- train any neural model;
-- generate additional waveform pairs;
-- download GWTC or GWOSC data;
+- generate any additional pair from the qualification or scientific plan;
+- start the frozen 118,784-pair plan or any proposed staged replacement;
+- train or tune any neural model;
+- download GWOSC or GWTC products;
+- generate real-noise data;
+- alter the frozen Phase 1B smoke artifact;
+- alter the frozen RC.5 scientific distributions or waveform-window contract
+  merely to make generation pass;
 - call synthetic Gaussian noise real detector noise;
 - modify any legacy file;
-- use the smoke dataset for scientific performance claims;
 - start manuscript writing;
-- proceed to medium- or large-scale generation.
+- proceed to Phase 3B or later phases.
 
-No Phase 3 execution is authorized until the Phase 2 report and
-preregistration receive human review.
+All Phase 3A remote outputs must remain under:
 
-All smoke outputs must be written only below:
+`/root/autodl-tmp/lensing-4/data_v2/production`
 
-`/root/autodl-tmp/lensing-4/data_v2/smoke`
-
-The 48-pair smoke dataset is engineering-only and may never be used for
-training, calibration, scientific testing, or reported performance claims.
+Full production, staged scientific production, model training, calibration,
+scientific testing, GWOSC/GWTC access and Phase 3B remain closed. Human review
+is required before any next phase. Planning may compare a staged
+16,384/32,768/65,536 training ladder with the historical 118,784-pair plan,
+but planning does not authorize execution and must not reuse Phase 3A data.
 
 ## Scientific integrity
 

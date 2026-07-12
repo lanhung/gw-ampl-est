@@ -1,0 +1,165 @@
+{
+  "acceptance_rate": 0.0022301205658930936,
+  "accepted_pair_count": 32,
+  "accepted_pairs_per_hour": 211.7073429285454,
+  "attempt_count": 14349,
+  "attempts_per_hour": 94930.89574005306,
+  "authorizing_git_commit": "bba0cdd6a750ff367674a85b8722432e613586d8",
+  "checksum_seconds": 0.08537873066961765,
+  "configuration_hash": "f8920a89787ea94f634a080b8d4d70a7205f5f382417bd169077a6d562d2145c",
+  "dataset_id": "gwlens-v2-2.0.0-alpha.3-7081b2e8be3a84e1-microbenchmark",
+  "dataset_purpose": "generator_qualification_microbenchmark",
+  "disk_amplification": 0.816835880279541,
+  "elapsed_seconds": 544.6139336321503,
+  "em_cell_counts": {
+    "astrometry_kinematics_no_einstein_scale": 4,
+    "astrometry_redshifts_only": 4,
+    "full_photometric_redshifts": 4,
+    "full_precise_spectroscopic": 4,
+    "no_lens_redshift": 4,
+    "no_source_redshift": 4,
+    "no_velocity_dispersion": 4,
+    "sparse_astrometry_timing_only": 4
+  },
+  "family_accepted": {
+    "epl_external_shear": 10,
+    "sie_external_shear": 22
+  },
+  "family_attempts": {
+    "epl_external_shear": 7272,
+    "sie_external_shear": 7077
+  },
+  "free_bytes_after": 338339237888,
+  "free_bytes_before": 338379755520,
+  "gates": {
+    "both_lens_families": true,
+    "double_and_quad_multiplicity": true,
+    "em_balance": true,
+    "exact_accepted_count": true,
+    "output": true,
+    "remaining_free": true,
+    "walltime": true,
+    "whitening": true
+  },
+  "generation_elapsed_seconds": 544.147398982197,
+  "generator_git_commit": "fbcd0616611d9cdf915ef0af030e6061c1be7f59",
+  "image_multiplicity_counts": {
+    "2": 17,
+    "3": 2,
+    "4": 13
+  },
+  "included_in_final_dataset": false,
+  "microbenchmark_worker_processes": 8,
+  "peak_child_rss_kib": 297288,
+  "preregistration_hash": "4dde279cf1bea78d1ddbd4fab99d88e88e334c80c180dc7850679736c5e53edb",
+  "projected_output_bytes": 3946818816,
+  "projected_qualification_walltime_hours": 9.673731537461281,
+  "projected_remaining_free_bytes": 334392419072,
+  "projected_worker_peak_rss_kib": 4756608,
+  "qualification_worker_processes": 16,
+  "rejection_counts": {
+    "fewer_than_two_images_pass_synthetic_selection": 4142,
+    "fewer_than_two_physical_images": 10175
+  },
+  "shard_tree_sha256": "74faa355496279fcfb197a8cfa4262e1da0ede33dfa7a7743c81a3dc98cf89d5",
+  "staged_bytes": 30834522,
+  "status": "passed",
+  "storage_write_seconds": 0.33718324825167656,
+  "timing_totals_seconds": {
+    "kinematics_seconds": 11.402445299550891,
+    "lens_solver_seconds": 1366.5424631852657,
+    "noise_and_whitening_seconds": 1.576279055327177,
+    "waveform_and_projection_seconds": 632.9636408612132
+  },
+  "whitening": {
+    "H1": {
+      "finite_fraction": 1.0,
+      "mean": -1.9566461081574338e-19,
+      "outlier_count_abs_gt_8": 0,
+      "quantiles": [
+        -3.0688876831818104,
+        -2.3217083033355035,
+        -0.0003454853561256053,
+        2.320100373303004,
+        3.088818474396379
+      ],
+      "standard_deviation": 0.9984362564521785
+    },
+    "L1": {
+      "finite_fraction": 1.0,
+      "mean": -2.752857078576476e-19,
+      "outlier_count_abs_gt_8": 0,
+      "quantiles": [
+        -3.0726546229170517,
+        -2.329263327330542,
+        0.001861131825638752,
+        2.322156073457668,
+        3.0866219375208677
+      ],
+      "standard_deviation": 0.9994550016535061
+    },
+    "V1": {
+      "finite_fraction": 1.0,
+      "mean": 2.430984558619842e-19,
+      "outlier_count_abs_gt_8": 0,
+      "quantiles": [
+        -3.0717807478981762,
+        -2.318193253569266,
+        -0.0016639598875487938,
+        2.333418870149684,
+        3.1063616828618272
+      ],
+      "standard_deviation": 0.99926808610917
+    }
+  },
+  "worker_summaries": [
+    {
+      "accepted_count": 4,
+      "attempt_count": 1828,
+      "elapsed_seconds": 248.7533982489258,
+      "worker_index": 0
+    },
+    {
+      "accepted_count": 4,
+      "attempt_count": 1457,
+      "elapsed_seconds": 214.9236734714359,
+      "worker_index": 1
+    },
+    {
+      "accepted_count": 4,
+      "attempt_count": 2281,
+      "elapsed_seconds": 319.9864536225796,
+      "worker_index": 2
+    },
+    {
+      "accepted_count": 4,
+      "attempt_count": 1061,
+      "elapsed_seconds": 152.74098497256637,
+      "worker_index": 3
+    },
+    {
+      "accepted_count": 4,
+      "attempt_count": 1338,
+      "elapsed_seconds": 188.0162001568824,
+      "worker_index": 4
+    },
+    {
+      "accepted_count": 4,
+      "attempt_count": 3937,
+      "elapsed_seconds": 543.9206330720335,
+      "worker_index": 5
+    },
+    {
+      "accepted_count": 4,
+      "attempt_count": 1909,
+      "elapsed_seconds": 271.1829716619104,
+      "worker_index": 6
+    },
+    {
+      "accepted_count": 4,
+      "attempt_count": 538,
+      "elapsed_seconds": 82.90368241257966,
+      "worker_index": 7
+    }
+  ]
+}

@@ -157,6 +157,26 @@ silently removed.
   237.937421 km/s (relative difference about 0.00091, below 0.02). This is a
   numerical contract check, not a simulated dataset or performance result.
 
+## Phase 3A pre-generation hard stop
+
+- The clean `2bb1ea43cb50f0fbaf8eea9f88750a90603b596a` checkpoint passed branch,
+  ancestry, authorization, frozen-hash and remote collision checks.
+- The frozen proposal specifies
+  `uniform_in_solver_bounding_region_then_condition_on_multiple_images`, but
+  neither the bounding region nor its relationship to lens scale is defined.
+- The frozen evaluation distribution specifies
+  `uniform_in_multiply_imaged_cross_section`, but the cross-section measure,
+  caustic/pseudo-caustic treatment, numerical integration method and tolerance
+  are undefined.
+- The Phase 3A prompt simultaneously requires normalized proposal/evaluation
+  log densities and forbids altering or completing frozen distributions merely
+  to make generation pass. Repository-wide search found no additional contract.
+
+No microbenchmark pair, qualification pair, staging directory or publication
+was created. This is a preregistration execution contradiction, not a runtime
+or solver failure. Human review must provide a versioned contract; code must not
+silently choose a solver search window or approximate caustic area.
+
 ## Phase 2.2 source-plane contract resolution
 
 - RC.2 did not define the solver bounding region or an executable normalized
@@ -169,6 +189,45 @@ silently removed.
 - The source support and solver search window still require the frozen Phase 3A
   boundary comparison. A failed support audit remains a hard stop.
 
+## Phase 3A RC.3 source-boundary audit
+
+- The pre-generation boundary probe found that EPL slope 2.5 systems can remain
+  multiply imaged at every tested edge/corner of `[-2.5,2.5)^2`. This is
+  consistent with the singular steep power-law deflection and means a claim of
+  covering a finite full multiply-imaged cross-section is not executable.
+- SIE and shallow-EPL boundary probes returned no multiple images in the same
+  test. No pair or shard was generated.
+- RC.3 is retained as superseded history. A new version must call the finite
+  source square a deliberately truncated benchmark support and test primary
+  versus reference solver classification on its boundary rather than require
+  absence of multiple images there.
+
+## Phase 3A RC.4 waveform-boundary hard failure
+
+- The frozen generator commit
+  `a2b8a02b4631e86c39e1b682e4424ecc2f2c5ca9` evaluated four deterministic
+  8-second IMRPhenomXPHM boundary fixtures against aligned 32-second references.
+- All arrays were finite, but all four cases failed. Relative differences were
+  0.0338--0.0609 against a `1e-5` limit. Leading/trailing 0.25-second energy
+  fractions were `6.19e-5`--`3.04e-4` against a `1e-6` limit.
+- The 32-accepted-pair microbenchmark and 4,096-pair run were not started. The
+  frozen criteria cannot be relaxed after observing this result; a separately
+  reviewed waveform-window/configuration revision is required.
+- An additional non-publication 1,000-attempt acceptance probe found 2 accepted
+  systems and projected roughly 224.8 hours for 4,096 at the measured serial
+  rate, independently exceeding the 24-hour gate. This probe is diagnostic,
+  not a substitute for the prohibited formal microbenchmark.
+- Follow-up read-only diagnostics ruled out a simple alignment error and found
+  that the stored clean-strain conversion uses unnormalized `numpy.irfft`
+  rather than Bilby's `infft`. At 2048 Hz this would suppress clean strain by a
+  factor of 2048 relative to stored noise. This must be corrected under a new
+  reviewed waveform contract before any official generation.
+- RC.5 corrects this before execution by using Bilby's normalized `infft`, a
+  fixed 64-second construction, conditioned 8-second publication and
+  stored-clean selection SNR. Precommit AutoDL diagnostics passed all four
+  128-second reference comparisons; these remain non-authoritative until rerun
+  on the clean generator commit.
+
 ## Phase 2.3 finite-support clarification
 
 - RC.3's first extreme probe found steep EPL doubles on every tested finite
@@ -177,3 +236,18 @@ silently removed.
   truncated benchmark and does not purport to contain the complete strong-lens
   cross-section. Primary/reference solver agreement replaces the impossible
   no-multiple-images-at-boundary requirement.
+
+## Phase 3A completion limitations
+
+- The final runner persisted microbenchmark peak RSS but not a continuous
+  peak-RSS counter for the 4,096-pair run. A sampled 16-worker snapshot totaled
+  5,446,536 KiB; this is not represented as an exact maximum. A future
+  production runner should persist cgroup or process-tree peak memory and
+  time-integrated CPU utilization.
+- The literal repository-wide Ruff command continues to report 18 pre-existing
+  formatting findings in `scripts/remote/build_phase0_manifests.py`. Phase 3A
+  scope Ruff passes. The old script was deliberately not reformatted after the
+  microbenchmark because any code change would violate the frozen generator
+  commit and force a full rerun.
+- These reporting/tooling limitations did not alter the 4,096-pair validation,
+  byte-identical resume result, 10 GB output gate or 100 GB free-space gate.

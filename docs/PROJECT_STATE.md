@@ -2,13 +2,16 @@
 
 ## Current phase
 
-Phase 1B and Phase 1B.1 are merged and frozen. RC.3 resolved the normalized
-source-plane measure but its first Phase 3A probe exposed an invalid
-full-cross-section boundary expectation for steep singular EPL. The human
-project owner approved RC.4's finite truncated benchmark interpretation on the
-Phase 2.3 branch. RC.4 remains execution-disabled pending an updated separate
-Phase 3A authorization. Full production, training, calibration, scientific
-testing and GWOSC/GWTC access remain unauthorized.
+Human review approved RC.5, now merged to main at
+`80167ea690914bb18be1fd1994b4dc626490e146`, with canonical hash
+`4dde279cf1bea78d1ddbd4fab99d88e88e334c80c180dc7850679736c5e53edb`.
+The independent Phase 3A authorization is frozen at
+`bba0cdd6a750ff367674a85b8722432e613586d8`. Production-generator,
+parallel-shard, resume, streaming-validation and numerical-gate code is
+implemented and awaiting a clean pre-execution code freeze and formal gate
+rerun. No official microbenchmark pair, qualification shard or publication
+exists. Full production, training, calibration, scientific testing and
+GWOSC/GWTC remain unauthorized.
 
 ## Completed
 
@@ -81,12 +84,31 @@ testing and GWOSC/GWTC access remain unauthorized.
   conservative novelty statement with no unsupported “first” claim;
 - expanded storage gating from raw capacity to peak staging/publication use
   plus a 100 GB post-peak reserve.
+- created the separate Phase 3A human authorization, bounded-memory shard
+  infrastructure, ADR-002, fail-closed attempt journal, PSD hash checks and
+  resource preflight;
+- verified the Phase 3A branch checkpoint, frozen preregistration hash,
+  authorization denials, authorizing commit, remote free space and absence of
+  existing Phase 3A staging/publication;
+- completed a section-by-section Phase 3A implementation gap audit and stopped
+  before generation when the normalized source-plane density could not be
+  implemented from the frozen specification.
 - defined the exact RC.3 source-plane preselection measure, normalized angular
   log density, selection-conditioning boundary and deterministic Lenstronomy
   numerical/support-audit contract.
 - corrected the finite source square's claim boundary in RC.4 after a
   pre-generation steep-EPL probe; boundary validation now requires
   primary/reference solver agreement rather than absence of multiple images.
+- froze RC.5 and the exact Phase 3A generator commit, passed source-plane,
+  mass-sheet, Galkin, waveform-boundary, whitening and input-policy gates;
+- passed the deterministic 32-pair microbenchmark and every resource gate;
+- generated exactly 4,096 non-scientific qualification pairs from 1,455,699
+  attempts and atomically published 32 shards of 128 pairs on AutoDL;
+- verified byte-identical hashes for the first three shards across intentional
+  interruption and resume, unique grouped IDs and exact float32 decomposition;
+- retained 330,450,604,032 free bytes after a 4,450,694,559-byte publication;
+- stopped Phase 3A with full production, staged scientific production,
+  training, calibration, scientific testing and GWOSC/GWTC still closed.
 
 ## Not started by design
 
@@ -96,7 +118,10 @@ testing and GWOSC/GWTC access remain unauthorized.
 
 ## Next recommended phase
 
-Validate and merge RC.4, then update the independent Phase 3A authorization to
-its exact commit and canonical hash. Qualification must rerun all preflight and
-solver-agreement gates. Full production remains gated on measured qualification
-throughput, solver acceptance, dynamics convergence, disk and resume evidence.
+Human review should inspect the Phase 3A qualification report and small
+evidence before any new execution decision. A later design-only amendment may
+compare a staged 16,384/32,768/65,536 scientific-training ladder with the
+historical 118,784-pair plan and freeze learning-curve stopping rules. It must
+use a new preregistration version/hash, keep the Phase 3A data outside all
+scientific splits, and leave real-noise/GWOSC/GWTC work behind a separate gate.
+No scientific production or training is currently authorized.

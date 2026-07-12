@@ -15,6 +15,7 @@ SEED_DOMAINS = (
     "detector_noise",
     "em_measurement_noise",
     "missing_modalities",
+    "stellar_kinematics",
     "augmentation",
 )
 
@@ -106,14 +107,25 @@ class DatasetManifest:
     dataset_purpose: str
     scientific_use_authorized: bool
     authorizing_git_commit: str
+    training_use_authorized: bool = False
+    calibration_use_authorized: bool = False
+    test_use_authorized: bool = False
 
     def validate(self) -> None:
         if not self.dataset_id or self.root_seed < 0:
             raise ValueError("dataset identity and nonnegative root seed are required")
-        if self.dataset_purpose != "engineering_smoke":
-            raise ValueError("Phase 1B manifest must identify an engineering smoke dataset")
+        if self.dataset_purpose not in {"engineering_smoke", "generator_qualification"}:
+            raise ValueError("unsupported non-scientific dataset purpose")
         if self.scientific_use_authorized:
-            raise ValueError("engineering smoke data cannot be authorized for scientific use")
+            raise ValueError("engineering data cannot be authorized for scientific use")
+        if any(
+            (
+                self.training_use_authorized,
+                self.calibration_use_authorized,
+                self.test_use_authorized,
+            )
+        ):
+            raise ValueError("engineering data cannot be authorized for downstream use")
         if len(self.authorizing_git_commit) != 40 or any(
             character not in "0123456789abcdef"
             for character in self.authorizing_git_commit.lower()

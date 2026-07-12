@@ -6,7 +6,7 @@ import importlib
 import importlib.metadata
 import math
 from dataclasses import dataclass
-from typing import Any, Mapping, Tuple
+from typing import Any, Mapping, Sequence, Tuple
 
 import numpy as np
 
@@ -101,19 +101,32 @@ class LenstronomyAdapter:
         lens_model, kwargs_lens = self._model(parameters)
         _, solver_class, lens_cosmo_class, _, planck18 = _load_dependencies()
         solver = solver_class(lens_model)
-        x_image, y_image = solver.image_position_from_source(
-            beta_x,
-            beta_y,
-            kwargs_lens,
-            search_window=float(parameters.get("search_window_arcsec", 5.0)),
-            min_distance=float(parameters.get("minimum_image_separation_arcsec", 0.01)),
-            num_iter_max=int(parameters.get("solver_iterations", 200)),
-        )
+        numerical_contract = parameters.get("numerical_contract")
+        if numerical_contract is None:
+            x_image, y_image = solver.image_position_from_source(
+                beta_x,
+                beta_y,
+                kwargs_lens,
+                search_window=float(parameters.get("search_window_arcsec", 5.0)),
+                min_distance=float(parameters.get("minimum_image_separation_arcsec", 0.01)),
+                num_iter_max=int(parameters.get("solver_iterations", 200)),
+            )
+            solver_label = "lenstronomy"
+        else:
+            x_image, y_image = self._solve_union(
+                solver,
+                lens_model,
+                kwargs_lens,
+                (beta_x, beta_y),
+                parameters,
+                numerical_contract,
+            )
+            solver_label = "lenstronomy-deterministic-union"
         if len(x_image) < 2:
             return LensSystemSolution(
                 lens_family=self.lens_family,
                 physical_images=(),
-                solver_name="lenstronomy",
+                solver_name=solver_label,
                 solver_version=str(importlib.metadata.version("lenstronomy")),
                 valid=False,
                 validity_reason="fewer than two images",
@@ -164,6 +177,85 @@ class LenstronomyAdapter:
         return LensSystemSolution(
             lens_family=self.lens_family,
             physical_images=tuple(images),
-            solver_name="lenstronomy",
+            solver_name=solver_label,
             solver_version=str(importlib.metadata.version("lenstronomy")),
         )
+
+    @staticmethod
+    def _solve_union(
+        solver: Any,
+        lens_model: Any,
+        kwargs_lens: list[dict[str, float]],
+        source_position: Tuple[float, float],
+        parameters: Mapping[str, Any],
+        contract: Any,
+    ) -> Tuple[np.ndarray, np.ndarray]:
+        if not isinstance(contract, Mapping) or contract.get("solver") != "deterministic_union":
+            raise ValueError("unsupported numerical lens-solver contract")
+        components = contract.get("components", contract.get("primary_components"))
+        if not isinstance(components, Sequence) or len(components) != 2:
+            raise ValueError("deterministic union requires analytical and grid components")
+        theta_e = float(parameters["einstein_radius_arcsec"])
+        beta_x, beta_y = source_position
+        candidates: list[Tuple[float, float]] = []
+        for component in components:
+            if not isinstance(component, Mapping):
+                raise ValueError("solver component must be a mapping")
+            if component.get("solver") == "analytical":
+                x_values, y_values = solver.image_position_from_source(
+                    beta_x,
+                    beta_y,
+                    kwargs_lens,
+                    solver="analytical",
+                    Nmeas=int(component["angular_samples"]),
+                    Nmeas_extra=int(component["low_shear_extra_samples"]),
+                    arrival_time_sort=True,
+                )
+            elif component.get("solver") == "lenstronomy_grid":
+                x_values, y_values = solver.image_position_from_source(
+                    beta_x,
+                    beta_y,
+                    kwargs_lens,
+                    solver="lenstronomy",
+                    search_window=float(component["search_window_over_einstein_radius"])
+                    * theta_e,
+                    min_distance=float(
+                        component["minimum_image_separation_over_einstein_radius"]
+                    )
+                    * theta_e,
+                    precision_limit=float(contract["precision_limit_arcsec"]),
+                    num_iter_max=int(contract["maximum_iterations"]),
+                    arrival_time_sort=bool(contract["arrival_time_sort"]),
+                    initial_guess_cut=bool(component["initial_guess_cut"]),
+                    num_random=int(contract["random_initial_guesses"]),
+                    non_linear=bool(contract["non_linear_solver"]),
+                    magnification_limit=contract["magnification_limit"],
+                )
+            else:
+                raise ValueError("unknown deterministic-union component")
+            candidates.extend(
+                (float(x_value), float(y_value))
+                for x_value, y_value in zip(x_values, y_values)
+            )
+        validation = contract["candidate_validation"]
+        residual_limit = float(validation["maximum_lens_equation_residual_arcsec"])
+        duplicate_limit = (
+            float(validation["duplicate_position_tolerance_over_einstein_radius"])
+            * theta_e
+        )
+        accepted: list[Tuple[float, float]] = []
+        for x_value, y_value in candidates:
+            mapped_x, mapped_y = lens_model.ray_shooting(x_value, y_value, kwargs_lens)
+            residual = math.hypot(float(mapped_x) - beta_x, float(mapped_y) - beta_y)
+            if not math.isfinite(residual) or residual > residual_limit:
+                continue
+            if any(
+                math.hypot(x_value - previous_x, y_value - previous_y) <= duplicate_limit
+                for previous_x, previous_y in accepted
+            ):
+                continue
+            accepted.append((x_value, y_value))
+        if not accepted:
+            return np.array([], dtype=float), np.array([], dtype=float)
+        positions = np.asarray(accepted, dtype=float)
+        return positions[:, 0], positions[:, 1]
