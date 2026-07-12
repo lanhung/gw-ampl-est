@@ -2,9 +2,10 @@
 
 ## Current phase
 
-Phase 1B and Phase 1B.1 are merged and frozen. Phase 2 documentation and
-preregistration are in progress on `phase2/preregistration`. No training,
-catalog download, or scientific data generation is authorized by this state.
+Phase 1B and Phase 1B.1 are merged and frozen. Phase 2 preregistration
+`1.0.0-rc.1` is complete on `phase2/preregistration` and awaits human review.
+No training, catalog download, or scientific data generation is authorized by
+this state.
 
 ## Completed
 
@@ -52,6 +53,17 @@ catalog download, or scientific data generation is authorized by this state.
   `gwlens-v2-2.0.0-alpha.2-ae86beab1c132682` and made the published AutoDL
   artifact read-only while preserving its hashes;
 - opened Phase 2 as a design-only preregistration phase.
+- froze broad proposal and balanced benchmark distributions while explicitly
+  denying that the benchmark is an astrophysical rate population;
+- froze the conditional two-magnification estimand, synthetic selection model,
+  eight EM availability cells, estimator grid, baselines and ablations;
+- fixed validation/calibration/IID/OOD counts from binomial precision targets;
+- pinned detector-specific synthetic curve names and hashes and identified the
+  frozen Phase 1B generic PSD label as imprecise provenance;
+- created a fail-closed Phase 3 plan with exact storage arithmetic, a 4,096-pair
+  qualification gate, 128-pair atomic shards and byte-identical resume rules;
+- passed 100 local tests plus one optional skip and 105 AutoDL tests, Ruff,
+  mypy, and package builds.
 
 ## Not started by design
 
@@ -61,8 +73,8 @@ catalog download, or scientific data generation is authorized by this state.
 
 ## Next recommended phase
 
-Complete and review the Phase 2 literature/identifiability audit and statistical
-preregistration. Freeze estimands, priors, observation and selection models,
-calibration criteria, baselines, ablations, split sizes, and a storage/compute
-plan before authorizing any Phase 3 generation or training. Do not reuse the
-engineering smoke artifact scientifically.
+Review `docs/reports/PHASE2_REPORT.md`, the preregistration and the planned
+manifest. If accepted, explicitly authorize only Phase 3A generator
+qualification. Full production remains gated on measured qualification
+throughput, solver acceptance, storage and interruption/resume evidence. Do not
+reuse the engineering smoke artifact scientifically.

@@ -1,5 +1,7 @@
 phase: "2"
-status: entry_draft
+preregistration_version: "1.0.0-rc.1"
+root_seed: 2026071202
+status: awaiting_human_review
 execution_enabled: false
 scientific_data_generation_authorized: false
 training_authorized: false
@@ -11,10 +13,9 @@ estimands:
     - log_abs_mu_primary
     - log_abs_mu_secondary
   derived:
-    - log_abs_mu_difference
-    - abs_magnification_ratio
-    - flux_ratio
-    - amplitude_factor_ratio
+    - log_abs_mu_secondary_minus_primary
+    - relative_abs_magnification_secondary_over_primary
+    - relative_strain_amplitude_secondary_over_primary
   conditioning_required:
     - lens_family
     - cosmology
@@ -22,20 +23,265 @@ estimands:
     - population_and_selection_model
     - gw_and_em_observation_models
 
-lens_families:
-  development: [sie_external_shear, epl_external_shear]
-  analytic_control: sis
+cosmology:
+  baseline: astropy_planck18
+  astropy_version: "6.1.7"
+  sensitivity_cases:
+    - flat_lcdm_h0_73_omega_m_0.30
 
-nominal_coverage_levels: [0.50, 0.80, 0.90, 0.95]
+proposal_distribution:
+  id: broad_support_v1
+  lens_family_probabilities:
+    sie_external_shear: 0.5
+    epl_external_shear: 0.5
+  lens_redshift: {distribution: uniform, minimum: 0.1, maximum: 1.0}
+  source_redshift:
+    distribution: conditional_uniform
+    minimum: 0.5
+    maximum: 3.0
+    minimum_separation_from_lens: 0.1
+  einstein_radius_arcsec: {distribution: log_uniform, minimum: 0.3, maximum: 3.0}
+  axis_ratio: {distribution: uniform, minimum: 0.4, maximum: 1.0}
+  position_angle_rad: {distribution: uniform, minimum: 0.0, maximum: 3.141592653589793}
+  shear_amplitude: {distribution: uniform, minimum: 0.0, maximum: 0.15}
+  shear_angle_rad: {distribution: uniform, minimum: 0.0, maximum: 3.141592653589793}
+  epl_density_slope: {distribution: uniform, minimum: 1.6, maximum: 2.5}
+  external_convergence: {distribution: uniform, minimum: -0.15, maximum: 0.15}
+  source_plane_sampling: uniform_in_solver_bounding_region_then_condition_on_multiple_images
+
+evaluation_distribution:
+  id: balanced_literature_informed_benchmark_v1
+  claim_boundary: benchmark_not_astrophysical_rate_population
+  lens_family_probabilities:
+    sie_external_shear: 0.5
+    epl_external_shear: 0.5
+  lens_redshift: {distribution: uniform, minimum: 0.1, maximum: 1.0}
+  source_redshift:
+    distribution: conditional_uniform
+    minimum: 0.5
+    maximum: 3.0
+    minimum_separation_from_lens: 0.1
+  einstein_radius_arcsec:
+    distribution: truncated_log_normal
+    median: 1.0
+    log_standard_deviation: 0.35
+    minimum: 0.3
+    maximum: 3.0
+  axis_ratio:
+    distribution: truncated_normal
+    mean: 0.7
+    standard_deviation: 0.15
+    minimum: 0.4
+    maximum: 1.0
+  position_angle_rad: {distribution: uniform, minimum: 0.0, maximum: 3.141592653589793}
+  shear_amplitude:
+    distribution: truncated_half_normal
+    standard_deviation: 0.05
+    minimum: 0.0
+    maximum: 0.15
+  shear_angle_rad: {distribution: uniform, minimum: 0.0, maximum: 3.141592653589793}
+  epl_density_slope:
+    distribution: truncated_normal
+    mean: 2.08
+    standard_deviation: 0.16
+    minimum: 1.6
+    maximum: 2.5
+  external_convergence:
+    distribution: truncated_normal
+    mean: 0.0
+    standard_deviation: 0.05
+    minimum: -0.15
+    maximum: 0.15
+  source_plane_sampling: uniform_in_multiply_imaged_cross_section
+
+lens_model_discrepancy:
+  baseline: none_within_declared_family
+  no_hidden_magnification_fudge: true
+  stress_tests:
+    - fit_sie_external_shear_to_epl_external_shear_truth
+    - fit_epl_external_shear_to_sie_external_shear_truth
+    - evaluate_density_slope_boundary_regions
+
+source_population:
+  id: bbh_benchmark_v1
+  claim_boundary: broad_bbh_benchmark_not_gwtc_population_fit
+  primary_mass_source_frame_msun:
+    distribution: power_law
+    exponent: -2.3
+    minimum: 20.0
+    maximum: 80.0
+  mass_ratio: {distribution: uniform, minimum: 0.25, maximum: 1.0}
+  secondary_mass_source_frame_minimum_msun: 10.0
+  spin_magnitude: {distribution: beta, alpha: 2.0, beta: 5.0, maximum: 0.99}
+  spin_orientation: isotropic
+  sky_orientation: isotropic
+  orbital_phase_rad: {distribution: uniform, minimum: 0.0, maximum: 6.283185307179586}
+  luminosity_distance: derived_from_source_redshift_and_declared_cosmology
+
+lens_solver:
+  package: lenstronomy
+  version: "1.13.6"
+  families: [sie_external_shear, epl_external_shear]
+  analytic_control: sis
+  retain_all_physical_images: true
+
+gw_observation_model:
+  id: gaussian_curve_conditioned_h1_l1_v1_v1
+  waveform_baseline: IMRPhenomXPHM
+  waveform_mismatch: SEOBNRv4PHM
+  lalsuite_version: "7.26.1"
+  bilby_version: "2.6.0"
+  minimum_frequency_hz: 20.0
+  reference_frequency_hz: 50.0
+  duration_seconds: 8
+  sample_rate_hz: 2048
+  sample_count: 16384
+  dtype: float32
+  detector_slots: [H1, L1, V1]
+  psd_curves:
+    H1:
+      file: aLIGO_O4_high_asd.txt
+      sha256: eb5ec9b081c3d86d2f4257b9aff6a57566d168b8a95e5e57b7909eebad021780
+    L1:
+      file: aLIGO_O4_high_asd.txt
+      sha256: eb5ec9b081c3d86d2f4257b9aff6a57566d168b8a95e5e57b7909eebad021780
+    V1:
+      file: AdV_psd.txt
+      sha256: c2532150f63dbaa76d451e2c074390272e259e4e2eedc3e684d2205582aa0764
+  preprocessing_version: bilby_psd_whiten_v1
+  preprocessing_contract:
+    - preserve_unwhitened_float32_noisy_clean_noise_products
+    - derive_network_input_from_declared_detector_psd
+    - verify_finite_unit_scale_whitened_noise_on_qualification_split
+    - reject_wraparound_or_edge_truncated_waveforms
+  synthetic_noise_label: synthetic_gaussian_curve_conditioned
+  label_noise_as_real: false
+
+selection_model:
+  id: synthetic_matched_filter_pair_selection_v1
+  selected_pair_rule: earliest_two_images_passing_detection
+  per_image_network_snr_minimum: 10.0
+  per_image_minimum_detectors: 2
+  per_detector_snr_minimum: 4.0
+  condition_posterior_on_selection: true
+  selection_statistics_deployable_inputs: false
+  rejected_attempts_append_only: true
+
+em_observation_model:
+  id: balanced_eight_cell_benchmark_v1
+  assignment: deterministic_balanced_hash_by_physical_system
+  claim_boundary: scenario_mixture_not_survey_missingness_rate
+  base_uncertainties:
+    astrometry_std_arcsec: [0.005, 0.02]
+    lens_center_std_arcsec: [0.01, 0.03]
+    einstein_radius_fractional_std: [0.03, 0.10]
+    spectroscopic_redshift_std_scale_1_plus_z: 0.001
+    photometric_redshift_std_scale_1_plus_z: 0.05
+    velocity_dispersion_fractional_std: [0.05, 0.10]
+    timing_std_seconds: [0.001, 0.01]
+  availability_cells:
+    - full_precise_spectroscopic
+    - full_photometric_redshifts
+    - no_velocity_dispersion
+    - no_source_redshift
+    - no_lens_redshift
+    - astrometry_redshifts_only
+    - astrometry_kinematics_no_einstein_scale
+    - sparse_astrometry_timing_only
+
 splits:
-  - validation
-  - calibration
-  - iid_test
-  - balanced_tail_diagnostic
-  - lens_family_ood
-  - parameter_region_ood
-  - real_noise_test
-  - waveform_psd_mismatch_test
+  generator_qualification: 4096
+  train: 65536
+  validation: 8192
+  calibration: 8192
+  iid_test: 16384
+  balanced_tail_diagnostic: 4096
+  lens_family_ood: 4096
+  parameter_region_ood: 4096
+  waveform_psd_mismatch_test: 4096
+  real_noise_test: 0
+  real_noise_test_status: reserved_unset_requires_separate_gwosc_gate
+
+estimator_design:
+  id: mask_aware_multimessenger_nsf_v1
+  target_parameterization:
+    - log_abs_mu_primary
+    - log_abs_mu_secondary
+  gw_encoder: shared_weight_mask_aware_1d_resnet_by_image_and_detector
+  gw_encoder_channels: [32, 64, 128, 256]
+  em_encoder: image_keyed_deepsets_plus_scalar_uncertainty_mlp
+  fusion: concatenation_with_detector_and_modality_masks
+  posterior_family: conditional_neural_spline_flow
+  spline_bins: 8
+  candidate_flow_transforms: [6, 10]
+  candidate_conditioner_widths: [128, 256]
+  training_seeds: [0, 1, 2]
+  selection_metric: validation_negative_log_probability
+  tie_break: lower_parameter_count
+  maximum_candidate_fits: 12
+  posthoc_calibration_split_only: true
+  deployable_policy_validation_required: true
+  baseline_ids:
+    - gw_only_same_backbone
+    - em_only_same_backbone
+    - non_neural_lens_posterior_matched_prior
+    - legacy_sis_point_regression_out_of_domain
+    - likelihood_gold_joint_model
+
+posterior_sampling:
+  samples_per_case: 4096
+  deterministic_seed_domain: posterior_sampling
+
+calibration_protocol:
+  marginal_interval: central_equal_tailed
+  nominal_coverage_levels: [0.50, 0.80, 0.90, 0.95]
+  interval_reporting: wilson_95_percent
+  iid_marginal_absolute_error_rule: max_0.01_or_3_binomial_standard_errors
+  iid_joint_absolute_error_rule: max_0.015_or_3_binomial_standard_errors
+  em_cell_absolute_error_rule: max_0.04_or_3_binomial_standard_errors
+  tail_stratum_absolute_error_rule: max_0.06_or_3_binomial_standard_errors
+  minimum_em_cell_count: 2048
+  minimum_tail_stratum_count: 1024
+  joint_region: flow_log_density_highest_density_rank
+  simulation_based_calibration:
+    source_split: calibration
+    replicates: 1024
+    posterior_draws_per_replicate: 1024
+    histogram_bins: 20
+    familywise_test: holm_corrected_chi_square
+    familywise_alpha: 0.01
+  gold_likelihood_subset:
+    source_split: iid_test
+    cases: 256
+    minimum_importance_sampling_efficiency: 0.10
+    required_fraction_meeting_efficiency: 0.95
+
+storage_plan:
+  format: zarr_v2_plus_parquet
+  products_per_pair: 3
+  array_shape_per_product: [2, 3, 16384]
+  bytes_per_pair_uncompressed: 1179648
+  planned_pairs_including_qualification: 118784
+  raw_array_bytes: 140123308032
+  reserve_multiplier: 1.30
+  reserved_bytes: 182160300442
+  measured_free_bytes_at_preregistration: 342407888896
+  projected_remaining_bytes: 160247588454
+  qualification_raw_bytes: 4831838208
+
+execution_plan:
+  phase3a_qualification_first: true
+  qualification_pair_count: 4096
+  qualification_is_scientific: false
+  shard_pair_count: 128
+  atomic_complete_marker_per_shard: true
+  append_only_attempt_log: true
+  deterministic_resume_byte_check: true
+  full_generation_requires_measured_throughput: true
+  log_path_template: /root/autodl-tmp/lensing-4/logs/phase3/{run_id}.log
+  manifest_path_template: /root/autodl-tmp/lensing-4/manifests/phase3/{run_id}.json
+  staging_path_template: /root/autodl-tmp/lensing-4/data_v2/production/staging/{dataset_id}
+  publication_path_template: /root/autodl-tmp/lensing-4/data_v2/production/published/{dataset_id}
 
 hard_failures:
   - grouped_split_leakage
@@ -44,12 +290,10 @@ hard_failures:
   - nonfinite_importance_weights
   - incomplete_manifest
   - declared_executed_prior_mismatch
+  - undeclared_psd_or_waveform_version
+  - waveform_edge_truncation
+  - resume_byte_mismatch
 
-unresolved_before_phase3:
-  - numerical_prior_bounds_and_versions
-  - selection_and_missingness_models
-  - coverage_interval_and_precision_target
-  - powered_split_and_stratum_sizes
-  - waveform_psd_calibration_versions
-  - compute_storage_log_manifest_resume_plan
+remaining_external_gate:
   - human_review
+  - explicit_phase3a_authorization

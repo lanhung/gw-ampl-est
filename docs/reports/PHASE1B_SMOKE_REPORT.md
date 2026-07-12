@@ -104,9 +104,13 @@ generator, independently tested, committed, and assigned a new dataset ID.
 
 ## Scientific limitations
 
-The artifact uses synthetic design-PSD Gaussian noise, a fixed engineering
-source/lens grid, identity preprocessing, and noisily simulated EM products. It
-does not validate real detector noise, astrophysical population coverage,
+The artifact uses synthetic Gaussian noise drawn from Bilby 2.6.0 built-in
+curves, a fixed engineering source/lens grid, identity preprocessing, and
+noisily simulated EM products. A Phase 2 provenance audit found that the frozen
+generic label `synthetic_gaussian_design_psd` is imprecise: H1/L1 used
+`aLIGO_O4_high_asd.txt` and V1 used `AdV_psd.txt`. This does not change any
+bytes, but the artifact must not be presented as a uniform design-PSD study.
+It does not validate real detector noise, astrophysical population coverage,
 posterior calibration, absolute-magnification inference, lens-family
 marginalization, or GWTC behavior. It must not enter later scientific splits.
 

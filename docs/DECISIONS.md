@@ -166,3 +166,40 @@ external-convergence/model-discrepancy treatment, selection model, and the
 available GW and EM observations. Relative magnification is derived but cannot
 substitute for absolute-magnification calibration. No claim may erase the
 distance-magnification or mass-sheet dependence.
+
+## D028 — Proposal versus evaluation population
+
+Phase 2 uses a broad proposal for support and a balanced, literature-informed
+benchmark evaluation distribution. Neither is labeled as the inferred GWTC or
+strong-lens rate population. Proposal densities and importance weights remain
+privileged evaluation fields.
+
+## D029 — Detector-specific synthetic noise identity
+
+Every future detector slot records its exact curve file and SHA-256. The
+baseline pins Bilby 2.6.0/LALSuite 7.26.1, H1/L1
+`aLIGO_O4_high_asd.txt`, V1 `AdV_psd.txt`, IMRPhenomXPHM, and the supported
+SEOBNRv4PHM mismatch. The generic frozen smoke label is retained as immutable
+history but is documented as imprecise.
+
+## D030 — Fixed calibration and model-selection budget
+
+The Phase 2 configuration freezes 65,536 training, 8,192 validation, 8,192
+calibration, and 16,384 IID cases plus four 4,096-case diagnostic/OOD sets.
+Model selection is limited to 12 preregistered flow fits. Coverage tolerances,
+SBC size and the 256-case likelihood gold subset are fixed before training.
+
+## D031 — Phase 3A qualification gate
+
+No full production run follows directly from Phase 2. After human acceptance,
+Phase 3A may be separately authorized for 4,096 engineering-qualification
+pairs, estimated at 4.83 GB raw. Only its measured throughput, solver
+acceptance rate, storage and resume evidence can authorize a larger run.
+
+## D032 — Relative magnification is not an observed flux ratio
+
+The derived target is the selected images' relative absolute macro
+magnification, with a separately named relative strain amplitude. Phase 2 does
+not create a deployable EM flux-ratio product or identify it with the macro
+ratio; doing so would require an explicit variability, extinction,
+microlensing and measurement model.

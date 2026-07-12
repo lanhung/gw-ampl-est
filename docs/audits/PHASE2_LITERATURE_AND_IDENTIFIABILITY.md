@@ -36,6 +36,21 @@ not treat pair identification as the inference target.
   likelihood subset with importance sampling; effective sample size and
   proposal support are required diagnostics rather than proof by visual
   posterior agreement: [Dax et al. (2023)](https://arxiv.org/abs/2210.05686).
+- The evaluation slope benchmark uses mean 2.08 and intrinsic scatter 0.16
+  from the SLACS early-type lens sample. The wider proposal remains deliberate
+  support coverage rather than a claim that this one sample is universal:
+  [Auger et al. (2010)](https://arxiv.org/abs/1007.2880).
+- The broad BBH benchmark is informed by, but is not fitted to, the structured
+  mass and redshift population inferred from GWTC-3. It is labeled a benchmark
+  so calibration claims do not become population-rate claims:
+  [LVK population analysis (2021)](https://arxiv.org/abs/2111.03634).
+- External convergence is system-specific and must be inferred from line-of-
+  sight information rather than hidden inside a fixed lens profile:
+  [TDCOSMO XIV (2023)](https://arxiv.org/abs/2302.03176).
+- Synthetic detector curves require detector-specific identities. The future
+  noise configuration records exact curve files and hashes; the relevant LAL
+  implementation distinguishes named Advanced LIGO scenarios:
+  [LALSimulation PSD documentation](https://lscsoft.docs.ligo.org/lalsuite/lalsimulation/group___l_a_l_sim_noise_p_s_d__c.html).
 
 ## Identifiability boundary
 

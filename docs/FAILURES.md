@@ -63,14 +63,14 @@ materialization.
   root with an `ABANDONED_FAILED_STAGING.txt` marker and is excluded from every
   result and count.
 - The first resume test with the initial generator commit failed because Bilby
-  2.6 design-PSD noise uses `bilby.core.utils.random.Generator`, not NumPy's
+  2.6 PSD-conditioned noise uses `bilby.core.utils.random.Generator`, not NumPy's
   legacy global RNG. The byte mismatch stopped publication automatically. The
   generator was fixed to seed Bilby's RNG explicitly, an independent
   determinism check passed, and a new generator commit/dataset ID was used.
-- The published smoke artifact uses synthetic Bilby design-PSD Gaussian noise,
-  identity float32 preprocessing, and a fixed engineering lens/source grid. It
-  is not evidence for real-noise performance, population performance, posterior
-  calibration, or any scientific inference claim.
+- The published smoke artifact uses synthetic Bilby curve-conditioned Gaussian
+  noise, identity float32 preprocessing, and a fixed engineering lens/source
+  grid. It is not evidence for real-noise performance, population performance,
+  posterior calibration, or any scientific inference claim.
 - The SIS smoke delay uses a documented one-day engineering conversion of the
   analytic dimensionless Fermat coordinate. It is a schema/windowing control,
   not an astrophysical time-delay population model.
@@ -109,3 +109,20 @@ silently removed.
   directory, yielding 100 passed and one path-related failure. Re-running from
   `/root/autodl-tmp/lensing-4/repo` passed all 101 tests. This was an operator
   working-directory error, not a solver or test portability defect.
+
+## Phase 2 design audit findings
+
+- The frozen Phase 1B field `synthetic_gaussian_design_psd` overgeneralizes the
+  actual Bilby 2.6.0 defaults. H1 and L1 loaded `aLIGO_O4_high_asd.txt` with
+  SHA-256 `eb5ec9b081c3d86d2f4257b9aff6a57566d168b8a95e5e57b7909eebad021780`;
+  V1 loaded `AdV_psd.txt` with SHA-256
+  `c2532150f63dbaa76d451e2c074390272e259e4e2eedc3e684d2205582aa0764`.
+  The immutable engineering artifact is not regenerated. Future manifests must
+  store detector-specific curve names and hashes and use the label synthetic
+  Gaussian curve-conditioned noise.
+- The pinned LALSuite 7.26.1 environment does not recognize `SEOBNRv5PHM`.
+  Phase 2 therefore freezes `SEOBNRv4PHM`, which is available, as the waveform
+  mismatch case. No unavailable approximant is claimed or silently replaced.
+- Package builds still warn that the repository has no conventional top-level
+  README. The sdist and wheel complete successfully; this packaging-quality
+  warning is deferred and is not hidden as a failed build.
