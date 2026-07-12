@@ -78,34 +78,34 @@ generator audit and approving a v2 schema.
 
 ## Current phase gate
 
-Phase 0 is complete and frozen at Git commit
-`38c76016b66eda3a4b72d5a7ca3fb1e90957abef`.
+Phase 0, Phase 1A and Phase 1A.1 are complete.
 
-The currently authorized phase is Phase 1A:
+The currently authorized phase is Phase 1B:
 
-- define the v2 physics API and quantity conventions;
-- define the privileged-variable denylist and deployable-input allowlist;
-- define the logical v2 dataset schema;
-- define source/lens/noise grouped split rules;
-- define provenance and manifest schemas;
-- implement unit and contract tests;
-- create a reviewed smoke-generation specification.
+- install and pin the smoke-generation environment on AutoDL;
+- implement and numerically validate SIS, SIE+shear and EPL+shear adapters;
+- implement the v2 generator and storage publication pipeline;
+- generate exactly 48 accepted engineering-smoke pairs;
+- validate physics, schema, provenance, resumability and amplitude preservation;
+- publish only small manifests, reports and diagnostic artifacts to Git.
 
-During Phase 1A, do not:
+During Phase 1B, do not:
 
 - train any neural model;
-- generate a full dataset;
-- generate more than metadata-only schema examples;
+- generate more than 48 accepted pairs;
 - download GWTC or GWOSC data;
-- launch long GPU jobs;
-- write the scientific manuscript;
+- call synthetic Gaussian noise real detector noise;
 - modify any legacy file;
-- treat legacy data as v2 training or final test data.
+- use the smoke dataset for scientific performance claims;
+- start manuscript writing;
+- proceed to medium- or large-scale generation.
 
-Phase 1A must stop after the physics API, schema, policies and tests pass.
+All smoke outputs must be written only below:
 
-Generating 10–100 v2 smoke pairs is Phase 1B and requires review of the
-Phase 1A report before execution.
+`/root/autodl-tmp/lensing-4/data_v2/smoke`
+
+Phase 1B must stop after the 48-pair smoke dataset and its validation report
+are complete.
 
 ## Scientific integrity
 
