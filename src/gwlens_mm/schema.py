@@ -22,6 +22,7 @@ DETECTOR_SLOTS = ("H1", "L1", "V1")
 
 class SplitName(str, Enum):
     ENGINEERING_SMOKE = "engineering_smoke"
+    GENERATOR_QUALIFICATION = "generator_qualification"
     TRAIN = "train"
     VALIDATION = "validation"
     CALIBRATION = "calibration"
@@ -286,6 +287,7 @@ class GWObservation:
     psd_reference: str
     calibration_reference: Optional[str]
     data_quality_reference: Optional[str]
+    detector_psd_references: Optional[Mapping[str, str]] = None
 
     def validate(self) -> None:
         if self.detector_slots != DETECTOR_SLOTS:
@@ -307,6 +309,11 @@ class GWObservation:
                 raise ValueError("array sample dimension disagrees with GW metadata")
         if not self.preprocessing_version or not self.psd_reference:
             raise ValueError("preprocessing and PSD references are required")
+        if self.detector_psd_references is not None:
+            if set(self.detector_psd_references) != set(DETECTOR_SLOTS) or any(
+                not value.strip() for value in self.detector_psd_references.values()
+            ):
+                raise ValueError("detector PSD references must cover H1/L1/V1 exactly")
         self.observed_time_difference.validate()
         for start in self.segment_start_gps:
             _finite(start, "segment start GPS")
@@ -369,6 +376,8 @@ class EMObservation:
     aperture_metadata: Mapping[str, float]
     redshift_ordering_valid: Optional[bool]
     external_convergence_observation: Optional[ExternalConvergenceObservation] = None
+    tracer_effective_radius_arcsec: Optional[float] = None
+    dynamics_model_reference: Optional[str] = None
 
     def validate(self, lens_truth: LensTruth, schema_version: str) -> None:
         values: Dict[str, Any] = {
@@ -427,6 +436,13 @@ class EMObservation:
             )
         if self.external_convergence_observation is not None:
             self.external_convergence_observation.validate()
+        if self.tracer_effective_radius_arcsec is not None:
+            _positive(
+                self.tracer_effective_radius_arcsec,
+                "tracer effective radius",
+            )
+        if self.dynamics_model_reference is not None and not self.dynamics_model_reference.strip():
+            raise ValueError("dynamics model reference cannot be blank")
         if self.lens_redshift is not None and self.source_redshift is not None:
             expected_ordering = self.lens_redshift.value < self.source_redshift.value
             if self.redshift_ordering_valid is not expected_ordering:
@@ -570,6 +586,9 @@ class V2Record:
         result = convert(asdict(self))
         if self.schema_version == FROZEN_SMOKE_SCHEMA_VERSION:
             del result["em_observation"]["external_convergence_observation"]
+            del result["em_observation"]["tracer_effective_radius_arcsec"]
+            del result["em_observation"]["dynamics_model_reference"]
+            del result["gw_observation"]["detector_psd_references"]
         return result
 
     def to_json(self, *, indent: Optional[int] = 2) -> str:
@@ -795,11 +814,24 @@ def v2_json_schema() -> Dict[str, Any]:
             "lens_truth": {"type": "object"},
             "gw_observation": {
                 "type": "object",
-                "required": ["observed_time_difference", "detector_availability_mask"],
+                "required": [
+                    "observed_time_difference",
+                    "detector_availability_mask",
+                    "detector_psd_references",
+                ],
                 "not": {"required": ["observed_event_time_difference_seconds"]},
                 "properties": {
                     "observed_time_difference": {"$ref": "#/$defs/TimingObservation"},
                     "detector_availability_mask": {"type": "array"},
+                    "detector_psd_references": {
+                        "type": "object",
+                        "required": list(DETECTOR_SLOTS),
+                        "additionalProperties": False,
+                        "properties": {
+                            detector: {"type": "string", "minLength": 1}
+                            for detector in DETECTOR_SLOTS
+                        },
+                    },
                 },
             },
             "em_observation": {
@@ -808,6 +840,8 @@ def v2_json_schema() -> Dict[str, Any]:
                     "observed_image_astrometry",
                     "external_convergence_observation",
                     "modality_availability_mask",
+                    "tracer_effective_radius_arcsec",
+                    "dynamics_model_reference",
                 ],
                 "not": {
                     "anyOf": [
@@ -827,6 +861,11 @@ def v2_json_schema() -> Dict[str, Any]:
                         ]
                     },
                     "modality_availability_mask": {"type": "object"},
+                    "tracer_effective_radius_arcsec": {
+                        "type": ["number", "null"],
+                        "exclusiveMinimum": 0,
+                    },
+                    "dynamics_model_reference": {"type": ["string", "null"]},
                 },
             },
             "provenance": {
