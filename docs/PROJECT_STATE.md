@@ -99,6 +99,16 @@ GWOSC/GWTC remain unauthorized.
 - corrected the finite source square's claim boundary in RC.4 after a
   pre-generation steep-EPL probe; boundary validation now requires
   primary/reference solver agreement rather than absence of multiple images.
+- froze RC.5 and the exact Phase 3A generator commit, passed source-plane,
+  mass-sheet, Galkin, waveform-boundary, whitening and input-policy gates;
+- passed the deterministic 32-pair microbenchmark and every resource gate;
+- generated exactly 4,096 non-scientific qualification pairs from 1,455,699
+  attempts and atomically published 32 shards of 128 pairs on AutoDL;
+- verified byte-identical hashes for the first three shards across intentional
+  interruption and resume, unique grouped IDs and exact float32 decomposition;
+- retained 330,450,604,032 free bytes after a 4,450,694,559-byte publication;
+- stopped Phase 3A with full production, staged scientific production,
+  training, calibration, scientific testing and GWOSC/GWTC still closed.
 
 ## Not started by design
 
@@ -108,8 +118,10 @@ GWOSC/GWTC remain unauthorized.
 
 ## Next recommended phase
 
-Freeze the exact executable generator commit, recreate a clean AutoDL code copy,
-and rerun every formal preflight/physics/numerical gate. Run the 32-pair
-microbenchmark only if they pass, and proceed to the reviewed interruption and
-4,096-pair run only if every microbenchmark resource gate passes. Full
-production remains closed.
+Human review should inspect the Phase 3A qualification report and small
+evidence before any new execution decision. A later design-only amendment may
+compare a staged 16,384/32,768/65,536 scientific-training ladder with the
+historical 118,784-pair plan and freeze learning-curve stopping rules. It must
+use a new preregistration version/hash, keep the Phase 3A data outside all
+scientific splits, and leave real-noise/GWOSC/GWTC work behind a separate gate.
+No scientific production or training is currently authorized.

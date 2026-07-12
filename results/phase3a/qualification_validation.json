@@ -1,24 +1,52 @@
 {
-  "accepted_pair_count": 0,
-  "authorizing_git_commit": "81e5a6bcbfed5f67f1ff511593f8dc4153485e5e",
-  "blocker": "The frozen RC.4 waveform-boundary gate failed all four deterministic fixtures",
-  "complete_shard_count": 0,
-  "generator_checkpoint": "a2b8a02b4631e86c39e1b682e4424ecc2f2c5ca9",
-  "microbenchmark_accepted_pair_count": 0,
-  "preregistration_hash": "1403f1f8cf96fbc34c2cfd99928bd7c24b5fde5495e54689d2a5ee7ec250c418",
-  "publication_created": false,
-  "stage": "pre_microbenchmark_waveform_boundary",
-  "status": "blocked",
-  "training_or_scientific_use": false,
-  "verification": {
-    "build_passed_at_generator_freeze": true,
-    "local_optional_skipped_at_generator_freeze": 3,
-    "local_pytest_passed_at_generator_freeze": 132,
-    "maintained_scope_mypy_passed_at_generator_freeze": true,
-    "maintained_scope_ruff_passed_at_generator_freeze": true,
-    "source_plane_boundary_cases": 992,
-    "source_plane_boundary_failures": 0,
-    "waveform_boundary_cases": 4,
-    "waveform_boundary_failures": 4
-  }
+  "accepted_pair_count": 4096,
+  "all_groups_confined_to_generator_qualification": true,
+  "all_ids_unique": true,
+  "all_physical_images_retained": true,
+  "array_decomposition_exact_float32": true,
+  "attempt_count": 1455699,
+  "authorizing_git_commit": "bba0cdd6a750ff367674a85b8722432e613586d8",
+  "calibration_use_authorized": false,
+  "complete_shard_count": 32,
+  "configuration_hash": "f8920a89787ea94f634a080b8d4d70a7205f5f382417bd169077a6d562d2145c",
+  "deployable_input_policy": "passed",
+  "em_cell_counts": {
+    "astrometry_kinematics_no_einstein_scale": 512,
+    "astrometry_redshifts_only": 512,
+    "full_photometric_redshifts": 512,
+    "full_precise_spectroscopic": 512,
+    "no_lens_redshift": 512,
+    "no_source_redshift": 512,
+    "no_velocity_dispersion": 512,
+    "sparse_astrometry_timing_only": 512
+  },
+  "family_counts": {
+    "epl_external_shear": 2029,
+    "sie_external_shear": 2067
+  },
+  "generator_git_commit": "fbcd0616611d9cdf915ef0af030e6061c1be7f59",
+  "image_multiplicity_counts": {
+    "2": 1924,
+    "3": 591,
+    "4": 1241,
+    "5": 340
+  },
+  "lens_ids_sha256": "79c7c75ace58e5fcafd2cd02befe3f9dc30019fb986b07df7bc156b306aa174c",
+  "noise_segment_ids_sha256": "39665b13500bbe70207554824acf22eb6b204cdd63fb00067207e2e4ef94f8eb",
+  "pair_ids_sha256": "83f293eebd17dad94ea8182d157f26df65ad86df4813b55b4619c2aea976d9a1",
+  "pairs_per_shard": 128,
+  "physical_system_ids_sha256": "446b13878eff22e9348305a694792fbae3988ccdec6336ec0b8b5bb6c17dc514",
+  "preregistration_hash": "4dde279cf1bea78d1ddbd4fab99d88e88e334c80c180dc7850679736c5e53edb",
+  "preregistration_version": "1.0.0-rc.5",
+  "rejection_counts": {
+    "fewer_than_two_images_pass_synthetic_selection": 425513,
+    "fewer_than_two_physical_images": 1026090
+  },
+  "schema_version": "2.0.0-alpha.3",
+  "scientific_use_authorized": false,
+  "selected_pair_identity_valid": true,
+  "source_ids_sha256": "2d9402038afd798e88745926282c2d88c8c29eae8fa04be9cb496b805ae1430b",
+  "status": "passed",
+  "test_use_authorized": false,
+  "training_use_authorized": false
 }

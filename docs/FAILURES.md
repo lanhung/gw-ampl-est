@@ -236,3 +236,18 @@ silently choose a solver search window or approximate caustic area.
   truncated benchmark and does not purport to contain the complete strong-lens
   cross-section. Primary/reference solver agreement replaces the impossible
   no-multiple-images-at-boundary requirement.
+
+## Phase 3A completion limitations
+
+- The final runner persisted microbenchmark peak RSS but not a continuous
+  peak-RSS counter for the 4,096-pair run. A sampled 16-worker snapshot totaled
+  5,446,536 KiB; this is not represented as an exact maximum. A future
+  production runner should persist cgroup or process-tree peak memory and
+  time-integrated CPU utilization.
+- The literal repository-wide Ruff command continues to report 18 pre-existing
+  formatting findings in `scripts/remote/build_phase0_manifests.py`. Phase 3A
+  scope Ruff passes. The old script was deliberately not reformatted after the
+  microbenchmark because any code change would violate the frozen generator
+  commit and force a full rerun.
+- These reporting/tooling limitations did not alter the 4,096-pair validation,
+  byte-identical resume result, 10 GB output gate or 100 GB free-space gate.

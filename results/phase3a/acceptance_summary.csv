@@ -1,0 +1,16 @@
+category,value,attempts,accepted,acceptance_rate
+overall,all,1455699,4096,0.002813768505714437
+lens_family,epl_external_shear,727987,2029,0.0027871376824036695
+lens_family,sie_external_shear,727712,2067,0.002840409392726793
+image_multiplicity,2,,1924,
+image_multiplicity,3,,591,
+image_multiplicity,4,,1241,
+image_multiplicity,5,,340,
+em_cell,astrometry_kinematics_no_einstein_scale,,512,
+em_cell,astrometry_redshifts_only,,512,
+em_cell,full_photometric_redshifts,,512,
+em_cell,full_precise_spectroscopic,,512,
+em_cell,no_lens_redshift,,512,
+em_cell,no_source_redshift,,512,
+em_cell,no_velocity_dispersion,,512,
+em_cell,sparse_astrometry_timing_only,,512,

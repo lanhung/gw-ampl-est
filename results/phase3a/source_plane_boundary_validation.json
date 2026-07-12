@@ -6,8 +6,8 @@
   "failures": [],
   "maximum_position_difference_arcsec": 2.814339822894673e-11,
   "maximum_relative_magnification_difference": 4.0990360870580904e-10,
-  "preregistration_version": "1.0.0-rc.4",
+  "preregistration_version": "1.0.0-rc.5",
   "status": "passed",
-  "walltime_seconds": 461.36311053298414,
+  "walltime_seconds": 516.353183073923,
   "workers": 16
 }

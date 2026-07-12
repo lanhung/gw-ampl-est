@@ -84,8 +84,15 @@ main at:
 
 `80167ea690914bb18be1fd1994b4dc626490e146`
 
-Human review explicitly authorizes Phase 3A only. The separate Phase 3A
-authorization is renewed against this exact RC.5 version, hash and main commit.
+The separately authorized Phase 3A generator qualification has completed on
+the review branch. Its immutable execution identities are:
+
+- authorizing commit:
+  `bba0cdd6a750ff367674a85b8722432e613586d8`;
+- generator commit:
+  `fbcd0616611d9cdf915ef0af030e6061c1be7f59`;
+- dataset ID:
+  `gwlens-v2-2.0.0-alpha.3-7081b2e8be3a84e1`.
 
 The frozen scientific design is:
 
@@ -98,29 +105,20 @@ The frozen scientific design is:
 - frozen engineering-smoke schema: `2.0.0-alpha.2`.
 
 RC.5 freezes the 64-second internal waveform construction, 8-second
-conditioned publication and 128-second numerical reference. Thresholds may not
-be changed after execution begins.
-
-Phase 3A may only:
-
-- implement the bounded-memory production generator and storage pipeline;
-- implement and validate the alpha.3 scientific observation schema;
-- validate mass-sheet external convergence and stellar-kinematics contracts;
-- run small preflight and runtime qualification cases;
-- generate exactly 4,096 accepted generator-qualification pairs;
-- publish exactly 32 atomic shards of 128 accepted pairs;
-- measure acceptance rate, throughput, peak memory, peak disk use,
-  whitening behavior and interruption/resume reproducibility;
-- commit only code, configurations, manifests, reports and small evidence.
+conditioned publication and 128-second numerical reference. Phase 3A published
+exactly 4,096 accepted engineering pairs in 32 atomic shards of 128. The first
+three shard hashes were byte-identical across interruption and resume. The
+qualification report and small evidence are the only remaining review inputs.
 
 The Phase 3A dataset is engineering qualification data only. It may never
 be used for model training, post-hoc calibration, SBC, IID testing, OOD
 testing or reported scientific performance.
 
-During Phase 3A, do not:
+The Phase 3A execution authorization is now exhausted. Until a new reviewed,
+versioned preregistration and separate human authorization exist, do not:
 
-- generate more than 4,096 accepted pairs;
-- start the 118,784-pair production plan;
+- generate any additional pair from the qualification or scientific plan;
+- start the frozen 118,784-pair plan or any proposed staged replacement;
 - train or tune any neural model;
 - download GWOSC or GWTC products;
 - generate real-noise data;
@@ -136,8 +134,11 @@ All Phase 3A remote outputs must remain under:
 
 `/root/autodl-tmp/lensing-4/data_v2/production`
 
-Any hard failure must stop publication and be recorded. Phase 3A must stop
-after the 4,096-pair qualification report and human-review gate.
+Full production, staged scientific production, model training, calibration,
+scientific testing, GWOSC/GWTC access and Phase 3B remain closed. Human review
+is required before any next phase. Planning may compare a staged
+16,384/32,768/65,536 training ladder with the historical 118,784-pair plan,
+but planning does not authorize execution and must not reuse Phase 3A data.
 
 ## Scientific integrity
 

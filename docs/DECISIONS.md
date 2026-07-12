@@ -331,3 +331,27 @@ The 32-pair microbenchmark uses eight analogous process streams and is excluded
 from the final dataset. Its measured aggregate throughput is projected to the
 reviewed 16-worker qualification configuration; no unmeasured GPU acceleration
 or physics-fidelity reduction is credited.
+
+## D045 — Phase 3A qualification data are published and permanently non-scientific
+
+The RC.5 generator commit
+`fbcd0616611d9cdf915ef0af030e6061c1be7f59` published exactly 4,096 accepted
+pairs in 32 shards. The dataset manifest denies scientific, training,
+calibration and test use. These denials are permanent: a later authorization
+cannot relabel the Phase 3A artifact as scientific data.
+
+The first three shard hashes were byte-identical across the reviewed
+interruption and resume sequence. Full production remains a separate human
+decision; passing Phase 3A does not open it.
+
+## D046 — Later scientific scale must be preregistered as a stopping rule
+
+The historical 118,784-pair plan is not automatically authorized by generator
+qualification. Human review may replace it with a cumulative
+16,384/32,768/65,536 training ladder, fixed disjoint evaluation sets and
+predeclared learning-curve/calibration stopping rules. Any replacement needs a
+new version and canonical hash before implementation.
+
+Physical-system counts and noise augmentations must be reported separately.
+Synthetic OOD evaluation and real-noise/GWOSC/GWTC evaluation must not share an
+implicit authorization. The latter remains behind its own future gate.
