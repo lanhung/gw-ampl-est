@@ -113,7 +113,12 @@ def generate_observations(
     if "einstein_radius" in modalities and theta_fraction is not None:
         theta_std = theta_e * float(theta_fraction)
         einstein = ScalarObservation(
-            max(np.finfo(float).tiny, theta_e + float(rng.normal(0.0, theta_std))),
+            float(
+                max(
+                    float(np.finfo(float).tiny),
+                    theta_e + float(rng.normal(0.0, theta_std)),
+                )
+            ),
             theta_std,
         )
     lens_redshift = _redshift_observation(rng, draw.z_lens, cell["lens_redshift"])
@@ -125,10 +130,12 @@ def generate_observations(
             raise ValueError("available velocity dispersion requires a Galkin draw")
         velocity_std = kinematics.velocity_dispersion_km_s * float(velocity_fraction)
         velocity = ScalarObservation(
-            max(
-                np.finfo(float).tiny,
-                kinematics.velocity_dispersion_km_s
-                + float(rng.normal(0.0, velocity_std)),
+            float(
+                max(
+                    float(np.finfo(float).tiny),
+                    kinematics.velocity_dispersion_km_s
+                    + float(rng.normal(0.0, velocity_std)),
+                )
             ),
             velocity_std,
         )
