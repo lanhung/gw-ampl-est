@@ -82,3 +82,18 @@ materialization.
 
 Both failed staging states remain immutable evidence; neither was published or
 silently removed.
+
+## Phase 1B.1 review findings
+
+- `selected_pair_is_first_two` compared against hard-coded Lenstronomy IDs, so
+  the SIS double was incorrectly reported as false. The diagnostic now uses the
+  actual first two returned image IDs; this was an evidence-file defect only.
+- `PhysicalImage.arrival_time_dimensionless` held dimensionless SIS Fermat
+  coordinates but physical seconds for Lenstronomy. The overloaded field was
+  removed and replaced with explicit optional dimensionless and seconds
+  quantities. The frozen dataset had already handled these paths explicitly,
+  so no published array or record changed.
+- The repository-wide command `ruff check scripts` also scans the frozen Phase
+  0 manifest-builder script, which contains pre-existing long audit-table lines.
+  Phase 1B.1 therefore ran Ruff on `src`, `tests`, all `scripts/phase1b`, and the
+  schema generator. The exclusion is explicit; no new lint failure was hidden.

@@ -33,6 +33,7 @@ def summarize(name: str, solution: Any, selected_ids: tuple[str, str]) -> dict[s
     image_ids = {image.image_id for image in solution.physical_images}
     if not set(selected_ids) <= image_ids:
         raise RuntimeError(f"fixture {name} selected pair is not physical")
+    first_two_ids = tuple(image.image_id for image in solution.physical_images[:2])
     return {
         "fixture": name,
         "lens_family": solution.lens_family.value,
@@ -40,13 +41,14 @@ def summarize(name: str, solution: Any, selected_ids: tuple[str, str]) -> dict[s
         "solver_version": solution.solver_version,
         "image_count": len(solution.physical_images),
         "selected_image_ids": list(selected_ids),
-        "selected_pair_is_first_two": list(selected_ids) == ["image_0", "image_1"],
+        "selected_pair_is_first_two": tuple(selected_ids) == first_two_ids,
         "images": [
             {
                 "image_id": image.image_id,
                 "position_arcsec": list(image.position_arcsec),
                 "mu_signed": image.mu_signed,
-                "arrival_time_seconds": image.arrival_time_dimensionless,
+                "fermat_potential_dimensionless": image.fermat_potential_dimensionless,
+                "arrival_time_seconds": image.arrival_time_seconds,
                 "parity": image.parity.value,
                 "morse_class": image.morse_class.value,
             }

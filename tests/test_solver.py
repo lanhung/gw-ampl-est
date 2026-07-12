@@ -18,7 +18,9 @@ from gwlens_mm.physics.solver import (
 def test_sis_solver_order_and_parity():
     solution = SISSolver().solve((0.5, 0.0), {"einstein_radius_arcsec": 1.0})
     plus, minus = solution.physical_images
-    assert plus.arrival_time_dimensionless < minus.arrival_time_dimensionless
+    assert plus.fermat_potential_dimensionless < minus.fermat_potential_dimensionless
+    assert plus.arrival_time_seconds is None
+    assert minus.arrival_time_seconds is None
     assert plus.parity is ImageParity.POSITIVE
     assert plus.morse_class is MorseClass.MINIMUM
     assert minus.parity is ImageParity.NEGATIVE
@@ -32,9 +34,9 @@ def test_multi_image_system_is_separate_from_selected_pair():
             image_id=f"image_{index}",
             position_arcsec=(float(index), 0.0),
             mu_signed=2.0 if index % 2 == 0 else -1.0,
-            arrival_time_dimensionless=float(index),
             parity=ImageParity.POSITIVE if index % 2 == 0 else ImageParity.NEGATIVE,
             morse_class=MorseClass.MINIMUM if index % 2 == 0 else MorseClass.SADDLE,
+            fermat_potential_dimensionless=float(index),
         )
         for index in range(4)
     )
@@ -80,20 +82,20 @@ def test_lightweight_non_sis_adapter_contract():
                 lens_family=self.lens_family,
                 physical_images=(
                     PhysicalImage(
-                        "minimum",
-                        (1.0, 0.0),
-                        2.0,
-                        0.0,
-                        ImageParity.POSITIVE,
-                        MorseClass.MINIMUM,
+                        image_id="minimum",
+                        position_arcsec=(1.0, 0.0),
+                        mu_signed=2.0,
+                        parity=ImageParity.POSITIVE,
+                        morse_class=MorseClass.MINIMUM,
+                        arrival_time_seconds=0.0,
                     ),
                     PhysicalImage(
-                        "saddle",
-                        (-0.7, 0.1),
-                        -1.0,
-                        1.0,
-                        ImageParity.NEGATIVE,
-                        MorseClass.SADDLE,
+                        image_id="saddle",
+                        position_arcsec=(-0.7, 0.1),
+                        mu_signed=-1.0,
+                        parity=ImageParity.NEGATIVE,
+                        morse_class=MorseClass.SADDLE,
+                        arrival_time_seconds=1.0,
                     ),
                 ),
                 solver_name="fixture-sie-adapter",
@@ -101,3 +103,14 @@ def test_lightweight_non_sis_adapter_contract():
             )
 
     validate_solver_contract(FixtureSIEAdapter(), [((0.1, 0.0), {"shear": 0.05})])
+
+
+def test_physical_image_requires_an_explicit_time_coordinate():
+    with pytest.raises(ValueError, match="Fermat or physical-time"):
+        PhysicalImage(
+            image_id="missing-time",
+            position_arcsec=(0.0, 0.0),
+            mu_signed=1.0,
+            parity=ImageParity.POSITIVE,
+            morse_class=MorseClass.MINIMUM,
+        )

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
-from typing import Any, Mapping, Protocol, Sequence, Tuple
+from typing import Any, Mapping, Optional, Protocol, Sequence, Tuple
 
 from .quantities import ImageParity, LensFamily, Magnification, MorseClass, PrimaryDefinition
 from .sis import sis_from_source_position
@@ -15,9 +15,10 @@ class PhysicalImage:
     image_id: str
     position_arcsec: Tuple[float, float]
     mu_signed: float
-    arrival_time_dimensionless: float
     parity: ImageParity
     morse_class: MorseClass
+    fermat_potential_dimensionless: Optional[float] = None
+    arrival_time_seconds: Optional[float] = None
     valid: bool = True
     validity_reason: str = "valid"
 
@@ -31,6 +32,14 @@ class PhysicalImage:
         magnification = Magnification(self.mu_signed)
         if magnification.parity is not self.parity:
             raise ValueError("parity is inconsistent with signed magnification")
+        coordinates = (
+            self.fermat_potential_dimensionless,
+            self.arrival_time_seconds,
+        )
+        if all(value is None for value in coordinates):
+            raise ValueError("a physical image requires a Fermat or physical-time coordinate")
+        if any(value is not None and not math.isfinite(value) for value in coordinates):
+            raise ValueError("supplied Fermat and physical-time coordinates must be finite")
 
 
 @dataclass(frozen=True)
@@ -114,17 +123,17 @@ class SISSolver:
                 image_id="sis_plus",
                 position_arcsec=(x_plus * ux, x_plus * uy),
                 mu_signed=analytic.plus.mu_signed,
-                arrival_time_dimensionless=-0.5 - y,
                 parity=ImageParity.POSITIVE,
                 morse_class=MorseClass.MINIMUM,
+                fermat_potential_dimensionless=-0.5 - y,
             ),
             PhysicalImage(
                 image_id="sis_minus",
                 position_arcsec=(x_minus * ux, x_minus * uy),
                 mu_signed=analytic.minus.mu_signed,
-                arrival_time_dimensionless=-0.5 + y,
                 parity=ImageParity.NEGATIVE,
                 morse_class=MorseClass.SADDLE,
+                fermat_potential_dimensionless=-0.5 + y,
             ),
         )
         return LensSystemSolution(
@@ -147,8 +156,19 @@ def validate_solver_contract(
         solution = solver.solve(source_position, parameters)
         if solution.lens_family is not solver.lens_family:
             raise ValueError("solver result family does not match adapter family")
-        arrival_times = [image.arrival_time_dimensionless for image in solution.physical_images]
-        if not all(math.isfinite(value) for value in arrival_times):
-            raise ValueError("all image arrival-time coordinates must be finite")
+        physical_times = [image.arrival_time_seconds for image in solution.physical_images]
+        fermat_values = [
+            image.fermat_potential_dimensionless for image in solution.physical_images
+        ]
+        if all(value is not None for value in physical_times):
+            ordering = [float(value) for value in physical_times if value is not None]
+        elif all(value is not None for value in fermat_values):
+            ordering = [float(value) for value in fermat_values if value is not None]
+        else:
+            raise ValueError(
+                "all images require one common explicit coordinate for ordering"
+            )
+        if ordering != sorted(ordering):
+            raise ValueError("solver images must be returned in arrival/Fermat order")
         if not all(image.valid for image in solution.physical_images):
             raise ValueError("contract case returned an invalid image")

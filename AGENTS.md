@@ -84,10 +84,17 @@ The reviewed Phase 1B engineering artifact is frozen as:
 
 `gwlens-v2-2.0.0-alpha.2-ae86beab1c132682`
 
-No subsequent phase is authorized until human review of
-`docs/reports/PHASE1B_SMOKE_REPORT.md`.
+Human review accepted Phase 1B and authorized the narrow Phase 1B.1 solver-time
+cleanup. No data regeneration is authorized.
 
-Until a new gate is explicitly opened, do not:
+Phase 1B.1 may only:
+
+- separate dimensionless Fermat coordinates from physical arrival seconds;
+- correct deterministic fixture diagnostics;
+- update solver documentation, tests, and fixture evidence;
+- merge the reviewed Phase 1B branch and freeze its generator/data artifacts.
+
+During Phase 1B.1, do not:
 
 - train any neural model;
 - generate additional waveform pairs;

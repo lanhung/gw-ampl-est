@@ -2,8 +2,9 @@
 
 ## Current phase
 
-Phase 1B is complete on `phase1b/v2-smoke`, pending human review. No training,
-catalog download, or larger data generation is authorized by this state.
+Phase 1B is accepted and Phase 1B.1 solver-time cleanup is complete on
+`phase1b/v2-smoke`, pending PR CI and merge. No training, catalog download, or
+larger data generation is authorized by this state.
 
 ## Completed
 
@@ -40,6 +41,11 @@ catalog download, or larger data generation is authorized by this state.
   maximum relative errors below `2.0e-16`;
 - kept all published waveform arrays on AutoDL; only small manifests and
   validation evidence are tracked by Git.
+- separated solver-level dimensionless Fermat potential from physical arrival
+  seconds without changing the frozen v2 record schema or dataset;
+- corrected first-two fixture diagnostics and re-ran 101 AutoDL tests;
+- verified the frozen manifest, Parquet records, and validation-file hashes
+  were identical before and after Phase 1B.1.
 
 ## Not started by design
 
@@ -50,7 +56,7 @@ catalog download, or larger data generation is authorized by this state.
 
 ## Next recommended phase
 
-Review `docs/reports/PHASE1B_SMOKE_REPORT.md`, the copied manifest, and failure
-record. If accepted, open a separate gate for Phase 2 literature,
-identifiability, and preregistration work. Do not reuse the engineering smoke
-artifact as a scientific dataset.
+Create the Phase 1B PR, require CI, merge to main, tag the exact generator
+commit, and make the AutoDL publication read-only. Then open a separate Phase 2
+branch for literature, identifiability, statistical design, and
+preregistration. Do not reuse the engineering smoke artifact scientifically.

@@ -5,7 +5,8 @@
       "image_count": 2,
       "images": [
         {
-          "arrival_time_seconds": -1.0,
+          "arrival_time_seconds": null,
+          "fermat_potential_dimensionless": -1.0,
           "image_id": "sis_plus",
           "morse_class": "minimum",
           "mu_signed": 3.0,
@@ -16,7 +17,8 @@
           ]
         },
         {
-          "arrival_time_seconds": 0.0,
+          "arrival_time_seconds": null,
+          "fermat_potential_dimensionless": 0.0,
           "image_id": "sis_minus",
           "morse_class": "saddle",
           "mu_signed": -1.0,
@@ -32,7 +34,7 @@
         "sis_plus",
         "sis_minus"
       ],
-      "selected_pair_is_first_two": false,
+      "selected_pair_is_first_two": true,
       "solver": "gwlens_mm.SISSolver",
       "solver_version": "1"
     },
@@ -42,6 +44,7 @@
       "images": [
         {
           "arrival_time_seconds": 0.0,
+          "fermat_potential_dimensionless": -1.1006588624071387,
           "image_id": "image_0",
           "morse_class": "minimum",
           "mu_signed": 4.4047208133324975,
@@ -53,6 +56,7 @@
         },
         {
           "arrival_time_seconds": 9085238.611623779,
+          "fermat_potential_dimensionless": -0.01004936698077541,
           "image_id": "image_1",
           "morse_class": "saddle",
           "mu_signed": -0.7403947331960326,
@@ -78,6 +82,7 @@
       "images": [
         {
           "arrival_time_seconds": 0.0,
+          "fermat_potential_dimensionless": -0.6581907837819894,
           "image_id": "image_0",
           "morse_class": "minimum",
           "mu_signed": 6.594191326453374,
@@ -89,6 +94,7 @@
         },
         {
           "arrival_time_seconds": 103858.72526435964,
+          "fermat_potential_dimensionless": -0.6457233828915745,
           "image_id": "image_1",
           "morse_class": "minimum",
           "mu_signed": 6.731337510793361,
@@ -100,6 +106,7 @@
         },
         {
           "arrival_time_seconds": 637707.9770731792,
+          "fermat_potential_dimensionless": -0.581639093195093,
           "image_id": "image_2",
           "morse_class": "saddle",
           "mu_signed": -6.264865340203596,
@@ -111,6 +118,7 @@
         },
         {
           "arrival_time_seconds": 1254561.6877219279,
+          "fermat_potential_dimensionless": -0.5075907888102427,
           "image_id": "image_3",
           "morse_class": "saddle",
           "mu_signed": -4.174284991633812,
@@ -136,6 +144,7 @@
       "images": [
         {
           "arrival_time_seconds": 0.0,
+          "fermat_potential_dimensionless": -0.7819440422417738,
           "image_id": "image_0",
           "morse_class": "minimum",
           "mu_signed": 7.653693355382901,
@@ -147,6 +156,7 @@
         },
         {
           "arrival_time_seconds": 63207.12492899466,
+          "fermat_potential_dimensionless": -0.7743565375461936,
           "image_id": "image_1",
           "morse_class": "minimum",
           "mu_signed": 7.567974305429355,
@@ -158,6 +168,7 @@
         },
         {
           "arrival_time_seconds": 441799.11924726487,
+          "fermat_potential_dimensionless": -0.7289096272836889,
           "image_id": "image_2",
           "morse_class": "saddle",
           "mu_signed": -7.871831729265217,
@@ -169,6 +180,7 @@
         },
         {
           "arrival_time_seconds": 1075414.0923476918,
+          "fermat_potential_dimensionless": -0.6528492687562268,
           "image_id": "image_3",
           "morse_class": "saddle",
           "mu_signed": -4.7185938428875,

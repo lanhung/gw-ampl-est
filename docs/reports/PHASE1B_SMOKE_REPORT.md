@@ -122,6 +122,20 @@ marginalization, or GWTC behavior. It must not enter later scientific splits.
 - `results/phase1b/environment.json`;
 - `results/phase1b/environment.freeze.txt`.
 
+## Post-review solver API correction
+
+Phase 1B.1 corrected two evidence/API issues after the dataset was frozen. The
+fixture diagnostic now compares selected IDs with the solver's actual first two
+IDs, so the SIS double is correctly marked `true`. `PhysicalImage` now exposes
+dimensionless Fermat potential and physical arrival seconds as separate
+optional fields; Lenstronomy provides both and SIS provides only the
+dimensionless analytic coordinate.
+
+This cleanup did not run the smoke generator or alter the published Zarr,
+Parquet, manifest, validation, hashes, or dataset ID. The frozen artifact
+continues to identify
+`d7287f8cc800406cc1e727a177fd27d7ca02cddf` as its exact generator commit.
+
 ## Reproduction
 
 From the synchronized generator commit on AutoDL:

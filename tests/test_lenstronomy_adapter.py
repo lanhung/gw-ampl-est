@@ -38,8 +38,13 @@ def test_lenstronomy_deterministic_fixtures(family, source_position, expected_im
     assert [image.image_id for image in solution.physical_images] == [
         f"image_{index}" for index in range(expected_images)
     ]
-    arrivals = [image.arrival_time_dimensionless for image in solution.physical_images]
+    arrivals = [image.arrival_time_seconds for image in solution.physical_images]
     assert arrivals == sorted(arrivals)
+    assert arrivals[0] == pytest.approx(0.0, abs=1e-9)
+    assert all(
+        image.fermat_potential_dimensionless is not None
+        for image in solution.physical_images
+    )
     validate_solver_contract(adapter, [(source_position, parameters(family))])
 
 
@@ -56,3 +61,20 @@ def test_selected_pair_need_not_be_first_two_solver_outputs():
         unselected_image_ids=("image_1", "image_3"),
     )
     pair.validate_against(solution)
+
+
+@pytest.mark.optional_solver
+def test_all_fixture_first_two_diagnostics():
+    from scripts.phase1b.run_solver_fixtures import run
+
+    result = run()
+    diagnostics = {
+        item["fixture"]: item["selected_pair_is_first_two"]
+        for item in result["fixtures"]
+    }
+    assert diagnostics == {
+        "sis_double": True,
+        "sie_double": True,
+        "sie_quad_nonconsecutive": False,
+        "epl_quad": True,
+    }

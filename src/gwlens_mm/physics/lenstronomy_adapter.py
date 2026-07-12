@@ -155,9 +155,10 @@ class LenstronomyAdapter:
                         float(y_image[raw_index]),
                     ),
                     mu_signed=mu_signed,
-                    arrival_time_dimensionless=float(delay_seconds[raw_index]),
                     parity=parity,
                     morse_class=morse,
+                    fermat_potential_dimensionless=float(fermat[raw_index]),
+                    arrival_time_seconds=float(delay_seconds[raw_index]),
                 )
             )
         return LensSystemSolution(

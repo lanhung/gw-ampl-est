@@ -98,18 +98,24 @@ class SmokeGenerator:
             raw = SISSolver().solve(source, parameters)
             # The analytic solver returns a dimensionless Fermat coordinate.  The smoke
             # adapter supplies a documented one-day scale; no delay occurs inside an array.
-            minimum = min(image.arrival_time_dimensionless for image in raw.physical_images)
+            fermat = tuple(
+                image.fermat_potential_dimensionless for image in raw.physical_images
+            )
+            if any(value is None for value in fermat):
+                raise RuntimeError("SIS solver did not provide Fermat coordinates")
+            fermat_values = tuple(float(value) for value in fermat if value is not None)
+            minimum = min(fermat_values)
             images = tuple(
                 PhysicalImage(
                     image_id=image.image_id,
                     position_arcsec=image.position_arcsec,
                     mu_signed=image.mu_signed,
-                    arrival_time_dimensionless=(image.arrival_time_dimensionless - minimum)
-                    * 86400.0,
                     parity=image.parity,
                     morse_class=image.morse_class,
+                    fermat_potential_dimensionless=coordinate,
+                    arrival_time_seconds=(coordinate - minimum) * 86400.0,
                 )
-                for image in raw.physical_images
+                for image, coordinate in zip(raw.physical_images, fermat_values)
             )
             return (
                 LensSystemSolution(
@@ -340,6 +346,8 @@ class SmokeGenerator:
         unselected: list[str] = []
         censored: list[str] = []
         for image_index, physical in enumerate(solution.physical_images):
+            if physical.arrival_time_seconds is None:
+                raise RuntimeError("smoke generation requires explicit physical arrival seconds")
             is_extra = physical.image_id not in selected_ids
             is_censored = is_extra and image_index % 2 == 1
             if is_extra:
@@ -352,7 +360,7 @@ class SmokeGenerator:
                     mu_signed=physical.mu_signed,
                     mu_abs=magnification.mu_abs,
                     amplitude_factor=magnification.amplitude_factor,
-                    arrival_time_seconds=physical.arrival_time_dimensionless,
+                    arrival_time_seconds=physical.arrival_time_seconds,
                     parity=physical.parity,
                     morse_class=physical.morse_class,
                     physically_detectable=not is_censored,
