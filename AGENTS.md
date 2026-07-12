@@ -151,15 +151,28 @@ SIE/EPL ESS 0.79184/0.77886, zero anchor failures and byte-identical replay.
 The theoretical population ESS lower bound is 0.55.
 
 The separate RC.5 diagnostic measured overall ESS 0.11776 and SIE/EPL ESS
-0.15222/0.09484; this is not a retrospective pass/fail gate. Phase 3C-0.2 must
-now stop for human review.
+0.15222/0.09484; this is not a retrospective pass/fail gate. Human review
+accepted Phase 3C-0.2 and PR #7 merged it at:
 
-During and after this hard stop, do not:
+`80367373b92065d049db4d9576201c186ef78623`
 
-- generate any additional pair from the qualification or scientific plan;
-- run the 1,024-pair proposal A/B qualification;
+Human review now authorizes Phase 3C-A only through:
+
+`configs/execution/phase3ca_proposal_v3_ab_authorization.yaml`
+
+Phase 3C-A may integrate the frozen proposal-v3 with the qualified production
+generator and generate exactly 512 RC.5-control plus 512 proposal-v3-candidate
+engineering pairs. Each arm has exactly 16 sequential matched blocks of 32
+accepted pairs, separate identities and a six-hour/one-million-attempt cap.
+The hard accepted-pair maximum is 1,024 across both arms. Both artifacts are
+permanently excluded from every scientific split.
+
+During Phase 3C-A, do not:
+
+- generate more or less than the authorized 512 accepted pairs per completed arm;
+- exceed 1,024 accepted engineering pairs across both arms;
+- inspect an interim throughput endpoint after the first matched health block;
 - authorize or adopt rejected proposal-v2 RC.1;
-- run proposal-v3 A/B without a new human authorization;
 - start any scientific production rung;
 - train or tune any neural model;
 - download GWOSC or GWTC products;
@@ -170,17 +183,18 @@ During and after this hard stop, do not:
 - call synthetic Gaussian noise real detector noise;
 - modify any legacy file;
 - start manuscript writing;
-- authorize or proceed to Phase 3C-A or later phases.
+- authorize or proceed to Stage A, Phase 3C-B or later phases.
 
 All Phase 3A remote outputs must remain under:
 
 `/root/autodl-tmp/lensing-4/data_v2/production`
 
-Full production, staged scientific production, proposal-v2 qualification,
-model training, calibration, SBC, scientific IID/OOD/mismatch testing,
-real-noise work, GWOSC/GWTC access and Phase 3C-A remain closed. RC.5 remains
-the only qualified proposal. The Phase 3A artifact and all future engineering
-A/B artifacts must never enter any scientific split.
+Full production, staged scientific production, model training, calibration,
+SBC, scientific IID/OOD/mismatch testing, real-noise work, GWOSC/GWTC access,
+Stage A and Phase 3C-B remain closed. A Phase 3C-A pass only permits a later
+human adoption review; it does not authorize scientific production. The Phase
+3A artifact and both engineering A/B artifacts must never enter any scientific
+split. Phase 3C-A must stop after its report and pushed review branch.
 
 ## Scientific integrity
 

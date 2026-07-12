@@ -37,6 +37,7 @@ from .gw import (
 )
 from .observations import balanced_em_cell, generate_observations
 from .population import sample_population
+from .proposal_adapter import ProductionProposalDraw, sample_production_proposal
 from .run_control import AttemptRecord
 
 
@@ -62,6 +63,7 @@ class QualificationGenerator:
         config: Mapping[str, Any],
         preregistration: Mapping[str, Any],
         generator_git_commit: str,
+        proposal_config: Mapping[str, Any] | None = None,
     ) -> None:
         self.config = config
         self.preregistration = preregistration
@@ -70,6 +72,11 @@ class QualificationGenerator:
         self.root_seed = int(config["root_seed"])
         self.waveforms = ProductionWaveformEngine(config["gw"], self.root_seed)
         self.cells = tuple(preregistration["em_observation_model"]["availability_cells"])
+        engineering = config.get("engineering_ab")
+        self.engineering_ab = dict(engineering) if engineering is not None else None
+        self.proposal_config = proposal_config
+        if self.engineering_ab is not None and proposal_config is None:
+            raise ValueError("engineering A/B generation requires an exact proposal config")
 
     def _rejected(
         self,
@@ -79,8 +86,14 @@ class QualificationGenerator:
         em_cell: str,
         reason: str,
         timings: Mapping[str, float],
+        proposal: ProductionProposalDraw | None = None,
     ) -> AttemptOutcome:
-        prefix = f"proposal-{attempt_id:08d}"
+        namespace = (
+            str(self.engineering_ab["id_prefix"])
+            if self.engineering_ab is not None
+            else "proposal"
+        )
+        prefix = f"{namespace}-proposal-{attempt_id:08d}"
         return AttemptOutcome(
             AttemptRecord(
                 attempt_id,
@@ -93,6 +106,14 @@ class QualificationGenerator:
                 f"{prefix}-source",
                 f"{prefix}-lens",
                 f"{prefix}-system",
+                None if proposal is None else proposal.component,
+                None if proposal is None else proposal.component_log_densities,
+                None if proposal is None else proposal.population.proposal_log_probability,
+                None if proposal is None else proposal.population.evaluation_log_probability,
+                None
+                if proposal is None
+                else proposal.population.evaluation_log_probability
+                - proposal.population.proposal_log_probability,
             ),
             None,
             timings,
@@ -105,18 +126,37 @@ class QualificationGenerator:
         accepted_index: int,
         dataset_id: str,
     ) -> AttemptOutcome:
-        pair_id = f"qualification-pair-{accepted_index:06d}"
-        source_id = f"qualification-source-{accepted_index:06d}"
-        lens_id = f"qualification-lens-{accepted_index:06d}"
-        system_id = f"qualification-system-{accepted_index:06d}"
+        prefix = (
+            str(self.engineering_ab["id_prefix"])
+            if self.engineering_ab is not None
+            else "qualification"
+        )
+        pair_id = f"{prefix}-pair-{accepted_index:06d}"
+        source_id = f"{prefix}-source-{accepted_index:06d}"
+        lens_id = f"{prefix}-lens-{accepted_index:06d}"
+        system_id = f"{prefix}-system-{accepted_index:06d}"
         em_cell = balanced_em_cell(accepted_index, system_id, self.cells)
         lens_seed = derive_seed(self.root_seed, "lens", f"attempt-{attempt_id:08d}")
         source_seed = derive_seed(self.root_seed, "source", f"attempt-{attempt_id:08d}")
-        draw = sample_population(
-            np.random.default_rng(lens_seed),
-            np.random.default_rng(source_seed),
-        )
+        proposal: ProductionProposalDraw | None = None
+        if self.engineering_ab is None:
+            draw = sample_population(
+                np.random.default_rng(lens_seed),
+                np.random.default_rng(source_seed),
+            )
+        else:
+            proposal_started = time.perf_counter()
+            proposal = sample_production_proposal(
+                np.random.default_rng(lens_seed),
+                mode=str(self.engineering_ab["proposal_mode"]),
+                proposal_config=self.proposal_config or {},
+            )
+            draw = proposal.population
         timings: Dict[str, float] = {}
+        if proposal is not None:
+            timings["proposal_sample_and_log_density_seconds"] = (
+                time.perf_counter() - proposal_started
+            )
         started = time.perf_counter()
         parameters = {
             **draw.lens_parameters,
@@ -135,6 +175,7 @@ class QualificationGenerator:
                 em_cell,
                 f"lens_solver_error:{type(error).__name__}",
                 timings,
+                proposal,
             )
         timings["lens_solver_seconds"] = time.perf_counter() - started
         if not baseline.valid:
@@ -145,6 +186,7 @@ class QualificationGenerator:
                 em_cell,
                 "fewer_than_two_physical_images",
                 timings,
+                proposal,
             )
         transformed, transformed_source = apply_mass_sheet_transform(
             baseline, draw.source_position_arcsec, draw.external_convergence
@@ -172,6 +214,7 @@ class QualificationGenerator:
                 em_cell,
                 str(selection.rejection_reason),
                 timings,
+                proposal,
             )
         selected = selection.selected
         passing = set(selection.passing_image_ids)
@@ -245,7 +288,11 @@ class QualificationGenerator:
         references = tuple(
             ArrayReference(
                 role,
-                f"shards/shard-{accepted_index // 128:05d}/{role.value}.zarr",
+                (
+                    "shards/shard-"
+                    f"{accepted_index // int(self.config['pairs_per_shard']):05d}/"
+                    f"{role.value}.zarr"
+                ),
                 role.value,
                 (2, 3, int(self.config["gw"]["sample_count"])),
                 "float32",
@@ -263,8 +310,16 @@ class QualificationGenerator:
             PrimaryDefinition.EARLIEST_ARRIVING,
             SplitName.GENERATOR_QUALIFICATION,
             draw.lens_family,
-            str(self.preregistration["proposal_distribution"]["id"]),
-            str(self.preregistration["evaluation_distribution"]["id"]),
+            str(
+                self.engineering_ab["proposal_distribution_id"]
+                if self.engineering_ab is not None
+                else self.preregistration["proposal_distribution"]["id"]
+            ),
+            str(
+                self.engineering_ab["evaluation_distribution_id"]
+                if self.engineering_ab is not None
+                else self.preregistration["evaluation_distribution"]["id"]
+            ),
             self.root_seed,
             dataset_id,
         )
@@ -307,6 +362,8 @@ class QualificationGenerator:
             "stellar_kinematics": kinematics_seed,
             "augmentation": derive_seed(self.root_seed, "augmentation", pair_id),
         }
+        if self.engineering_ab is not None:
+            seed_hierarchy["proposal"] = lens_seed
         seed_hierarchy.update(
             {
                 f"detector_noise:{projection.image.image_id}:{detector}": derive_seed(
@@ -434,6 +491,13 @@ class QualificationGenerator:
                 source_id,
                 lens_id,
                 system_id,
+                None if proposal is None else proposal.component,
+                None if proposal is None else proposal.component_log_densities,
+                None if proposal is None else draw.proposal_log_probability,
+                None if proposal is None else draw.evaluation_log_probability,
+                None
+                if proposal is None
+                else draw.evaluation_log_probability - draw.proposal_log_probability,
             ),
             generated,
             timings,
