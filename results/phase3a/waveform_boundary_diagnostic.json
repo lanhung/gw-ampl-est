@@ -1,0 +1,67 @@
+{
+  "dataset_artifacts_created": false,
+  "diagnostic_only": true,
+  "frozen_generator_commit": "a2b8a02b4631e86c39e1b682e4424ecc2f2c5ca9",
+  "frequency_grid_convergence": {
+    "guarded_32s_vs_64s_relative_difference": [
+      0.00596081442970068,
+      0.0051651840147140865,
+      0.005274554198207882,
+      0.007955575924178079
+    ],
+    "guarded_64s_vs_128s_relative_difference": [
+      0.0029765410782565203,
+      0.0026295458978997516,
+      0.002190225381882706,
+      0.003948047568872122
+    ],
+    "raw_32s_vs_64s_relative_difference": [
+      0.006297406612848449,
+      0.0054508701539424265,
+      0.005476139048000544,
+      0.008403518763706095
+    ],
+    "raw_64s_vs_128s_relative_difference": [
+      0.003141347581217415,
+      0.0027742383042425613,
+      0.00230694492241173,
+      0.004165880224207962
+    ]
+  },
+  "normalization_audit": {
+    "bilby_infft_definition": "numpy.irfft(frequency_domain_strain) * sampling_frequency",
+    "production_implementation_at_frozen_commit": "numpy.irfft(frequency_domain_response)",
+    "sample_rate_hz": 2048,
+    "stored_clean_strain_scale_error_factor": 2048
+  },
+  "reference_alignment": {
+    "best_circular_lag_samples": [0, 0, 0, 0],
+    "best_scalar": [
+      1.002039947534649,
+      1.0014736061704352,
+      1.0008367499982977,
+      1.0026006620432926
+    ],
+    "interior_relative_difference": [
+      0.03839503145101869,
+      0.03484233301958907,
+      0.032056886508245196,
+      0.057598722983281524
+    ]
+  },
+  "recommended_64s_construction_diagnostics": {
+    "conditioned_energy_retained_fraction": [
+      0.9998605294457608,
+      0.9999211078060967,
+      0.9998543732115412,
+      0.9995027886407837
+    ],
+    "outside_8s_crop_energy_fraction": [
+      0.0010491221460166493,
+      0.0007440307938626204,
+      0.0007147905698449873,
+      0.002353707950020601
+    ]
+  },
+  "status": "requires_reviewed_contract_revision"
+}

@@ -114,6 +114,15 @@ shard or dataset publication was created. Criteria were not relaxed after the
 result. Phase 3A requires a separately reviewed waveform-window revision before
 restarting every pre-execution gate.
 
+Follow-up read-only diagnostics are recorded in
+`results/phase3a/waveform_boundary_diagnostic.json`. They exclude a simple
+alignment or scalar-amplitude explanation, quantify 32/64/128-second
+frequency-grid convergence, and identify an independent factor-2048 clean
+strain inverse-transform normalization defect. A proposed replacement contract
+is documented for human review in
+`docs/reports/PHASE3A_WAVEFORM_WINDOW_CONTRACT_PROPOSAL.md`; it is not an
+authorization or a frozen configuration.
+
 ## Verification at the RC.4 stop
 
 - local pytest: 132 passed and three optional Lenstronomy tests skipped;

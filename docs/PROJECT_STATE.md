@@ -9,6 +9,11 @@ No qualification shard or publication exists. A reviewed waveform-window
 revision is required before Phase 3A restarts. Full production, training,
 calibration, scientific testing and GWOSC/GWTC remain unauthorized.
 
+A non-authoritative RC.5 waveform-window proposal now records the diagnosed
+frequency-grid behavior, the clean-strain inverse-transform normalization bug,
+and an exact 64-second construction/128-second reference candidate for human
+review. It does not reopen execution.
+
 ## Completed
 
 - established Vultr as the sole authoritative Git repository;
@@ -105,5 +110,7 @@ calibration, scientific testing and GWOSC/GWTC remain unauthorized.
 ## Next recommended phase
 
 Review the waveform-boundary failure and freeze a new duration/placement and
-numerical acceptance contract. Then issue a new Phase 3A authorization and
-rerun every physics gate. Full production remains closed.
+numerical acceptance contract. The candidate is documented in
+`docs/reports/PHASE3A_WAVEFORM_WINDOW_CONTRACT_PROPOSAL.md`. Then issue a new
+Phase 3A authorization and rerun every physics gate. Full production remains
+closed.

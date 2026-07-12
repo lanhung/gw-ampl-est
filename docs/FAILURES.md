@@ -217,6 +217,11 @@ silently choose a solver search window or approximate caustic area.
   systems and projected roughly 224.8 hours for 4,096 at the measured serial
   rate, independently exceeding the 24-hour gate. This probe is diagnostic,
   not a substitute for the prohibited formal microbenchmark.
+- Follow-up read-only diagnostics ruled out a simple alignment error and found
+  that the stored clean-strain conversion uses unnormalized `numpy.irfft`
+  rather than Bilby's `infft`. At 2048 Hz this would suppress clean strain by a
+  factor of 2048 relative to stored noise. This must be corrected under a new
+  reviewed waveform contract before any official generation.
 
 ## Phase 2.3 finite-support clarification
 
