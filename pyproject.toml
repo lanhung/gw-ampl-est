@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "gwlens-mm"
+version = "0.1.0"
+description = "Physics and schema foundations for multimessenger GW lensing inference"
+requires-python = ">=3.9"
+dependencies = [
+  "numpy>=1.21",
+  "PyYAML>=6",
+]
+
+[project.optional-dependencies]
+test = ["pytest>=7", "ruff>=0.5", "mypy>=1.10", "types-PyYAML>=6", "build>=1.2"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+addopts = "-ra"
+testpaths = ["tests"]
+markers = [
+  "optional_solver: contract tests requiring an optional external lens solver",
+]
+
+[tool.ruff]
+target-version = "py39"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
+
+[tool.mypy]
+python_version = "3.9"
+files = ["src"]
+warn_unused_ignores = true
+disallow_untyped_defs = true
+no_implicit_optional = true

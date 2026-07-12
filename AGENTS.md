@@ -28,14 +28,17 @@ The new AutoDL project root is:
 
 `/root/autodl-tmp/lensing-4`
 
-The following paths are legacy candidates and must be treated as read-only
-until Phase 0 resolves their relationship:
+The resolved immutable legacy roots are:
 
-- `/root/autodl-tmp/wjx_project/classcify-gw-lensing-pairs-main`
 - `/root/autodl-tmp/qkzhang`
+  - authoritative source for the original 0222/0228 legacy datasets;
+- `/root/autodl-tmp/wjx_project/classcify-gw-lensing-pairs-main`
+  - downstream pair-classification project;
+- `/root/autodl-tmp/tmp`
+  - source of the PDF point-regression baseline and related later variants.
 
 Never write, rename, move, delete, normalize in place, or overwrite files
-under either legacy candidate path.
+under any legacy root.
 
 All new code copies, generated data, caches, manifests and runs must be placed
 under `/root/autodl-tmp/lensing-4`.
@@ -75,26 +78,34 @@ generator audit and approving a v2 schema.
 
 ## Current phase gate
 
-The first Codex task is Phase 0 only.
+Phase 0 is complete and frozen at Git commit
+`38c76016b66eda3a4b72d5a7ca3fb1e90957abef`.
 
-During Phase 0, do not:
-- rewrite the model;
-- train a new model;
-- generate a large dataset;
-- download the full GWTC catalog;
-- write a manuscript;
-- claim novelty;
-- alter legacy data;
-- launch long GPU jobs.
+The currently authorized phase is Phase 1A:
 
-Phase 0 is limited to:
-- local and remote inventory;
-- path reconciliation;
-- provenance analysis;
-- legacy manifest construction;
-- code/data mapping;
-- compute and storage inspection;
-- a written decision on what can be reused.
+- define the v2 physics API and quantity conventions;
+- define the privileged-variable denylist and deployable-input allowlist;
+- define the logical v2 dataset schema;
+- define source/lens/noise grouped split rules;
+- define provenance and manifest schemas;
+- implement unit and contract tests;
+- create a reviewed smoke-generation specification.
+
+During Phase 1A, do not:
+
+- train any neural model;
+- generate a full dataset;
+- generate more than metadata-only schema examples;
+- download GWTC or GWOSC data;
+- launch long GPU jobs;
+- write the scientific manuscript;
+- modify any legacy file;
+- treat legacy data as v2 training or final test data.
+
+Phase 1A must stop after the physics API, schema, policies and tests pass.
+
+Generating 10–100 v2 smoke pairs is Phase 1B and requires review of the
+Phase 1A report before execution.
 
 ## Scientific integrity
 

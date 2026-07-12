@@ -1,0 +1,67 @@
+schema_version: 2.0.0-alpha.2
+specification_version: 1
+execution_authorized: false
+output_root: /root/autodl-tmp/lensing-4/data_v2/smoke
+root_seed: 20260712
+count_control: accepted_count
+accepted_pairs:
+  sis: 24
+  sie_external_shear: 12
+  epl_external_shear: 12
+attempt_log:
+  record_rejections: true
+  require_rejection_reason: true
+pair_selection:
+  selected_images: 2
+  store_all_physical_images: true
+  preserve_undetected_and_censored_images: true
+  primary_definition: earliest_arriving
+gw:
+  selected_image_slots: 2
+  detector_slots: [H1, L1, V1]
+  detector_availability_masks: true
+  duration_seconds: 1
+  sample_rate_hz: 4096
+  sample_count: 4096
+  dtype: float32
+  separate_products:
+    - noisy_strain
+    - clean_injected_signal
+    - noise_realization
+  repeat_full_time_axis_per_pair: false
+  unavailable_detector_fill_value: 0.0
+  require_noisy_equals_clean_plus_noise: true
+  noise_model: synthetic_gaussian_design_psd
+  label_noise_as_real: false
+  timing_observation_model:
+    measurement_method: paired_trigger_geocentric_time
+    standard_deviation_seconds: 0.002
+    deterministic_control: false
+em:
+  noisy_observations: true
+  covariance_required: true
+  modalities:
+    - image_astrometry
+    - lens_center
+    - einstein_radius
+    - lens_redshift
+    - source_redshift
+    - velocity_dispersion
+  include_missing_modalities: true
+  missingness_seed_domain: missing_modalities
+grouping:
+  deterministic_ids: true
+  group_by_source: true
+  group_by_lens: true
+  group_by_physical_system: true
+  group_by_noise_segment: true
+provenance:
+  require_generator_git_commit: true
+  require_configuration_hash: true
+  require_seed_hierarchy: true
+  require_solver_version: true
+  require_waveform_model_version: true
+storage:
+  format: zarr_v2_plus_parquet
+  chunk_shape: [1, 2, 3, 4096]
+  checksum: sha256_per_shard_and_manifest

@@ -1,0 +1,214 @@
+{
+  "$defs": {
+    "DetectorNoiseReference": {
+      "additionalProperties": false,
+      "properties": {
+        "available": {
+          "type": "boolean"
+        },
+        "detector": {
+          "enum": [
+            "H1",
+            "L1",
+            "V1"
+          ]
+        },
+        "image_id": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "noise_source": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "segment_id": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "image_id",
+        "detector",
+        "segment_id",
+        "available",
+        "noise_source"
+      ],
+      "type": "object"
+    },
+    "ImageAstrometryObservation": {
+      "additionalProperties": false,
+      "properties": {
+        "covariance_arcsec2": {
+          "items": {
+            "items": {
+              "type": "number"
+            },
+            "maxItems": 2,
+            "minItems": 2,
+            "type": "array"
+          },
+          "maxItems": 2,
+          "minItems": 2,
+          "type": "array"
+        },
+        "image_id": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "position_arcsec": {
+          "items": {
+            "type": "number"
+          },
+          "maxItems": 2,
+          "minItems": 2,
+          "type": "array"
+        }
+      },
+      "required": [
+        "image_id",
+        "position_arcsec",
+        "covariance_arcsec2"
+      ],
+      "type": "object"
+    },
+    "TimingObservation": {
+      "additionalProperties": false,
+      "properties": {
+        "deterministic_control": {
+          "type": "boolean"
+        },
+        "measurement_method": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "reference": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "standard_deviation_seconds": {
+          "minimum": 0,
+          "type": "number"
+        },
+        "value_seconds": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "value_seconds",
+        "standard_deviation_seconds",
+        "measurement_method",
+        "reference",
+        "deterministic_control"
+      ],
+      "type": "object"
+    }
+  },
+  "$id": "https://example.invalid/gwlens-mm/v2/2.0.0-alpha.2",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "em_observation": {
+      "not": {
+        "anyOf": [
+          {
+            "required": [
+              "observed_image_positions_arcsec"
+            ]
+          },
+          {
+            "required": [
+              "image_position_covariances_arcsec2"
+            ]
+          }
+        ]
+      },
+      "properties": {
+        "modality_availability_mask": {
+          "type": "object"
+        },
+        "observed_image_astrometry": {
+          "items": {
+            "$ref": "#/$defs/ImageAstrometryObservation"
+          },
+          "type": [
+            "array",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "observed_image_astrometry",
+        "modality_availability_mask"
+      ],
+      "type": "object"
+    },
+    "gw_observation": {
+      "not": {
+        "required": [
+          "observed_event_time_difference_seconds"
+        ]
+      },
+      "properties": {
+        "detector_availability_mask": {
+          "type": "array"
+        },
+        "observed_time_difference": {
+          "$ref": "#/$defs/TimingObservation"
+        }
+      },
+      "required": [
+        "observed_time_difference",
+        "detector_availability_mask"
+      ],
+      "type": "object"
+    },
+    "lens_truth": {
+      "type": "object"
+    },
+    "pair": {
+      "type": "object"
+    },
+    "provenance": {
+      "not": {
+        "required": [
+          "noise_segment_ids"
+        ]
+      },
+      "properties": {
+        "detector_noise_references": {
+          "items": {
+            "$ref": "#/$defs/DetectorNoiseReference"
+          },
+          "maxItems": 6,
+          "minItems": 6,
+          "type": "array"
+        }
+      },
+      "required": [
+        "detector_noise_references"
+      ],
+      "type": "object"
+    },
+    "schema_version": {
+      "const": "2.0.0-alpha.2"
+    },
+    "source_truth": {
+      "type": "object"
+    }
+  },
+  "required": [
+    "schema_version",
+    "pair",
+    "source_truth",
+    "lens_truth",
+    "gw_observation",
+    "em_observation",
+    "provenance"
+  ],
+  "title": "GWLens-MM v2 metadata record",
+  "type": "object"
+}

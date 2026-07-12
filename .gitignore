@@ -13,17 +13,20 @@ __pycache__/
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
+*.egg-info/
+/build/
+/dist/
 .venv/
 venv/
 
 # Large data
-data/
-data_v2/
-gwosc_cache/
-runs/
-cache/
-artifacts/
-checkpoints/
+/data/
+/data_v2/
+/gwosc_cache/
+/runs/
+/cache/
+/artifacts/
+/checkpoints/
 *.npy
 *.npz
 *.h5
