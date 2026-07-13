@@ -73,7 +73,22 @@ class QualificationGenerator:
         self.waveforms = ProductionWaveformEngine(config["gw"], self.root_seed)
         self.cells = tuple(preregistration["em_observation_model"]["availability_cells"])
         engineering = config.get("engineering_ab")
-        self.engineering_ab = dict(engineering) if engineering is not None else None
+        production = config.get("production_context")
+        if engineering is not None and production is not None:
+            raise ValueError("generator cannot use engineering_ab and production_context together")
+        context = production if production is not None else engineering
+        self.engineering_ab = dict(context) if context is not None else None
+        self.output_split = (
+            SplitName(
+                str(
+                    self.engineering_ab.get(
+                        "split", SplitName.GENERATOR_QUALIFICATION.value
+                    )
+                )
+            )
+            if self.engineering_ab is not None
+            else SplitName.GENERATOR_QUALIFICATION
+        )
         self.proposal_config = proposal_config
         if self.engineering_ab is not None and proposal_config is None:
             raise ValueError("engineering A/B generation requires an exact proposal config")
@@ -308,7 +323,7 @@ class QualificationGenerator:
             selected[0].image.image_id,
             selected[1].image.image_id,
             PrimaryDefinition.EARLIEST_ARRIVING,
-            SplitName.GENERATOR_QUALIFICATION,
+            self.output_split,
             draw.lens_family,
             str(
                 self.engineering_ab["proposal_distribution_id"]

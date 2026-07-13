@@ -1,0 +1,37 @@
+{
+  "accepted_ids_known_before_materialization": false,
+  "accepted_rank_allocation_rule": "split-local deterministic accepted rank under frozen attempt stream",
+  "attempt_id_allocation_rule": "shard_index + local_attempt * attempt_id_stride",
+  "attempt_stream_namespaces": {
+    "balanced_tail_diagnostic": "adaptive_rc2_balanced_tail_attempts",
+    "cross_family_misspecification_test": "adaptive_rc2_cross_family_attempts",
+    "iid_test": "adaptive_rc2_iid_attempts",
+    "parameter_region_ood": "adaptive_rc2_parameter_ood_attempts",
+    "psd_mismatch_test": "adaptive_rc2_psd_mismatch_attempts",
+    "waveform_mismatch_test": "adaptive_rc2_waveform_mismatch_attempts"
+  },
+  "commitment_status": "unfinalized_design_template",
+  "final_evaluation_count": 20480,
+  "future_scientific_generator_commit": null,
+  "grouping_rules": "inherit adaptive RC.3 physical-system grouped disjointness",
+  "manifest_validation_rules": "inherit adaptive RC.3 sealed-final-evaluation validation",
+  "preregistration": {
+    "canonical_hash": "5aeaac395463bd073c44ead4ff4c5c729b5a2d4b4f1840c0825a53b30ab1bc98",
+    "path": "configs/statistics/direct_target_stage_a_preregistration.yaml",
+    "version": "1.1.0-rc.4"
+  },
+  "proposal_distribution_id": "balanced_literature_informed_benchmark_v1",
+  "evaluation_distribution_id": "balanced_literature_informed_benchmark_v1",
+  "root_seed": 2026071203,
+  "schema_version": "2.0.0-alpha.3",
+  "split_counts": {
+    "balanced_tail_diagnostic": 4096,
+    "cross_family_misspecification_test": 2048,
+    "iid_test": 8192,
+    "parameter_region_ood": 2048,
+    "psd_mismatch_test": 2048,
+    "waveform_mismatch_test": 2048
+  },
+  "training_or_materialization_authorized": false,
+  "waveform_psd_observation_versions": "inherit RC.5 and adaptive RC.3"
+}

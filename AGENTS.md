@@ -246,6 +246,46 @@ preregistration plus separate Stage A execution authorization. Until then,
 scientific generation, training, calibration, evaluation, real noise,
 GWOSC/GWTC, Stage A and later phases remain closed.
 
+Human review accepted the Phase 3C-A.1 evidence and PR #9 merged it at:
+
+`ce0cf464cf5b56e3df5e1b0c93ffadc12f2e517a`
+
+Human direction authorizes Phase 4 direct-target preregistration and
+pre-execution implementation only through:
+
+`configs/execution/phase4_direct_target_design_authorization.yaml`
+
+The proposed scientific delta is preregistration `1.1.0-rc.4`, configuration:
+
+`configs/statistics/direct_target_stage_a_preregistration.yaml`
+
+with canonical hash:
+
+`5aeaac395463bd073c44ead4ff4c5c729b5a2d4b4f1840c0825a53b30ab1bc98`
+
+RC.4 preserves the RC.5/RC.3 estimand, target, selection, split counts,
+stopping and evaluation contracts. It changes Stage A training generation to
+direct `p_eval` draws, so `q_train=p_eval`, log importance weight is zero and
+importance weight is exactly one. Stage A remains 32,768 train plus 6,144
+validation accepted physical systems. Proposal-v3 and RC.5 weighted scientific
+training remain closed.
+
+Phase 4 design work may implement the typed direct-target path, release gate,
+immutable environment identity, 8+8 disposable canary runner and Stage A
+runner. It may not execute the canary, create official Stage A identities,
+generate scientific data or train a model. Canary execution, RC.4 acceptance
+and Stage A materialization each require their stated future human gate.
+
+Until those gates are recorded, do not:
+
+- set any RC.4 execution flag true;
+- generate even one disposable canary or scientific pair;
+- create official parent/train/validation identities;
+- train or tune a model;
+- materialize calibration, SBC or final evaluation data;
+- access GWOSC/GWTC or real noise;
+- resume or reuse any Phase 3C artifact.
+
 ## Scientific integrity
 
 - Never fabricate results, citations, completed runs or calibration.

@@ -1,0 +1,13 @@
+environment_id: phase4-direct-target-autodl-v1
+status: design_lock_unresolved_wheel
+python_version: "3.10.12"
+dependency_lock_path: configs/environment/phase4-autodl-requirements.lock.txt
+dependency_lock_sha256: "792a93f24f6c38c18ec214665d34c8348e042b21beebd177333dae2c30224d8f"
+normalized_remote_freeze_sha256: "792a93f24f6c38c18ec214665d34c8348e042b21beebd177333dae2c30224d8f"
+normalized_freeze_excludes:
+  - editable_gwlens_mm_install
+generator_commit: null
+generator_wheel_sha256: null
+editable_install_for_official_execution_authorized: false
+container_digest: null
+resolution_rule: wheel_hash_and_generator_commit_must_be_filled_by_reviewed_release_certificate

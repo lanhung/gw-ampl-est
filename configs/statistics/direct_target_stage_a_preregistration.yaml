@@ -1,0 +1,200 @@
+phase: "4"
+preregistration_version: "1.1.0-rc.4"
+status: awaiting_human_review
+
+parent_adaptive_preregistration:
+  version: "1.1.0-rc.3"
+  path: configs/statistics/adaptive_scientific_production_preregistration.yaml
+  canonical_hash: "6082475631539d3069edacc52f41b37fb8fe725ccd7c6bc9980cc3008795a927"
+
+parent_scientific_preregistration:
+  version: "1.0.0-rc.5"
+  path: configs/statistics/phase2_preregistration.yaml
+  canonical_hash: "4dde279cf1bea78d1ddbd4fab99d88e88e334c80c180dc7850679736c5e53edb"
+
+scientific_schema_version: "2.0.0-alpha.3"
+
+authorization:
+  design_and_implementation_authorized: true
+  disposable_canary_execution_authorized: false
+  execution_enabled: false
+  scientific_data_generation_authorized: false
+  stage_a_materialization_authorized: false
+  model_training_authorized: false
+  model_tuning_authorized: false
+  calibration_fit_authorized: false
+  sbc_authorized: false
+  iid_evaluation_authorized: false
+  ood_evaluation_authorized: false
+  mismatch_evaluation_authorized: false
+  real_noise_authorized: false
+  gwosc_gwtc_access_authorized: false
+  catalog_scan_authorized: false
+
+inherited_scientific_contract:
+  estimand: inherit_parent_rc5
+  posterior_target: inherit_parent_rc5
+  preselection_evaluation_distribution: inherit_parent_rc3
+  selection_model: inherit_parent_rc5
+  observation_models: inherit_parent_rc5
+  waveform_and_psd_contract: inherit_parent_rc5
+  lens_and_external_convergence_contract: inherit_parent_rc5
+  em_availability_cells: inherit_parent_rc5
+  split_counts_and_stopping_rule: inherit_parent_rc3
+  architecture_selection_rule: inherit_parent_rc3
+  calibration_sbc_and_final_evaluation_rules: inherit_parent_rc3
+  evaluation_target_change_authorized: false
+
+direct_target_training_contract:
+  evaluation_target_id: balanced_literature_informed_benchmark_v1
+  training_proposal_id: balanced_literature_informed_benchmark_v1
+  q_train_equals_p_eval: true
+  preselection_sampling: direct_evaluation_target
+  selection_conditioning: explicit_inherited_synthetic_selection
+  ordinary_unweighted_conditional_nlp_authorized: true
+  objective_equivalence: importance_weighted_conditional_nlp_with_all_weights_one
+  proposal_log_probability_equals_evaluation_log_probability: true
+  log_importance_weight: 0.0
+  importance_weight: 1.0
+  importance_weight_clipping_authorized: false
+  privileged_density_provenance_retained: true
+  density_provenance_deployable_input: false
+  proposal_mixture_or_adaptation_authorized: false
+  proposal_v3_scientific_use_authorized: false
+  rc5_weighted_scientific_training_authorized: false
+
+stage_a:
+  independent_sample_unit: accepted_physical_system
+  train:
+    split: train
+    accepted_count: 32768
+    shard_count: 256
+    accepted_pairs_per_shard: 128
+    root_seed: 2026071401
+    attempt_stream_namespace: phase4-stage-a-train-direct-target-v1
+    accepted_rank_rule: first_32768_accepted_in_namespace
+    first_probe_subset_count: 16384
+  validation:
+    split: validation
+    accepted_count: 6144
+    shard_count: 48
+    accepted_pairs_per_shard: 128
+    root_seed: 2026071402
+    attempt_stream_namespace: phase4-stage-a-validation-direct-target-v1
+    accepted_rank_rule: first_6144_accepted_in_namespace
+  total_accepted_count: 38912
+  total_shard_count: 304
+  train_and_validation_group_disjoint: true
+  generation_continues_to_train_32k_regardless_of_16k_probe_result: true
+  calibration_sbc_and_final_evaluation_materialized: false
+  stage_b_materialized: false
+
+split_and_identity_contract:
+  assignment_method: deterministic_rank_of_sha256
+  group_identifiers:
+    - source_id
+    - lens_id
+    - physical_system_id
+    - pair_id
+    - noise_segment_id
+  phase3a_dataset_id_forbidden: gwlens-v2-2.0.0-alpha.3-7081b2e8be3a84e1
+  phase3ca_parent_id_forbidden: phase3ca-185e68d4346d-0ed6958442da
+  phase3ca1_parent_id_forbidden: phase3ca1-324bab47aff5-f065e349f166
+  all_engineering_canary_ids_forbidden_from_science: true
+  final_evaluation_commitment_template: results/phase4/final_evaluation_commitment.json
+  commitment_must_be_finalized_before_training: true
+
+disposable_canary_contract:
+  execution_authorized_in_rc4: false
+  dataset_purpose: execution_canary
+  scientific_use_authorized: false
+  training_use_authorized: false
+  calibration_use_authorized: false
+  test_use_authorized: false
+  permanent_exclusion_from_all_scientific_splits: true
+  code_path: identical_direct_target_generator_storage_and_validator
+  train_namespace_accepted_count: 8
+  validation_namespace_accepted_count: 8
+  total_accepted_count: 16
+  accepted_pairs_per_shard: 8
+  train_namespace_root_seed: 2026071491
+  validation_namespace_root_seed: 2026071492
+  official_seed_or_identity_reuse_forbidden: true
+  throughput_or_ess_inspection_forbidden: true
+  required_checks:
+    - schema_round_trip
+    - direct_target_unit_weight
+    - array_decomposition
+    - storage_and_checksum
+    - interruption_and_resume
+    - telemetry
+    - manifest_identity
+    - no_scientific_split
+
+release_gate_contract:
+  command: python -m gwlens_mm.release_gate phase4
+  required_ready_status: ready_for_official_execution
+  official_identities_created_only_after_ready: true
+  checks:
+    - exact_branch_and_commit
+    - clean_worktree_or_synced_commit_marker
+    - preregistration_hash
+    - authorization_hash_and_flags
+    - schema_contract
+    - environment_lock
+    - wheel_hash
+    - psd_hashes
+    - disk_gate
+    - output_collision
+    - disposable_canary_passed
+    - canary_commit_matches_generator_commit
+    - scientific_execution_authorized
+
+immutable_environment_contract:
+  dependency_lock: configs/environment/phase4-autodl-requirements.lock.txt
+  lock_identity: configs/environment/phase4-autodl-environment.yaml
+  generator_wheel_sha256_resolved_at_release: true
+  editable_install_for_official_execution_forbidden: true
+  synchronized_git_commit_required: true
+
+resource_gate:
+  projection_basis: phase3a_rc5_conservative_direct_target_upper_planning_bound
+  projected_attempts: 13829141
+  projected_active_hours: 56.483797483244
+  projected_published_bytes: 42281598311
+  retained_failed_evidence_reserve_bytes: 2114079916
+  checkpoint_and_cache_reserve_bytes: 20000000000
+  active_shard_reserve_bytes: 139084205
+  projected_peak_bytes: 64534762432
+  minimum_post_peak_free_bytes: 100000000000
+  minimum_prelaunch_free_bytes: 164534762432
+  projected_values_are_measurements: false
+  canary_may_lower_official_resource_gate: false
+
+execution_sequence:
+  - finalize_generator_commit_and_wheel_hash
+  - create_immutable_environment
+  - authorize_and_run_disposable_canary
+  - review_canary_evidence
+  - resolve_official_dataset_identities
+  - authorize_exact_stage_a_counts
+  - run_release_gate
+  - materialize_stage_a
+  - validate_and_publish_stage_a
+  - open_probe_training_only_under_separate_training_authorization
+
+hard_stops:
+  - any_execution_flag_true_before_human_gate
+  - proposal_v4_or_further_proposal_ab
+  - rc5_or_v3_weighted_scientific_training
+  - nonunit_direct_target_weight
+  - proposal_log_probability_differs_from_evaluation_log_probability
+  - canary_id_in_scientific_split
+  - phase3a_or_phase3c_id_in_scientific_split
+  - train_validation_group_leakage
+  - stage_a_count_or_shard_mismatch
+  - calibration_sbc_or_final_evaluation_materialized_in_stage_a
+  - training_before_final_evaluation_commitment
+  - editable_install_used_for_official_execution
+  - official_identity_created_before_release_gate
+  - gwosc_or_gwtc_access

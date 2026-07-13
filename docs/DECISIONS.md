@@ -548,3 +548,28 @@ engineering retry; a second execution failure invokes the preregistered
 fallback. A target-effective-systems-per-hour metric may be used only when
 frozen before data exist, never retroactively on the incomplete Phase 3C-A.1
 run.
+
+## D063 — Stage A falls back to direct evaluation-target generation
+
+RC.4 inherits the RC.5/RC.3 scientific target and changes only the training
+sampling route. Stage A uses `q_train=p_eval`, exact log weight zero and unit
+weight. Ordinary conditional NLP is therefore identical to the previously
+frozen weighted objective under unit weights. RC.5 and proposal-v3 are not
+authorized for weighted scientific training.
+
+Stage A remains 32,768 train plus 6,144 validation systems. The 16k probe,
+development-only stopping and all sealed final-evaluation rules remain
+unchanged. This closes proposal optimization as a prerequisite while retaining
+a fully target-correct scientific path.
+
+## D064 — Canary precedes identities and one release certificate opens execution
+
+Every future official execution uses typed schema APIs, an immutable dependency
+and wheel identity, and a disposable canary before official dataset identities
+exist. The Phase 4 canary is exactly 8+8 engineering pairs, uses separate seeds
+and qualification split labels, and cannot inspect throughput or ESS.
+
+The single release-gate command returns official parent/train/validation IDs
+only when RC.4, the final commit/wheel, the canary hash, disk/PSD checks and the
+exact scientific execution authorization all pass. During design it must
+remain blocked and return no identities.
