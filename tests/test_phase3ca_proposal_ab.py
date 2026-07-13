@@ -27,6 +27,17 @@ RETRY_CONFIG = ROOT / "configs/data/phase3ca1_proposal_v3_ab_retry.yaml"
 EXAMPLE = ROOT / "examples/v2_metadata_example.json"
 
 
+def _checkout_head() -> str:
+    marker = ROOT / "SYNCED_COMMIT"
+    return (
+        marker.read_text().strip()
+        if marker.is_file()
+        else subprocess.check_output(
+            ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True
+        ).strip()
+    )
+
+
 def _health_fixture(tmp_path: Path, *, nonfinite: bool = False) -> tuple[Path, str]:
     pytest.importorskip("zarr")
     pytest.importorskip("numcodecs")
@@ -116,14 +127,7 @@ def test_phase3ca_contract_is_bounded_and_non_scientific() -> None:
 
 
 def test_contract_derives_distinct_arm_identities() -> None:
-    marker = ROOT / "SYNCED_COMMIT"
-    head = (
-        marker.read_text().strip()
-        if marker.is_file()
-        else subprocess.check_output(
-            ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True
-        ).strip()
-    )
+    head = _checkout_head()
     config, _, _, identity = load_and_verify_contract(ROOT, head)
     assert identity.control_dataset_id != identity.candidate_dataset_id
     control = arm_config(ROOT, config, "rc5_control")
@@ -134,7 +138,7 @@ def test_contract_derives_distinct_arm_identities() -> None:
 
 
 def test_retry_contract_uses_new_seeds_namespaces_and_identities() -> None:
-    head = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
+    head = _checkout_head()
     config, _, _, identity = load_and_verify_contract(
         ROOT, head, str(RETRY_CONFIG.relative_to(ROOT))
     )
