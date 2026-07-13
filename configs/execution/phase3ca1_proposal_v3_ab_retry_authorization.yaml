@@ -1,0 +1,82 @@
+phase: "3C-A.1"
+authorization_status: authorized_narrow_full_retry
+authorized_by: human_project_owner
+authorization_date: "2026-07-13"
+base_main_commit: "49600a7a4fa9b1fcd645d9e0bc4ccec05f22c441"
+
+retry_of_failed_run:
+  phase: "3C-A"
+  generator_commit: "185e68d4346d84edc118a9197ffb8bceeb026ee4"
+  parent_run_id: "phase3ca-185e68d4346d-0ed6958442da"
+  control_dataset_id: "gwlens-v2-2.0.0-alpha.3-79588465a35421e2-control"
+  candidate_dataset_id: "gwlens-v2-2.0.0-alpha.3-17bb6106d0192dcd-v3"
+  status: execution_failed
+  completed_control_pairs: 32
+  completed_candidate_pairs: 32
+  reuse_in_retry_authorized: false
+  publication_authorized: false
+  retained_as_read_only_failure_evidence: true
+
+frozen_adaptive_preregistration:
+  version: "1.1.0-rc.3"
+  path: configs/statistics/adaptive_scientific_production_preregistration.yaml
+  canonical_hash: "6082475631539d3069edacc52f41b37fb8fe725ccd7c6bc9980cc3008795a927"
+
+candidate:
+  proposal_version: proposal-v3-target-anchored-mixture-1.0.0-rc.1
+  config_path: configs/proposals/proposal_v3_target_anchored_mixture.yaml
+  config_hash: "2d7998ca099c1ecddbb5d9cb1d824f37d3d398826a88831b2bccddbda814cbf4"
+  mixture_change_authorized: false
+
+authorized_correction:
+  health_validator_field_from: evaluation_log_probability
+  health_validator_field_to: evaluation_prior_log_probability
+  unrelated_generator_changes_authorized: false
+
+authorization:
+  validator_correction_authorized: true
+  regression_tests_authorized: true
+  proposal_v3_ab_retry_authorized: true
+  engineering_waveform_generation_authorized: true
+  accepted_pair_generator_authorized_within_retry_only: true
+  scientific_data_generation_authorized: false
+  model_training_authorized: false
+  model_tuning_authorized: false
+  calibration_authorized: false
+  sbc_authorized: false
+  iid_ood_mismatch_evaluation_authorized: false
+  real_noise_authorized: false
+  gwosc_gwtc_access_authorized: false
+  stage_a_authorized: false
+  later_phase_authorized: false
+
+retry_contract:
+  new_parent_run_id_required: true
+  new_control_dataset_id_required: true
+  new_candidate_dataset_id_required: true
+  new_attempt_namespaces_required: true
+  control_root_seed: 2026071213
+  candidate_root_seed: 2026071214
+  accepted_pairs_per_arm: 512
+  total_new_accepted_pairs: 1024
+  old_64_pairs_count_toward_retry: false
+  blocks_per_arm: 16
+  accepted_pairs_per_block: 32
+  maximum_attempts_per_arm: 1000000
+  maximum_active_hours_per_arm: 6.0
+  hard_maximum_new_accepted_pairs: 1024
+
+dataset_policy:
+  purpose: proposal_efficiency_engineering_retry
+  scientific_use_authorized: false
+  training_use_authorized: false
+  calibration_use_authorized: false
+  test_use_authorized: false
+  permanent_exclusion_from_all_scientific_splits: true
+
+resource_gates:
+  minimum_prelaunch_free_bytes: 121446475732
+  minimum_post_peak_free_bytes: 100000000000
+  maximum_new_accepted_pairs: 1024
+
+stop_after_phase3ca1: true
