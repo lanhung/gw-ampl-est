@@ -13,7 +13,7 @@ import resource
 import sys
 import time
 from pathlib import Path
-from typing import Any, Dict, Mapping
+from typing import Any, Dict, Mapping, Sequence
 
 from gwlens_mm.config import load_yaml
 from gwlens_mm.policy import InputPolicy
@@ -28,6 +28,7 @@ from gwlens_mm.production.ab_qualification import (
     publish_arm,
     strip_large_validation,
     validate_arm,
+    validate_first_block_health,
 )
 from gwlens_mm.production.qualification import generate_qualification_shard
 from gwlens_mm.production.storage import tree_checksum, verify_complete_shard
@@ -78,58 +79,7 @@ def _load_summary(stage: Path, block: int) -> Dict[str, Any]:
     return json.loads(_summary_path(stage, block).read_text())
 
 
-def _health(stage: Path, arm_cfg: Mapping[str, Any], expected_dataset: str) -> Dict[str, Any]:
-    import numpy as np
-    import pandas as pd
-    import zarr
-
-    from gwlens_mm.arrays import validate_strain_array_semantics
-    from gwlens_mm.schema import V2Record
-
-    shard = stage / "shards" / "shard-00000"
-    verify_complete_shard(shard, 32)
-    frame = pd.read_parquet(shard / "records.parquet")
-    arrays = {
-        name: zarr.open_array(str(shard / f"{name}.zarr"), mode="r")
-        for name in ("noisy", "clean", "noise")
-    }
-    pair_ids = set()
-    for index, row in frame.iterrows():
-        record = V2Record.from_json(str(row["record_json"]))
-        record.validate()
-        if record.pair.dataset_version != expected_dataset:
-            raise ValueError("first-block dataset identity mismatch")
-        if record.pair.pair_id in pair_ids:
-            raise ValueError("first-block duplicate pair ID")
-        pair_ids.add(record.pair.pair_id)
-        validate_strain_array_semantics(
-            np.asarray(arrays["noisy"][index]),
-            np.asarray(arrays["clean"][index]),
-            np.asarray(arrays["noise"][index]),
-            record.gw_observation.detector_availability_mask,
-        )
-        distribution = record.provenance.distribution
-        if not all(
-            np.isfinite(
-                (
-                    distribution.proposal_log_probability,
-                    distribution.evaluation_log_probability,
-                    distribution.importance_weight,
-                )
-            )
-        ):
-            raise ValueError("first-block nonfinite proposal provenance")
-    digest, byte_count = tree_checksum(shard)
-    return {
-        "status": "passed",
-        "accepted_pair_count": len(pair_ids),
-        "tree_sha256": digest,
-        "bytes": byte_count,
-        "throughput_inspected": False,
-    }
-
-
-def _write_telemetry(path: Path, rows: list[Mapping[str, Any]]) -> None:
+def _write_telemetry(path: Path, rows: Sequence[Mapping[str, Any]]) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     fields = sorted({key for row in rows for key in row})
     with path.open("w", newline="") as handle:
@@ -138,7 +88,7 @@ def _write_telemetry(path: Path, rows: list[Mapping[str, Any]]) -> None:
         writer.writerows(rows)
 
 
-def _atomic_list(path: Path, rows: list[Mapping[str, Any]]) -> None:
+def _atomic_list(path: Path, rows: Sequence[Mapping[str, Any]]) -> None:
     temporary = path.with_name(path.name + ".partial")
     temporary.write_text(json.dumps(rows, indent=2, sort_keys=True) + "\n")
     os.replace(temporary, path)
@@ -148,8 +98,13 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--generator-commit", required=True)
     parser.add_argument("--output", required=True, type=Path)
+    parser.add_argument(
+        "--config", default="configs/data/phase3ca_proposal_v3_ab.yaml"
+    )
     args = parser.parse_args()
-    config, adaptive, proposal, identity = load_and_verify_contract(ROOT, args.generator_commit)
+    config, adaptive, proposal, identity = load_and_verify_contract(
+        ROOT, args.generator_commit, args.config
+    )
     synced = ROOT / "SYNCED_COMMIT"
     if not (ROOT / ".git").exists() and (
         not synced.is_file() or synced.read_text().strip() != args.generator_commit
@@ -294,7 +249,9 @@ def main() -> None:
             _atomic_list(existing_telemetry, telemetry)
         if block == 0:
             health_results = {
-                arm: _health(parent_stage / arm_ids[arm], arm_cfgs[arm], arm_ids[arm])
+                arm: validate_first_block_health(
+                    parent_stage / arm_ids[arm], arm_ids[arm]
+                )
                 for arm in ARM_NAMES
             }
             lines = [
@@ -309,7 +266,9 @@ def main() -> None:
             )
     if not health_results:
         health_results = {
-            arm: _health(parent_stage / arm_ids[arm], arm_cfgs[arm], arm_ids[arm])
+            arm: validate_first_block_health(
+                parent_stage / arm_ids[arm], arm_ids[arm]
+            )
             for arm in ARM_NAMES
         }
     final_lines = []
@@ -343,6 +302,7 @@ def main() -> None:
             parent_publication / arm_ids[arm],
             validations[arm],
             identity,
+            str(config["dataset_purpose"]),
         )
         for arm in ARM_NAMES
     }

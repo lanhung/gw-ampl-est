@@ -20,7 +20,7 @@ from ..arrays import validate_strain_array_semantics
 from ..config import load_yaml
 from ..policy import InputPolicy
 from ..provenance import canonical_json, configuration_hash, dataset_id
-from ..schema import SplitName, V2Record
+from ..schema import DistributionMetadata, SplitName, V2Record
 from .run_control import AttemptRecord, verify_psd_files
 from .storage import tree_checksum, verify_complete_shard
 
@@ -57,24 +57,53 @@ class ABIdentity:
 
 
 def load_and_verify_contract(
-    root: Path, generator_commit: str
+    root: Path,
+    generator_commit: str,
+    config_path: str = "configs/data/phase3ca_proposal_v3_ab.yaml",
 ) -> tuple[Dict[str, Any], Dict[str, Any], Dict[str, Any], ABIdentity]:
-    config = load_yaml(root / "configs/data/phase3ca_proposal_v3_ab.yaml")
+    config = load_yaml(root / config_path)
     authorization = load_yaml(root / config["authorization"]["path"])
     adaptive = load_yaml(root / config["adaptive_preregistration"]["path"])
     proposal = load_yaml(root / config["proposal"]["path"])
+    is_retry = config.get("phase") == "3C-A.1"
+    expected_phase = "3C-A.1" if is_retry else "3C-A"
+    expected_status = (
+        "authorized_narrow_full_retry"
+        if is_retry
+        else "authorized_engineering_ab_only"
+    )
     if (
-        authorization.get("phase") != "3C-A"
-        or authorization.get("authorization_status") != "authorized_engineering_ab_only"
+        authorization.get("phase") != expected_phase
+        or authorization.get("authorization_status") != expected_status
     ):
-        raise ValueError("Phase 3C-A authorization is absent")
-    if authorization.get("base_main_commit") != "80367373b92065d049db4d9576201c186ef78623":
-        raise ValueError("Phase 3C-A base merge identity changed")
+        raise ValueError(f"{expected_phase} authorization is absent")
+    expected_base = (
+        "49600a7a4fa9b1fcd645d9e0bc4ccec05f22c441"
+        if is_retry
+        else "80367373b92065d049db4d9576201c186ef78623"
+    )
+    if authorization.get("base_main_commit") != expected_base:
+        raise ValueError(f"{expected_phase} base merge identity changed")
     if configuration_hash(adaptive) != config["adaptive_preregistration"]["canonical_hash"]:
         raise ValueError("adaptive RC.3 canonical hash mismatch")
     if configuration_hash(proposal) != config["proposal"]["canonical_hash"]:
         raise ValueError("proposal-v3 canonical hash mismatch")
-    if (
+    if is_retry:
+        candidate_authorization = authorization["candidate"]
+        if (
+            candidate_authorization["config_hash"]
+            != config["proposal"]["canonical_hash"]
+            or candidate_authorization.get("mixture_change_authorized") is not False
+        ):
+            raise ValueError("retry proposal-v3 identity or immutability changed")
+        correction = authorization["authorized_correction"]
+        if correction != {
+            "health_validator_field_from": "evaluation_log_probability",
+            "health_validator_field_to": "evaluation_prior_log_probability",
+            "unrelated_generator_changes_authorized": False,
+        }:
+            raise ValueError("retry validator correction scope changed")
+    if not is_retry and (
         authorization["candidate"]["implementation_commit"]
         != "9e154addd8634db6f0a91ccdf9f6f95339264405"
     ):
@@ -90,13 +119,13 @@ def load_and_verify_contract(
         "real_noise_authorized",
         "gwosc_gwtc_access_authorized",
         "stage_a_authorized",
-        "phase3c_b_or_later_authorized",
+        "later_phase_authorized" if is_retry else "phase3c_b_or_later_authorized",
     ):
         _false(denied, key)
-    contract = authorization["ab_contract"]
+    contract = authorization["retry_contract"] if is_retry else authorization["ab_contract"]
     if (
         contract["accepted_pairs_per_arm"],
-        contract["total_accepted_pairs"],
+        contract["total_new_accepted_pairs"] if is_retry else contract["total_accepted_pairs"],
         contract["blocks_per_arm"],
         contract["accepted_pairs_per_block"],
     ) != (512, 1024, 16, 32):
@@ -122,7 +151,8 @@ def load_and_verify_contract(
             if ancestry.returncode:
                 raise ValueError("generator commit does not descend from the reviewed base")
     config_hash = configuration_hash(config)
-    parent = f"phase3ca-{generator_commit[:12]}-{config_hash[:12]}"
+    run_prefix = "phase3ca1" if is_retry else "phase3ca"
+    parent = f"{run_prefix}-{generator_commit[:12]}-{config_hash[:12]}"
     control = (
         dataset_id(
             "2.0.0-alpha.3",
@@ -143,6 +173,24 @@ def load_and_verify_contract(
     )
     if control == candidate:
         raise ValueError("A/B arm dataset identities collide")
+    if is_retry:
+        failed = authorization["retry_of_failed_run"]
+        forbidden = {
+            str(failed["parent_run_id"]),
+            str(failed["control_dataset_id"]),
+            str(failed["candidate_dataset_id"]),
+        }
+        if {parent, control, candidate} & forbidden:
+            raise ValueError("retry identity collides with failed-run evidence")
+        if failed.get("reuse_in_retry_authorized") is not False:
+            raise ValueError("failed-run evidence reuse denial is absent")
+        exclusion = config["failed_run_exclusion"]
+        if {
+            str(exclusion["parent_run_id"]),
+            str(exclusion["control_dataset_id"]),
+            str(exclusion["candidate_dataset_id"]),
+        } != forbidden or int(exclusion["old_pair_count_toward_retry"]) != 0:
+            raise ValueError("retry failed-run exclusion contract changed")
     identity = ABIdentity(
         config["authorization"]["authorizing_git_commit"],
         generator_commit,
@@ -154,12 +202,72 @@ def load_and_verify_contract(
     return config, adaptive, proposal, identity
 
 
+def validate_distribution_metadata_finite(distribution: DistributionMetadata) -> None:
+    """Validate the exact typed alpha.3 proposal/evaluation provenance fields."""
+
+    values = (
+        distribution.proposal_log_probability,
+        distribution.evaluation_prior_log_probability,
+        distribution.importance_weight,
+    )
+    if not all(math.isfinite(float(value)) for value in values):
+        raise ValueError("nonfinite proposal distribution provenance")
+    distribution.validate()
+
+
+def validate_first_block_health(
+    stage: Path,
+    expected_dataset: str,
+    *,
+    expected_pairs: int = 32,
+) -> Dict[str, Any]:
+    """Run the real first-block schema, array, density, and checksum health gate."""
+
+    pandas = importlib.import_module("pandas")
+    zarr = importlib.import_module("zarr")
+    shard = stage / "shards" / "shard-00000"
+    verify_complete_shard(shard, expected_pairs)
+    frame = pandas.read_parquet(shard / "records.parquet")
+    arrays = {
+        name: zarr.open_array(str(shard / f"{name}.zarr"), mode="r")
+        for name in ("noisy", "clean", "noise")
+    }
+    pair_ids: set[str] = set()
+    for index, row in frame.iterrows():
+        record = V2Record.from_json(str(row["record_json"]))
+        record.validate()
+        if record.pair.split is not SplitName.GENERATOR_QUALIFICATION:
+            raise ValueError("first-block record entered a scientific split")
+        if record.pair.dataset_version != expected_dataset:
+            raise ValueError("first-block dataset identity mismatch")
+        if record.pair.pair_id in pair_ids:
+            raise ValueError("first-block duplicate pair ID")
+        pair_ids.add(record.pair.pair_id)
+        validate_strain_array_semantics(
+            np.asarray(arrays["noisy"][index]),
+            np.asarray(arrays["clean"][index]),
+            np.asarray(arrays["noise"][index]),
+            record.gw_observation.detector_availability_mask,
+        )
+        validate_distribution_metadata_finite(record.provenance.distribution)
+    if len(pair_ids) != expected_pairs:
+        raise ValueError("first-block accepted count mismatch")
+    digest, byte_count = tree_checksum(shard)
+    return {
+        "status": "passed",
+        "accepted_pair_count": len(pair_ids),
+        "tree_sha256": digest,
+        "bytes": byte_count,
+        "throughput_inspected": False,
+    }
+
+
 def arm_config(root: Path, config: Mapping[str, Any], arm: str) -> Dict[str, Any]:
     base = load_yaml(root / config["base_data_config"])
     arm_spec = config["arms"][arm]
     base.update(
         {
-            "phase": "3C-A",
+            "phase": str(config["phase"]),
             "root_seed": int(arm_spec["root_seed"]),
             "dataset_purpose": config["dataset_purpose"],
             "accepted_pair_count": 512,
@@ -328,9 +436,8 @@ def validate_arm(
                 if value in noise_ids:
                     raise ValueError("duplicate A/B noise ID")
                 noise_ids.add(value)
+            validate_distribution_metadata_finite(record.provenance.distribution)
             weight = float(record.provenance.distribution.importance_weight)
-            if not math.isfinite(weight):
-                raise ValueError("nonfinite A/B importance weight")
             weights.append(weight)
             families.append(record.pair.lens_family.value)
             cells.append(str(row["em_cell"]))
@@ -444,7 +551,11 @@ def postselection_diagnostics(
 
 
 def publish_arm(
-    stage: Path, destination: Path, summary: Mapping[str, Any], identity: ABIdentity
+    stage: Path,
+    destination: Path,
+    summary: Mapping[str, Any],
+    identity: ABIdentity,
+    dataset_purpose: str,
 ) -> Dict[str, Any]:
     small = {
         key: value
@@ -466,7 +577,7 @@ def publish_arm(
         "parent_run_id": identity.parent_run_id,
         "generator_commit": identity.generator_commit,
         "configuration_hash": identity.configuration_hash,
-        "purpose": "proposal_efficiency_engineering_qualification",
+        "purpose": dataset_purpose,
         "accepted_pair_count": 512,
         "complete_block_count": 16,
         "artifacts": summary["artifacts"],

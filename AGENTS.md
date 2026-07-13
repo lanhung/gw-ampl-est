@@ -208,6 +208,23 @@ Do not patch or resume this artifact identity. Human review must approve a new
 generator commit and new parent/control/candidate identities before any retry.
 Stage A, training and GWOSC/GWTC remain closed.
 
+Human review accepted the fail-closed evidence in PR #8, merged at
+`49600a7a4fa9b1fcd645d9e0bc4ccec05f22c441`, and authorizes only the narrow
+Phase 3C-A.1 retry through:
+
+`configs/execution/phase3ca1_proposal_v3_ab_retry_authorization.yaml`
+
+Phase 3C-A.1 may correct only the alpha.3 health-validator field access, add
+real health-path regression coverage, freeze a new generator commit and run a
+new 512+512 engineering A/B using seeds 2026071213/2026071214 and completely
+new parent/control/candidate identities. The old 32+32 blocks remain immutable,
+unpublished and excluded from the retry and all statistics.
+
+Do not modify proposal-v3, adaptive RC.3, physics or statistical gates. Do not
+resume, publish or mutate the failed run. Scientific generation, training,
+calibration, evaluation, real noise, GWOSC/GWTC, Stage A and later phases remain
+closed. Phase 3C-A.1 must stop after its retry report and pushed review branch.
+
 ## Scientific integrity
 
 - Never fabricate results, citations, completed runs or calibration.
