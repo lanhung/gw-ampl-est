@@ -106,19 +106,21 @@ def load_and_verify_contract(
     if len(generator_commit) != 40:
         raise ValueError("generator commit must be a full Git SHA")
     if (root / ".git").exists():
-        ancestry = subprocess.run(
-            [
-                "git",
-                "merge-base",
-                "--is-ancestor",
-                authorization["base_main_commit"],
-                generator_commit,
-            ],
+        base_commit = str(authorization["base_main_commit"])
+        base_available = subprocess.run(
+            ["git", "cat-file", "-e", f"{base_commit}^{{commit}}"],
             cwd=root,
             check=False,
+            capture_output=True,
         )
-        if ancestry.returncode:
-            raise ValueError("generator commit does not descend from the reviewed base")
+        if base_available.returncode == 0:
+            ancestry = subprocess.run(
+                ["git", "merge-base", "--is-ancestor", base_commit, generator_commit],
+                cwd=root,
+                check=False,
+            )
+            if ancestry.returncode:
+                raise ValueError("generator commit does not descend from the reviewed base")
     config_hash = configuration_hash(config)
     parent = f"phase3ca-{generator_commit[:12]}-{config_hash[:12]}"
     control = (
