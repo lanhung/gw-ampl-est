@@ -178,15 +178,23 @@ def evaluate_phase4_release_gate(
         blockers.append(f"PSD verification failed: {error}")
     staging = Path(config["paths"]["stage_a_staging_root"])
     publication = Path(config["paths"]["stage_a_publication_root"])
-    if staging.parent.exists():
+    try:
+        staging_parent_exists = staging.parent.exists()
+    except OSError as error:
+        staging_parent_exists = False
+        blockers.append(f"Stage A filesystem inspection failed: {error}")
+    if staging_parent_exists:
         free = shutil.disk_usage(staging.parent).free
         checks["free_bytes"] = free
         if free < int(config["resource_gates"]["minimum_prelaunch_free_bytes"]):
             blockers.append("Stage A free-space gate failed")
-    else:
+    elif not any(item.startswith("Stage A filesystem inspection failed:") for item in blockers):
         blockers.append("Stage A filesystem root does not exist")
-    if publication.exists() and any(publication.iterdir()):
-        blockers.append("Stage A publication root is not empty")
+    try:
+        if publication.exists() and any(publication.iterdir()):
+            blockers.append("Stage A publication root is not empty")
+    except OSError as error:
+        blockers.append(f"Stage A publication inspection failed: {error}")
     status = "ready_for_official_execution" if not blockers else "blocked_preexecution"
     identities = _official_identities(config, generator_commit) if not blockers else None
     return {
