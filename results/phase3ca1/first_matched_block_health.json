@@ -1,0 +1,20 @@
+{
+  "arms": {
+    "proposal_v3_candidate": {
+      "accepted_pair_count": 32,
+      "bytes": 30810285,
+      "status": "passed",
+      "throughput_inspected": false,
+      "tree_sha256": "2ac4d03dbe0bc375a2c2d75beee1f6cc8dd71b51e6c4c1fd0b7edd954d5a0d93"
+    },
+    "rc5_control": {
+      "accepted_pair_count": 32,
+      "bytes": 30815842,
+      "status": "passed",
+      "throughput_inspected": false,
+      "tree_sha256": "560a49995ac7f533bd7780f7c22fa540183366a7babf44d998fd1a4eaa7e6dca"
+    }
+  },
+  "interim_throughput_inspected": false,
+  "status": "passed"
+}

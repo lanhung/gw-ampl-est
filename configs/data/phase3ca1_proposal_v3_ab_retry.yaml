@@ -1,0 +1,79 @@
+phase: "3C-A.1"
+base_data_config: configs/data/phase3a_qualification.yaml
+authorization:
+  path: configs/execution/phase3ca1_proposal_v3_ab_retry_authorization.yaml
+  authorizing_git_commit: da1e7438e30011ee2733963f6441dcd789f2ce0b
+adaptive_preregistration:
+  path: configs/statistics/adaptive_scientific_production_preregistration.yaml
+  version: 1.1.0-rc.3
+  canonical_hash: 6082475631539d3069edacc52f41b37fb8fe725ccd7c6bc9980cc3008795a927
+proposal:
+  path: configs/proposals/proposal_v3_target_anchored_mixture.yaml
+  version: proposal-v3-target-anchored-mixture-1.0.0-rc.1
+  canonical_hash: 2d7998ca099c1ecddbb5d9cb1d824f37d3d398826a88831b2bccddbda814cbf4
+dataset_purpose: proposal_efficiency_engineering_retry
+arm_count: 2
+accepted_pairs_per_arm: 512
+total_accepted_pairs: 1024
+blocks_per_arm: 16
+accepted_pairs_per_block: 32
+arms:
+  rc5_control:
+    root_seed: 2026071213
+    proposal_mode: rc5_control
+    proposal_distribution_id: broad_support_v1
+    id_prefix: phase3ca1-control
+  proposal_v3_candidate:
+    root_seed: 2026071214
+    proposal_mode: proposal_v3_candidate
+    proposal_distribution_id: proposal-v3-target-anchored-mixture-1.0.0-rc.1
+    id_prefix: phase3ca1-v3
+evaluation_distribution_id: balanced_literature_informed_benchmark_v1
+failed_run_exclusion:
+  parent_run_id: phase3ca-185e68d4346d-0ed6958442da
+  control_dataset_id: gwlens-v2-2.0.0-alpha.3-79588465a35421e2-control
+  candidate_dataset_id: gwlens-v2-2.0.0-alpha.3-17bb6106d0192dcd-v3
+  old_pair_count_toward_retry: 0
+execution:
+  worker_processes: 1
+  sequential_blocks: true
+  maximum_attempts_per_arm: 1000000
+  maximum_active_seconds_per_arm: 21600
+  attempt_id_stride: 16
+  even_block_order: [rc5_control, proposal_v3_candidate]
+  odd_block_order: [proposal_v3_candidate, rc5_control]
+bootstrap:
+  replicates: 10000
+  seed: 2026071212
+  seed_domain: proposal_v2_throughput_ab_bootstrap_v1
+  confidence_level: 0.95
+  minimum_lower_bound: 2.0
+postselection_gates:
+  overall_relative_ess_minimum: 0.50
+  family_relative_ess_minimum: 0.40
+  em_cell_relative_ess_minimum: 0.25
+  maximum_single_normalized_weight: 0.05
+  tail_support:
+    minimum_rc5_safety_component_accepted: 1
+    maximum_required_normalized_source_radius_minimum: 0.50
+    minimum_required_einstein_radius_arcsec_maximum: 1.30
+    maximum_required_einstein_radius_arcsec_minimum: 0.70
+    maximum_required_lens_redshift_minimum: 0.40
+    minimum_required_lens_redshift_maximum: 0.70
+paths:
+  staging_root: /root/autodl-tmp/lensing-4/data_v2/proposal_ab_retry/staging
+  publication_root: /root/autodl-tmp/lensing-4/data_v2/proposal_ab_retry/published
+  manifest_root: /root/autodl-tmp/lensing-4/manifests/phase3ca1
+  log_root: /root/autodl-tmp/lensing-4/logs/phase3ca1
+resource_gates:
+  minimum_prelaunch_free_bytes: 121446475732
+  minimum_post_peak_free_bytes: 100000000000
+  projected_publication_bytes: 1112673640
+  projected_peak_bytes: 21446475732
+  maximum_conservative_active_hours: 12.0
+use_policy:
+  scientific_use_authorized: false
+  training_use_authorized: false
+  calibration_use_authorized: false
+  test_use_authorized: false
+  permanent_exclusion_from_all_scientific_splits: true

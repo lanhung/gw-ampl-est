@@ -1,0 +1,8 @@
+{
+  "error": "shard 12 exceeded maximum active time",
+  "error_type": "RuntimeError",
+  "scientific_use_authorized": false,
+  "stage_a_authorized": false,
+  "status": "execution_failed",
+  "training_use_authorized": false
+}

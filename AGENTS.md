@@ -208,6 +208,44 @@ Do not patch or resume this artifact identity. Human review must approve a new
 generator commit and new parent/control/candidate identities before any retry.
 Stage A, training and GWOSC/GWTC remain closed.
 
+Human review accepted the fail-closed evidence in PR #8, merged at
+`49600a7a4fa9b1fcd645d9e0bc4ccec05f22c441`, and authorizes only the narrow
+Phase 3C-A.1 retry through:
+
+`configs/execution/phase3ca1_proposal_v3_ab_retry_authorization.yaml`
+
+Phase 3C-A.1 may correct only the alpha.3 health-validator field access, add
+real health-path regression coverage, freeze a new generator commit and run a
+new 512+512 engineering A/B using seeds 2026071213/2026071214 and completely
+new parent/control/candidate identities. The old 32+32 blocks remain immutable,
+unpublished and excluded from the retry and all statistics.
+
+Do not modify proposal-v3, adaptive RC.3, physics or statistical gates. Do not
+resume, publish or mutate the failed run. Scientific generation, training,
+calibration, evaluation, real noise, GWOSC/GWTC, Stage A and later phases remain
+closed. Phase 3C-A.1 must stop after its retry report and pushed review branch.
+
+Phase 3C-A.1 froze generator commit
+`324bab47aff5c4ed2b2041099a103735a40463f0`. The corrected typed alpha.3
+health path passed locally and on AutoDL, and the first matched health block
+passed without inspecting throughput. The run later stopped fail-closed when
+the RC.5 control arm reached its six-hour active-time cap during block 12.
+Exactly 12 complete 32-pair blocks per arm are retained: 384 control plus 384
+proposal-v3 engineering pairs. One control partial block remains incomplete.
+
+No publication, throughput bootstrap, effective-throughput calculation or
+post-selection ESS decision exists. These 768 complete pairs and the partial
+block are immutable engineering-only failure evidence and cannot enter science
+or a retry.
+
+Human direction now closes proposal optimization after its one formal retry.
+Do not create proposal-v4 or run another proposal A/B. The future scientific
+fallback is direct evaluation-target generation, but adopting it changes the
+training-data/weighting contract and therefore requires a new versioned
+preregistration plus separate Stage A execution authorization. Until then,
+scientific generation, training, calibration, evaluation, real noise,
+GWOSC/GWTC, Stage A and later phases remain closed.
+
 ## Scientific integrity
 
 - Never fabricate results, citations, completed runs or calibration.
