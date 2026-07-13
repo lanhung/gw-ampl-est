@@ -514,3 +514,37 @@ No throughput inference may be drawn from the retained first blocks. They stay
 engineering-only and cannot be combined with a retry. Correcting the validator
 requires a new generator commit, parent run ID and two new arm dataset IDs,
 followed by full preflight and human review. Stage A remains unauthorized.
+
+## D061 — One failed retry closes proposal A/B and selects direct-target fallback
+
+The Phase 3C-A.1 typed health correction passed its real JSON/Parquet/Zarr
+integration path and first matched-block health gate. The new run nevertheless
+reached the frozen six-hour control-arm cap after 12 complete blocks per arm
+and stopped with `execution_failed`. No bootstrap, post-selection ESS or
+proposal decision was computed.
+
+This is the one permitted full retry. The project will not create proposal-v4
+or perform a third proposal A/B. All stopped artifacts remain engineering-only
+and may not be reanalysed under a newly chosen endpoint.
+
+The publication path instead falls back to direct evaluation-target generation
+for scientific training. Because RC.3 names a proposal/weighted training route,
+the direct-target route must be frozen in a new preregistration version with
+`q_train = p_eval` and unit weights before Stage A execution is authorized.
+This is one scientific-contract review, not another proposal microphase.
+
+## D062 — Scientific contracts and engineering releases use separate governance
+
+Preregistration versions are reserved for changes to estimands, target/data
+distributions, selection/splits, weighting objectives, model decisions,
+calibration/evaluation gates and claims. Field accessors, telemetry, resume,
+environment fixes, storage plumbing and test coverage remain patch commits in
+one major-phase branch and one final PR.
+
+Future official runs require typed schema APIs, an end-to-end disposable
+canary, immutable environment identity and a single release-gate result before
+official identities are created. Each major phase permits at most one full
+engineering retry; a second execution failure invokes the preregistered
+fallback. A target-effective-systems-per-hour metric may be used only when
+frozen before data exist, never retroactively on the incomplete Phase 3C-A.1
+run.

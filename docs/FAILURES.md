@@ -331,3 +331,21 @@ silently choose a solver search window or approximate caustic area.
 - Both completed blocks remain immutable engineering-only staging evidence.
   They cannot be reused in a corrected run. A new commit, new identities and
   human review are required before retrying.
+
+## Phase 3C-A.1 active-time-cap stop
+
+- Commit `324bab47aff5c4ed2b2041099a103735a40463f0` corrected the alpha.3
+  accessor through a typed helper. The real JSON/Parquet/Zarr health regression,
+  193 local tests, 202 AutoDL tests and all inherited preflights passed.
+- The corrected first matched-block health gate passed both arms and explicitly
+  did not inspect interim throughput.
+- The new run completed 12 atomic 32-pair blocks per arm, then control block 12
+  exceeded the frozen six-hour active-time cap. Machine state is
+  `execution_failed`; one control partial block remains.
+- No publication, paired bootstrap, throughput ratio, effective-throughput
+  ratio or post-selection ESS exists. The 384+384 completed pairs cannot be
+  used scientifically, resumed, published or combined with another attempt.
+- This was the single full retry. Proposal optimization is closed and no
+  proposal-v4 or third A/B is planned. Direct evaluation-target generation is
+  the fallback, pending a new scientific preregistration and Stage A execution
+  authorization.

@@ -6,12 +6,17 @@ Human review accepted Phase 3B and PR #5 merged at
 `80c795a36b902798fe52598262f8b0328755cfac`. Adaptive preregistration RC.3
 remains frozen at hash
 `6082475631539d3069edacc52f41b37fb8fe725ccd7c6bc9980cc3008795a927`.
-Phase 3C-0.2 preserved that failure and implemented target-anchored proposal-v3
-RC.1. Its latent preflight passed every frozen gate and now stops for review.
+Phase 3C-A.1 corrected the alpha.3 health accessor and passed its integration
+and first-block health gates. Its full retry later stopped at the frozen
+control-arm active-time cap after 12 complete blocks per arm. The 384+384
+completed pairs remain unpublished engineering evidence; no A/B statistical
+decision exists.
 
-Zero waveform pairs were generated. Proposal A/B, scientific data, training,
-calibration, SBC, final evaluation, real noise, GWOSC/GWTC and Phase 3C-A remain
-unauthorized. The next action is human review, not execution.
+Proposal optimization is now closed under the one-retry policy. The main path
+falls back to direct evaluation-target scientific generation, pending one new
+versioned scientific contract and explicit Stage A authorization. Scientific
+data, training, calibration, SBC, final evaluation, real noise and GWOSC/GWTC
+remain unauthorized.
 
 ## Completed
 
@@ -160,6 +165,21 @@ unauthorized. The next action is human review, not execution.
   distribution-metadata attribute name;
 - retained both block hashes and staging evidence, published nothing, computed
   no throughput endpoint and kept Stage A/training/GWOSC/GWTC closed.
+- merged the Phase 3C-A failure evidence in PR #8 and created a fresh retry
+  identity rather than resuming either failed artifact;
+- corrected distribution metadata validation through a typed package helper
+  and exercised the real JSON/Parquet/Zarr health path;
+- passed 193 local tests, 202 AutoDL tests and every inherited preflight under
+  frozen generator commit `324bab47aff5c4ed2b2041099a103735a40463f0`;
+- passed the corrected first matched-block health gate without inspecting an
+  interim endpoint;
+- atomically completed 12 control and 12 proposal-v3 blocks (384 pairs each)
+  before the control arm reached its frozen six-hour cap during block 12;
+- retained 24 block hashes, one incomplete control block and the fail-closed
+  result without publication, bootstrap or post-selection inference;
+- closed proposal optimization after its one full retry and selected a future
+  direct-target route that still requires a new scientific preregistration and
+  Stage A authorization.
 
 ## Not started by design
 
@@ -173,7 +193,7 @@ unauthorized. The next action is human review, not execution.
 
 ## Next recommended phase
 
-Human review should inspect the Phase 3C-A execution failure. A replacement
-run requires a reviewed validator correction, a new generator commit and new
-parent/control/candidate identities; the retained 32+32 blocks cannot be mixed
-into it.
+Human review should accept the Phase 3C-A.1 fail-closed report and proposal-path
+closure. The next branch should create one direct-target Stage A scientific
+preregistration and its release-gate/canary implementation. It must not run
+Stage A until that new hash and execution authorization are reviewed.

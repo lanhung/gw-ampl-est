@@ -225,6 +225,27 @@ resume, publish or mutate the failed run. Scientific generation, training,
 calibration, evaluation, real noise, GWOSC/GWTC, Stage A and later phases remain
 closed. Phase 3C-A.1 must stop after its retry report and pushed review branch.
 
+Phase 3C-A.1 froze generator commit
+`324bab47aff5c4ed2b2041099a103735a40463f0`. The corrected typed alpha.3
+health path passed locally and on AutoDL, and the first matched health block
+passed without inspecting throughput. The run later stopped fail-closed when
+the RC.5 control arm reached its six-hour active-time cap during block 12.
+Exactly 12 complete 32-pair blocks per arm are retained: 384 control plus 384
+proposal-v3 engineering pairs. One control partial block remains incomplete.
+
+No publication, throughput bootstrap, effective-throughput calculation or
+post-selection ESS decision exists. These 768 complete pairs and the partial
+block are immutable engineering-only failure evidence and cannot enter science
+or a retry.
+
+Human direction now closes proposal optimization after its one formal retry.
+Do not create proposal-v4 or run another proposal A/B. The future scientific
+fallback is direct evaluation-target generation, but adopting it changes the
+training-data/weighting contract and therefore requires a new versioned
+preregistration plus separate Stage A execution authorization. Until then,
+scientific generation, training, calibration, evaluation, real noise,
+GWOSC/GWTC, Stage A and later phases remain closed.
+
 ## Scientific integrity
 
 - Never fabricate results, citations, completed runs or calibration.

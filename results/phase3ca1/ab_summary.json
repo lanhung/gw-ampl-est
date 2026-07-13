@@ -1,0 +1,42 @@
+{
+  "accepted_pair_count_completed_before_stop": 768,
+  "candidate": {
+    "accepted_pair_count": 384,
+    "attempt_count_complete_blocks": 64331,
+    "complete_blocks": 12,
+    "dataset_id": "gwlens-v2-2.0.0-alpha.3-79e330197ad5620c-v3",
+    "elapsed_seconds_complete_blocks": 9687.546672
+  },
+  "complete_block_count_total": 24,
+  "control": {
+    "accepted_pair_count": 384,
+    "attempt_count_complete_blocks": 143762,
+    "complete_blocks": 12,
+    "dataset_id": "gwlens-v2-2.0.0-alpha.3-c86b4bf44a0d54f8-control",
+    "elapsed_seconds_complete_blocks": 19744.317278,
+    "failed_partial_block_index": 12,
+    "failed_partial_block_journal_records": 13727
+  },
+  "error": "shard 12 exceeded maximum active time",
+  "error_type": "RuntimeError",
+  "first_matched_block_health": "passed",
+  "generator_commit": "324bab47aff5c4ed2b2041099a103735a40463f0",
+  "gwosc_gwtc_accessed": false,
+  "interim_throughput_inspected": false,
+  "parent_run_id": "phase3ca1-324bab47aff5-f065e349f166",
+  "postselection_ess_computed": false,
+  "publication_created": false,
+  "retry_reuse_authorized": false,
+  "scientific_use_authorized": false,
+  "stage_a_authorized": false,
+  "status": "execution_failed",
+  "stopped_staging_bytes": 904836338,
+  "strategy_disposition": {
+    "direct_target_fallback_selected_for_future_preregistration": true,
+    "effective_throughput_computed_from_partial_run": false,
+    "further_proposal_ab_retry_authorized": false,
+    "proposal_optimization_closed": true
+  },
+  "throughput_bootstrap_computed": false,
+  "training_use_authorized": false
+}
