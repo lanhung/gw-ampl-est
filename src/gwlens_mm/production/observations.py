@@ -41,11 +41,12 @@ def balanced_em_cell(
     if accepted_index < 0 or not physical_system_id or len(cell_names) != 8:
         raise ValueError("balanced EM assignment requires index, system ID, and eight cells")
     block_start = accepted_index - accepted_index % 8
-    expected_id = f"qualification-system-{accepted_index:06d}"
-    if physical_system_id != expected_id:
+    suffix = f"{accepted_index:06d}"
+    if not physical_system_id.endswith(suffix):
         raise ValueError("physical-system ID disagrees with accepted index")
+    prefix = physical_system_id[: -len(suffix)]
     block_ids = [
-        f"qualification-system-{index:06d}"
+        f"{prefix}{index:06d}"
         for index in range(block_start, block_start + 8)
     ]
     ranked = sorted(block_ids, key=_hash)

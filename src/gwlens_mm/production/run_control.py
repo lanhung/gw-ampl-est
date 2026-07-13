@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import importlib
 import json
+import math
 import os
 import shutil
 import socket
@@ -29,6 +30,11 @@ class AttemptRecord:
     source_id: str
     lens_id: str
     physical_system_id: str
+    proposal_component: Optional[str] = None
+    component_log_densities: Optional[Mapping[str, float]] = None
+    proposal_log_probability: Optional[float] = None
+    evaluation_log_probability: Optional[float] = None
+    log_importance_weight: Optional[float] = None
 
     def validate(self) -> None:
         if self.attempt_id < 0 or self.proposal_seed < 0:
@@ -48,6 +54,19 @@ class AttemptRecord:
         )
         if not all(identifiers):
             raise ValueError("attempt provenance identifiers are required")
+        density_values = (
+            self.proposal_log_probability,
+            self.evaluation_log_probability,
+            self.log_importance_weight,
+        )
+        if any(value is not None for value in density_values):
+            if not all(value is not None for value in density_values):
+                raise ValueError("proposal density provenance must be complete")
+            if not self.proposal_component or not self.component_log_densities:
+                raise ValueError("proposal component provenance is incomplete")
+            values = (*self.component_log_densities.values(), *density_values)
+            if not all(value is not None and math.isfinite(float(value)) for value in values):
+                raise ValueError("proposal density provenance must be finite")
 
 
 class AttemptJournal:
@@ -155,9 +174,7 @@ def build_preflight_manifest(
             f"free-space gate failed: {usage.free} < {authorization.minimum_prelaunch_free_bytes}"
         )
     psd = verify_psd_files(config["gw"]["psd_curves"])
-    expected = [
-        f"shards/shard-{index:05d}" for index in range(authorization.shard_count)
-    ]
+    expected = [f"shards/shard-{index:05d}" for index in range(authorization.shard_count)]
     return {
         "run_id": run_id,
         "dataset_id": dataset_id,

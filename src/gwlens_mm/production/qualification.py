@@ -40,12 +40,19 @@ def generate_qualification_shard(
     preregistration: Mapping[str, Any],
     generator_git_commit: str,
     dataset_id: str,
+    proposal_config: Mapping[str, Any] | None = None,
+    maximum_attempts_override: int | None = None,
+    maximum_active_seconds_override: float | None = None,
 ) -> Dict[str, Any]:
     """Generate one deterministic shard in one owned worker process."""
 
     pairs_per_shard = int(config["pairs_per_shard"])
     stride = int(config["execution"]["attempt_id_stride"])
-    maximum_attempts = int(config["execution"]["maximum_attempts_per_worker"])
+    maximum_attempts = (
+        int(maximum_attempts_override)
+        if maximum_attempts_override is not None
+        else int(config["execution"]["maximum_attempts_per_worker"])
+    )
     if stride < int(config["shard_count"]) or not 0 <= shard_index < stride:
         raise ValueError("attempt stride does not provide disjoint shard sequences")
     complete = stage / "shards" / f"shard-{shard_index:05d}"
@@ -58,7 +65,9 @@ def generate_qualification_shard(
         raise RuntimeError(
             f"inconsistent retained partial evidence prevents shard resume: {shard_index}"
         )
-    generator = QualificationGenerator(config, preregistration, generator_git_commit)
+    generator = QualificationGenerator(
+        config, preregistration, generator_git_commit, proposal_config
+    )
     writer = ShardWriter(
         stage / "shards",
         shard_index,
@@ -86,6 +95,17 @@ def generate_qualification_shard(
         while accepted < pairs_per_shard:
             if local_attempt >= maximum_attempts:
                 raise RuntimeError(f"shard {shard_index} exceeded maximum attempts")
+            maximum_seconds = (
+                float(maximum_active_seconds_override)
+                if maximum_active_seconds_override is not None
+                else float(
+                    config["execution"].get(
+                        "maximum_active_seconds_per_worker", math.inf
+                    )
+                )
+            )
+            if time.perf_counter() - started >= maximum_seconds:
+                raise RuntimeError(f"shard {shard_index} exceeded maximum active time")
             attempt_id = shard_index + local_attempt * stride
             accepted_index = shard_index * pairs_per_shard + accepted
             outcome = generator.generate_attempt(

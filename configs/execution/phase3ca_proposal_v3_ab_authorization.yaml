@@ -1,0 +1,61 @@
+phase: "3C-A"
+authorization_status: authorized_engineering_ab_only
+authorized_by: human_project_owner
+authorization_date: "2026-07-12"
+base_main_commit: "80367373b92065d049db4d9576201c186ef78623"
+frozen_adaptive_preregistration:
+  version: "1.1.0-rc.3"
+  path: configs/statistics/adaptive_scientific_production_preregistration.yaml
+  canonical_hash: 6082475631539d3069edacc52f41b37fb8fe725ccd7c6bc9980cc3008795a927
+candidate:
+  proposal_version: proposal-v3-target-anchored-mixture-1.0.0-rc.1
+  config_path: configs/proposals/proposal_v3_target_anchored_mixture.yaml
+  config_hash: 2d7998ca099c1ecddbb5d9cb1d824f37d3d398826a88831b2bccddbda814cbf4
+  implementation_commit: 9e154addd8634db6f0a91ccdf9f6f95339264405
+  latent_gate_passed: true
+rejected_candidate:
+  proposal_version: proposal-v2-exact-mixture-1.0.0-rc.1
+  status: rejected
+  use_authorized: false
+authorization:
+  proposal_v3_ab_qualification_authorized: true
+  engineering_waveform_generation_authorized: true
+  accepted_pair_generator_authorized_within_ab_only: true
+  scientific_data_generation_authorized: false
+  model_training_authorized: false
+  model_tuning_authorized: false
+  calibration_authorized: false
+  sbc_authorized: false
+  iid_ood_mismatch_evaluation_authorized: false
+  real_noise_authorized: false
+  gwosc_gwtc_access_authorized: false
+  stage_a_authorized: false
+  phase3c_b_or_later_authorized: false
+ab_contract:
+  arm_count: 2
+  control_proposal: rc5_broad_support_v1
+  candidate_proposal: proposal-v3-target-anchored-mixture-1.0.0-rc.1
+  accepted_pairs_per_arm: 512
+  total_accepted_pairs: 1024
+  blocks_per_arm: 16
+  accepted_pairs_per_block: 32
+  maximum_attempts_per_arm: 1000000
+  maximum_active_hours_per_arm: 6.0
+  hard_maximum_accepted_pairs_total: 1024
+  execution_order: sequential_matched_blocks
+  even_block_order: [rc5_control, proposal_v3_candidate]
+  odd_block_order: [proposal_v3_candidate, rc5_control]
+dataset_policy:
+  purpose: proposal_efficiency_engineering_qualification
+  scientific_use_authorized: false
+  training_use_authorized: false
+  calibration_use_authorized: false
+  test_use_authorized: false
+  permanent_exclusion_from_all_scientific_splits: true
+resource_gates:
+  minimum_prelaunch_free_bytes: 121446475732
+  minimum_post_peak_free_bytes: 100000000000
+  projected_publication_bytes: 1112673640
+  projected_peak_bytes: 21446475732
+  maximum_conservative_active_hours: 12.0
+stop_after_phase3ca: true

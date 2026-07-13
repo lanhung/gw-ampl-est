@@ -1,0 +1,10 @@
+{
+  "accepted_pair_count": 32,
+  "complete_block_count": 1,
+  "dataset_id": "gwlens-v2-2.0.0-alpha.3-79588465a35421e2-control",
+  "engineering_only": true,
+  "published": false,
+  "shard_00000_bytes": 30802583,
+  "shard_00000_tree_sha256": "d6091efd63b454ea528f59290914b5b6dd4a26dcd8c71d198ef34eba9da6e0dc",
+  "status": "retained_staging_evidence"
+}

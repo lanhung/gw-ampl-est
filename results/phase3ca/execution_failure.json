@@ -1,0 +1,8 @@
+{
+  "error": "'DistributionMetadata' object has no attribute 'evaluation_log_probability'",
+  "error_type": "AttributeError",
+  "scientific_use_authorized": false,
+  "stage_a_authorized": false,
+  "status": "execution_failed",
+  "training_use_authorized": false
+}

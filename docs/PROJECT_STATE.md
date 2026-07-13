@@ -150,6 +150,16 @@ unauthorized. The next action is human review, not execution.
 - certified population ESS >=0.55 and empirically measured 0.78532 overall;
 - measured RC.5 baseline ESS 0.11776 as diagnostic-only evidence;
 - kept A/B, waveform generation, training and external access closed.
+- accepted and merged proposal-v3 latent evidence, then opened only the bounded
+  Phase 3C-A 512+512 engineering A/B gate;
+- froze generator commit `185e68d4346d84edc118a9197ffb8bceeb026ee4`
+  after 191 local tests, Ruff, mypy and build, then passed 198 AutoDL tests and
+  every inherited physics/numerical preflight;
+- atomically completed one 32-pair block per arm and stopped at the first
+  matched-block health gate when the new validator used the wrong alpha.3
+  distribution-metadata attribute name;
+- retained both block hashes and staging evidence, published nothing, computed
+  no throughput endpoint and kept Stage A/training/GWOSC/GWTC closed.
 
 ## Not started by design
 
@@ -163,6 +173,7 @@ unauthorized. The next action is human review, not execution.
 
 ## Next recommended phase
 
-Human review should inspect proposal-v3 latent evidence and may separately
-authorize the frozen 512+512 A/B. Proposal-v2 remains rejected and RC.5's low
-diagnostic ESS should be considered in any direct-production decision.
+Human review should inspect the Phase 3C-A execution failure. A replacement
+run requires a reviewed validator correction, a new generator commit and new
+parent/control/candidate identities; the retained 32+32 blocks cannot be mixed
+into it.

@@ -316,3 +316,18 @@ silently choose a solver search window or approximate caustic area.
   warning against direct weighted training from broad RC.5 draws.
 - No A/B or waveform evidence exists for v3. Latent ESS passage cannot be
   represented as a throughput result or execution authorization.
+
+## Phase 3C-A first matched-block health-validator failure
+
+- Generator commit `185e68d4346d84edc118a9197ffb8bceeb026ee4`
+  passed all local and AutoDL pre-execution gates.
+- The official run atomically completed one 32-pair RC.5 block and one 32-pair
+  proposal-v3 block, then the health validator accessed nonexistent
+  `DistributionMetadata.evaluation_log_probability`; the schema field is
+  `evaluation_prior_log_probability`.
+- The machine outcome is `execution_failed`. No second block or publication
+  exists, and no interim/final throughput ratio or post-selection ESS was
+  computed.
+- Both completed blocks remain immutable engineering-only staging evidence.
+  They cannot be reused in a corrected run. A new commit, new identities and
+  human review are required before retrying.

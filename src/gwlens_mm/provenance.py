@@ -114,7 +114,11 @@ class DatasetManifest:
     def validate(self) -> None:
         if not self.dataset_id or self.root_seed < 0:
             raise ValueError("dataset identity and nonnegative root seed are required")
-        if self.dataset_purpose not in {"engineering_smoke", "generator_qualification"}:
+        if self.dataset_purpose not in {
+            "engineering_smoke",
+            "generator_qualification",
+            "proposal_efficiency_engineering_qualification",
+        }:
             raise ValueError("unsupported non-scientific dataset purpose")
         if self.scientific_use_authorized:
             raise ValueError("engineering data cannot be authorized for scientific use")
