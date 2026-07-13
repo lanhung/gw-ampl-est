@@ -1,0 +1,75 @@
+{
+  "status": "passed_design_only_preexecution",
+  "validated_at_utc": "2026-07-13T16:59:49Z",
+  "implementation_checkpoint": "87325ef0fede15304378cfb846ed3ba88ba8c5af",
+  "branch": "phase4/direct-target-stage-a",
+  "preregistration": {
+    "version": "1.1.0-rc.4",
+    "canonical_hash": "5aeaac395463bd073c44ead4ff4c5c729b5a2d4b4f1840c0825a53b30ab1bc98",
+    "parent_rc3_hash_reproduced": "6082475631539d3069edacc52f41b37fb8fe725ccd7c6bc9980cc3008795a927"
+  },
+  "artifact_hashes": {
+    "autodl_dependency_lock_sha256": "792a93f24f6c38c18ec214665d34c8348e042b21beebd177333dae2c30224d8f",
+    "final_evaluation_commitment_sha256": "5b53910d5fb3e008eb08be1d5b1448b0f6c79cbe1ac00f40d644aa864e6468f9"
+  },
+  "stage_a_arithmetic": {
+    "train_accepted_count": 32768,
+    "validation_accepted_count": 6144,
+    "total_accepted_count": 38912,
+    "train_shard_count": 256,
+    "validation_shard_count": 48,
+    "total_shard_count": 304,
+    "accepted_pairs_per_shard": 128
+  },
+  "local_validation": {
+    "pytest_passed": 210,
+    "pytest_optional_skips": 5,
+    "phase4_focused_passed": 17,
+    "maintained_scope_ruff": "passed",
+    "mypy_source_files": 38,
+    "mypy": "passed",
+    "sdist_and_wheel": "passed",
+    "git_diff_check": "passed"
+  },
+  "autodl_validation": {
+    "synced_commit_marker": "87325ef0fede15304378cfb846ed3ba88ba8c5af",
+    "pytest_passed": 219,
+    "maintained_scope_ruff": "passed",
+    "mypy_source_files": 38,
+    "mypy": "passed",
+    "sdist_and_wheel": "passed",
+    "dependency_lock_reproduced_with": "pip list --format=freeze, editable project excluded, LC_ALL=C sort",
+    "free_bytes": 323172220928,
+    "canary_output_absent": true,
+    "stage_a_output_absent": true
+  },
+  "release_gate": {
+    "status": "blocked_preexecution",
+    "official_identities": null,
+    "scientific_data_generation_authorized": false,
+    "blockers": [
+      "final generator commit is unresolved or mismatched",
+      "generator wheel SHA-256 is unresolved",
+      "future Stage A execution authorization is absent",
+      "disposable canary manifest is unresolved",
+      "Stage A filesystem root does not exist"
+    ]
+  },
+  "runner_fail_closed_checks": {
+    "canary_runner_exit_code": 1,
+    "canary_refusal": "disposable canary execution authorization is absent",
+    "stage_a_runner_exit_code": 1,
+    "stage_a_refusal": "Stage A execution authorization is absent"
+  },
+  "executed_counts": {
+    "canary_accepted_pairs": 0,
+    "scientific_stage_a_accepted_pairs": 0,
+    "trained_models": 0
+  },
+  "authorization": {
+    "canary_execution_authorized": false,
+    "scientific_data_generation_authorized": false,
+    "model_training_authorized": false,
+    "gwosc_gwtc_access_authorized": false
+  }
+}

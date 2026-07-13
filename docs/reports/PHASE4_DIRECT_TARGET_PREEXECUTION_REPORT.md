@@ -46,6 +46,27 @@ The release gate was executed in the design state and correctly returned
 `blocked_preexecution` with no official identities. Canary and Stage A runners
 also refused execution because their separate authorization paths are null.
 
+## Verification
+
+The implementation checkpoint is
+`87325ef0fede15304378cfb846ed3ba88ba8c5af`. Local verification passed 210
+tests with five optional-dependency skips; the Phase 4 focused suite passed 17
+tests. Maintained-scope Ruff, mypy over 38 source files, sdist/wheel build and
+the Git whitespace check passed.
+
+The exact checkpoint was synchronized to the disposable AutoDL repository.
+AutoDL passed 219 tests, maintained-scope Ruff, mypy and package build. The
+normalized environment inventory reproduced SHA-256
+`792a93f24f6c38c18ec214665d34c8348e042b21beebd177333dae2c30224d8f`.
+Both preregistration hashes and the final-evaluation commitment hash were
+independently reproduced.
+
+AutoDL retained 323,172,220,928 free bytes. Neither the canary root nor the
+Stage A output root exists. The design-state release gate reported its five
+expected unresolved inputs, returned no official identities, and both runners
+refused absent authorization. The complete machine-readable record is
+`results/phase4/preexecution_validation.json`.
+
 ## Still unresolved by design
 
 Human review must still resolve, in order:

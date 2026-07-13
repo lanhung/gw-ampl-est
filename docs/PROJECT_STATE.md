@@ -195,10 +195,18 @@ unauthorized.
   dependency lock;
 - verified the design-state gate creates no official identities and both
   execution runners refuse absent authorization.
+- froze pre-execution implementation checkpoint
+  `87325ef0fede15304378cfb846ed3ba88ba8c5af` and synchronized it to AutoDL;
+- passed 210 local tests plus 219 AutoDL tests, maintained-scope Ruff, mypy and
+  package builds, and reproduced the RC.3, RC.4, environment-lock and
+  final-evaluation commitment hashes;
+- confirmed that the canary and Stage A output roots remain absent, no pair was
+  generated and the release certificate remains blocked with null official
+  identities.
 
 ## Not started by design
 
-- proposal-v2 engineering qualification;
+- further proposal engineering qualification (permanently closed);
 - scientific data materialization;
 - model or posterior training;
 - calibration, SBC or final scientific evaluation;
