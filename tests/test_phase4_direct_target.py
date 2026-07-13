@@ -23,6 +23,7 @@ from gwlens_mm.production.stage_a import (
 from gwlens_mm.provenance import configuration_hash
 from gwlens_mm.release_gate import evaluate_phase4_release_gate
 from gwlens_mm.schema import SplitName, V2Record
+from scripts.phase4.run_direct_target_canary import _verify_canary_authorization
 
 ROOT = Path(__file__).resolve().parents[1]
 CONFIG = ROOT / "configs/data/phase4_direct_target_stage_a.yaml"
@@ -177,6 +178,55 @@ def test_canary_manifest_requires_resume_and_permanent_use_denials() -> None:
     manifest["throughput_or_ess_inspected"] = True
     with pytest.raises(ValueError, match="efficiency endpoint"):
         validate_canary_manifest(manifest, "1" * 40)
+
+
+def test_canary_authorization_is_separate_from_frozen_rc4(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    wheel = tmp_path / "gwlens_mm.whl"
+    wheel.write_bytes(b"frozen-wheel")
+    lock = ROOT / "configs/environment/phase4-autodl-requirements.lock.txt"
+    authorization = {
+        "authorization_status": "authorized_disposable_canary_only",
+        "preregistration": {"canonical_hash": RC4_HASH},
+        "immutable_generator": {
+            "git_commit": "1" * 40,
+            "wheel_path": str(wheel),
+            "wheel_sha256": hashlib.sha256(wheel.read_bytes()).hexdigest(),
+            "environment_lock_sha256": hashlib.sha256(lock.read_bytes()).hexdigest(),
+            "editable_install_authorized": False,
+        },
+        "canary_contract": {
+            "train_namespace_accepted_pairs": 8,
+            "validation_namespace_accepted_pairs": 8,
+            "total_accepted_pairs": 16,
+            "throughput_inspection_authorized": False,
+            "ess_inspection_authorized": False,
+        },
+        "authorization": {
+            "disposable_canary_execution_authorized": True,
+            "accepted_pair_generator_authorized_within_canary_only": True,
+            "scientific_data_generation_authorized": False,
+            "stage_a_materialization_authorized": False,
+            "model_training_authorized": False,
+            "calibration_authorized": False,
+            "sbc_authorized": False,
+            "scientific_evaluation_authorized": False,
+            "gwosc_gwtc_access_authorized": False,
+        },
+        "use_policy": {
+            "scientific_use_authorized": False,
+            "training_use_authorized": False,
+            "calibration_use_authorized": False,
+            "test_use_authorized": False,
+            "permanent_exclusion_from_all_scientific_splits": True,
+        },
+    }
+    path = tmp_path / "authorization.yaml"
+    path.write_text(yaml.safe_dump(authorization))
+    monkeypatch.chdir(ROOT)
+    loaded = _verify_canary_authorization(path, "1" * 40, RC4_HASH)
+    assert loaded["canary_contract"]["total_accepted_pairs"] == 16
 
 
 def test_release_gate_is_fail_closed_and_creates_no_official_identity() -> None:
