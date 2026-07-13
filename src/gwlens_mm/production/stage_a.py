@@ -10,7 +10,7 @@ import subprocess
 from collections import Counter
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, Mapping, Set, Tuple
+from typing import Any, Dict, Mapping, Sequence, Set, Tuple
 
 import numpy as np
 
@@ -173,8 +173,13 @@ def derive_canary_identity(
     return CanaryIdentity(generator_commit, parent, train, validation, config_hash)
 
 
-def verify_generator_commit(root: Path, generator_commit: str) -> None:
-    """Verify an authoritative Git checkout or a disposable synchronized marker."""
+def verify_generator_commit(
+    root: Path,
+    generator_commit: str,
+    *,
+    allowed_postfreeze_paths: Sequence[str] = (),
+) -> None:
+    """Verify frozen code while allowing an authorization-only descendant."""
 
     if (root / ".git").exists():
         head = subprocess.run(
@@ -185,7 +190,26 @@ def verify_generator_commit(root: Path, generator_commit: str) -> None:
             text=True,
         ).stdout.strip()
         if head != generator_commit:
-            raise ValueError("checkout HEAD differs from generator commit")
+            ancestry = subprocess.run(
+                ["git", "merge-base", "--is-ancestor", generator_commit, head],
+                cwd=root,
+                check=False,
+            )
+            if ancestry.returncode != 0:
+                raise ValueError("generator commit is not an ancestor of checkout HEAD")
+            changed = subprocess.run(
+                ["git", "diff", "--name-only", f"{generator_commit}..{head}"],
+                cwd=root,
+                check=True,
+                capture_output=True,
+                text=True,
+            ).stdout.splitlines()
+            unexpected = sorted(set(changed) - set(allowed_postfreeze_paths))
+            if unexpected:
+                raise ValueError(
+                    "post-freeze checkout changes protected paths: "
+                    + ", ".join(unexpected)
+                )
         return
     marker = root / "SYNCED_COMMIT"
     if not marker.is_file() or marker.read_text().strip() != generator_commit:
