@@ -286,6 +286,32 @@ Until those gates are recorded, do not:
 - access GWOSC/GWTC or real noise;
 - resume or reuse any Phase 3C artifact.
 
+Human review accepted direct-target preregistration `1.1.0-rc.4` and PR #10
+merged its pre-execution implementation. A narrow authorization-separation
+fix passed CI and PR #11 merged it without changing RC.4, the schema or any
+generator distribution. The frozen Phase 4 generator identity is:
+
+`2be777e727ef9d8e1a85f89c68966df5d37932b0`
+
+Its immutable wheel SHA-256 is:
+
+`14104f8aab3aa911fe43e27c311079f118add7ca8ad22178ca158c13d81d0a88`
+
+Human review now authorizes only the disposable direct-target canary through:
+
+`configs/execution/phase4_direct_target_canary_authorization.yaml`
+
+The canary must generate exactly eight train-namespace plus eight
+validation-namespace engineering pairs, intentionally interrupt after the
+first namespace, resume byte-identically and stop for review. It may validate
+schema, exact q=p/unit weights, arrays, storage, telemetry, manifests and
+checksums. It may not inspect throughput or ESS.
+
+Stage A scientific materialization, official parent/train/validation
+identities, model training, calibration, SBC, scientific evaluation, real
+noise and GWOSC/GWTC access remain unauthorized. Canary artifacts are
+permanently excluded from all scientific splits.
+
 ## Scientific integrity
 
 - Never fabricate results, citations, completed runs or calibration.
