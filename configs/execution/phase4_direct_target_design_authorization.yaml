@@ -1,0 +1,48 @@
+phase: "4-preexecution"
+authorization_status: authorized_design_and_implementation_only
+authorized_by: human_project_owner
+authorization_date: "2026-07-13"
+
+base_main_commit: "ce0cf464cf5b56e3df5e1b0c93ffadc12f2e517a"
+
+parent_adaptive_preregistration:
+  version: "1.1.0-rc.3"
+  path: configs/statistics/adaptive_scientific_production_preregistration.yaml
+  canonical_hash: "6082475631539d3069edacc52f41b37fb8fe725ccd7c6bc9980cc3008795a927"
+
+proposal_path_disposition:
+  phase3ca1_report: docs/reports/PHASE3CA1_PROPOSAL_V3_AB_RETRY_REPORT.md
+  proposal_optimization_closed: true
+  further_proposal_ab_authorized: false
+  proposal_v4_authorized: false
+  direct_target_fallback_design_selected: true
+
+authorization:
+  direct_target_preregistration_design_authorized: true
+  direct_target_generator_integration_authorized: true
+  release_gate_implementation_authorized: true
+  canary_runner_implementation_authorized: true
+  training_pipeline_implementation_authorized: true
+  statistics_pipeline_implementation_authorized: true
+
+  disposable_canary_execution_authorized: false
+  scientific_data_generation_authorized: false
+  stage_a_materialization_authorized: false
+  model_training_authorized: false
+  model_tuning_authorized: false
+  calibration_authorized: false
+  sbc_authorized: false
+  iid_ood_mismatch_evaluation_authorized: false
+  real_noise_authorized: false
+  gwosc_gwtc_access_authorized: false
+  manuscript_results_authorized: false
+
+required_next_human_gate:
+  - accept_new_preregistration_version_and_hash
+  - resolve_final_generator_commit
+  - resolve_immutable_environment_identity
+  - authorize_exact_disposable_canary_count
+  - review_canary_evidence
+  - authorize_exact_stage_a_counts
+
+stop_before_canary_or_stage_a_execution: true

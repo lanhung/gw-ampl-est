@@ -349,3 +349,15 @@ silently choose a solver search window or approximate caustic area.
   proposal-v4 or third A/B is planned. Direct evaluation-target generation is
   the fallback, pending a new scientific preregistration and Stage A execution
   authorization.
+
+## Phase 4 pre-execution evidence still required
+
+- Direct-target RC.4 and its implementation are design evidence only. No
+  canary, scientific system or model-training result exists yet.
+- The current environment manifest intentionally leaves the generator commit
+  and wheel SHA-256 unresolved. Editable installation is forbidden for official
+  execution.
+- The release gate is expected to remain `blocked_preexecution` until RC.4,
+  the 8+8 canary and exact 38,912-system Stage A authorization are reviewed.
+- RC.5 resource projections are retained as conservative planning bounds, not
+  measured direct-target throughput.

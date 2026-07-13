@@ -12,11 +12,12 @@ control-arm active-time cap after 12 complete blocks per arm. The 384+384
 completed pairs remain unpublished engineering evidence; no A/B statistical
 decision exists.
 
-Proposal optimization is now closed under the one-retry policy. The main path
-falls back to direct evaluation-target scientific generation, pending one new
-versioned scientific contract and explicit Stage A authorization. Scientific
-data, training, calibration, SBC, final evaluation, real noise and GWOSC/GWTC
-remain unauthorized.
+Proposal optimization is closed under the one-retry policy. Phase 4 now has a
+reviewable direct-target RC.4 delta and pre-execution implementation. The
+release gate remains blocked with no official identities because RC.4, canary
+and Stage A execution have not yet been accepted. Scientific data, training,
+calibration, SBC, final evaluation, real noise and GWOSC/GWTC remain
+unauthorized.
 
 ## Completed
 
@@ -180,10 +181,32 @@ remain unauthorized.
 - closed proposal optimization after its one full retry and selected a future
   direct-target route that still requires a new scientific preregistration and
   Stage A authorization.
+- merged the Phase 3C-A.1 report in PR #9 at
+  `ce0cf464cf5b56e3df5e1b0c93ffadc12f2e517a`;
+- created direct-target preregistration RC.4 without modifying adaptive RC.3;
+- froze exact q=p, zero-log-weight and unit-weight scientific training
+  semantics while retaining the 32,768/6,144 Stage A counts;
+- implemented typed production-generator train/validation contexts, full
+  namespace validation, a bounded-memory Stage A runner and atomic parent
+  publication;
+- implemented an 8+8 disposable canary with distinct non-scientific identities
+  and byte-identical interruption/resume validation;
+- implemented one fail-closed release-gate command and an exact AutoDL
+  dependency lock;
+- verified the design-state gate creates no official identities and both
+  execution runners refuse absent authorization.
+- froze pre-execution implementation checkpoint
+  `87325ef0fede15304378cfb846ed3ba88ba8c5af` and synchronized it to AutoDL;
+- passed 210 local tests plus 219 AutoDL tests, maintained-scope Ruff, mypy and
+  package builds, and reproduced the RC.3, RC.4, environment-lock and
+  final-evaluation commitment hashes;
+- confirmed that the canary and Stage A output roots remain absent, no pair was
+  generated and the release certificate remains blocked with null official
+  identities.
 
 ## Not started by design
 
-- proposal-v2 engineering qualification;
+- further proposal engineering qualification (permanently closed);
 - scientific data materialization;
 - model or posterior training;
 - calibration, SBC or final scientific evaluation;
@@ -193,7 +216,8 @@ remain unauthorized.
 
 ## Next recommended phase
 
-Human review should accept the Phase 3C-A.1 fail-closed report and proposal-path
-closure. The next branch should create one direct-target Stage A scientific
-preregistration and its release-gate/canary implementation. It must not run
-Stage A until that new hash and execution authorization are reviewed.
+Human review should accept direct-target RC.4 and its pre-execution
+implementation. After the final generator commit/wheel is frozen, the next
+gate may authorize exactly 8+8 disposable canary pairs only. Stage A remains
+closed until that canary is reviewed and a separate exact-count authorization
+is recorded.

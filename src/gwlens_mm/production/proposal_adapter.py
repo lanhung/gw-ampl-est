@@ -15,6 +15,7 @@ from ..proposals.target_anchored import (
     log_rc5_density,
     log_target_density,
     log_v3_density,
+    sample_evaluation_target,
     sample_rc5,
     sample_v3,
 )
@@ -77,9 +78,19 @@ def sample_production_proposal(
     mode: str,
     proposal_config: Mapping[str, Any],
 ) -> ProductionProposalDraw:
-    """Sample RC.5 or v3 with complete exact pre-selection density provenance."""
+    """Sample RC.5, v3, or the direct target with exact density provenance."""
 
     specification = TargetAnchoredSpecification.from_mapping(proposal_config)
+    if mode == "evaluation_target_direct":
+        draw = sample_evaluation_target(rng, specification)
+        log_target = log_target_density(draw, specification)
+        if not math.isfinite(log_target):
+            raise ValueError("direct evaluation-target proposal returned nonfinite density")
+        return ProductionProposalDraw(
+            _population(draw, log_target, log_target),
+            "evaluation_target",
+            {"evaluation_target": log_target},
+        )
     if mode == "rc5_control":
         draw = sample_rc5(rng, specification)
         log_rc5 = log_rc5_density(draw, specification)
