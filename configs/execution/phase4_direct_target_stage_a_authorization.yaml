@@ -8,7 +8,7 @@ authorization_basis:
   accepted_canary_evidence_commit: "f821b4ead7d5c636d72d869d8765212a77a79d9b"
   expert_review_result: passed
 
-authorizing_commit: null
+authorizing_commit: "2d1cd5e9d1e706881ea562b20724948da60293dd"
 base_main_commit: "f821b4ead7d5c636d72d869d8765212a77a79d9b"
 
 preregistration:
