@@ -122,13 +122,18 @@ def generate_qualification_shard(
                 rejection_counts[str(outcome.attempt.rejection_reason)] += 1
             else:
                 generated = outcome.generated
+                partition_metadata = {"em_cell": generated.em_cell}
+                if generated.diagnostic_context is not None:
+                    partition_metadata["diagnostic_context"] = (
+                        generated.diagnostic_context
+                    )
                 writer.append(
                     generated.record,
                     generated.products.noisy,
                     generated.products.clean,
                     generated.products.noise,
                     attempt_id=attempt_id,
-                    partition_metadata={"em_cell": generated.em_cell},
+                    partition_metadata=partition_metadata,
                 )
                 family_accepted[outcome.attempt.lens_family] += 1
                 multiplicities[generated.image_multiplicity] += 1

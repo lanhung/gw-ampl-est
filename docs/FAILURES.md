@@ -373,3 +373,19 @@ silently choose a solver search window or approximate caustic area.
   exist.
 - The published-shard reader has not read Stage A staging and cannot be treated
   as end-to-end scientific I/O evidence until atomic publication is complete.
+
+## Phase 4 final-evaluation implementation boundary
+
+- The final-evaluation commitment remained intentionally unfinalized while its
+  six generator paths were absent. The Stage A generator commit was not used as
+  a false placeholder.
+- Implementation review caught endpoint drift before data existed: the first
+  OOD sampler draft used the common `[lower, upper)` convention for all
+  intervals, while the frozen parent specifies `(0.15,0.25]` for high shear and
+  external convergence and `(2.5,2.7]` for the high-slope branch. Sampler,
+  density, validators and tests now use the exact parent semantics.
+- No pair or official identity existed during this correction. It is an
+  implementation finding, not a scientific result or a preregistration change.
+- Final-evaluation execution and unsealing remain unauthorized; the implemented
+  runner must fail before generation without a future exact authorization,
+  finalized commitment and release certificate.

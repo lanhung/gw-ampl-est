@@ -8,6 +8,12 @@ from typing import Any, Mapping
 
 import numpy as np
 
+from ..physics.quantities import LensFamily
+from ..proposals.diagnostic import (
+    ParameterOODStratum,
+    sample_parameter_ood,
+    sample_target_conditioned_family,
+)
 from ..proposals.target_anchored import (
     TargetAnchoredSpecification,
     V3Component,
@@ -29,7 +35,7 @@ class ProductionProposalDraw:
     component_log_densities: Mapping[str, float]
 
 
-def _population(draw: Any, log_q: float, log_p: float) -> PopulationDraw:
+def population_from_latent(draw: Any, log_q: float, log_p: float) -> PopulationDraw:
     shear_gamma1 = draw.shear_amplitude * math.cos(2.0 * draw.shear_angle_rad)
     shear_gamma2 = draw.shear_amplitude * math.sin(2.0 * draw.shear_angle_rad)
     return PopulationDraw(
@@ -81,13 +87,33 @@ def sample_production_proposal(
     """Sample RC.5, v3, or the direct target with exact density provenance."""
 
     specification = TargetAnchoredSpecification.from_mapping(proposal_config)
+    if mode in {"evaluation_target_family_sie", "evaluation_target_family_epl"}:
+        family = (
+            LensFamily.SIE_EXTERNAL_SHEAR
+            if mode.endswith("_sie")
+            else LensFamily.EPL_EXTERNAL_SHEAR
+        )
+        draw, log_density = sample_target_conditioned_family(rng, specification, family)
+        return ProductionProposalDraw(
+            population_from_latent(draw, log_density, log_density),
+            f"evaluation_target_conditioned_{family.value}",
+            {f"evaluation_target_conditioned_{family.value}": log_density},
+        )
+    if mode.startswith("parameter_ood_"):
+        stratum = ParameterOODStratum(mode.removeprefix("parameter_ood_"))
+        draw, log_density = sample_parameter_ood(rng, specification, stratum)
+        return ProductionProposalDraw(
+            population_from_latent(draw, log_density, log_density),
+            f"parameter_ood_{stratum.value}",
+            {f"parameter_ood_{stratum.value}": log_density},
+        )
     if mode == "evaluation_target_direct":
         draw = sample_evaluation_target(rng, specification)
         log_target = log_target_density(draw, specification)
         if not math.isfinite(log_target):
             raise ValueError("direct evaluation-target proposal returned nonfinite density")
         return ProductionProposalDraw(
-            _population(draw, log_target, log_target),
+            population_from_latent(draw, log_target, log_target),
             "evaluation_target",
             {"evaluation_target": log_target},
         )
@@ -96,7 +122,7 @@ def sample_production_proposal(
         log_rc5 = log_rc5_density(draw, specification)
         log_target = log_target_density(draw, specification)
         return ProductionProposalDraw(
-            _population(draw, log_rc5, log_target),
+            population_from_latent(draw, log_rc5, log_target),
             "rc5_broad",
             {"rc5_broad": log_rc5},
         )
@@ -113,7 +139,7 @@ def sample_production_proposal(
     if not all(math.isfinite(value) for value in (*component_logs.values(), log_q, log_p)):
         raise ValueError("production proposal returned nonfinite density provenance")
     return ProductionProposalDraw(
-        _population(draw, log_q, log_p),
+        population_from_latent(draw, log_q, log_p),
         component.value if isinstance(component, V3Component) else str(component),
         component_logs,
     )

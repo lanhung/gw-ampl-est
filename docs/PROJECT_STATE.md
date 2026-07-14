@@ -244,6 +244,15 @@ final-evaluation generation commitment is finalized and hashed.
   `19f8dc0621f610825d000f37af333f384a963e55`; scientific training remains
   blocked on Stage A publication, the final-evaluation commitment and a
   separate execution authorization.
+- implemented all 15 deterministic final-evaluation generator contexts for the
+  frozen 20,480-system sealed pool, including exact tail priority, cross-family,
+  parameter-OOD, waveform and PSD mismatch semantics;
+- implemented a fail-closed future runner with streaming record/array/journal
+  validation, global grouped-ID checks, resource caps and atomic sealed parent
+  publication; no final-evaluation pair or identity was created;
+- at `2026-07-14T13:15:29Z`, observed 82/256 train shards complete (10,496
+  accepted systems), 16 partial train shards and zero execution errors; Stage A
+  remained staging-only and validation had not started.
 
 ## Not started or not yet complete by design
 
@@ -260,4 +269,7 @@ final-evaluation generation commitment is finalized and hashed.
 Stage A is actively materializing under parent
 `phase4-stage-a-2be777e727ef-d3a60034bbd6`. It must finish all 304 shards,
 complete full validation and atomically publish before a Phase 4 completion
-report can be written. Model training remains a later, independent gate.
+report can be written. In parallel, the final-evaluation implementation must be
+frozen at one clean commit and the cryptographic generation commitment finalized
+without opening materialization. Model training remains a later, independent
+gate.

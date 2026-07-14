@@ -1,0 +1,135 @@
+phase: "4"
+status: implementation_only_execution_disabled
+dataset_purpose: sealed_final_scientific_evaluation
+
+authorization_path: configs/execution/phase4_final_evaluation_generator_implementation_authorization.yaml
+base_data_config: configs/data/phase3a_qualification.yaml
+target_proposal_config: configs/proposals/proposal_v3_target_anchored_mixture.yaml
+
+preregistration:
+  version: "1.1.0-rc.4"
+  path: configs/statistics/direct_target_stage_a_preregistration.yaml
+  canonical_hash: "5aeaac395463bd073c44ead4ff4c5c729b5a2d4b4f1840c0825a53b30ab1bc98"
+parent_adaptive_preregistration:
+  version: "1.1.0-rc.3"
+  path: configs/statistics/adaptive_scientific_production_preregistration.yaml
+  canonical_hash: "6082475631539d3069edacc52f41b37fb8fe725ccd7c6bc9980cc3008795a927"
+parent_scientific_preregistration:
+  version: "1.0.0-rc.5"
+  path: configs/statistics/phase2_preregistration.yaml
+  canonical_hash: "4dde279cf1bea78d1ddbd4fab99d88e88e334c80c180dc7850679736c5e53edb"
+
+schema_version: "2.0.0-alpha.3"
+root_seed: 2026071203
+pairs_per_shard: 128
+attempt_id_stride: 512
+
+splits:
+  iid_test:
+    accepted_count: 8192
+    shard_count: 64
+    seed_domain: adaptive_rc2_iid_test_v1
+    attempt_namespace: adaptive_rc2_iid_attempts
+    proposal_mode: evaluation_target_direct
+    proposal_distribution_id: direct_evaluation_generative_distribution_v1
+    evaluation_distribution_id: balanced_literature_informed_benchmark_v1
+    id_prefix: phase4-final-iid
+
+  balanced_tail_diagnostic:
+    accepted_count: 4096
+    shard_count: 32
+    seed_domain: adaptive_rc2_balanced_tail_v1
+    attempt_namespace: adaptive_rc2_balanced_tail_attempts
+    proposal_mode: evaluation_target_direct
+    cases_per_stratum: 1024
+    strata:
+      - high_absolute_magnification
+      - extreme_relative_magnification
+      - second_image_near_threshold
+      - extreme_profile_or_environment
+    proposal_distribution_id: balanced_tail_diagnostic_rc5
+    evaluation_distribution_id: balanced_tail_diagnostic_rc5
+    id_prefix: phase4-final-tail
+
+  cross_family_misspecification_test:
+    accepted_count: 2048
+    shard_count: 16
+    seed_domain: adaptive_rc2_cross_family_v1
+    attempt_namespace: adaptive_rc2_cross_family_attempts
+    cases_per_cell: 512
+    cells:
+      - {id: sie_truth_epl_assumed, truth: sie_external_shear, assumed: epl_external_shear_fixed_slope_2.08}
+      - {id: epl_truth_sie_assumed, truth: epl_external_shear, assumed: sie_external_shear}
+      - {id: sie_truth_family_marginalized, truth: sie_external_shear, assumed: family_marginalized_sie_epl}
+      - {id: epl_truth_family_marginalized, truth: epl_external_shear, assumed: family_marginalized_sie_epl}
+    proposal_distribution_id: cross_family_misspecification_rc5
+    evaluation_distribution_id: cross_family_misspecification_rc5
+    id_prefix: phase4-final-cross-family
+
+  parameter_region_ood:
+    accepted_count: 2048
+    shard_count: 16
+    seed_domain: adaptive_rc2_parameter_ood_v1
+    attempt_namespace: adaptive_rc2_parameter_ood_attempts
+    cases_per_stratum: 512
+    strata:
+      - slope_outside_training
+      - extreme_flattening
+      - high_external_shear
+      - extreme_external_convergence
+    proposal_distribution_id: parameter_region_ood_rc5
+    evaluation_distribution_id: parameter_region_ood_rc5
+    id_prefix: phase4-final-parameter-ood
+
+  waveform_mismatch_test:
+    accepted_count: 2048
+    shard_count: 16
+    seed_domain: adaptive_rc2_waveform_mismatch_v1
+    attempt_namespace: adaptive_rc2_waveform_mismatch_attempts
+    proposal_mode: evaluation_target_direct
+    truth_waveform: SEOBNRv4PHM
+    assumed_waveform: IMRPhenomXPHM
+    proposal_distribution_id: waveform_mismatch_seobnrv4phm_rc5
+    evaluation_distribution_id: waveform_mismatch_seobnrv4phm_rc5
+    id_prefix: phase4-final-waveform-mismatch
+
+  psd_mismatch_test:
+    accepted_count: 2048
+    shard_count: 16
+    seed_domain: adaptive_rc2_psd_mismatch_v1
+    attempt_namespace: adaptive_rc2_psd_mismatch_attempts
+    proposal_mode: evaluation_target_direct
+    truth_psd_curves:
+      H1: {file: aLIGO_ZERO_DET_high_P_psd.txt, sha256: 98d7e2cc5610770cf04d91396d975af5b98299a3498c352c3d660a8992568aab}
+      L1: {file: aLIGO_ZERO_DET_high_P_psd.txt, sha256: 98d7e2cc5610770cf04d91396d975af5b98299a3498c352c3d660a8992568aab}
+      V1: {file: AdV_psd.txt, sha256: c2532150f63dbaa76d451e2c074390272e259e4e2eedc3e684d2205582aa0764}
+    assumed_psd_curves: baseline_psd_curves
+    proposal_distribution_id: psd_mismatch_zero_det_high_p_rc5
+    evaluation_distribution_id: psd_mismatch_zero_det_high_p_rc5
+    id_prefix: phase4-final-psd-mismatch
+
+totals:
+  accepted_count: 20480
+  shard_count: 160
+
+paths:
+  staging_root: /root/autodl-tmp/lensing-4/data_v2/scientific/final_evaluation/staging
+  publication_root: /root/autodl-tmp/lensing-4/data_v2/scientific/final_evaluation/sealed
+  manifest_root: /root/autodl-tmp/lensing-4/manifests/phase7
+  log_root: /root/autodl-tmp/lensing-4/logs/phase7
+
+resource_gates:
+  minimum_prelaunch_free_bytes: 145000000000
+  minimum_post_publication_free_bytes: 100000000000
+  maximum_published_bytes: 30000000000
+
+execution:
+  enabled: false
+  materialization_authorized: false
+  unsealing_authorized: false
+  model_training_authorized: false
+  gwosc_gwtc_access_authorized: false
+  worker_processes: 16
+  maximum_attempts_per_worker: 20000000
+  atomic_shards: true
+  publish_sealed_only_after_complete_validation: true
