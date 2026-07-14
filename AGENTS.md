@@ -386,6 +386,15 @@ implementation commit exists. It may not generate a pair, read or modify Stage
 A staging, materialize/unseal final evaluation, train a model or access
 GWOSC/GWTC. All final-evaluation execution flags remain false.
 
+The final-evaluation generator is frozen at
+`bc02054c1f95e7f6cd143fb9dc796ae48f0a15ac`. Its deterministic pre-training
+commitment is finalized at
+`results/phase4/final_evaluation_commitment.json`, SHA-256
+`c13412eced163bac26abc4b22d054f3a6fa967e7e5a4dd7849ebf54f42df6083`.
+This resolves only the reproducibility prerequisite. No final-evaluation pair
+or identity exists, and materialization, unsealing, analysis and all training
+remain separately gated.
+
 ## Scientific integrity
 
 - Never fabricate results, citations, completed runs or calibration.

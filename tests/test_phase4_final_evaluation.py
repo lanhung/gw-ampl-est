@@ -210,8 +210,10 @@ def test_psd_constructor_semantics_and_commitment_are_fail_closed() -> None:
     commitment = json.loads(
         (ROOT / "results/phase4/final_evaluation_commitment.json").read_text()
     )
-    assert commitment["commitment_status"] == "unfinalized_design_template"
-    assert commitment["future_scientific_generator_commit"] is None
+    assert commitment["commitment_status"] == "finalized_before_training"
+    assert commitment["future_scientific_generator_commit"] == (
+        "bc02054c1f95e7f6cd143fb9dc796ae48f0a15ac"
+    )
 
 
 def test_waveform_engine_loads_hashes_and_assigns_declared_curve_type(
@@ -277,6 +279,24 @@ def test_final_evaluation_config_hash_and_resource_caps_are_frozen() -> None:
         "maximum_published_bytes": 30000000000,
     }
     assert config["execution"]["maximum_attempts_per_worker"] == 20000000
+
+
+def test_finalized_commitment_matches_every_deterministic_namespace() -> None:
+    config, _ = load_final_evaluation_contract(ROOT)
+    namespaces = final_evaluation_namespaces(config)
+    commitment = json.loads(
+        (ROOT / "results/phase4/final_evaluation_commitment.json").read_text()
+    )
+    committed = commitment["namespace_commitments"]
+    assert set(committed) == {item.namespace_id for item in namespaces}
+    for namespace in namespaces:
+        item = committed[namespace.namespace_id]
+        assert item["root_seed"] == namespace.root_seed
+        assert item["accepted_count"] == namespace.accepted_count
+        assert item["shard_count"] == namespace.shard_count
+    assert commitment["attempt_stream_allocation"]["attempt_id_stride"] == 512
+    assert commitment["accepted_rank_allocation_rule"]["namespace_scoped"] is True
+    assert all(value is False for value in commitment["use_policy"].values())
 
 
 def test_published_reference_group_ids_are_streamed_and_duplicates_rejected(

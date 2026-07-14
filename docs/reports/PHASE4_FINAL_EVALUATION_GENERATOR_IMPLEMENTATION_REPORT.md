@@ -2,9 +2,10 @@
 
 ## Outcome
 
-The sealed final-evaluation generator implementation is complete at the source
-level. It implements all six RC.3/RC.4 final-pool splits, a fail-closed future
-materialization runner, streaming validators and atomic sealed publication.
+The sealed final-evaluation generator implementation is complete and frozen at
+`bc02054c1f95e7f6cd143fb9dc796ae48f0a15ac`. It implements all six RC.3/RC.4
+final-pool splits, a fail-closed future materialization runner, streaming
+validators and atomic sealed publication.
 
 No final-evaluation pair was generated. No official final-evaluation identity
 was created. Materialization, unsealing, model training, calibration, scientific
@@ -85,8 +86,8 @@ official identities on its own.
 
 ## Verification
 
-- focused final-evaluation tests: 15 passed;
-- full local suite: 240 passed with five optional dependency skips;
+- focused final-evaluation tests: 16 passed;
+- full local suite: 241 passed with five optional dependency skips;
 - maintained-scope Ruff: passed;
 - mypy, including both Phase 4 final-evaluation scripts: passed for 49 source
   files;
@@ -95,8 +96,12 @@ official identities on its own.
 - configuration hash:
   `11277a2a4c5d233e6f525b3ab5d6ece90c115d818d752849076f3a136e574d66`.
 
-The exact implementation commit is recorded after the clean implementation
-checkpoint is created.
+The finalized generation commitment SHA-256 is
+`c13412eced163bac26abc4b22d054f3a6fa967e7e5a4dd7849ebf54f42df6083`.
+It records the exact generator commit, all 15 derived namespace seeds, the
+512-stride attempt formula, shard-major accepted-rank rule, counts,
+distribution/version identities, cross-pool grouping rules and sealed-use
+policy. Accepted IDs remain correctly unknown until future materialization.
 
 ## Independent Stage A state
 
@@ -107,12 +112,9 @@ implementation did not read any Stage A record or alter the remote checkout.
 
 ## Remaining gates
 
-1. create one clean implementation commit;
-2. bind that commit into the deterministic final-evaluation commitment and
-   recompute its SHA-256 in a documentation-only descendant;
-3. pass PR CI and merge;
-4. finish, validate and atomically publish Stage A;
-5. obtain a separate probe-training authorization before any scientific fit.
+1. pass PR CI and merge;
+2. finish, validate and atomically publish Stage A;
+3. obtain a separate probe-training authorization before any scientific fit.
 
 Final-evaluation materialization remains post-lock by default and is not on the
 current Stage A publication critical path.

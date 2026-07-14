@@ -250,6 +250,9 @@ final-evaluation generation commitment is finalized and hashed.
 - implemented a fail-closed future runner with streaming record/array/journal
   validation, global grouped-ID checks, resource caps and atomic sealed parent
   publication; no final-evaluation pair or identity was created;
+- froze that generator at `bc02054c1f95e7f6cd143fb9dc796ae48f0a15ac`
+  and finalized the pre-training deterministic generation commitment with
+  SHA-256 `c13412eced163bac26abc4b22d054f3a6fa967e7e5a4dd7849ebf54f42df6083`;
 - at `2026-07-14T13:15:29Z`, observed 82/256 train shards complete (10,496
   accepted systems), 16 partial train shards and zero execution errors; Stage A
   remained staging-only and validation had not started.
@@ -269,7 +272,6 @@ final-evaluation generation commitment is finalized and hashed.
 Stage A is actively materializing under parent
 `phase4-stage-a-2be777e727ef-d3a60034bbd6`. It must finish all 304 shards,
 complete full validation and atomically publish before a Phase 4 completion
-report can be written. In parallel, the final-evaluation implementation must be
-frozen at one clean commit and the cryptographic generation commitment finalized
-without opening materialization. Model training remains a later, independent
-gate.
+report can be written. The final-evaluation implementation and commitment are
+now frozen without opening materialization. Model training remains a later,
+independent gate.
