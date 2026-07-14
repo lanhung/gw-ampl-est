@@ -240,6 +240,10 @@ final-evaluation generation commitment is finalized and hashed.
 - passed 225 local tests with five optional skips, maintained-scope Ruff,
   mypy for 44 source files and package build; no scientific data or checkpoint
   was read or written by the model smoke.
+- froze the implementation-only probe-training stack at
+  `19f8dc0621f610825d000f37af333f384a963e55`; scientific training remains
+  blocked on Stage A publication, the final-evaluation commitment and a
+  separate execution authorization.
 
 ## Not started or not yet complete by design
 

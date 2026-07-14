@@ -367,6 +367,13 @@ first 16,384 systems generated are not the probe subset. Scientific training
 also requires the final-evaluation generation commitment to be finalized and
 hashed plus a separate probe-training authorization.
 
+The implementation-only training-stack checkpoint is:
+
+`19f8dc0621f610825d000f37af333f384a963e55`
+
+It contains no scientific fit or checkpoint and does not authorize Stage A
+staging access or probe execution.
+
 ## Scientific integrity
 
 - Never fabricate results, citations, completed runs or calibration.

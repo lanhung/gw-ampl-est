@@ -5,6 +5,9 @@
 The preregistered probe software is implemented and passes local engineering
 checks. Scientific probe training remains closed.
 
+The exact implementation checkpoint is
+`19f8dc0621f610825d000f37af333f384a963e55`.
+
 This work ran in parallel with the immutable Stage A generator. It did not
 sync code into the active AutoDL checkout, read Stage A staging, train on a
 scientific record, save a model checkpoint, select an architecture, fit
