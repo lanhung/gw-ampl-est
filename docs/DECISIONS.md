@@ -586,3 +586,17 @@ This is engineering execution evidence only. It resolves the disposable
 canary prerequisite but does not itself authorize scientific materialization,
 official Stage A identities or model training. Those still require the single
 release gate plus a separate exact 32,768/6,144 human authorization.
+
+## D066 — A ready release certificate opens exact-count Stage A only
+
+Delegated expert review accepted RC.4, the frozen generator wheel, the passed
+8+8 canary and conservative resource evidence. A separate authorization opens
+only 32,768 direct-target train plus 6,144 direct-target validation systems.
+Training, calibration, SBC, final evaluation, real noise and GWOSC/GWTC remain
+closed.
+
+The hardened release gate verified the actual wheel artifact, dependency lock,
+canary and PSD hashes before deriving the official identities. The run started
+under `phase4-stage-a-2be777e727ef-d3a60034bbd6` and remains staging-only until
+all 304 shards and full cross-split validation pass. Partial shards and
+progress snapshots are never publication evidence.

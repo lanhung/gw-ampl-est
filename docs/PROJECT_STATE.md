@@ -215,20 +215,33 @@ unauthorized.
   grouped-ID disjointness, telemetry-field and independent checksum checks;
 - retained Stage A as blocked with no official identities and did not inspect
   canary throughput or ESS.
+- accepted the passed canary through a separate exact-count materialization
+  authorization while keeping training, calibration, evaluation and external
+  data access closed;
+- passed a hardened single release gate that verified the actual frozen wheel,
+  dependency lock, canary, PSD identities, disk gate and authorization, then
+  created the official Stage A parent/train/validation identities;
+- launched the exact 32,768-train plus 6,144-validation direct-target run at
+  `2026-07-14T02:07:18Z` with 16 workers and an atomic resume strategy;
+- at `2026-07-14T08:05:43Z`, completed 42 of 304 total shards (5,376 accepted
+  pairs), retained 16 partial train shards, observed zero execution errors and
+  kept the official parent under staging;
+- independently read-validated the first completed 128-pair train shard,
+  including complete-marker/artifact integrity, q=p and exact unit weights.
 
-## Not started by design
+## Not started or not yet complete by design
 
 - further proposal engineering qualification (permanently closed);
-- scientific data materialization;
+- Stage A validation generation and final atomic publication;
 - model or posterior training;
 - calibration, SBC or final scientific evaluation;
 - GWOSC/GWTC download;
 - real-noise injection or catalog scan;
 - manuscript work.
 
-## Next recommended phase
+## Current execution and next gate
 
-Human review should inspect the passed 8+8 canary evidence. A separate
-authorization must freeze exactly 32,768 train plus 6,144 validation systems
-before the release gate may create official identities. Model training remains
-a later, independent gate.
+Stage A is actively materializing under parent
+`phase4-stage-a-2be777e727ef-d3a60034bbd6`. It must finish all 304 shards,
+complete full validation and atomically publish before a Phase 4 completion
+report can be written. Model training remains a later, independent gate.
