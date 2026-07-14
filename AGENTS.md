@@ -374,6 +374,18 @@ The implementation-only training-stack checkpoint is:
 It contains no scientific fit or checkpoint and does not authorize Stage A
 staging access or probe execution.
 
+While Stage A continues, the owner also authorizes an isolated implementation
+of the frozen final-evaluation generator contexts only through:
+
+`configs/execution/phase4_final_evaluation_generator_implementation_authorization.yaml`
+
+This gate may implement and test deterministic IID, balanced-tail,
+cross-family, parameter-OOD, waveform-mismatch and PSD-mismatch contexts and
+may finalize the cryptographic generation commitment only after one clean
+implementation commit exists. It may not generate a pair, read or modify Stage
+A staging, materialize/unseal final evaluation, train a model or access
+GWOSC/GWTC. All final-evaluation execution flags remain false.
+
 ## Scientific integrity
 
 - Never fabricate results, citations, completed runs or calibration.
