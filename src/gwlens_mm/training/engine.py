@@ -250,11 +250,13 @@ def _capture_rng_state(torch: Any) -> Mapping[str, Any]:
 def _restore_rng_state(torch: Any, state: Mapping[str, Any]) -> None:
     random.setstate(state["python"])
     np.random.set_state(state["numpy"])
-    torch.set_rng_state(state["torch_cpu"])
+    # ``torch.load(..., map_location=device)`` follows the model onto CUDA, but
+    # both RNG restoration APIs require host ByteTensors even for CUDA states.
+    torch.set_rng_state(state["torch_cpu"].cpu())
     if "torch_cuda" in state:
         if not torch.cuda.is_available():
             raise TrainingGateError("CUDA checkpoint cannot resume without CUDA")
-        torch.cuda.set_rng_state_all(state["torch_cuda"])
+        torch.cuda.set_rng_state_all([value.cpu() for value in state["torch_cuda"]])
 
 
 def _set_training_epoch(train_loader: Any, epoch: int) -> None:

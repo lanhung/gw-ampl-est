@@ -6,6 +6,7 @@ import json
 from copy import deepcopy
 from importlib.util import find_spec
 from pathlib import Path
+from typing import Any
 
 import numpy as np
 import pytest
@@ -31,6 +32,7 @@ from gwlens_mm.training.engine import (
     DeterministicShardEpochSampler,
     TargetStandardizer,
     TrainingRunIdentity,
+    _restore_rng_state,
     standardizer_hash,
     validate_engineering_smoke_limits,
 )
@@ -463,6 +465,49 @@ def test_epoch_sampler_is_resume_stable_and_epoch_specific() -> None:
     assert first == replay
     assert first != next_epoch
     assert set(first) == set(range(64))
+
+
+def test_rng_restore_moves_loaded_states_back_to_cpu() -> None:
+    calls: list[tuple[str, Any]] = []
+
+    class LoadedState:
+        def __init__(self, name: str) -> None:
+            self.name = name
+
+        def cpu(self) -> str:
+            calls.append((self.name, "cpu"))
+            return f"cpu-{self.name}"
+
+    class Cuda:
+        @staticmethod
+        def is_available() -> bool:
+            return True
+
+        @staticmethod
+        def set_rng_state_all(values: list[object]) -> None:
+            calls.append(("cuda-set", tuple(values)))
+
+    class Torch:
+        cuda = Cuda()
+
+        @staticmethod
+        def set_rng_state(value: object) -> None:
+            calls.append(("cpu-set", value))
+
+    _restore_rng_state(
+        Torch(),
+        {
+            "python": __import__("random").getstate(),
+            "numpy": np.random.get_state(),
+            "torch_cpu": LoadedState("torch-cpu"),
+            "torch_cuda": [LoadedState("cuda-0"), LoadedState("cuda-1")],
+        },
+    )
+    assert calls[-2:] == [
+        ("cuda-1", "cpu"),
+        ("cuda-set", ("cpu-cuda-0", "cpu-cuda-1")),
+    ]
+    assert ("cpu-set", "cpu-torch-cpu") in calls
 
 
 def test_shard_sampler_is_resume_stable_and_keeps_shards_local() -> None:

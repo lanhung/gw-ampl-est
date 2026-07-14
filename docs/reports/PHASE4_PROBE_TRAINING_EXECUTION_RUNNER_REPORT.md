@@ -90,6 +90,13 @@ and passed twice with replay
 SHA-256 `ae4e68c02b2723698ae68c34d28bc673ff0e545cd6cd70ea86b46f13508b702d`.
 It used random in-memory inputs and is not a scientific fit or I/O result.
 
+A later synthetic interruption canary exercised the checkpoint path itself and
+caught a CUDA map-location defect before scientific authorization: a saved CPU
+RNG ByteTensor was loaded onto CUDA. The narrow same-phase patch restores all RNG
+state tensors from host memory and adds regression coverage. Its byte-identical
+resume evidence is recorded on the implementation issue and patch PR; no Stage A
+data or scientific checkpoint was read.
+
 The clean AutoDL environment itself is installed and GPU-visible with Python
 3.10.12, Torch 2.10.0+cu128, four RTX 5000 Ada devices and the exact versions in
 the model configuration. Its normalized freeze SHA-256 is
