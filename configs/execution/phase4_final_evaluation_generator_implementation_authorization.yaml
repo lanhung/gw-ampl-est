@@ -1,0 +1,57 @@
+phase: "4-final-evaluation-generator"
+authorization_status: authorized_implementation_and_commitment_only
+authorized_by: human_project_owner_delegated_to_codex
+authorization_date: "2026-07-14"
+
+base_main_commit: "3fcd7a16c4642a4dcbf2e679347b013707cc575b"
+
+frozen_scientific_contracts:
+  direct_target_preregistration_version: "1.1.0-rc.4"
+  direct_target_preregistration_hash: "5aeaac395463bd073c44ead4ff4c5c729b5a2d4b4f1840c0825a53b30ab1bc98"
+  adaptive_preregistration_version: "1.1.0-rc.3"
+  adaptive_preregistration_hash: "6082475631539d3069edacc52f41b37fb8fe725ccd7c6bc9980cc3008795a927"
+  parent_preregistration_version: "1.0.0-rc.5"
+  parent_preregistration_hash: "4dde279cf1bea78d1ddbd4fab99d88e88e334c80c180dc7850679736c5e53edb"
+  schema_version: "2.0.0-alpha.3"
+
+final_evaluation_contract:
+  iid_test: 8192
+  balanced_tail_diagnostic: 4096
+  cross_family_misspecification_test: 2048
+  parameter_region_ood: 2048
+  waveform_mismatch_test: 2048
+  psd_mismatch_test: 2048
+  total: 20480
+  commitment_path: results/phase4/final_evaluation_commitment.json
+
+authorization:
+  deterministic_context_implementation_authorized: true
+  diagnostic_sampler_and_density_implementation_authorized: true
+  stratum_and_cell_validator_implementation_authorized: true
+  waveform_and_psd_configuration_adapter_authorized: true
+  runner_skeleton_and_dry_run_authorized: true
+  unit_and_integration_tests_authorized: true
+  commitment_finalization_after_clean_implementation_commit_authorized: true
+
+  stage_a_staging_access_authorized: false
+  waveform_pair_generation_authorized: false
+  final_evaluation_materialization_authorized: false
+  final_evaluation_unsealing_authorized: false
+  scientific_probe_training_authorized: false
+  model_selection_authorized: false
+  calibration_authorized: false
+  sbc_authorized: false
+  gwosc_gwtc_access_authorized: false
+  real_noise_authorized: false
+
+safety_contract:
+  exact_split_counts_immutable: true
+  accepted_ids_not_claimed_before_materialization: true
+  final_evaluation_sealed_during_development: true
+  stage_a_remote_checkout_mutation_authorized: false
+  stage_a_artifact_mutation_authorized: false
+  phase3a_or_phase3c_artifact_reuse_authorized: false
+  no_pair_generation_in_this_workstream: true
+  generator_commit_must_precede_commitment_finalization: true
+
+stop_after_implementation_and_finalized_commitment: true

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import importlib
 import math
 from dataclasses import dataclass
@@ -15,6 +16,17 @@ from ..physics.solver import PhysicalImage
 from ..provenance import derive_seed
 from ..schema import DETECTOR_SLOTS
 from .population import PopulationDraw
+
+
+def psd_file_keyword(filename: str) -> str:
+    """Return Bilby's explicit curve-file constructor keyword."""
+
+    name = filename.lower()
+    if name.endswith("_asd.txt"):
+        return "asd_file"
+    if name.endswith("_psd.txt"):
+        return "psd_file"
+    raise ValueError("PSD curve filename must declare ASD or PSD semantics")
 
 
 def raised_cosine_guard_window(
@@ -174,13 +186,23 @@ class ProductionWaveformEngine:
             self.transition_samples,
         )
         self._bilby = importlib.import_module("bilby")
+        bilby_file = getattr(self._bilby, "__file__", None)
+        if bilby_file is None:
+            raise RuntimeError("Bilby package path is unavailable")
+        curve_root = (
+            Path(str(bilby_file)).resolve().parent / "gw" / "detector" / "noise_curves"
+        )
+        self._psd_by_detector: Dict[str, Any] = {}
         for detector in DETECTOR_SLOTS:
-            interferometer = self._bilby.gw.detector.get_empty_interferometer(detector)
-            psd = interferometer.power_spectral_density
-            source = getattr(psd, "asd_file", None) or getattr(psd, "psd_file", None)
-            expected = str(config["psd_curves"][detector]["file"])
-            if source is None or Path(str(source)).name != expected:
-                raise ValueError(f"Bilby default PSD does not match RC.5 for {detector}")
+            specification = config["psd_curves"][detector]
+            curve_path = curve_root / str(specification["file"])
+            digest = hashlib.sha256(curve_path.read_bytes()).hexdigest()
+            if digest != str(specification["sha256"]):
+                raise ValueError(f"PSD hash mismatch for {detector}: {curve_path}")
+            keyword = psd_file_keyword(curve_path.name)
+            self._psd_by_detector[detector] = self._bilby.gw.detector.PowerSpectralDensity(
+                **{keyword: str(curve_path)}
+            )
         self._waveform_generator = self._bilby.gw.WaveformGenerator(
             duration=self.construction_duration,
             sampling_frequency=self.sample_rate,
@@ -192,13 +214,18 @@ class ProductionWaveformEngine:
             },
         )
 
+    def _interferometer(self, detector: str) -> Any:
+        interferometer = self._bilby.gw.detector.get_empty_interferometer(detector)
+        interferometer.power_spectral_density = self._psd_by_detector[detector]
+        return interferometer
+
     def _conditioned_selection_snr(
         self,
         detector: str,
         clean_time: np.ndarray,
         segment_start: float,
     ) -> float:
-        interferometer = self._bilby.gw.detector.get_empty_interferometer(detector)
+        interferometer = self._interferometer(detector)
         interferometer.set_strain_data_from_zero_noise(
             self.sample_rate,
             self.duration,
@@ -264,7 +291,7 @@ class ProductionWaveformEngine:
             clean = np.zeros((3, self.sample_count), dtype=np.float64)
             snrs = []
             for detector_index, detector in enumerate(DETECTOR_SLOTS):
-                interferometer = self._bilby.gw.detector.get_empty_interferometer(detector)
+                interferometer = self._interferometer(detector)
                 interferometer.set_strain_data_from_zero_noise(
                     self.sample_rate,
                     self.construction_duration,
@@ -321,7 +348,7 @@ class ProductionWaveformEngine:
         for image_index, projection in enumerate(selected):
             clean[image_index] = projection.clean_time_by_detector.astype(np.float32)
             for detector_index, detector in enumerate(DETECTOR_SLOTS):
-                interferometer = self._bilby.gw.detector.get_empty_interferometer(detector)
+                interferometer = self._interferometer(detector)
                 seed = derive_seed(
                     self.root_seed,
                     "detector_noise",

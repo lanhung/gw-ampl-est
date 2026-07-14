@@ -364,7 +364,11 @@ def test_environment_and_commitment_hashes_are_reproducible() -> None:
     commitment = ROOT / "results/phase4/final_evaluation_commitment.json"
     expected = (ROOT / "results/phase4/final_evaluation_commitment.sha256").read_text().split()[0]
     assert hashlib.sha256(commitment.read_bytes()).hexdigest() == expected
-    assert json.loads(commitment.read_text())["future_scientific_generator_commit"] is None
+    finalized = json.loads(commitment.read_text())
+    assert finalized["commitment_status"] == "finalized_before_training"
+    assert finalized["future_scientific_generator_commit"] == (
+        "bc02054c1f95e7f6cd143fb9dc796ae48f0a15ac"
+    )
 
 
 def test_scripts_do_not_access_distribution_schema_fields_directly() -> None:

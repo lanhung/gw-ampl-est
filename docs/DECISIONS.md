@@ -631,3 +631,23 @@ weights or random flow permutations are initialized. Training order is
 addressed by `(seed, epoch)`. Resumable checkpoints bind code, environment,
 data manifests, ranked membership, the final-evaluation commitment,
 preprocessing state and Python/NumPy/Torch RNG state.
+
+## D068 — Freeze final-evaluation generators before training, keep data sealed
+
+The deterministic generation commitment required before probe training binds
+an executable generator, not a placeholder Stage A commit. The implementation
+therefore freezes all 15 IID/tail/cross-family/OOD/waveform/PSD contexts, exact
+seed namespaces, attempt allocation, streaming validation and atomic sealed
+publication before a scientific optimizer can start.
+
+Balanced-tail membership is a recorded priority-conditioned selection on
+direct-target accepted systems. Parameter-OOD samplers preserve the exact
+parent endpoint conventions, including left-open/right-closed high-shear,
+high-convergence and upper-slope intervals. Waveform and PSD mismatch alter
+truth generation only and retain their frozen assumed-model identities.
+
+The commitment does not authorize early materialization or inspection. A
+future runner requires training-size and architecture lock, a separate
+authorization and release certificate, and publishes only to a sealed root.
+Final evaluation remains forbidden for stopping, architecture selection and
+calibration fitting.

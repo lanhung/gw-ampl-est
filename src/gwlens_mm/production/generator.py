@@ -29,6 +29,7 @@ from ..schema import (
     SplitName,
     V2Record,
 )
+from .diagnostic_context import BalancedTailStratum, classify_balanced_tail
 from .dynamics import galkin_velocity_dispersion, sample_kinematics_nuisance
 from .gw import (
     ProductionWaveformEngine,
@@ -48,6 +49,7 @@ class GeneratedQualificationPair:
     em_cell: str
     image_multiplicity: int
     timings: Mapping[str, float]
+    diagnostic_context: Optional[str] = None
 
 
 @dataclass(frozen=True)
@@ -232,6 +234,35 @@ class QualificationGenerator:
                 proposal,
             )
         selected = selection.selected
+        image_map = {image.image_id: image for image in transformed.physical_images}
+        selected_images = (
+            image_map[selected[0].image.image_id],
+            image_map[selected[1].image.image_id],
+        )
+        required_tail = (
+            None
+            if self.engineering_ab is None
+            else self.engineering_ab.get("balanced_tail_stratum")
+        )
+        if required_tail is not None:
+            actual_tail = classify_balanced_tail(
+                selected_images,
+                secondary_network_snr=selected[1].network_snr,
+                external_convergence=draw.external_convergence,
+                density_slope=float(draw.lens_parameters["density_slope"]),
+            )
+            required_tail_value = BalancedTailStratum(str(required_tail))
+            timings["balanced_tail_match"] = float(actual_tail == required_tail_value)
+            if actual_tail != required_tail_value:
+                return self._rejected(
+                    attempt_id,
+                    lens_seed,
+                    draw.lens_family.value,
+                    em_cell,
+                    "not_required_balanced_tail_stratum",
+                    timings,
+                    proposal,
+                )
         passing = set(selection.passing_image_ids)
         selected_ids = {projection.image.image_id for projection in selected}
         image_truths = []
@@ -259,11 +290,6 @@ class QualificationGenerator:
                     "below_synthetic_selection_threshold" if is_censored else None,
                 )
             )
-        image_map = {image.image_id: image for image in transformed.physical_images}
-        selected_images = (
-            image_map[selected[0].image.image_id],
-            image_map[selected[1].image.image_id],
-        )
         cell_specification = self.preregistration["em_observation_model"][
             "availability_cells"
         ][em_cell]
@@ -493,6 +519,9 @@ class QualificationGenerator:
             observations.em_cell,
             len(transformed.physical_images),
             timings,
+            None
+            if self.engineering_ab is None
+            else self.engineering_ab.get("diagnostic_context_id"),
         )
         return AttemptOutcome(
             AttemptRecord(
