@@ -287,7 +287,20 @@ def test_release_gate_creates_official_identities_only_after_every_gate(
     }
     canary_path = tmp_path / "canary.json"
     canary_path.write_text(json.dumps(canary, sort_keys=True) + "\n")
+    wheel_path = tmp_path / "gwlens_mm.whl"
+    wheel_path.write_bytes(b"frozen-generator-wheel")
+    wheel_hash = hashlib.sha256(wheel_path.read_bytes()).hexdigest()
+    dependency_lock = ROOT / config["environment"]["dependency_lock_path"]
+    dependency_hash = hashlib.sha256(dependency_lock.read_bytes()).hexdigest()
     authorization = {
+        "authorization_status": "authorized_scientific_materialization_only",
+        "authorizing_commit": config["authorization"]["authorizing_git_commit"],
+        "immutable_generator": {
+            "git_commit": generator_commit,
+            "wheel_path": str(wheel_path),
+            "wheel_sha256": wheel_hash,
+            "environment_lock_sha256": dependency_hash,
+        },
         "authorization": {
             "disposable_canary_accepted": True,
             "scientific_data_generation_authorized": True,
@@ -314,7 +327,7 @@ def test_release_gate_creates_official_identities_only_after_every_gate(
     config["release"].update(
         {
             "final_generator_commit": generator_commit,
-            "generator_wheel_sha256": "2" * 64,
+            "generator_wheel_sha256": wheel_hash,
             "canary_manifest_path": str(canary_path),
             "canary_manifest_sha256": hashlib.sha256(canary_path.read_bytes()).hexdigest(),
         }

@@ -129,6 +129,33 @@ def evaluate_phase4_release_gate(
         blockers.append("future Stage A execution authorization is absent")
     else:
         execution_authorization = load_yaml(root / str(future_path))
+        if execution_authorization.get("authorization_status") != (
+            "authorized_scientific_materialization_only"
+        ):
+            blockers.append("execution authorization is not materialization-only")
+        if execution_authorization.get("authorizing_commit") != config[
+            "authorization"
+        ].get("authorizing_git_commit"):
+            blockers.append("execution authorization commit mismatch")
+        immutable = execution_authorization.get("immutable_generator", {})
+        if immutable.get("git_commit") != generator_commit:
+            blockers.append("execution authorization generator commit mismatch")
+        if immutable.get("environment_lock_sha256") != dependency_hash:
+            blockers.append("execution authorization environment lock mismatch")
+        authorized_wheel_hash = immutable.get("wheel_sha256")
+        if authorized_wheel_hash != wheel_hash:
+            blockers.append("execution authorization wheel hash mismatch")
+        wheel_path = Path(str(immutable.get("wheel_path", "")))
+        try:
+            if not wheel_path.is_file():
+                blockers.append("authorized generator wheel does not exist")
+            else:
+                actual_wheel_hash = _sha256(wheel_path)
+                checks["generator_wheel_sha256"] = actual_wheel_hash
+                if actual_wheel_hash != authorized_wheel_hash:
+                    blockers.append("authorized generator wheel SHA-256 mismatch")
+        except Exception as error:
+            blockers.append(f"authorized generator wheel inspection failed: {error}")
         flags = execution_authorization.get("authorization", {})
         for key in (
             "disposable_canary_accepted",
