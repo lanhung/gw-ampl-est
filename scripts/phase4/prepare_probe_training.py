@@ -20,8 +20,7 @@ def _parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser()
     parser.add_argument("--root", type=Path, default=Path.cwd())
     parser.add_argument("--authorization", type=Path)
-    parser.add_argument("--train-publication", type=Path)
-    parser.add_argument("--validation-publication", type=Path)
+    parser.add_argument("--stage-a-publication", type=Path)
     parser.add_argument("--output", type=Path)
     parser.add_argument("--execute", action="store_true")
     return parser
@@ -41,20 +40,19 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "final_evaluation_accessed": False,
     }
     if arguments.execute:
-        if not all(
-            (arguments.authorization, arguments.train_publication, arguments.validation_publication)
-        ):
-            raise TrainingGateError("execution requires authorization and both publication roots")
+        if not all((arguments.authorization, arguments.stage_a_publication)):
+            raise TrainingGateError("execution requires authorization and Stage A publication")
         evidence = validate_scientific_training_gate(
             root,
             authorization_path=arguments.authorization,
-            train_publication_root=arguments.train_publication,
-            validation_publication_root=arguments.validation_publication,
+            stage_a_publication_root=arguments.stage_a_publication,
         )
+        publication = evidence["publication"]
         result.update(
             status="ready_to_construct_authorized_training_run",
             scientific_probe_training_authorized=True,
             training_authorization_status=evidence["authorization_status"],
+            stage_a_parent_manifest_sha256=publication.manifest_sha256,
         )
     if arguments.output is not None:
         arguments.output.parent.mkdir(parents=True, exist_ok=True)
