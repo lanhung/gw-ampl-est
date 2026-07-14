@@ -81,12 +81,14 @@ Completed locally:
   continuation exits.
 
 The optional Parquet/Zarr reader will be rerun only against the future atomic
-publication. A pre-commit candidate-wheel Torch/nflows engineering smoke did run
-in the isolated AutoDL environment: full 16,384-sample strain, one forward/backward
-step, conditional sampling and sampled log density passed twice with replay
+publication. The wheel built from pushed implementation commit
+`c2edcab57beb048b22bb5f1887d556e268025ac9` has SHA-256
+`a24442ba2730980e68f291d4748a3e68293a97c0b7a3b4c489749cefd74d869b`.
+Its isolated AutoDL Torch/nflows engineering smoke used full 16,384-sample
+strain, one forward/backward step, conditional sampling and sampled log density,
+and passed twice with replay
 SHA-256 `ae4e68c02b2723698ae68c34d28bc673ff0e545cd6cd70ea86b46f13508b702d`.
-It used random in-memory inputs and is not a scientific fit or I/O result. The
-smoke will be repeated from the final pushed implementation commit before merge.
+It used random in-memory inputs and is not a scientific fit or I/O result.
 
 The clean AutoDL environment itself is installed and GPU-visible with Python
 3.10.12, Torch 2.10.0+cu128, four RTX 5000 Ada devices and the exact versions in
