@@ -24,6 +24,7 @@ from gwlens_mm.provenance import configuration_hash
 from gwlens_mm.release_gate import evaluate_phase4_release_gate
 from gwlens_mm.schema import SplitName, V2Record
 from scripts.phase4.run_direct_target_canary import _verify_canary_authorization
+from scripts.phase4.run_stage_a import _verify_execution_authorization
 
 ROOT = Path(__file__).resolve().parents[1]
 CONFIG = ROOT / "configs/data/phase4_direct_target_stage_a.yaml"
@@ -66,6 +67,7 @@ def test_phase4_contract_loads_but_all_execution_flags_remain_false() -> None:
 
 
 def test_stage_a_authorization_is_exact_count_and_training_closed() -> None:
+    config, _, _ = load_phase4_contract(ROOT)
     authorization = load_yaml(
         ROOT / "configs/execution/phase4_direct_target_stage_a_authorization.yaml"
     )
@@ -87,6 +89,10 @@ def test_stage_a_authorization_is_exact_count_and_training_closed() -> None:
         contract["total_accepted_count"],
         contract["total_shard_count"],
     ) == (32768, 6144, 38912, 304)
+    verified = _verify_execution_authorization(
+        config, authorization["immutable_generator"]["git_commit"]
+    )
+    assert verified["authorizing_commit"] == authorization["authorizing_commit"]
 
 
 def test_direct_target_contract_has_exact_unit_weights() -> None:
