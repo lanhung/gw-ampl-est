@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import csv
+import hashlib
 import json
 from copy import deepcopy
 from importlib.util import find_spec
@@ -7,9 +9,10 @@ from pathlib import Path
 
 import numpy as np
 import pytest
+import yaml
 
 from gwlens_mm.config import load_yaml
-from gwlens_mm.schema import V2Record
+from gwlens_mm.schema import SplitName, V2Record
 from gwlens_mm.training.contracts import (
     TrainingGateError,
     deterministic_probe_subset,
@@ -18,15 +21,21 @@ from gwlens_mm.training.contracts import (
     validate_direct_target_unit_weights,
     validate_scientific_training_gate,
 )
-from gwlens_mm.training.data import index_complete_shards
+from gwlens_mm.training.data import (
+    PublishedStageADataset,
+    index_complete_shards,
+    resolve_stage_a_publication,
+)
 from gwlens_mm.training.engine import (
     DeterministicEpochSampler,
+    DeterministicShardEpochSampler,
     TargetStandardizer,
     TrainingRunIdentity,
     standardizer_hash,
     validate_engineering_smoke_limits,
 )
 from gwlens_mm.training.features import InputStandardizer, load_input_policy, prepare_example
+from gwlens_mm.training.learning_curve import compare_16k_to_32k
 from gwlens_mm.training.metrics import (
     central_coverage,
     empirical_crps,
@@ -37,10 +46,72 @@ from gwlens_mm.training.whitening import ASDCurve, bilby_psd_whiten, whiten_dete
 
 ROOT = Path(__file__).resolve().parents[1]
 EXAMPLE = ROOT / "examples/v2_metadata_example.json"
+STAGE_A_GENERATOR = "2be777e727ef9d8e1a85f89c68966df5d37932b0"
+RC4_HASH = "5aeaac395463bd073c44ead4ff4c5c729b5a2d4b4f1840c0825a53b30ab1bc98"
 
 
 def _example_record() -> V2Record:
     return V2Record.from_dict(json.loads(EXAMPLE.read_text()))
+
+
+def _write_parent_publication(
+    tmp_path: Path, *, train_count: int, validation_count: int, pairs_per_shard: int
+) -> Path:
+    parent = tmp_path / "published" / "stage-a-parent"
+    parent.mkdir(parents=True)
+    identities = {"train": "scientific-train", "validation": "scientific-validation"}
+    validations = {}
+    for split, accepted_count in (
+        ("train", train_count),
+        ("validation", validation_count),
+    ):
+        dataset_id = identities[split]
+        child = parent / dataset_id
+        (child / "shards").mkdir(parents=True)
+        (child / "run_manifest.json").write_text(
+            json.dumps(
+                {
+                    "status": "generating_or_resuming",
+                    "split": split,
+                    "dataset_id": dataset_id,
+                    "generator_commit": STAGE_A_GENERATOR,
+                    "accepted_target": accepted_count,
+                    "all_importance_weights_one": True,
+                }
+            )
+        )
+        validations[split] = {
+            "status": "passed",
+            "split": split,
+            "dataset_id": dataset_id,
+            "accepted_pair_count": accepted_count,
+            "complete_shard_count": accepted_count // pairs_per_shard,
+            "pairs_per_shard": pairs_per_shard,
+            "generator_commit": STAGE_A_GENERATOR,
+            "configuration_hash": split * 8,
+            "proposal_equals_evaluation": True,
+            "all_importance_weights_one": True,
+        }
+    (parent / "dataset_manifest.json").write_text(
+        json.dumps(
+            {
+                "status": "passed",
+                "generator_commit": STAGE_A_GENERATOR,
+                "preregistration_hash": RC4_HASH,
+                "accepted_pair_count": train_count + validation_count,
+                "train_accepted_pair_count": train_count,
+                "validation_accepted_pair_count": validation_count,
+                "validations": validations,
+                "train_validation_group_disjoint": True,
+                "proposal_equals_evaluation": True,
+                "all_importance_weights_one": True,
+                "model_training_authorized": False,
+            },
+            sort_keys=True,
+        )
+        + "\n"
+    )
+    return parent
 
 
 def test_implementation_authorization_keeps_scientific_training_closed() -> None:
@@ -64,8 +135,7 @@ def test_scientific_training_gate_fails_closed_before_publication_and_commitment
             authorization_path=(
                 ROOT / "configs/execution/phase4_probe_training_stack_authorization.yaml"
             ),
-            train_publication_root=Path("/not/published/train"),
-            validation_publication_root=Path("/not/published/validation"),
+            stage_a_publication_root=Path("/not/published/stage-a"),
         )
 
 
@@ -193,6 +263,176 @@ def test_manifest_only_shard_index_refuses_partial_and_duplicates(tmp_path: Path
         index_complete_shards(dataset, expected_pairs_per_shard=2, require_published=False)
 
 
+def test_atomic_parent_publication_resolves_child_datasets(tmp_path: Path) -> None:
+    parent = _write_parent_publication(
+        tmp_path, train_count=4, validation_count=2, pairs_per_shard=2
+    )
+    publication = resolve_stage_a_publication(
+        parent,
+        expected_generator_commit=STAGE_A_GENERATOR,
+        expected_preregistration_hash=RC4_HASH,
+        expected_train_count=4,
+        expected_validation_count=2,
+        expected_pairs_per_shard=2,
+    )
+    assert publication.train_root == parent / "scientific-train"
+    assert publication.validation_root == parent / "scientific-validation"
+    assert len(publication.manifest_sha256) == 64
+    assert set(publication.namespace_manifest_sha256) == {"train", "validation"}
+    for shard_index in range(2):
+        shard = publication.train_root / "shards" / f"shard-{shard_index:05d}"
+        shard.mkdir()
+        (shard / "COMPLETE.json").write_text("{}\n")
+        (shard / "shard_manifest.json").write_text(
+            json.dumps(
+                {
+                    "status": "complete",
+                    "accepted_pair_count": 2,
+                    "physical_system_ids": [
+                        f"train-system-{shard_index}-0",
+                        f"train-system-{shard_index}-1",
+                    ],
+                }
+            )
+            + "\n"
+        )
+    entries = index_complete_shards(
+        publication.train_root,
+        expected_pairs_per_shard=2,
+        expected_total_pairs=4,
+    )
+    assert len(entries) == 4
+    manifest = json.loads((parent / "dataset_manifest.json").read_text())
+    manifest["validations"]["train"]["dataset_id"] = "wrong-train-id"
+    (parent / "dataset_manifest.json").write_text(json.dumps(manifest) + "\n")
+    with pytest.raises(TrainingGateError, match="directory is absent"):
+        resolve_stage_a_publication(
+            parent,
+            expected_train_count=4,
+            expected_validation_count=2,
+            expected_pairs_per_shard=2,
+        )
+
+
+def test_future_probe_gate_accepts_only_exact_parent_manifest(tmp_path: Path) -> None:
+    parent = _write_parent_publication(
+        tmp_path,
+        train_count=32768,
+        validation_count=6144,
+        pairs_per_shard=128,
+    )
+    commitment = ROOT / "results/phase4/final_evaluation_commitment.json"
+    authorization = {
+        "authorization_status": "authorized_probe_training_only",
+        "authorization": {
+            "stage_a_data_access_authorized": True,
+            "scientific_probe_training_authorized": True,
+            "probe_optimizer_execution_authorized": True,
+            "learning_curve_decision_authorized": True,
+            "model_tuning_authorized": False,
+            "calibration_authorized": False,
+            "sbc_authorized": False,
+            "final_evaluation_authorized": False,
+            "gwosc_gwtc_access_authorized": False,
+        },
+        "authorized_training_rungs": [16384, 32768],
+        "authorized_training_seeds": [0, 1, 2],
+        "final_evaluation_commitment_sha256": hashlib.sha256(
+            commitment.read_bytes()
+        ).hexdigest(),
+        "stage_a_generator_commit": STAGE_A_GENERATOR,
+        "stage_a_parent_manifest_sha256": hashlib.sha256(
+            (parent / "dataset_manifest.json").read_bytes()
+        ).hexdigest(),
+    }
+    authorization_path = tmp_path / "probe_authorization.yaml"
+    authorization_path.write_text(yaml.safe_dump(authorization, sort_keys=False))
+    evidence = validate_scientific_training_gate(
+        ROOT,
+        authorization_path=authorization_path,
+        stage_a_publication_root=parent,
+    )
+    assert evidence["publication"].train_dataset_id == "scientific-train"
+    authorization["stage_a_parent_manifest_sha256"] = "0" * 64
+    authorization_path.write_text(yaml.safe_dump(authorization, sort_keys=False))
+    with pytest.raises(TrainingGateError, match="parent manifest hash"):
+        validate_scientific_training_gate(
+            ROOT,
+            authorization_path=authorization_path,
+            stage_a_publication_root=parent,
+        )
+
+
+def test_published_reader_traverses_parent_parquet_zarr_path(tmp_path: Path) -> None:
+    pandas = pytest.importorskip("pandas")
+    zarr = pytest.importorskip("zarr")
+    parent = _write_parent_publication(
+        tmp_path, train_count=2, validation_count=2, pairs_per_shard=2
+    )
+    publication = resolve_stage_a_publication(
+        parent,
+        expected_train_count=2,
+        expected_validation_count=2,
+        expected_pairs_per_shard=2,
+    )
+    shard = publication.train_root / "shards" / "shard-00000"
+    shard.mkdir()
+    serialized = []
+    physical_ids = []
+    for index in range(2):
+        record = deepcopy(json.loads(EXAMPLE.read_text()))
+        record["pair"].update(
+            {
+                "dataset_version": publication.train_dataset_id,
+                "pair_id": f"reader-pair-{index}",
+                "source_id": f"reader-source-{index}",
+                "lens_id": f"reader-lens-{index}",
+                "physical_system_id": f"reader-system-{index}",
+                "split": "train",
+            }
+        )
+        physical_ids.append(record["pair"]["physical_system_id"])
+        serialized.append(json.dumps(record, sort_keys=True))
+    pandas.DataFrame({"record_json": serialized}).to_parquet(shard / "records.parquet")
+    noisy = zarr.open_array(
+        str(shard / "noisy.zarr"),
+        mode="w",
+        shape=(2, 2, 3, 4096),
+        chunks=(1, 2, 3, 4096),
+        dtype="f4",
+    )
+    noisy[:] = 0.0
+    (shard / "COMPLETE.json").write_text("{}\n")
+    (shard / "shard_manifest.json").write_text(
+        json.dumps(
+            {
+                "status": "complete",
+                "accepted_pair_count": 2,
+                "physical_system_ids": physical_ids,
+            }
+        )
+        + "\n"
+    )
+    curve = ASDCurve(
+        np.asarray((0.0, 1024.0)), np.asarray((1.0, 1.0)), "reader-test"
+    )
+    dataset = PublishedStageADataset(
+        publication.train_root,
+        expected_split=SplitName.TRAIN,
+        detector_curves={"H1": curve, "L1": curve, "V1": curve},
+        expected_pairs_per_shard=2,
+        expected_total_pairs=2,
+        minimum_frequency_hz=20.0,
+        maximum_frequency_hz=1024.0,
+    )
+    metadata = dataset.metadata_example(0)
+    assert metadata.gw_strain.size == 0
+    example = dataset[0]
+    assert example.gw_strain.shape == (2, 3, 4096)
+    assert example.physical_system_id == "reader-system-0"
+    assert np.all(np.isfinite(example.gw_strain))
+
+
 def test_metrics_and_target_standardization_are_finite() -> None:
     target = np.asarray(((0.0, 1.0), (1.0, 2.0)))
     samples = np.asarray(
@@ -225,6 +465,20 @@ def test_epoch_sampler_is_resume_stable_and_epoch_specific() -> None:
     assert set(first) == set(range(64))
 
 
+def test_shard_sampler_is_resume_stable_and_keeps_shards_local() -> None:
+    keys = tuple(f"shard-{index // 4}" for index in range(24))
+    sampler = DeterministicShardEpochSampler(keys, seed=2)
+    sampler.set_epoch(11)
+    first = tuple(sampler)
+    sampler.set_epoch(11)
+    assert tuple(sampler) == first
+    sampler.set_epoch(12)
+    assert tuple(sampler) != first
+    assert set(first) == set(range(24))
+    transitions = sum(keys[left] != keys[right] for left, right in zip(first, first[1:]))
+    assert transitions == 5
+
+
 def test_input_standardizer_uses_only_observed_values_and_preserves_missing_zero() -> None:
     record = _example_record()
     strain = np.zeros((2, 3, record.gw_observation.sample_count), dtype=np.float32)
@@ -232,6 +486,8 @@ def test_input_standardizer_uses_only_observed_values_and_preserves_missing_zero
     second = deepcopy(first)
     second.scalar_features[0] += 2.0
     standardizer = InputStandardizer.fit((first, second))
+    streaming_standardizer = InputStandardizer.fit_iterable(iter((first, second)))
+    assert streaming_standardizer == standardizer
     transformed = standardizer.transform(first)
     assert np.all(transformed.scalar_features[first.scalar_mask == 0] == 0.0)
     assert np.all(transformed.astrometry_items[first.astrometry_mask == 0] == 0.0)
@@ -240,6 +496,10 @@ def test_input_standardizer_uses_only_observed_values_and_preserves_missing_zero
     target_standardizer = TargetStandardizer.fit(
         np.asarray(((0.0, 1.0), (1.0, 2.0)))
     )
+    streaming_target_standardizer = TargetStandardizer.fit_iterable(
+        iter((np.asarray((0.0, 1.0)), np.asarray((1.0, 2.0))))
+    )
+    assert streaming_target_standardizer == target_standardizer
     identity = TrainingRunIdentity(
         model_configuration_hash="0" * 64,
         training_code_commit="1" * 40,
@@ -269,3 +529,59 @@ def test_engineering_smoke_caps_and_optional_model_dependency() -> None:
         model = load_yaml(ROOT / "configs/models/phase4_probe_nsf.yaml")
         with pytest.raises(MissingTrainingDependency):
             build_probe_model(model, seed=0)
+
+
+def _write_learning_curve_cases(path: Path, *, nlp: float, crps: float) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    rows = []
+    tail_groups = (
+        "high_absolute_magnification",
+        "extreme_relative_magnification",
+        "second_image_near_threshold",
+        "extreme_profile_or_environment",
+    )
+    for index in range(512):
+        row = {
+            "physical_system_id": f"validation-system-{index:04d}",
+            "lens_family": "sie_external_shear" if index % 2 == 0 else "epl_external_shear",
+            "em_cell_signature": "all_modalities",
+            "tail_view": tail_groups[index // 128],
+            "nlp_nat_per_target_dimension": nlp,
+            "crps_log_mu_primary": crps,
+            "crps_log_mu_secondary": crps,
+            "crps_mean": crps,
+        }
+        for level in (0.50, 0.80, 0.90, 0.95):
+            key = f"{level:.2f}"
+            covered = index < round(level * 512)
+            row[f"covered_primary_{key}"] = covered
+            row[f"covered_secondary_{key}"] = covered
+            row[f"covered_joint_{key}"] = covered
+            row[f"width_primary_{key}"] = 1.0
+            row[f"width_secondary_{key}"] = 1.0
+        rows.append(row)
+    with path.open("w", newline="", encoding="utf-8") as stream:
+        writer = csv.DictWriter(stream, fieldnames=list(rows[0]))
+        writer.writeheader()
+        writer.writerows(rows)
+
+
+def test_learning_curve_decision_is_paired_and_has_a_forward_exit(tmp_path: Path) -> None:
+    for rung, nlp, crps in ((16384, 1.0, 1.0), (32768, 0.995, 0.995)):
+        for seed in (0, 1, 2):
+            _write_learning_curve_cases(
+                tmp_path / f"rung-{rung}" / f"seed-{seed}" / "development_cases.csv",
+                nlp=nlp,
+                crps=crps,
+            )
+    saturated = compare_16k_to_32k(tmp_path, bootstrap_replicates=100)
+    assert saturated["decision"] == "lock_train_32k"
+    assert saturated["all_saturation_conditions_passed"] is True
+    _write_learning_curve_cases(
+        tmp_path / "rung-32768" / "seed-2" / "development_cases.csv",
+        nlp=0.95,
+        crps=0.95,
+    )
+    improving = compare_16k_to_32k(tmp_path, bootstrap_replicates=100)
+    assert improving["decision"] == "continue_to_train_65k"
+    assert improving["all_saturation_conditions_passed"] is False

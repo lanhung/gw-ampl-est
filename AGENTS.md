@@ -395,6 +395,20 @@ This resolves only the reproducibility prerequisite. No final-evaluation pair
 or identity exists, and materialization, unsealing, analysis and all training
 remain separately gated.
 
+The implementation-only probe stack may also implement the fail-closed future
+execution runner, atomic-parent publication resolver, bounded-memory rung
+preprocessing, development-only metrics and paired learning-curve comparison.
+These are software-release changes under the existing implementation gate, not a
+scientific authorization. They may use synthetic fixtures and bounded in-memory
+smoke inputs only while Stage A is staging.
+
+Do not resolve the 16k membership, open Stage A Parquet/Zarr, create a scientific
+checkpoint or start an optimizer until the atomic Stage A parent publication exists
+and a separate authorization binds its manifest hash, the finalized evaluation
+commitment, the training-code merge commit, model configuration and immutable CUDA
+environment. Calibration, SBC, final evaluation, Stage B and GWOSC/GWTC remain
+closed even after a future probe authorization.
+
 ## Scientific integrity
 
 - Never fabricate results, citations, completed runs or calibration.

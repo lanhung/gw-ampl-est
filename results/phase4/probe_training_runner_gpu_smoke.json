@@ -1,0 +1,19 @@
+{
+  "active_seconds_first_replay": 3.904395366087556,
+  "environment_freeze_sha256": "2e45000a8cea6712ae307c87782c593245ad56607a772f27a0cc5af726e37b95",
+  "examples": 1,
+  "finite": true,
+  "model_configuration_hash": "4930651be569725748a0025311ea8b479a217ecab8137be9855a7ee6d2c0377c",
+  "optimizer_steps": 1,
+  "parameter_count": 7796596,
+  "peak_gpu_bytes_first_replay": 253165056,
+  "posterior_sample_log_probability_shape": [1, 16],
+  "posterior_sample_shape": [1, 16, 2],
+  "replay_count": 2,
+  "replay_sha256": "ae4e68c02b2723698ae68c34d28bc673ff0e545cd6cd70ea86b46f13508b702d",
+  "sample_count": 16384,
+  "scientific_data_read": false,
+  "source_identity": "candidate_tree_before_final_commit",
+  "status": "passed_engineering_only",
+  "torch_version": "2.10.0+cu128"
+}

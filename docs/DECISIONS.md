@@ -651,3 +651,36 @@ future runner requires training-size and architecture lock, a separate
 authorization and release certificate, and publishes only to a sealed root.
 Final evaluation remains forbidden for stopping, architecture selection and
 calibration fitting.
+
+## D069 — Probe execution binds the atomic parent publication and reuses rung preprocessing
+
+Stage A publishes train and validation together by atomically renaming their
+common parent. Training therefore resolves both child identities from the passed
+parent `dataset_manifest.json`; it does not require nonexistent child dataset
+manifests and never reads staging. The later authorization binds the exact parent
+manifest hash, Stage A generator, RC.4 hash and finalized evaluation commitment.
+
+Input and target standardizers use deterministic streaming moments over the
+authorized rung's metadata. No waveform array is opened during preprocessing and
+no full collection of prepared examples is retained. One hashed preprocessing
+artifact is reused by seeds 0, 1 and 2. The three seeds may run concurrently on
+three isolated GPUs because model initialization, epoch ordering, data membership
+and checkpoints remain seed-addressed; architecture and best-seed selection remain
+forbidden.
+
+Development evaluation is fixed at 1,024 posterior draws per validation case.
+Marginal coverage uses central intervals, while joint coverage uses conditional
+posterior-density HPD ranks rather than the intersection of marginal intervals.
+The final learning-curve decision uses only the identical 6,144 validation systems
+and the frozen 10,000-replicate paired bootstrap. Calibration, SBC and final
+evaluation stay closed.
+
+Training order remains a complete deterministic permutation for every seed and
+epoch, but is shard-local: shard order and row order within each shard are both
+randomized. This prevents lazy Parquet/Zarr access from degenerating into one
+store open per example without changing membership or example weights.
+
+The executable AutoDL candidate uses Python 3.10.12, Torch 2.10.0+cu128, Zarr
+2.18.3 and Numcodecs 0.13.1. The latter two are the Python-3.10-compatible Zarr-v2
+pair already proven by the Stage A writer. A dependency pair requiring Python
+3.11 is not an acceptable nominal lock for a Python 3.10 host.

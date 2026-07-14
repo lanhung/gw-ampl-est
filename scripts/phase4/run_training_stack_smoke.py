@@ -91,9 +91,12 @@ def run_smoke(
     with torch.no_grad():
         final_log_probability = model.log_prob(target, batch)
         posterior_samples = model.sample(3, batch)
+        posterior_sample_log_probability = model.sample_log_prob(
+            posterior_samples, batch
+        )
     if not torch.isfinite(final_log_probability).all() or not torch.isfinite(
         posterior_samples
-    ).all():
+    ).all() or not torch.isfinite(posterior_sample_log_probability).all():
         raise FloatingPointError("engineering smoke outputs are nonfinite")
     result = {
         "status": "passed_engineering_only",
@@ -106,7 +109,16 @@ def run_smoke(
         "losses": losses,
         "log_probability_shape": list(final_log_probability.shape),
         "posterior_sample_shape": list(posterior_samples.shape),
-        "replay_sha256": _tensor_digest((final_log_probability, posterior_samples)),
+        "posterior_sample_log_probability_shape": list(
+            posterior_sample_log_probability.shape
+        ),
+        "replay_sha256": _tensor_digest(
+            (
+                final_log_probability,
+                posterior_samples,
+                posterior_sample_log_probability,
+            )
+        ),
         "scientific_data_read": False,
         "stage_a_data_read": False,
         "checkpoint_written": False,

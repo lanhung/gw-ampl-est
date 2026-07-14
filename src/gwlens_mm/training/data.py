@@ -2,17 +2,24 @@
 
 from __future__ import annotations
 
+import hashlib
 import importlib
 import json
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, List, Mapping, Optional, Sequence, Tuple
+from typing import Any, Dict, List, Mapping, Optional, Sequence, Tuple
 
 import numpy as np
 
+from ..production.diagnostic_context import classify_balanced_tail
 from ..schema import ArrayProductRole, SplitName, V2Record
 from .contracts import TrainingGateError
-from .features import PreparedExample, prepare_example
+from .features import (
+    InputStandardizer,
+    PreparedExample,
+    prepare_example,
+    prepare_metadata_example,
+)
 from .whitening import ASDCurve, whiten_detector_grid
 
 
@@ -21,6 +28,166 @@ class ShardIndexEntry:
     path: Path
     row_index: int
     physical_system_id: str
+
+
+@dataclass(frozen=True)
+class StageAPublication:
+    """Validated identity of the one atomic Stage A parent publication.
+
+    Stage A deliberately publishes the train and validation datasets together by
+    renaming their common parent.  The authoritative ``dataset_manifest.json``
+    therefore lives at the parent, not inside either child dataset directory.
+    """
+
+    parent_root: Path
+    manifest_path: Path
+    manifest_sha256: str
+    generator_commit: str
+    preregistration_hash: str
+    train_dataset_id: str
+    validation_dataset_id: str
+    train_root: Path
+    validation_root: Path
+    namespace_manifest_sha256: Mapping[str, str]
+
+
+@dataclass(frozen=True)
+class DevelopmentCase:
+    """One validation example plus nondeployable diagnostic group labels."""
+
+    example: PreparedExample
+    tail_view: Optional[str]
+
+
+def _sha256_file(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def _canonical_mapping_sha256(value: Mapping[str, Any]) -> str:
+    payload = json.dumps(
+        dict(value), sort_keys=True, separators=(",", ":"), allow_nan=False
+    ).encode()
+    return hashlib.sha256(payload).hexdigest()
+
+
+def resolve_stage_a_publication(
+    parent_root: Path,
+    *,
+    expected_generator_commit: Optional[str] = None,
+    expected_preregistration_hash: Optional[str] = None,
+    expected_train_count: int = 32768,
+    expected_validation_count: int = 6144,
+    expected_pairs_per_shard: int = 128,
+) -> StageAPublication:
+    """Resolve child datasets only from a passed atomic parent manifest.
+
+    This function reads manifests only.  Array and Parquet access remains lazy and
+    happens after the separate scientific-training gate has passed.
+    """
+
+    root = parent_root.resolve()
+    if "published" not in root.parts or not root.is_dir():
+        raise TrainingGateError("Stage A input is not an atomic published parent")
+    manifest_path = root / "dataset_manifest.json"
+    if not manifest_path.is_file():
+        raise TrainingGateError("Stage A parent publication manifest is absent")
+    manifest = _load_mapping(manifest_path)
+    if manifest.get("status") != "passed":
+        raise TrainingGateError("Stage A parent publication did not pass validation")
+    if manifest.get("model_training_authorized") is not False:
+        raise TrainingGateError("Stage A data manifest must not self-authorize training")
+    if manifest.get("train_validation_group_disjoint") is not True:
+        raise TrainingGateError("Stage A parent manifest lacks group-disjoint validation")
+    if not (
+        manifest.get("proposal_equals_evaluation") is True
+        and manifest.get("all_importance_weights_one") is True
+    ):
+        raise TrainingGateError("Stage A parent manifest violates the direct-target contract")
+    if (
+        int(manifest.get("accepted_pair_count", -1)),
+        int(manifest.get("train_accepted_pair_count", -1)),
+        int(manifest.get("validation_accepted_pair_count", -1)),
+    ) != (
+        expected_train_count + expected_validation_count,
+        expected_train_count,
+        expected_validation_count,
+    ):
+        raise TrainingGateError("Stage A parent count contract is inconsistent")
+    generator_commit = str(manifest.get("generator_commit", ""))
+    preregistration_hash = str(manifest.get("preregistration_hash", ""))
+    if expected_generator_commit is not None and generator_commit != expected_generator_commit:
+        raise TrainingGateError("Stage A generator commit differs from the training gate")
+    if (
+        expected_preregistration_hash is not None
+        and preregistration_hash != expected_preregistration_hash
+    ):
+        raise TrainingGateError("Stage A preregistration hash differs from the training gate")
+    validations = manifest.get("validations")
+    if not isinstance(validations, dict) or set(validations) != {"train", "validation"}:
+        raise TrainingGateError("Stage A parent manifest has incomplete split validations")
+    expected = {
+        "train": (expected_train_count, expected_train_count // expected_pairs_per_shard),
+        "validation": (
+            expected_validation_count,
+            expected_validation_count // expected_pairs_per_shard,
+        ),
+    }
+    dataset_ids: Dict[str, str] = {}
+    namespace_hashes: Dict[str, str] = {}
+    roots: Dict[str, Path] = {}
+    for split, (accepted_count, shard_count) in expected.items():
+        validation = validations[split]
+        if not isinstance(validation, dict):
+            raise TrainingGateError(f"Stage A {split} validation is not a mapping")
+        if (
+            validation.get("status"),
+            validation.get("split"),
+            int(validation.get("accepted_pair_count", -1)),
+            int(validation.get("complete_shard_count", -1)),
+            int(validation.get("pairs_per_shard", -1)),
+        ) != ("passed", split, accepted_count, shard_count, expected_pairs_per_shard):
+            raise TrainingGateError(f"Stage A {split} validation count contract failed")
+        if validation.get("generator_commit") != generator_commit:
+            raise TrainingGateError(f"Stage A {split} mixes generator commits")
+        if not (
+            validation.get("proposal_equals_evaluation") is True
+            and validation.get("all_importance_weights_one") is True
+        ):
+            raise TrainingGateError(f"Stage A {split} is not exact direct-target data")
+        dataset_id = str(validation.get("dataset_id", ""))
+        if not dataset_id or Path(dataset_id).name != dataset_id:
+            raise TrainingGateError(f"Stage A {split} dataset identity is invalid")
+        dataset_root = root / dataset_id
+        if not dataset_root.is_dir():
+            raise TrainingGateError(f"Stage A {split} dataset directory is absent")
+        run_manifest = _load_mapping(dataset_root / "run_manifest.json")
+        if (
+            run_manifest.get("split"),
+            run_manifest.get("dataset_id"),
+            run_manifest.get("generator_commit"),
+            int(run_manifest.get("accepted_target", -1)),
+            run_manifest.get("all_importance_weights_one"),
+        ) != (split, dataset_id, generator_commit, accepted_count, True):
+            raise TrainingGateError(f"Stage A {split} run manifest identity mismatch")
+        dataset_ids[split] = dataset_id
+        roots[split] = dataset_root
+        namespace_hashes[split] = _canonical_mapping_sha256(
+            {"run_manifest": run_manifest, "validation": validation}
+        )
+    if dataset_ids["train"] == dataset_ids["validation"]:
+        raise TrainingGateError("Stage A train and validation identities collide")
+    return StageAPublication(
+        parent_root=root,
+        manifest_path=manifest_path,
+        manifest_sha256=_sha256_file(manifest_path),
+        generator_commit=generator_commit,
+        preregistration_hash=preregistration_hash,
+        train_dataset_id=dataset_ids["train"],
+        validation_dataset_id=dataset_ids["validation"],
+        train_root=roots["train"],
+        validation_root=roots["validation"],
+        namespace_manifest_sha256=namespace_hashes,
+    )
 
 
 def _load_mapping(path: Path) -> Mapping[str, Any]:
@@ -43,8 +210,23 @@ def index_complete_shards(
         raise TrainingGateError("training readers refuse staging or canary roots")
     if not dataset_root.is_dir():
         raise FileNotFoundError(dataset_root)
-    if require_published and not (dataset_root / "dataset_manifest.json").is_file():
-        raise TrainingGateError("atomic dataset publication manifest is missing")
+    if require_published:
+        parent_manifest = dataset_root.parent / "dataset_manifest.json"
+        if not parent_manifest.is_file():
+            raise TrainingGateError("atomic parent publication manifest is missing")
+        parent = _load_mapping(parent_manifest)
+        validation = parent.get("validations", {}).get(dataset_root.name)
+        if validation is None:
+            validation = next(
+                (
+                    item
+                    for item in parent.get("validations", {}).values()
+                    if isinstance(item, dict) and item.get("dataset_id") == dataset_root.name
+                ),
+                None,
+            )
+        if parent.get("status") != "passed" or not isinstance(validation, dict):
+            raise TrainingGateError("dataset is not named by a passed parent publication")
     shards_root = dataset_root / "shards"
     complete = sorted(
         path
@@ -126,22 +308,17 @@ class PublishedStageADataset:
     def __len__(self) -> int:
         return len(self.entries)
 
-    def _open_shard(self, path: Path) -> Tuple[Any, Any]:
+    def _open_records(self, path: Path) -> Any:
         if self._cached_path != path:
             pandas = importlib.import_module("pandas")
-            zarr = importlib.import_module("zarr")
             records = pandas.read_parquet(path / "records.parquet")
-            noisy = zarr.open_array(str(path / "noisy.zarr"), mode="r")
-            if len(records) != noisy.shape[0]:
-                raise TrainingGateError("Parquet/Zarr row counts disagree")
             self._cached_path = path
             self._cached_records = records
-            self._cached_noisy = noisy
-        return self._cached_records, self._cached_noisy
+            self._cached_noisy = None
+        return self._cached_records
 
-    def __getitem__(self, index: int) -> PreparedExample:
-        entry = self.entries[index]
-        records, noisy_store = self._open_shard(entry.path)
+    def _record(self, entry: ShardIndexEntry) -> V2Record:
+        records = self._open_records(entry.path)
         row = records.iloc[entry.row_index]
         record = V2Record.from_json(str(row["record_json"]))
         record.validate()
@@ -161,6 +338,60 @@ class PublishedStageADataset:
         roles = {reference.product_role for reference in record.gw_observation.array_products}
         if roles != set(ArrayProductRole):
             raise TrainingGateError("record array-product roles are incomplete")
+        return record
+
+    def _open_noisy(self, path: Path, expected_rows: int) -> Any:
+        if self._cached_path != path:
+            self._open_records(path)
+        if self._cached_noisy is None:
+            zarr = importlib.import_module("zarr")
+            noisy = zarr.open_array(str(path / "noisy.zarr"), mode="r")
+            if expected_rows != noisy.shape[0]:
+                raise TrainingGateError("Parquet/Zarr row counts disagree")
+            self._cached_noisy = noisy
+        return self._cached_noisy
+
+    def metadata_example(self, index: int) -> PreparedExample:
+        """Read one record for standardizer fitting without opening strain arrays."""
+
+        entry = self.entries[index]
+        record = self._record(entry)
+        return prepare_metadata_example(record)
+
+    def development_case(self, index: int) -> DevelopmentCase:
+        """Read validation-only labels that are never passed into the model."""
+
+        if self.expected_split is not SplitName.VALIDATION:
+            raise TrainingGateError("development diagnostics require the validation split")
+        entry = self.entries[index]
+        record = self._record(entry)
+        selection = record.provenance.selection
+        if selection is None:
+            raise TrainingGateError("development record lacks frozen selection provenance")
+        images = {image.image_id: image for image in record.lens_truth.physical_images}
+        selected = (
+            images[record.pair.primary_image_id],
+            images[record.pair.secondary_image_id],
+        )
+        secondary_snr = float(
+            selection.per_image_network_optimal_snr[record.pair.secondary_image_id]
+        )
+        density_slope = float(record.lens_truth.lens_parameters.get("density_slope", 2.0))
+        tail = classify_balanced_tail(
+            selected,
+            secondary_network_snr=secondary_snr,
+            external_convergence=record.lens_truth.external_convergence,
+            density_slope=density_slope,
+        )
+        return DevelopmentCase(
+            example=self[index], tail_view=None if tail is None else tail.value
+        )
+
+    def __getitem__(self, index: int) -> PreparedExample:
+        entry = self.entries[index]
+        record = self._record(entry)
+        records = self._cached_records
+        noisy_store = self._open_noisy(entry.path, len(records))
         noisy = np.asarray(noisy_store[entry.row_index], dtype=np.float32)
         detector_mask = np.asarray(
             record.gw_observation.detector_availability_mask, dtype=bool
@@ -179,6 +410,43 @@ class PublishedStageADataset:
         return tuple(entry.physical_system_id for entry in self.entries)
 
 
+class StandardizedStageADataset:
+    """Apply frozen rung statistics lazily without mutating the publication."""
+
+    def __init__(
+        self, dataset: PublishedStageADataset, standardizer: InputStandardizer
+    ) -> None:
+        self.dataset = dataset
+        self.standardizer = standardizer
+
+    def __len__(self) -> int:
+        return len(self.dataset)
+
+    def __getitem__(self, index: int) -> PreparedExample:
+        return self.standardizer.transform(self.dataset[index])
+
+
+class DevelopmentStageADataset:
+    """Apply the training-rung standardizer while keeping labels out of inputs."""
+
+    def __init__(
+        self, dataset: PublishedStageADataset, standardizer: InputStandardizer
+    ) -> None:
+        if dataset.expected_split is not SplitName.VALIDATION:
+            raise ValueError("development dataset must wrap validation")
+        self.dataset = dataset
+        self.standardizer = standardizer
+
+    def __len__(self) -> int:
+        return len(self.dataset)
+
+    def __getitem__(self, index: int) -> DevelopmentCase:
+        case = self.dataset.development_case(index)
+        return DevelopmentCase(
+            example=self.standardizer.transform(case.example), tail_view=case.tail_view
+        )
+
+
 def torch_collate(examples: Sequence[PreparedExample]) -> Mapping[str, Any]:
     """Convert a prepared batch after optional PyTorch is installed."""
 
@@ -187,3 +455,21 @@ def torch_collate(examples: Sequence[PreparedExample]) -> Mapping[str, Any]:
     torch = importlib.import_module("torch")
     arrays = collate_numpy(examples)
     return {name: torch.from_numpy(value) for name, value in arrays.items()}
+
+
+def torch_development_collate(
+    cases: Sequence[DevelopmentCase],
+) -> Tuple[Mapping[str, Any], Tuple[Mapping[str, Optional[str]], ...]]:
+    """Keep IDs and group labels beside, never inside, deployable tensors."""
+
+    tensors = torch_collate([case.example for case in cases])
+    metadata = tuple(
+        {
+            "physical_system_id": case.example.physical_system_id,
+            "lens_family": case.example.lens_family,
+            "em_cell_signature": case.example.em_cell_signature,
+            "tail_view": case.tail_view,
+        }
+        for case in cases
+    )
+    return tensors, metadata

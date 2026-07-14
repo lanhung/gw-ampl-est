@@ -5,7 +5,7 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass, replace
 from pathlib import Path
-from typing import List, Mapping, Optional, Sequence, Tuple
+from typing import Iterable, List, Mapping, Optional, Sequence, Tuple
 
 import numpy as np
 
@@ -75,39 +75,52 @@ class InputStandardizer:
 
     @classmethod
     def fit(cls, examples: Sequence[PreparedExample]) -> "InputStandardizer":
-        if len(examples) < 2:
-            raise ValueError("input standardization requires at least two training examples")
-        scalar_values = np.stack([example.scalar_features for example in examples]).astype(
-            np.float64
-        )
-        scalar_masks = np.stack([example.scalar_mask for example in examples]).astype(bool)
-        scalar_mean = []
-        scalar_scale = []
-        for column in range(scalar_values.shape[1]):
-            observed = scalar_values[scalar_masks[:, column], column]
-            if not len(observed):
-                raise ValueError(f"scalar feature {column} is never observed in training")
-            mean = float(np.mean(observed))
-            scale = float(np.std(observed, ddof=0))
-            # Constant metadata remain finite without inventing a scale.
-            scalar_mean.append(mean)
-            scalar_scale.append(scale if scale > 0 else 1.0)
-        astrometry_rows = []
+        return cls.fit_iterable(examples)
+
+    @classmethod
+    def fit_iterable(cls, examples: Iterable[PreparedExample]) -> "InputStandardizer":
+        """Fit observed-only statistics without retaining strain examples in memory."""
+
+        scalar_count = np.zeros(22, dtype=np.int64)
+        scalar_mean = np.zeros(22, dtype=np.float64)
+        scalar_m2 = np.zeros(22, dtype=np.float64)
+        astrometry_count = 0
+        astrometry_mean = np.zeros(5, dtype=np.float64)
+        astrometry_m2 = np.zeros(5, dtype=np.float64)
+        example_count = 0
         for example in examples:
-            available = example.astrometry_mask.astype(bool)
-            if np.any(available):
-                astrometry_rows.append(example.astrometry_items[available, :5])
-        if not astrometry_rows:
+            example_count += 1
+            values = np.asarray(example.scalar_features, dtype=np.float64)
+            observed_mask = np.asarray(example.scalar_mask, dtype=bool)
+            if values.shape != (22,) or observed_mask.shape != (22,):
+                raise ValueError("streaming standardizer received incompatible scalar features")
+            for column in np.flatnonzero(observed_mask):
+                scalar_count[column] += 1
+                delta = values[column] - scalar_mean[column]
+                scalar_mean[column] += delta / scalar_count[column]
+                scalar_m2[column] += delta * (values[column] - scalar_mean[column])
+            available = np.asarray(example.astrometry_mask, dtype=bool)
+            for row in np.asarray(example.astrometry_items[available, :5], dtype=np.float64):
+                astrometry_count += 1
+                delta = row - astrometry_mean
+                astrometry_mean += delta / astrometry_count
+                astrometry_m2 += delta * (row - astrometry_mean)
+        if example_count < 2:
+            raise ValueError("input standardization requires at least two training examples")
+        missing = np.flatnonzero(scalar_count == 0)
+        if len(missing):
+            raise ValueError(f"scalar feature {int(missing[0])} is never observed in training")
+        if astrometry_count == 0:
             raise ValueError("no astrometry is observed in the training standardizer fit")
-        astrometry_values = np.concatenate(astrometry_rows, axis=0).astype(np.float64)
-        astrometry_mean_array = np.mean(astrometry_values, axis=0)
-        astrometry_scale_array = np.std(astrometry_values, axis=0, ddof=0)
-        astrometry_scale_array[astrometry_scale_array <= 0] = 1.0
+        scalar_scale = np.sqrt(scalar_m2 / scalar_count)
+        scalar_scale[scalar_scale <= 0] = 1.0
+        astrometry_scale = np.sqrt(astrometry_m2 / astrometry_count)
+        astrometry_scale[astrometry_scale <= 0] = 1.0
         return cls(
-            tuple(scalar_mean),
-            tuple(scalar_scale),
-            tuple(float(value) for value in astrometry_mean_array),  # type: ignore[arg-type]
-            tuple(float(value) for value in astrometry_scale_array),  # type: ignore[arg-type]
+            tuple(float(value) for value in scalar_mean),
+            tuple(float(value) for value in scalar_scale),
+            tuple(float(value) for value in astrometry_mean),  # type: ignore[arg-type]
+            tuple(float(value) for value in astrometry_scale),  # type: ignore[arg-type]
         )
 
     def transform(self, example: PreparedExample) -> PreparedExample:
@@ -267,25 +280,12 @@ def _target(record: V2Record) -> np.ndarray:
     return target
 
 
-def prepare_example(
-    record: V2Record,
-    whitened_noisy_strain: np.ndarray,
-    *,
-    maximum_astrometry_items: int = 5,
+def _assemble_example(
+    record: V2Record, strain: np.ndarray, maximum_astrometry_items: int
 ) -> PreparedExample:
-    """Prepare allowlisted observations; truth enters only the explicit target."""
-
-    record.validate()
-    strain = np.asarray(whitened_noisy_strain, dtype=np.float32)
-    if strain.shape != (2, 3, record.gw_observation.sample_count):
-        raise ValueError("whitened noisy strain has the wrong shape")
-    if not np.all(np.isfinite(strain)):
-        raise ValueError("whitened noisy strain contains NaN or Inf")
     detector_mask = np.asarray(
         record.gw_observation.detector_availability_mask, dtype=np.float32
     )
-    if np.any(strain[detector_mask == 0] != 0.0):
-        raise ValueError("unavailable whitened detector slots must be zero")
     astrometry, astrometry_mask = _astrometry_features(record, maximum_astrometry_items)
     scalars, scalar_mask = _scalar_features(record.em_observation, record)
     modality_names = tuple(sorted(record.em_observation.modality_availability_mask))
@@ -316,6 +316,43 @@ def prepare_example(
         physical_system_id=record.pair.physical_system_id,
         lens_family=record.pair.lens_family.value,
         em_cell_signature=signature,
+    )
+
+
+def prepare_example(
+    record: V2Record,
+    whitened_noisy_strain: np.ndarray,
+    *,
+    maximum_astrometry_items: int = 5,
+) -> PreparedExample:
+    """Prepare allowlisted observations; truth enters only the explicit target."""
+
+    record.validate()
+    strain = np.asarray(whitened_noisy_strain, dtype=np.float32)
+    if strain.shape != (2, 3, record.gw_observation.sample_count):
+        raise ValueError("whitened noisy strain has the wrong shape")
+    if not np.all(np.isfinite(strain)):
+        raise ValueError("whitened noisy strain contains NaN or Inf")
+    detector_mask = np.asarray(
+        record.gw_observation.detector_availability_mask, dtype=np.float32
+    )
+    if np.any(strain[detector_mask == 0] != 0.0):
+        raise ValueError("unavailable whitened detector slots must be zero")
+    return _assemble_example(record, strain, maximum_astrometry_items)
+
+
+def prepare_metadata_example(
+    record: V2Record,
+    *,
+    maximum_astrometry_items: int = 5,
+) -> PreparedExample:
+    """Prepare only metadata and targets for bounded-memory standardizer fitting."""
+
+    record.validate()
+    return _assemble_example(
+        record,
+        np.empty((0,), dtype=np.float32),
+        maximum_astrometry_items,
     )
 
 

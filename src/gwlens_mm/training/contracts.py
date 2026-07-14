@@ -142,18 +142,23 @@ def validate_scientific_training_gate(
     root: Path,
     *,
     authorization_path: Path,
-    train_publication_root: Path,
-    validation_publication_root: Path,
+    stage_a_publication_root: Path,
 ) -> Mapping[str, Any]:
-    """Require a later explicit gate before any Stage A optimization is allowed."""
+    """Require a later explicit gate before even indexing published Stage A data."""
 
     load_training_stack_contract(root)
     authorization = load_yaml(authorization_path)
     if authorization.get("authorization_status") != "authorized_probe_training_only":
         raise TrainingGateError("scientific probe-training authorization is absent")
     flags = authorization.get("authorization", {})
-    if flags.get("scientific_probe_training_authorized") is not True:
-        raise TrainingGateError("scientific probe training remains closed")
+    for required in (
+        "stage_a_data_access_authorized",
+        "scientific_probe_training_authorized",
+        "probe_optimizer_execution_authorized",
+        "learning_curve_decision_authorized",
+    ):
+        if flags.get(required) is not True:
+            raise TrainingGateError(f"probe gate requires {required}=true")
     for forbidden in (
         "model_tuning_authorized",
         "calibration_authorized",
@@ -163,6 +168,10 @@ def validate_scientific_training_gate(
     ):
         if flags.get(forbidden) is not False:
             raise TrainingGateError(f"probe gate must keep {forbidden} false")
+    if authorization.get("authorized_training_rungs") != [16384, 32768]:
+        raise TrainingGateError("probe authorization must cover only the frozen 16k/32k rungs")
+    if authorization.get("authorized_training_seeds") != [0, 1, 2]:
+        raise TrainingGateError("probe authorization must cover exactly seeds 0, 1 and 2")
     commitment_path = root / "results/phase4/final_evaluation_commitment.json"
     commitment = _load_json(commitment_path)
     if commitment.get("commitment_status") != "finalized_before_training":
@@ -173,15 +182,21 @@ def validate_scientific_training_gate(
     actual_commitment_hash = hashlib.sha256(commitment_path.read_bytes()).hexdigest()
     if expected_commitment_hash != actual_commitment_hash:
         raise TrainingGateError("final-evaluation commitment hash mismatch")
-    for name, path in (
-        ("train", train_publication_root),
-        ("validation", validation_publication_root),
-    ):
-        if "published" not in path.parts or not path.is_dir():
-            raise TrainingGateError(f"{name} input is not an atomic published dataset")
-        if not (path / "dataset_manifest.json").is_file():
-            raise TrainingGateError(f"{name} publication manifest is absent")
-    return authorization
+    from .data import resolve_stage_a_publication
+
+    publication = resolve_stage_a_publication(
+        stage_a_publication_root,
+        expected_generator_commit=str(authorization.get("stage_a_generator_commit", "")),
+        expected_preregistration_hash=RC4_HASH,
+    )
+    if authorization.get("stage_a_parent_manifest_sha256") != publication.manifest_sha256:
+        raise TrainingGateError("Stage A parent manifest hash mismatch")
+    return {
+        "authorization": authorization,
+        "publication": publication,
+        "authorization_status": authorization["authorization_status"],
+        "final_evaluation_commitment_sha256": actual_commitment_hash,
+    }
 
 
 def model_configuration_hash(model: Mapping[str, Any]) -> str:

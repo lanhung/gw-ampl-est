@@ -364,15 +364,22 @@ silently choose a solver search window or approximate caustic area.
 
 - The implementation-only stack passed unit, type, lint, build and deterministic
   in-memory model smoke checks. This is not a model fit or performance result.
-- AutoDL GPU execution was deliberately not attempted while the frozen Stage A
-  checkout is active; the only model smoke used random in-memory tensors in a
-  disposable Vultr CPU environment.
-- The final-evaluation commitment remains an unfinalized design template.
-  The scientific training gate correctly refuses execution until that
-  commitment, Stage A publication and a separate training authorization all
-  exist.
+- The isolated AutoDL environment installation correctly rejected Zarr 2.18.7
+  and Numcodecs 0.15.1 because those releases require Python 3.11. The executable
+  Python-3.10 environment is now frozen to Zarr 2.18.3 and Numcodecs 0.13.1;
+  no scientific data or generator environment was changed.
+- A disposable in-memory AutoDL GPU smoke then exercised full-length strain,
+  forward/backward optimization, conditional sampling and sampled log density
+  twice with byte-identical replay. It did not read Stage A or produce a model
+  performance result.
+- The final-evaluation commitment is now finalized. The scientific training gate
+  correctly refuses execution until Stage A publication and a separate training
+  authorization also exist.
 - The published-shard reader has not read Stage A staging and cannot be treated
   as end-to-end scientific I/O evidence until atomic publication is complete.
+- Review also caught a prospective I/O failure: a global random permutation would
+  reopen lazy stores almost once per sample. The shard-local deterministic sampler
+  fixes that before training without changing the epoch permutation contract.
 
 ## Phase 4 final-evaluation implementation boundary
 
@@ -389,3 +396,24 @@ silently choose a solver search window or approximate caustic area.
 - Final-evaluation execution and unsealing remain unauthorized; the implemented
   runner must fail before generation without a future exact authorization,
   finalized commitment and release certificate.
+
+## Phase 4 probe-runner integration findings resolved before data access
+
+- Review found that the original reader expected `dataset_manifest.json` inside
+  each train/validation child. The active immutable Stage A runner correctly writes
+  one manifest at the atomic parent, so the old reader would have failed after
+  publication. The reader now resolves and hashes child identities from that parent
+  contract; Stage A generation code and artifacts were not changed.
+- The original `InputStandardizer.fit` retained a sequence of prepared examples.
+  At 16k/32k, retaining their strain tensors would violate the bounded-memory
+  requirement. Rung preprocessing now streams Parquet metadata and never opens
+  strain arrays.
+- Development metric functions existed but were not connected to a scientific
+  runner. The runner now writes per-case validation NLP, CRPS, marginal coverage,
+  joint HPD coverage, interval width, EM-cell and internal-tail diagnostics, then
+  applies the frozen paired bootstrap. No scientific result was calculated while
+  making these corrections.
+- The prior software candidate named Python 3.11, while the qualified AutoDL host
+  provides Python 3.10.12 and the package supports Python 3.9 or newer. The isolated
+  training environment is therefore pinned to the real 3.10.12 runtime before any
+  training authorization, rather than fabricating a 3.11 execution identity.

@@ -1,0 +1,20 @@
+environment_id: phase4-probe-training-autodl-v1
+status: frozen_candidate_scientific_training_not_authorized
+python_version: "3.10.12"
+cuda_available: true
+gpu_model: NVIDIA RTX 5000 Ada Generation
+gpu_count: 4
+
+requirements_lock_path: configs/environment/phase4-training-requirements.lock.txt
+requirements_lock_sha256: "071e3a56a6945189968ff8ab92d201461a729606f6c3dff0a542f32b0d8e7ef1"
+normalized_remote_freeze_path: configs/environment/phase4-training-freeze.txt
+normalized_remote_freeze_sha256: "2e45000a8cea6712ae307c87782c593245ad56607a772f27a0cc5af726e37b95"
+
+model_configuration_path: configs/models/phase4_probe_nsf.yaml
+model_configuration_hash: "4930651be569725748a0025311ea8b479a217ecab8137be9855a7ee6d2c0377c"
+training_code_commit: null
+training_wheel_sha256: null
+
+editable_install_for_scientific_training_authorized: false
+scientific_training_authorized: false
+resolution_rule: exact_noneditable_wheel_and_normalized_environment_freeze_required

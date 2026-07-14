@@ -7,17 +7,20 @@ Direct-target RC.4 is frozen at hash
 The exact-count Stage A run is active under parent
 `phase4-stage-a-2be777e727ef-d3a60034bbd6`, using frozen generator commit
 `2be777e727ef9d8e1a85f89c68966df5d37932b0`. At the read-only snapshot
-`2026-07-14T10:50:24Z`, 64/256 train shards were atomically complete, 16 train
-shards were partial, 8,192/32,768 train systems were complete, no error pattern
-was present and 312,123,940,864 bytes remained free. Validation generation and
+`2026-07-14T13:39:00Z`, 85/256 train shards were atomically complete, 16 train
+shards were partial, 10,880/32,768 train systems were complete, no error pattern
+was present and 308,282,417,152 bytes remained free. Validation generation and
 final publication have not started.
 
-In parallel, an implementation-only branch now contains the candidate probe
-training stack. It may run unit/integration and in-memory engineering smoke
-tests but cannot read Stage A, start scientific training or inspect final
-evaluation. Scientific probe training remains separately gated until Stage A
-is published, all 32k train IDs resolve the deterministic 16k subset, and the
-final-evaluation generation commitment is finalized and hashed.
+In parallel, the probe stack now has a fail-closed execution runner, atomic-parent
+publication resolver, streaming rung standardization, deterministic three-GPU seed
+launcher, development metrics and the preregistered paired learning-curve decision.
+It may run unit/integration and in-memory engineering smoke tests but cannot read
+Stage A or start scientific training. The final-evaluation generation commitment
+is finalized at SHA-256
+`c13412eced163bac26abc4b22d054f3a6fa967e7e5a4dd7849ebf54f42df6083`.
+Scientific probe training still requires Stage A atomic publication and a separate
+authorization binding the publication, training code and environment.
 
 ## Completed
 
@@ -256,6 +259,16 @@ final-evaluation generation commitment is finalized and hashed.
 - at `2026-07-14T13:15:29Z`, observed 82/256 train shards complete (10,496
   accepted systems), 16 partial train shards and zero execution errors; Stage A
   remained staging-only and validation had not started.
+- at `2026-07-14T14:18:07Z`, observed 89/256 train shards complete (11,392
+  accepted systems), 16 partial train shards and zero execution errors; this is
+  34.77% of train and 29.28% of the full 304-shard Stage A contract.
+- completed the fail-closed future probe runner, atomic-parent resolver,
+  metadata-only streaming rung preparation, deterministic shard-local epoch
+  sampling, three-GPU launcher, validation development metrics and paired
+  learning-curve decision; all scientific execution flags remain false.
+- installed and normalized the isolated AutoDL candidate environment at freeze
+  SHA-256 `2e45000a...`; a full-length GPU engineering smoke passed twice with
+  replay SHA-256 `ae4e68c0...`, without reading Stage A.
 
 ## Not started or not yet complete by design
 

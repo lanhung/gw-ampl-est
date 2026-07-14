@@ -100,7 +100,7 @@ architecture:
 optimization:
   seeds: [0, 1, 2]
   model_initialization: seed_applied_before_model_construction
-  training_order: deterministic_epoch_addressed_sampler
+  training_order: deterministic_epoch_addressed_shard_local_sampler
   optimizer: AdamW
   learning_rate: 0.0003
   betas: [0.9, 0.999]
@@ -118,15 +118,30 @@ optimization:
     binds_run_identity: true
     binds_input_and_target_standardizers: true
 
+development_evaluation:
+  source_split: validation
+  comparison_cases: identical_6144_physical_systems_across_all_rungs_and_seeds
+  posterior_draws_per_case: 1024
+  posterior_draw_seed_domain: adaptive_learning_curve_posterior_draws_v1
+  batch_size: 32
+  coverage_levels: [0.50, 0.80, 0.90, 0.95]
+  per_case_metrics: [nlp, crps, marginal_coverage, joint_coverage, interval_width]
+  grouped_metrics: [lens_family, em_cell, validation_internal_tail_view]
+  minimum_tail_view_cases: 128
+  calibration_applied: false
+  final_evaluation_accessed: false
+
 software_candidate:
-  python: "3.11"
-  torch: "2.10.0"
+  python: "3.10.12"
+  torch: "2.10.0+cu128"
   nflows: "0.14"
   numpy: "2.2.6"
   pandas: "2.3.3"
   pyarrow: "22.0.0"
-  zarr: "2.18.7"
-  numcodecs: "0.15.1"
+  zarr: "2.18.3"
+  numcodecs: "0.13.1"
+  scipy: "1.15.3"
+  pyyaml: "6.0.3"
 
 execution:
   scientific_training_enabled: false

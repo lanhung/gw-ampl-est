@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+import csv
 import hashlib
 import importlib
+import io
 import json
 import os
 import random
@@ -15,6 +17,7 @@ import numpy as np
 
 from .contracts import TrainingGateError
 from .features import InputStandardizer
+from .metrics import empirical_crps
 
 
 @dataclass(frozen=True)
@@ -27,10 +30,26 @@ class TargetStandardizer:
         values = np.asarray(targets, dtype=np.float64)
         if values.ndim != 2 or values.shape[1] != 2 or len(values) < 2:
             raise ValueError("target standardization requires at least two two-dimensional cases")
-        if not np.all(np.isfinite(values)):
-            raise ValueError("target standardization received NaN or Inf")
-        mean = np.mean(values, axis=0)
-        scale = np.std(values, axis=0, ddof=0)
+        return cls.fit_iterable(values)
+
+    @classmethod
+    def fit_iterable(cls, targets: Iterable[np.ndarray]) -> "TargetStandardizer":
+        """Fit target moments in a deterministic bounded-memory pass."""
+
+        count = 0
+        mean = np.zeros(2, dtype=np.float64)
+        m2 = np.zeros(2, dtype=np.float64)
+        for target in targets:
+            value = np.asarray(target, dtype=np.float64)
+            if value.shape != (2,) or not np.all(np.isfinite(value)):
+                raise ValueError("target standardization received NaN, Inf, or wrong shape")
+            count += 1
+            delta = value - mean
+            mean += delta / count
+            m2 += delta * (value - mean)
+        if count < 2:
+            raise ValueError("target standardization requires at least two two-dimensional cases")
+        scale = np.sqrt(m2 / count)
         if np.any(scale <= 0) or not np.all(np.isfinite(scale)):
             raise ValueError("target standard deviations must be finite and positive")
         return cls(
@@ -130,6 +149,52 @@ class DeterministicEpochSampler:
         return self.size
 
 
+class DeterministicShardEpochSampler:
+    """Epoch-addressed shuffle that preserves shard-local I/O.
+
+    A global element permutation makes a lazy sharded reader reopen Parquet and
+    Zarr stores for almost every example.  Randomizing both the shard order and
+    the row order within every shard preserves an unbiased epoch permutation
+    while reducing store opens to roughly the number of shards.
+    """
+
+    def __init__(self, shard_keys: Sequence[str], *, seed: int) -> None:
+        if not shard_keys:
+            raise ValueError("shard-aware sampler requires at least one example")
+        if seed not in (0, 1, 2):
+            raise ValueError("sampler seed is outside the preregistered set")
+        groups: Dict[str, list[int]] = {}
+        for index, key in enumerate(shard_keys):
+            if not key:
+                raise ValueError("shard-aware sampler received an empty shard key")
+            groups.setdefault(str(key), []).append(index)
+        self.groups = tuple(
+            (key, tuple(indices)) for key, indices in sorted(groups.items())
+        )
+        self.size = len(shard_keys)
+        self.seed = int(seed)
+        self.epoch = 0
+
+    def set_epoch(self, epoch: int) -> None:
+        if epoch < 0:
+            raise ValueError("sampler epoch must be nonnegative")
+        self.epoch = int(epoch)
+
+    def __iter__(self) -> Iterator[int]:
+        generator = np.random.default_rng(np.random.SeedSequence((self.seed, self.epoch)))
+        group_order = generator.permutation(len(self.groups))
+        ordered: list[int] = []
+        for group_index in group_order:
+            indices = np.asarray(self.groups[int(group_index)][1], dtype=np.int64)
+            ordered.extend(int(value) for value in generator.permutation(indices))
+        if len(ordered) != self.size or len(set(ordered)) != self.size:
+            raise RuntimeError("shard-aware sampler did not construct an epoch permutation")
+        return iter(ordered)
+
+    def __len__(self) -> int:
+        return self.size
+
+
 def set_deterministic_training_seed(seed: int) -> None:
     if seed not in (0, 1, 2):
         raise ValueError("training seed is outside the preregistered set")
@@ -194,9 +259,11 @@ def _restore_rng_state(torch: Any, state: Mapping[str, Any]) -> None:
 
 def _set_training_epoch(train_loader: Any, epoch: int) -> None:
     sampler = getattr(train_loader, "sampler", None)
-    if not isinstance(sampler, DeterministicEpochSampler):
+    if not isinstance(
+        sampler, (DeterministicEpochSampler, DeterministicShardEpochSampler)
+    ):
         raise TrainingGateError(
-            "scientific train loader requires DeterministicEpochSampler"
+            "scientific train loader requires an epoch-addressed deterministic sampler"
         )
     sampler.set_epoch(epoch)
 
@@ -253,7 +320,10 @@ def train_probe(
     epochs_without_improvement = 0
     checkpoint_path = output_directory / "last.ckpt"
     best_path = output_directory / "best.ckpt"
+    history: list[Mapping[str, Any]] = []
     if resume_checkpoint is not None:
+        if resume_checkpoint.resolve() != checkpoint_path.resolve():
+            raise TrainingGateError("probe resume must use this run identity's last checkpoint")
         state = torch.load(resume_checkpoint, map_location=device, weights_only=False)
         if state["identity"] != asdict(identity):
             raise TrainingGateError("checkpoint identity does not match this training run")
@@ -263,15 +333,20 @@ def train_probe(
         best_value = float(state["best_validation_nlp_per_dimension"])
         best_epoch = int(state["best_epoch"])
         epochs_without_improvement = int(state["epochs_without_improvement"])
+        checkpoint_history = state.get("history")
+        if not isinstance(checkpoint_history, list) or len(checkpoint_history) != start_epoch:
+            raise TrainingGateError("checkpoint history does not match its completed epoch")
+        history = [dict(row) for row in checkpoint_history]
         if state["input_standardizer"] != asdict(input_standardizer):
             raise TrainingGateError("checkpoint input standardizer mismatch")
         if state["target_standardizer"] != asdict(standardizer):
             raise TrainingGateError("checkpoint target standardizer mismatch")
         _restore_rng_state(torch, state["rng_state"])
+        if best_epoch >= 0 and not best_path.is_file():
+            raise TrainingGateError("resume checkpoint has no matching best checkpoint")
     maximum_epochs = int(optimization["maximum_epochs"])
     patience = int(optimization["early_stopping_patience_epochs"])
     minimum_delta = float(optimization["early_stopping_minimum_delta"])
-    history = []
     for epoch in range(start_epoch, maximum_epochs):
         _set_training_epoch(train_loader, epoch)
         model.train()
@@ -359,6 +434,166 @@ def train_probe(
     }
     summary_path = output_directory / "training_summary.json"
     _atomic_text_write(summary_path, json.dumps(summary, indent=2, sort_keys=True) + "\n")
+    return summary
+
+
+def evaluate_development_validation(
+    model: Any,
+    validation_loader: Iterable[
+        Tuple[Mapping[str, Any], Sequence[Mapping[str, Optional[str]]]]
+    ],
+    *,
+    standardizer: TargetStandardizer,
+    device_name: str,
+    posterior_draws_per_case: int,
+    evaluation_seed: int,
+    output_directory: Path,
+    levels: Sequence[float] = (0.5, 0.8, 0.9, 0.95),
+) -> Mapping[str, Any]:
+    """Evaluate only the authorized development validation cases."""
+
+    if posterior_draws_per_case < 128:
+        raise TrainingGateError("development posterior draw count is too small")
+    torch = importlib.import_module("torch")
+    device = torch.device(device_name)
+    torch.manual_seed(evaluation_seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(evaluation_seed)
+    model.eval()
+    mean = np.asarray(standardizer.mean, dtype=np.float64)
+    scale = np.asarray(standardizer.standard_deviation, dtype=np.float64)
+    rows: list[Dict[str, Any]] = []
+    with torch.no_grad():
+        for batch, metadata in validation_loader:
+            moved = _move_batch(batch, device)
+            target_tensor = moved.pop("target")
+            standardized = _standardize_target(target_tensor, standardizer, torch)
+            log_probability = (
+                model.log_prob(standardized, moved) - standardizer.log_absolute_jacobian
+            )
+            sampled = model.sample(posterior_draws_per_case, moved)
+            sampled_log_probability = model.sample_log_prob(sampled, moved)
+            samples = sampled.detach().cpu().numpy().astype(np.float64)
+            sampled_log_probability_numpy = (
+                sampled_log_probability.detach().cpu().numpy().astype(np.float64)
+            )
+            target = target_tensor.detach().cpu().numpy().astype(np.float64)
+            if samples.shape != (len(target), posterior_draws_per_case, 2):
+                raise TrainingGateError("development posterior samples have the wrong shape")
+            samples = samples * scale[None, None, :] + mean[None, None, :]
+            crps = empirical_crps(samples, target)
+            log_probability_numpy = log_probability.detach().cpu().numpy().astype(np.float64)
+            if not (
+                np.all(np.isfinite(log_probability_numpy))
+                and np.all(np.isfinite(sampled_log_probability_numpy))
+                and np.all(np.isfinite(samples))
+                and np.all(np.isfinite(crps))
+            ):
+                raise FloatingPointError("development evaluation produced NaN or Inf")
+            for case_index, labels in enumerate(metadata):
+                row: Dict[str, Any] = {
+                    "physical_system_id": labels["physical_system_id"],
+                    "lens_family": labels["lens_family"],
+                    "em_cell_signature": labels["em_cell_signature"],
+                    "tail_view": labels["tail_view"] or "none",
+                    "nlp_nat_per_target_dimension": -log_probability_numpy[case_index] / 2.0,
+                    "crps_log_mu_primary": crps[case_index, 0],
+                    "crps_log_mu_secondary": crps[case_index, 1],
+                    "crps_mean": float(np.mean(crps[case_index])),
+                }
+                for level in levels:
+                    key = f"{level:.2f}"
+                    alpha = (1.0 - level) / 2.0
+                    lower = np.quantile(samples[case_index], alpha, axis=0)
+                    upper = np.quantile(samples[case_index], 1.0 - alpha, axis=0)
+                    contained = (target[case_index] >= lower) & (
+                        target[case_index] <= upper
+                    )
+                    joint_threshold = np.quantile(
+                        sampled_log_probability_numpy[case_index], 1.0 - level
+                    )
+                    row[f"covered_primary_{key}"] = bool(contained[0])
+                    row[f"covered_secondary_{key}"] = bool(contained[1])
+                    row[f"covered_joint_{key}"] = bool(
+                        log_probability_numpy[case_index]
+                        + standardizer.log_absolute_jacobian
+                        >= joint_threshold
+                    )
+                    row[f"width_primary_{key}"] = float(upper[0] - lower[0])
+                    row[f"width_secondary_{key}"] = float(upper[1] - lower[1])
+                rows.append(row)
+    if not rows:
+        raise TrainingGateError("development validation loader was empty")
+    identifiers = [str(row["physical_system_id"]) for row in rows]
+    if len(identifiers) != len(set(identifiers)):
+        raise TrainingGateError("development validation contains duplicate system IDs")
+    nlp = np.asarray([row["nlp_nat_per_target_dimension"] for row in rows])
+    crps_mean = np.asarray([row["crps_mean"] for row in rows])
+    aggregate_coverage: Dict[str, Any] = {}
+    for level in levels:
+        key = f"{level:.2f}"
+        primary = np.mean([row[f"covered_primary_{key}"] for row in rows])
+        secondary = np.mean([row[f"covered_secondary_{key}"] for row in rows])
+        joint = np.mean([row[f"covered_joint_{key}"] for row in rows])
+        aggregate_coverage[key] = {
+            "marginal": [float(primary), float(secondary)],
+            "maximum_marginal_absolute_error": float(
+                max(abs(primary - level), abs(secondary - level))
+            ),
+            "joint": float(joint),
+            "joint_absolute_error": float(abs(joint - level)),
+            "mean_width": [
+                float(np.mean([row[f"width_primary_{key}"] for row in rows])),
+                float(np.mean([row[f"width_secondary_{key}"] for row in rows])),
+            ],
+        }
+    em_cell_coverage: Dict[str, Any] = {}
+    for group in sorted({str(row["em_cell_signature"]) for row in rows}):
+        selected = [row for row in rows if row["em_cell_signature"] == group]
+        em_cell_coverage[group] = {
+            "case_count": len(selected),
+            "marginal_0.90": [
+                float(np.mean([row["covered_primary_0.90"] for row in selected])),
+                float(np.mean([row["covered_secondary_0.90"] for row in selected])),
+            ],
+            "joint_0.90": float(
+                np.mean([row["covered_joint_0.90"] for row in selected])
+            ),
+        }
+    tail_views: Dict[str, Any] = {}
+    for group in sorted({str(row["tail_view"]) for row in rows} - {"none"}):
+        selected = [row for row in rows if row["tail_view"] == group]
+        tail_views[group] = {
+            "case_count": len(selected),
+            "median_nlp_nat_per_target_dimension": float(
+                np.median([row["nlp_nat_per_target_dimension"] for row in selected])
+            ),
+            "median_crps": float(np.median([row["crps_mean"] for row in selected])),
+            "minimum_case_requirement_met": len(selected) >= 128,
+        }
+    summary = {
+        "status": "completed_development_validation",
+        "case_count": len(rows),
+        "posterior_draws_per_case": posterior_draws_per_case,
+        "evaluation_seed": evaluation_seed,
+        "mean_nlp_nat_per_target_dimension": float(np.mean(nlp)),
+        "median_nlp_nat_per_target_dimension": float(np.median(nlp)),
+        "median_crps": float(np.median(crps_mean)),
+        "coverage": aggregate_coverage,
+        "em_cell_coverage": em_cell_coverage,
+        "validation_internal_tail_views": tail_views,
+        "posthoc_calibration_applied": False,
+        "final_evaluation_accessed": False,
+    }
+    csv_buffer = io.StringIO()
+    writer = csv.DictWriter(csv_buffer, fieldnames=list(rows[0]))
+    writer.writeheader()
+    writer.writerows(rows)
+    _atomic_text_write(output_directory / "development_cases.csv", csv_buffer.getvalue())
+    _atomic_text_write(
+        output_directory / "development_summary.json",
+        json.dumps(summary, indent=2, sort_keys=True) + "\n",
+    )
     return summary
 
 

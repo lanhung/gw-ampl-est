@@ -206,10 +206,25 @@ def build_probe_model(config: Mapping[str, Any], *, seed: int) -> Any:
             self.context_encoder = ContextEncoder()
             self.flow = flow
 
+        def encode_context(self, batch: Mapping[str, Any]) -> Any:
+            return self.context_encoder(batch)
+
         def log_prob(self, target: Any, batch: Mapping[str, Any]) -> Any:
-            return self.flow.log_prob(target, context=self.context_encoder(batch))
+            return self.flow.log_prob(target, context=self.encode_context(batch))
 
         def sample(self, sample_count: int, batch: Mapping[str, Any]) -> Any:
-            return self.flow.sample(sample_count, context=self.context_encoder(batch))
+            return self.flow.sample(sample_count, context=self.encode_context(batch))
+
+        def sample_log_prob(self, samples: Any, batch: Mapping[str, Any]) -> Any:
+            """Evaluate each conditional draw for joint HPD coverage diagnostics."""
+
+            if samples.ndim != 3 or samples.shape[0] != batch["gw_strain"].shape[0]:
+                raise ValueError("conditional samples must be (cases, draws, targets)")
+            context = self.encode_context(batch)
+            draws = samples.shape[1]
+            flat_samples = samples.reshape(samples.shape[0] * draws, samples.shape[2])
+            flat_context = context.repeat_interleave(draws, dim=0)
+            values = self.flow.log_prob(flat_samples, context=flat_context)
+            return values.reshape(samples.shape[0], draws)
 
     return ConditionalPosterior()
