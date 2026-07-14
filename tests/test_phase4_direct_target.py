@@ -59,8 +59,34 @@ def test_phase4_contract_loads_but_all_execution_flags_remain_false() -> None:
     assert all(value is False for value in authorization.values())
     assert config["execution"]["scientific_execution_enabled"] is False
     assert config["execution"]["canary_execution_enabled"] is False
-    assert config["authorization"]["future_execution_path"] is None
+    assert config["authorization"]["future_execution_path"] == (
+        "configs/execution/phase4_direct_target_stage_a_authorization.yaml"
+    )
     assert config["authorization"]["canary_execution_path"] is None
+
+
+def test_stage_a_authorization_is_exact_count_and_training_closed() -> None:
+    authorization = load_yaml(
+        ROOT / "configs/execution/phase4_direct_target_stage_a_authorization.yaml"
+    )
+    assert authorization["authorization_status"] == (
+        "authorized_scientific_materialization_only"
+    )
+    flags = authorization["authorization"]
+    assert flags["scientific_data_generation_authorized"] is True
+    assert flags["stage_a_materialization_authorized"] is True
+    assert flags["model_training_authorized"] is False
+    assert flags["calibration_authorized"] is False
+    assert flags["sbc_authorized"] is False
+    assert flags["iid_ood_mismatch_evaluation_authorized"] is False
+    assert flags["gwosc_gwtc_access_authorized"] is False
+    contract = authorization["stage_a_contract"]
+    assert (
+        contract["train_accepted_count"],
+        contract["validation_accepted_count"],
+        contract["total_accepted_count"],
+        contract["total_shard_count"],
+    ) == (32768, 6144, 38912, 304)
 
 
 def test_direct_target_contract_has_exact_unit_weights() -> None:

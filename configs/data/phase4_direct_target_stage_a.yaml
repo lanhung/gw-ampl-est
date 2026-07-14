@@ -5,8 +5,8 @@ base_data_config: configs/data/phase3a_qualification.yaml
 authorization:
   design_path: configs/execution/phase4_direct_target_design_authorization.yaml
   canary_execution_path: null
-  future_execution_path: null
-  authorizing_git_commit: null
+  future_execution_path: configs/execution/phase4_direct_target_stage_a_authorization.yaml
+  authorizing_git_commit: "2d1cd5e9d1e706881ea562b20724948da60293dd"
 
 preregistration:
   path: configs/statistics/direct_target_stage_a_preregistration.yaml
@@ -109,10 +109,10 @@ use_policy:
   gwosc_gwtc_access_authorized: false
 
 release:
-  final_generator_commit: null
-  generator_wheel_sha256: null
-  canary_manifest_path: null
-  canary_manifest_sha256: null
+  final_generator_commit: "2be777e727ef9d8e1a85f89c68966df5d37932b0"
+  generator_wheel_sha256: "14104f8aab3aa911fe43e27c311079f118add7ca8ad22178ca158c13d81d0a88"
+  canary_manifest_path: /root/autodl-tmp/lensing-4/manifests/phase4/canary/direct-target-canary-final.json
+  canary_manifest_sha256: "c1984616f2f7cea3d9d07b799cf1578f7e5d702174d2f6ba749ffb78d59afb40"
   official_parent_run_id: null
   train_dataset_id: null
   validation_dataset_id: null

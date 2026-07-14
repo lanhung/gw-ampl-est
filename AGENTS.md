@@ -328,6 +328,27 @@ Passing the canary does not authorize Stage A. The release gate remains
 blocked with null official identities until a separate exact-count Stage A
 authorization is recorded.
 
+The project owner explicitly delegated scientific and engineering gate review
+to Codex. Expert review accepted RC.4, the frozen generator/wheel, the passed
+canary, split safety and conservative resource evidence. Stage A
+materialization is now authorized only through:
+
+`configs/execution/phase4_direct_target_stage_a_authorization.yaml`
+
+The authorizing evidence commit is:
+
+`2d1cd5e9d1e706881ea562b20724948da60293dd`
+
+This authorization permits exactly 32,768 train plus 6,144 validation
+accepted physical systems, in 304 atomic shards of 128, sampled directly from
+the frozen evaluation target with exact unit weights. It permits creation of
+official Stage A identities only through a ready release certificate.
+
+Model training/tuning, calibration, SBC, IID/OOD/mismatch evaluation,
+real-noise work, GWOSC/GWTC access, final-evaluation materialization, the 65k
+extension and later phases remain unauthorized. Stage A must stop after
+validated atomic publication and review evidence.
+
 ## Scientific integrity
 
 - Never fabricate results, citations, completed runs or calibration.

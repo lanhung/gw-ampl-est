@@ -158,19 +158,19 @@ def evaluate_phase4_release_gate(
         blockers.append("disposable canary manifest is unresolved")
     else:
         manifest_path = Path(str(canary_path))
-        if not manifest_path.is_file():
-            blockers.append("disposable canary manifest does not exist")
-        else:
-            expected_hash = release.get("canary_manifest_sha256")
-            actual_hash = _sha256(manifest_path)
-            checks["canary_manifest_sha256"] = actual_hash
-            if actual_hash != expected_hash:
-                blockers.append("disposable canary manifest hash mismatch")
-            try:
+        try:
+            if not manifest_path.is_file():
+                blockers.append("disposable canary manifest does not exist")
+            else:
+                expected_hash = release.get("canary_manifest_sha256")
+                actual_hash = _sha256(manifest_path)
+                checks["canary_manifest_sha256"] = actual_hash
+                if actual_hash != expected_hash:
+                    blockers.append("disposable canary manifest hash mismatch")
                 validate_canary_manifest(json.loads(manifest_path.read_text()), generator_commit)
                 checks["disposable_canary"] = "passed"
-            except Exception as error:
-                blockers.append(str(error))
+        except Exception as error:
+            blockers.append(f"disposable canary manifest inspection failed: {error}")
     base = load_yaml(root / config["base_data_config"])
     try:
         checks["psd_files"] = verify_psd_files(base["gw"]["psd_curves"])
