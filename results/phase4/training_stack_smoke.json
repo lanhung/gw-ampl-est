@@ -1,0 +1,26 @@
+{
+  "checkpoint_written": false,
+  "examples": 1,
+  "log_probability_shape": [
+    1
+  ],
+  "losses": [
+    1.9201064109802246
+  ],
+  "model_configuration_hash": "f0bd25d08a93571f19c8b455aa14ec4fd050649193efae49fa3149293144d906",
+  "model_selection_performed": false,
+  "optimizer_steps": 1,
+  "parameter_count": 7796596,
+  "posterior_sample_shape": [
+    1,
+    3,
+    2
+  ],
+  "replay_sha256": "b4a7126c83963e8d05c3014ecc1385bc90226d3c9863ad99aedf7fcc7277523e",
+  "sample_count": 16384,
+  "scientific_data_read": false,
+  "scientific_metric_reported": false,
+  "stage_a_data_read": false,
+  "status": "passed_engineering_only",
+  "torch_version": "2.10.0+cpu"
+}

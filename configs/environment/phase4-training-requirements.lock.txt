@@ -1,0 +1,12 @@
+# Candidate isolated training environment. Scientific execution remains separately gated.
+# Install torch from the reviewed PyTorch wheel index appropriate to the host (CPU for
+# engineering smoke; CUDA 12.8 for the future AutoDL environment), then install this file.
+torch==2.10.0
+nflows==0.14
+numpy==2.2.6
+PyYAML==6.0.3
+pandas==2.3.3
+pyarrow==22.0.0
+zarr==2.18.7
+numcodecs==0.15.1
+scipy==1.15.3

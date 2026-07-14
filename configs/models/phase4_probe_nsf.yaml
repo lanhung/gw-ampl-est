@@ -1,0 +1,135 @@
+implementation_id: mask_aware_multimessenger_nsf_probe_v1
+implementation_version: "0.1.0-rc.1"
+status: implementation_candidate_not_scientifically_authorized
+
+authorization_path: configs/execution/phase4_probe_training_stack_authorization.yaml
+
+scientific_contract:
+  direct_target_preregistration_version: "1.1.0-rc.4"
+  direct_target_preregistration_hash: "5aeaac395463bd073c44ead4ff4c5c729b5a2d4b4f1840c0825a53b30ab1bc98"
+  adaptive_preregistration_version: "1.1.0-rc.3"
+  adaptive_preregistration_hash: "6082475631539d3069edacc52f41b37fb8fe725ccd7c6bc9980cc3008795a927"
+  schema_version: "2.0.0-alpha.3"
+  training_split: train
+  validation_split: validation
+  training_rungs: [16384, 32768]
+  probe_subset_rule: deterministic_rank_of_sha256_over_complete_train_32k
+  probe_subset_seed_domain: adaptive_scientific_split_assignment_v1
+  target_parameterization: [log_abs_mu_primary, log_abs_mu_secondary]
+  target_standardization: training_rung_mean_and_population_std_with_exact_log_jacobian
+  direct_target_unit_weights_required: true
+
+inputs:
+  adopted_model_hypothesis:
+    field: adopted_lens_family
+    values: [sie_external_shear, epl_external_shear]
+    interpretation: analyst_selected_model_condition_not_observed_truth
+  gw:
+    product_role: noisy_strain
+    clean_input_forbidden: true
+    noise_input_forbidden: true
+    image_slots: 2
+    detector_slots: [H1, L1, V1]
+    sample_rate_hz: 2048
+    sample_count: 16384
+    whitening:
+      implementation: bilby_psd_whiten_v1
+      minimum_frequency_hz: 20.0
+      maximum_frequency_hz: 1024.0
+      per_event_observed_std_normalization: false
+      unavailable_slots_zero_filled: true
+      psd_curves:
+        H1: {file: aLIGO_O4_high_asd.txt, sha256: eb5ec9b081c3d86d2f4257b9aff6a57566d168b8a95e5e57b7909eebad021780}
+        L1: {file: aLIGO_O4_high_asd.txt, sha256: eb5ec9b081c3d86d2f4257b9aff6a57566d168b8a95e5e57b7909eebad021780}
+        V1: {file: AdV_psd.txt, sha256: c2532150f63dbaa76d451e2c074390272e259e4e2eedc3e684d2205582aa0764}
+  em:
+    astrometry_max_items: 5
+    astrometry_item_features: [x, y, cov_xx, cov_xy, cov_yy, selected_primary, selected_secondary, other_image, observed_censoring_flag]
+    scalar_features:
+      - observed_time_difference
+      - observed_lens_center_arcsec
+      - observed_lens_center_covariance_arcsec2
+      - observed_einstein_radius_arcsec
+      - observed_einstein_radius_std_arcsec
+      - observed_lens_redshift
+      - observed_lens_redshift_std
+      - observed_source_redshift
+      - observed_source_redshift_std
+      - observed_velocity_dispersion_km_s
+      - observed_velocity_dispersion_std_km_s
+      - observed_kinematics_aperture_inner_radius_arcsec
+      - observed_kinematics_aperture_outer_radius_arcsec
+      - observed_kinematics_seeing_fwhm_arcsec
+      - observed_tracer_effective_radius_arcsec
+      - observed_external_convergence_mean
+      - observed_external_convergence_std
+    masks_are_mandatory: true
+    continuous_input_standardization: training_rung_observed_only_mean_and_population_std
+    missing_value_after_standardization: 0.0
+  privileged_provenance_as_input: false
+
+architecture:
+  posterior_family: conditional_neural_spline_flow
+  context_dimension: 256
+  gw_encoder:
+    type: shared_weight_mask_aware_1d_resnet_by_image_and_detector
+    channels: [32, 64, 128, 256]
+    blocks_per_stage: 2
+    stem_kernel: 17
+    stem_stride: 4
+    residual_kernel: 9
+    stream_embedding_dimension: 64
+    slot_identity_embedding_dimension: 8
+  em_encoder:
+    type: image_keyed_deepsets_plus_scalar_uncertainty_mlp
+    item_hidden_dimension: 64
+    set_embedding_dimension: 64
+    scalar_hidden_dimension: 64
+    output_dimension: 128
+  fusion:
+    type: concatenation_with_detector_and_modality_masks
+    includes_adopted_lens_family_one_hot: true
+    hidden_dimension: 256
+  flow:
+    transforms: 10
+    conditioner_width: 256
+    spline_bins: 8
+    tail_bound: 5.0
+    permutation: alternating_random_permutation
+
+optimization:
+  seeds: [0, 1, 2]
+  model_initialization: seed_applied_before_model_construction
+  training_order: deterministic_epoch_addressed_sampler
+  optimizer: AdamW
+  learning_rate: 0.0003
+  betas: [0.9, 0.999]
+  weight_decay: 0.00001
+  gradient_clip_norm: 5.0
+  maximum_epochs: 200
+  batch_size: 256
+  early_stopping_metric: validation_nlp_nat_per_target_dimension
+  early_stopping_patience_epochs: 20
+  early_stopping_minimum_delta: 0.001
+  restore_best_epoch: true
+  checkpoint:
+    atomic_replace: true
+    captures_rng_state: [python, numpy, torch_cpu, torch_cuda_when_available]
+    binds_run_identity: true
+    binds_input_and_target_standardizers: true
+
+software_candidate:
+  python: "3.11"
+  torch: "2.10.0"
+  nflows: "0.14"
+  numpy: "2.2.6"
+  pandas: "2.3.3"
+  pyarrow: "22.0.0"
+  zarr: "2.18.7"
+  numcodecs: "0.15.1"
+
+execution:
+  scientific_training_enabled: false
+  model_selection_enabled: false
+  stage_a_access_enabled: false
+  engineering_smoke_only: true

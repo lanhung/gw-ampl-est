@@ -2,22 +2,22 @@
 
 ## Current phase
 
-Human review accepted Phase 3B and PR #5 merged at
-`80c795a36b902798fe52598262f8b0328755cfac`. Adaptive preregistration RC.3
-remains frozen at hash
-`6082475631539d3069edacc52f41b37fb8fe725ccd7c6bc9980cc3008795a927`.
-Phase 3C-A.1 corrected the alpha.3 health accessor and passed its integration
-and first-block health gates. Its full retry later stopped at the frozen
-control-arm active-time cap after 12 complete blocks per arm. The 384+384
-completed pairs remain unpublished engineering evidence; no A/B statistical
-decision exists.
+Direct-target RC.4 is frozen at hash
+`5aeaac395463bd073c44ead4ff4c5c729b5a2d4b4f1840c0825a53b30ab1bc98`.
+The exact-count Stage A run is active under parent
+`phase4-stage-a-2be777e727ef-d3a60034bbd6`, using frozen generator commit
+`2be777e727ef9d8e1a85f89c68966df5d37932b0`. At the read-only snapshot
+`2026-07-14T10:50:24Z`, 64/256 train shards were atomically complete, 16 train
+shards were partial, 8,192/32,768 train systems were complete, no error pattern
+was present and 312,123,940,864 bytes remained free. Validation generation and
+final publication have not started.
 
-Proposal optimization is closed under the one-retry policy. Phase 4 now has a
-reviewable direct-target RC.4 delta and pre-execution implementation. The
-release gate remains blocked with no official identities because RC.4, canary
-and Stage A execution have not yet been accepted. Scientific data, training,
-calibration, SBC, final evaluation, real noise and GWOSC/GWTC remain
-unauthorized.
+In parallel, an implementation-only branch now contains the candidate probe
+training stack. It may run unit/integration and in-memory engineering smoke
+tests but cannot read Stage A, start scientific training or inspect final
+evaluation. Scientific probe training remains separately gated until Stage A
+is published, all 32k train IDs resolve the deterministic 16k subset, and the
+final-evaluation generation commitment is finalized and hashed.
 
 ## Completed
 
@@ -226,14 +226,26 @@ unauthorized.
 - at `2026-07-14T08:05:43Z`, completed 42 of 304 total shards (5,376 accepted
   pairs), retained 16 partial train shards, observed zero execution errors and
   kept the official parent under staging;
+- at `2026-07-14T12:52:16Z`, completed 80 of 304 total shards (10,240 accepted
+  train systems), retained 16 partial train shards, observed zero error
+  artifacts and kept the parent unpublished with 309,241,184,256 free bytes;
 - independently read-validated the first completed 128-pair train shard,
   including complete-marker/artifact integrity, q=p and exact unit weights.
+- implemented a bounded-memory published-shard reader that opens noisy strain
+  only, exact Bilby-compatible PSD whitening, safe feature/target extraction,
+  the mask-aware GW/EM conditional NSF, deterministic checkpoint/resume,
+  learning-curve metrics and a fail-closed training planner;
+- passed a full-length 16,384-sample in-memory PyTorch/nflows smoke twice with
+  byte-identical replay hash `b4a7126c83963e8d05c3014ecc1385bc90226d3c9863ad99aedf7fcc7277523e`;
+- passed 225 local tests with five optional skips, maintained-scope Ruff,
+  mypy for 44 source files and package build; no scientific data or checkpoint
+  was read or written by the model smoke.
 
 ## Not started or not yet complete by design
 
 - further proposal engineering qualification (permanently closed);
 - Stage A validation generation and final atomic publication;
-- model or posterior training;
+- scientific model or posterior training (implementation exists, execution is closed);
 - calibration, SBC or final scientific evaluation;
 - GWOSC/GWTC download;
 - real-noise injection or catalog scan;

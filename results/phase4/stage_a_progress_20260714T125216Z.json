@@ -1,0 +1,19 @@
+{
+  "accepted_train_pairs_complete": 10240,
+  "complete_train_shards": 80,
+  "complete_validation_shards": 0,
+  "error_pattern_present": false,
+  "free_bytes": 309241184256,
+  "generator_commit": "2be777e727ef9d8e1a85f89c68966df5d37932b0",
+  "parent_run_id": "phase4-stage-a-2be777e727ef-d3a60034bbd6",
+  "partial_train_shards": 16,
+  "publication_status": "staging_only",
+  "published_parent_present": false,
+  "snapshot_utc": "2026-07-14T12:52:16Z",
+  "staging_bytes": 13271326632,
+  "status": "in_progress",
+  "total_stage_a_shards": 304,
+  "total_train_shards": 256,
+  "training_authorized": false,
+  "validation_accepted_count_target": 6144
+}

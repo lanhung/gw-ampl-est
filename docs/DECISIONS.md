@@ -189,6 +189,11 @@ calibration, and 16,384 IID cases plus four 4,096-case diagnostic/OOD sets.
 Model selection is limited to 12 preregistered flow fits. Coverage tolerances,
 SBC size and the 256-case likelihood gold subset are fixed before training.
 
+This paragraph records the historical RC.1 allocation. D033 and adaptive
+RC.3/RC.4 supersede its nontraining counts with 6,144 validation, 4,096
+calibration-fit, 2,048 SBC-diagnostic and the separately sealed 20,480-case
+final pool. The twelve-result model-selection ceiling is unchanged.
+
 ## D031 — Phase 3A qualification gate
 
 No full production run follows directly from Phase 2. After human acceptance,
@@ -600,3 +605,29 @@ canary and PSD hashes before deriving the official identities. The run started
 under `phase4-stage-a-2be777e727ef-d3a60034bbd6` and remains staging-only until
 all 304 shards and full cross-split validation pass. Partial shards and
 progress snapshots are never publication evidence.
+
+## D067 — Training software may advance without opening scientific training
+
+Stage A generation and probe-software implementation are separate engineering
+workstreams. The training-stack branch may implement and test the lazy reader,
+PSD whitening, mask-aware encoders, conditional NSF, checkpoint/resume and
+development metrics using synthetic in-memory tensors. It may not read Stage A
+staging or execute scientific optimization.
+
+The reader opens only `noisy.zarr`; clean and noise products remain forbidden
+model inputs. Policy 1.4 adds the analyst-selected adopted lens-family
+hypothesis because the estimand is explicitly model-conditional; it does not
+permit any continuous lens truth. Five astrometry items are supported because Phase 3A observed
+five-image systems. Censoring is attached only to actually observed astrometry
+items, avoiding a truth-multiplicity leak when astrometry is unavailable.
+
+The 16k probe is the lowest SHA-256-ranked half of the complete 32k training
+rung, not the first 16k generated. Training remains fail-closed until Stage A
+is atomically published, the final-evaluation generation commitment is
+finalized and hashed, and a separate scientific probe authorization exists.
+
+Scientific model construction must apply the declared seed before any neural
+weights or random flow permutations are initialized. Training order is
+addressed by `(seed, epoch)`. Resumable checkpoints bind code, environment,
+data manifests, ranked membership, the final-evaluation commitment,
+preprocessing state and Python/NumPy/Torch RNG state.

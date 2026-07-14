@@ -1,5 +1,5 @@
 {
-  "policy_version": "1.3.0",
+  "policy_version": "1.4.0",
   "exact_fields": [
     "source_position_y_true",
     "source_position_u_true",
