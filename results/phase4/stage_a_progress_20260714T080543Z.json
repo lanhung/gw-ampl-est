@@ -1,0 +1,59 @@
+{
+  "snapshot_status": "in_progress_not_publication_evidence",
+  "snapshot_utc": "2026-07-14T08:05:43Z",
+  "run_started_utc": "2026-07-14T02:07:18Z",
+  "process_state": "running",
+  "parent_run_id": "phase4-stage-a-2be777e727ef-d3a60034bbd6",
+  "generator_commit": "2be777e727ef9d8e1a85f89c68966df5d37932b0",
+  "preregistration_version": "1.1.0-rc.4",
+  "preregistration_hash": "5aeaac395463bd073c44ead4ff4c5c729b5a2d4b4f1840c0825a53b30ab1bc98",
+  "train": {
+    "dataset_id": "gwlens-v2-2.0.0-alpha.3-ef4baee395dbe94b-train",
+    "complete_shards": 42,
+    "partial_shards": 16,
+    "target_shards": 256,
+    "atomically_complete_pairs": 5376,
+    "target_pairs": 32768,
+    "complete_percent": 16.40625,
+    "partial_unpublished_chunks": 903
+  },
+  "validation": {
+    "dataset_id": "gwlens-v2-2.0.0-alpha.3-33c3e6cb507a03e9-validation",
+    "complete_shards": 0,
+    "partial_shards": 0,
+    "target_shards": 48,
+    "atomically_complete_pairs": 0,
+    "target_pairs": 6144,
+    "complete_percent": 0.0
+  },
+  "stage_a": {
+    "complete_shards": 42,
+    "target_shards": 304,
+    "atomically_complete_pairs": 5376,
+    "target_pairs": 38912,
+    "complete_percent": 13.81578947368421,
+    "published": false,
+    "dataset_manifest_present": false,
+    "execution_result_present": false
+  },
+  "resources": {
+    "runner_processes_including_parent": 18,
+    "worker_processes": 16,
+    "elapsed_seconds": 21505,
+    "cpu_percent_sum": 1597.1,
+    "rss_kib_total": 5622632,
+    "staging_bytes": 7467857940,
+    "free_bytes": 315543281664
+  },
+  "observed_error_lines": 0,
+  "first_complete_shard_read_only_validation": {
+    "shard_index": 0,
+    "accepted_pair_count": 128,
+    "complete_manifest_valid": true,
+    "direct_target_record_validation": "passed",
+    "proposal_equals_evaluation": true,
+    "all_importance_weights_one": true
+  },
+  "model_training_authorized": false,
+  "gwosc_gwtc_access_authorized": false
+}

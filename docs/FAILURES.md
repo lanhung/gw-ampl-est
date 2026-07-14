@@ -350,14 +350,12 @@ silently choose a solver search window or approximate caustic area.
   the fallback, pending a new scientific preregistration and Stage A execution
   authorization.
 
-## Phase 4 pre-execution evidence still required
+## Phase 4 pre-execution requirements resolved; execution remains incomplete
 
-- Direct-target RC.4 and its implementation are design evidence only. No
-  canary, scientific system or model-training result exists yet.
-- The current environment manifest intentionally leaves the generator commit
-  and wheel SHA-256 unresolved. Editable installation is forbidden for official
-  execution.
-- The release gate is expected to remain `blocked_preexecution` until RC.4,
-  the 8+8 canary and exact 38,912-system Stage A authorization are reviewed.
-- RC.5 resource projections are retained as conservative planning bounds, not
-  measured direct-target throughput.
+- The exact wheel, dependency lock, 8+8 canary, PSDs, disk gate and Stage A
+  authorization passed the hardened release gate with no blockers.
+- Official Stage A identities now exist and the 38,912-system run is active.
+- This is not yet completion evidence: validation generation, the final
+  dataset manifest, full grouped-ID checks and atomic publication remain
+  pending.
+- No model-training result exists, and training remains unauthorized.

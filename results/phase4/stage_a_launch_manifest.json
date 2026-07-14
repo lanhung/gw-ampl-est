@@ -1,0 +1,19 @@
+{
+  "accepted_target": 38912,
+  "generator_commit": "2be777e727ef9d8e1a85f89c68966df5d37932b0",
+  "gwosc_gwtc_access_authorized": false,
+  "log_path": "/root/autodl-tmp/lensing-4/logs/phase4/stage_a-2be777e727ef-d3a60034bbd6.log",
+  "model_training_authorized": false,
+  "official_identities": {
+    "parent_run_id": "phase4-stage-a-2be777e727ef-d3a60034bbd6",
+    "train_dataset_id": "gwlens-v2-2.0.0-alpha.3-ef4baee395dbe94b-train",
+    "validation_dataset_id": "gwlens-v2-2.0.0-alpha.3-33c3e6cb507a03e9-validation"
+  },
+  "release_certificate": "/root/autodl-tmp/lensing-4/manifests/phase4/stage_a_release_certificate.json",
+  "release_status": "ready_for_official_execution",
+  "result_path": "/root/autodl-tmp/lensing-4/manifests/phase4/stage_a_execution_result.json",
+  "resume_strategy": "rerun identical command; completed atomic shards are verified and not rewritten",
+  "status": "ready_to_launch",
+  "train_target": 32768,
+  "validation_target": 6144
+}
