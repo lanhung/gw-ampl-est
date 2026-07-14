@@ -417,3 +417,9 @@ silently choose a solver search window or approximate caustic area.
   provides Python 3.10.12 and the package supports Python 3.9 or newer. The isolated
   training environment is therefore pinned to the real 3.10.12 runtime before any
   training authorization, rather than fabricating a 3.11 execution identity.
+- A post-merge synthetic CUDA checkpoint canary found that `torch.load` with a
+  CUDA map location also moved the saved CPU RNG ByteTensor to CUDA. Torch's RNG
+  restore APIs require host ByteTensors. The same-phase patch explicitly moves
+  CPU and CUDA RNG-state tensors back to host before restoration and is covered
+  by a regression plus byte-identical interruption/resume canary. No scientific
+  data or checkpoint was involved.
