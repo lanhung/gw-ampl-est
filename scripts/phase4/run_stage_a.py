@@ -43,6 +43,10 @@ def _verify_execution_authorization(
     if not path:
         raise PermissionError("Stage A execution authorization is absent")
     authorization = load_yaml(ROOT / str(path))
+    if authorization.get("authorization_status") != (
+        "authorized_scientific_materialization_only"
+    ):
+        raise PermissionError("authorization is not Stage A materialization-only")
     flags = authorization.get("authorization", {})
     for key in (
         "scientific_data_generation_authorized",
@@ -60,13 +64,22 @@ def _verify_execution_authorization(
     ):
         if flags.get(key) is not False:
             raise PermissionError(f"Stage A authorization requires {key}=false")
-    if authorization.get("generator_commit") != generator_commit:
+    immutable = authorization.get("immutable_generator", {})
+    if immutable.get("git_commit") != generator_commit:
         raise ValueError("Stage A authorization generator commit mismatch")
     if (
         authorization.get("preregistration", {}).get("canonical_hash")
         != config["preregistration"]["canonical_hash"]
     ):
         raise ValueError("Stage A authorization preregistration hash mismatch")
+    counts = authorization.get("stage_a_contract", {})
+    if (
+        counts.get("train_accepted_count"),
+        counts.get("validation_accepted_count"),
+        counts.get("total_accepted_count"),
+        counts.get("total_shard_count"),
+    ) != (32768, 6144, 38912, 304):
+        raise ValueError("Stage A authorization count contract mismatch")
     return authorization
 
 
