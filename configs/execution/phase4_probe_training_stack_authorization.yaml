@@ -1,0 +1,58 @@
+phase: "4-training-stack"
+authorization_status: authorized_implementation_and_engineering_smoke_only
+authorized_by: human_project_owner_delegated_to_codex
+authorization_date: "2026-07-14"
+
+base_main_commit: "0df49d6cbb52e6869d09d880a7112a8e95db63cb"
+
+frozen_scientific_contracts:
+  direct_target_preregistration_version: "1.1.0-rc.4"
+  direct_target_preregistration_hash: "5aeaac395463bd073c44ead4ff4c5c729b5a2d4b4f1840c0825a53b30ab1bc98"
+  adaptive_preregistration_version: "1.1.0-rc.3"
+  adaptive_preregistration_hash: "6082475631539d3069edacc52f41b37fb8fe725ccd7c6bc9980cc3008795a927"
+  schema_version: "2.0.0-alpha.3"
+
+authorization:
+  training_stack_implementation_authorized: true
+  lazy_reader_implementation_authorized: true
+  whitening_implementation_authorized: true
+  model_implementation_authorized: true
+  checkpoint_and_resume_implementation_authorized: true
+  metrics_implementation_authorized: true
+  launcher_dry_run_authorized: true
+  unit_and_integration_tests_authorized: true
+  in_memory_engineering_smoke_authorized: true
+
+  stage_a_data_access_authorized: false
+  scientific_probe_training_authorized: false
+  model_selection_authorized: false
+  hyperparameter_tuning_authorized: false
+  calibration_authorized: false
+  sbc_authorized: false
+  scientific_evaluation_authorized: false
+  final_evaluation_access_authorized: false
+  gwosc_gwtc_access_authorized: false
+  real_noise_authorized: false
+
+engineering_smoke_contract:
+  scientific_data_reads_authorized: false
+  maximum_in_memory_examples: 48
+  maximum_optimizer_steps: 4
+  persistent_checkpoint_authorized: false
+  scientific_metric_reporting_authorized: false
+  architecture_comparison_authorized: false
+  output_root: "/tmp/gwlens-mm-phase4-training-stack-smoke"
+
+safety_contract:
+  stage_a_remote_checkout_mutation_authorized: false
+  stage_a_staging_read_authorized: false
+  stage_a_publication_required_before_scientific_training: true
+  finalized_evaluation_commitment_required_before_scientific_training: true
+  separate_scientific_training_authorization_required: true
+  engineering_artifacts_forbidden_from_science: true
+  privileged_inputs_forbidden: true
+  clean_or_noise_array_as_input_forbidden: true
+  first_generated_16384_as_probe_forbidden: true
+  probe_membership_rule: deterministic_rank_of_sha256_over_complete_train_32k
+
+stop_after_implementation_evidence: true

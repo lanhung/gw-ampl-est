@@ -24,6 +24,7 @@ def test_allowlisted_observations_pass(policy):
             "observed_external_convergence_mean",
             "observed_external_convergence_std",
             "environment_modality_available",
+            "adopted_lens_family",
         ]
     )
 
@@ -62,6 +63,13 @@ def test_forbidden_exact_and_alias_fields_fail_closed(policy, field):
 def test_unknown_field_is_not_silently_accepted(policy):
     with pytest.raises(InputPolicyError, match="unknown"):
         policy.validate_model_inputs(["some_new_feature"])
+
+
+def test_adopted_family_is_allowed_but_lens_truth_remains_forbidden(policy):
+    assert policy.version == "1.4.0"
+    assert policy.validate_model_inputs(["adopted_lens_family"])
+    with pytest.raises(InputPolicyError, match="forbidden"):
+        policy.validate_model_inputs(["lens_parameters_true"])
 
 
 def test_target_permission_does_not_imply_input_permission(policy):

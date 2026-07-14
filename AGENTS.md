@@ -349,6 +349,31 @@ real-noise work, GWOSC/GWTC access, final-evaluation materialization, the 65k
 extension and later phases remain unauthorized. Stage A must stop after
 validated atomic publication and review evidence.
 
+While Stage A runs, the project owner authorizes an isolated probe-training
+software implementation only through:
+
+`configs/execution/phase4_probe_training_stack_authorization.yaml`
+
+This implementation gate permits a lazy published-shard reader, exact
+Bilby-compatible PSD whitening, the preregistered mask-aware conditional NSF,
+checkpoint/resume code, development metrics, dry-run planning and bounded
+in-memory engineering smoke tests. It does not permit reading Stage A staging,
+starting a scientific optimizer, selecting an architecture, fitting
+calibration, opening final evaluation or accessing GWOSC/GWTC.
+
+The 16,384-system probe membership may be resolved only by deterministic
+SHA-256 rank after all 32,768 train physical-system IDs are published. The
+first 16,384 systems generated are not the probe subset. Scientific training
+also requires the final-evaluation generation commitment to be finalized and
+hashed plus a separate probe-training authorization.
+
+The implementation-only training-stack checkpoint is:
+
+`19f8dc0621f610825d000f37af333f384a963e55`
+
+It contains no scientific fit or checkpoint and does not authorize Stage A
+staging access or probe execution.
+
 ## Scientific integrity
 
 - Never fabricate results, citations, completed runs or calibration.

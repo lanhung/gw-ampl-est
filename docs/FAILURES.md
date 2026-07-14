@@ -359,3 +359,17 @@ silently choose a solver search window or approximate caustic area.
   dataset manifest, full grouped-ID checks and atomic publication remain
   pending.
 - No model-training result exists, and training remains unauthorized.
+
+## Phase 4 training-stack deferred execution boundary
+
+- The implementation-only stack passed unit, type, lint, build and deterministic
+  in-memory model smoke checks. This is not a model fit or performance result.
+- AutoDL GPU execution was deliberately not attempted while the frozen Stage A
+  checkout is active; the only model smoke used random in-memory tensors in a
+  disposable Vultr CPU environment.
+- The final-evaluation commitment remains an unfinalized design template.
+  The scientific training gate correctly refuses execution until that
+  commitment, Stage A publication and a separate training authorization all
+  exist.
+- The published-shard reader has not read Stage A staging and cannot be treated
+  as end-to-end scientific I/O evidence until atomic publication is complete.

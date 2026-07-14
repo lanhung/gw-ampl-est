@@ -39,7 +39,8 @@ introduced.
 ## Allowed observations
 
 The current allowlist contains GW pair strain observations, detector masks and
-identity, typed timing, image-ID-keyed astrometry, other noisy EM measurements
+identity, the analyst-selected adopted lens-family hypothesis, typed timing,
+image-ID-keyed astrometry, other noisy EM measurements
 with uncertainty, external-convergence posterior mean/standard deviation and
 its availability flag, modality masks/censoring, and preprocessing/PSD/
 calibration/DQ metadata. Exact `true_time_delay_seconds`, `kappa_ext_true` and
@@ -50,7 +51,10 @@ The clean/noise products remain required dataset artifacts for validation but
 are not deployable inputs. Group IDs remain required for leakage-safe splitting
 but are not neural features. Proposal component indices, component log
 densities, proposal/evaluation log probabilities, log/normalized weights and
-proposal seeds remain privileged provenance under policy version `1.3.0`.
+proposal seeds remain privileged provenance. Policy version `1.4.0` adds only
+`adopted_lens_family`: a model-hypothesis condition required by the frozen
+estimand, not a latent lens-parameter truth. Exact lens parameters and their
+aliases remain forbidden.
 
 ## Change control
 

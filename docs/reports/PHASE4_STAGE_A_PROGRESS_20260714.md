@@ -49,6 +49,16 @@ Sixteen train shards were partial. Their 903 written chunks are deliberately
 excluded from the formal accepted count because partial shards are never
 publication evidence.
 
+### Latest read-only update
+
+At `2026-07-14T12:52:16Z`, the immutable run remained healthy with 80 complete
+train shards, 16 partial train shards and no validation shard yet. Formal
+progress was 10,240/32,768 train systems (31.25%) and 80/304 total Stage A
+shards (26.32%). Staging occupied 13,271,326,632 bytes, 309,241,184,256 bytes
+remained free, no matching error artifact was present and the published parent
+still did not exist. The timestamped JSON snapshot is committed separately;
+these counts remain progress evidence, not publication evidence.
+
 The run began at `2026-07-14T02:07:18Z`. At the snapshot it had used 21,505
 seconds, approximately 5.97 hours. Sixteen workers consumed about 1,597% CPU
 and 5.36 GiB aggregate RSS. Stage A staging occupied 7,467,857,940 bytes and
@@ -113,9 +123,9 @@ evaluation, real noise and GWOSC/GWTC remain closed.
 
 ## Time estimate
 
-The completed-shard rate at the snapshot was about 900 accepted pairs per
-hour, while partial-shard progress suggested a somewhat higher instantaneous
-rate. A reasonable operational estimate was 32–43 additional hours including
-final validation and publication. The preregistered conservative projection
-remained approximately 51 additional hours. These are projections, not
-completion evidence.
+The completed-shard rate at the first snapshot was about 900 accepted pairs
+per hour. At the latest snapshot it was about 953 accepted pairs per active
+hour from launch. A reasonable operational estimate is 30–38 additional hours
+including final validation and publication, approximately 2026-07-15 19:00 to
+2026-07-16 03:00 UTC. The preregistered conservative projection remains a
+slower bound. These are projections, not completion evidence.
