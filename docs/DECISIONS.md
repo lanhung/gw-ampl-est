@@ -573,3 +573,16 @@ The single release-gate command returns official parent/train/validation IDs
 only when RC.4, the final commit/wheel, the canary hash, disk/PSD checks and the
 exact scientific execution authorization all pass. During design it must
 remain blocked and return no identities.
+
+## D065 — The direct-target canary passes without opening Stage A
+
+The frozen generator commit and non-editable wheel completed exactly 8+8
+engineering canary pairs. The first namespace remained byte-identical across
+intentional interruption/resume; q=p, unit weights, typed schema/array health,
+cross-namespace grouped-ID disjointness, telemetry fields and independent
+checksums passed. No throughput or ESS value was inspected.
+
+This is engineering execution evidence only. It resolves the disposable
+canary prerequisite but does not itself authorize scientific materialization,
+official Stage A identities or model training. Those still require the single
+release gate plus a separate exact 32,768/6,144 human authorization.

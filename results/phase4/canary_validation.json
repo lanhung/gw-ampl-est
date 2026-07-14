@@ -1,0 +1,28 @@
+{
+  "accepted_pair_count": 16,
+  "cross_namespace_group_disjoint": true,
+  "independent_checksums": {
+    "train_namespace": {
+      "bytes": 7708346,
+      "tree_sha256": "b892f51858788dde75687317d69ddf4f2d426fb37cf187626b8f68671551a255"
+    },
+    "validation_namespace": {
+      "bytes": 7708896,
+      "tree_sha256": "37a3d29b0e3d32a5ffc5a710ad53557706dbc87c6822edb35decce3f7e5091ae"
+    }
+  },
+  "official_stage_a_identities_created": false,
+  "release_gate_status": "blocked_preexecution",
+  "resume_first_namespace_byte_identical": true,
+  "stage_a_output_absent": true,
+  "status": "passed",
+  "telemetry": {
+    "train_namespace": {
+      "required_fields_present": true
+    },
+    "validation_namespace": {
+      "required_fields_present": true
+    }
+  },
+  "throughput_or_ess_inspected": false
+}

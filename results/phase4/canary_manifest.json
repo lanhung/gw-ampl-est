@@ -1,0 +1,72 @@
+{
+  "accepted_pair_count": 16,
+  "calibration_use_authorized": false,
+  "configuration_hash": "718204954753931d577320861f1ec4ec3345b0e59904597c700720a9bf2d7577",
+  "environment": {
+    "editable_install": false,
+    "generator_commit": "2be777e727ef9d8e1a85f89c68966df5d37932b0",
+    "hostname": "autodl-container-7fb444a9ae-9b4ed319",
+    "packages": {
+      "astropy": "6.1.7",
+      "bilby": "2.6.0",
+      "lalsuite": "7.26.1",
+      "lenstronomy": "1.13.6",
+      "numpy": "1.26.4",
+      "pandas": "2.2.3",
+      "pyarrow": "17.0.0",
+      "zarr": "2.18.3"
+    },
+    "python": "3.10.12",
+    "python_executable": "/root/autodl-tmp/lensing-4/envs/phase1b-smoke/bin/python",
+    "wheel_sha256": "14104f8aab3aa911fe43e27c311079f118add7ca8ad22178ca158c13d81d0a88"
+  },
+  "generator_commit": "2be777e727ef9d8e1a85f89c68966df5d37932b0",
+  "gwosc_gwtc_accessed": false,
+  "namespaces": {
+    "train_namespace": {
+      "bytes": 7708346,
+      "dataset_id": "gwlens-v2-2.0.0-alpha.3-023915cd20adfd7e-canary-train",
+      "direct_target": {
+        "accepted_pair_count": 8,
+        "all_importance_weights_one": true,
+        "proposal_equals_evaluation": true,
+        "status": "passed"
+      },
+      "health": {
+        "accepted_pair_count": 8,
+        "bytes": 7708346,
+        "status": "passed",
+        "throughput_inspected": false,
+        "tree_sha256": "b892f51858788dde75687317d69ddf4f2d426fb37cf187626b8f68671551a255"
+      },
+      "tree_sha256": "b892f51858788dde75687317d69ddf4f2d426fb37cf187626b8f68671551a255"
+    },
+    "validation_namespace": {
+      "bytes": 7708896,
+      "dataset_id": "gwlens-v2-2.0.0-alpha.3-621bf8c6bc6637e1-canary-validation",
+      "direct_target": {
+        "accepted_pair_count": 8,
+        "all_importance_weights_one": true,
+        "proposal_equals_evaluation": true,
+        "status": "passed"
+      },
+      "health": {
+        "accepted_pair_count": 8,
+        "bytes": 7708896,
+        "status": "passed",
+        "throughput_inspected": false,
+        "tree_sha256": "37a3d29b0e3d32a5ffc5a710ad53557706dbc87c6822edb35decce3f7e5091ae"
+      },
+      "tree_sha256": "37a3d29b0e3d32a5ffc5a710ad53557706dbc87c6822edb35decce3f7e5091ae"
+    }
+  },
+  "parent_run_id": "phase4-canary-2be777e727ef-718204954753",
+  "resume_first_namespace_byte_identical": true,
+  "scientific_use_authorized": false,
+  "stage_a_identity_created": false,
+  "status": "passed",
+  "test_use_authorized": false,
+  "throughput_or_ess_inspected": false,
+  "total_bytes": 15417242,
+  "training_use_authorized": false
+}

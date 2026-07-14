@@ -312,6 +312,22 @@ identities, model training, calibration, SBC, scientific evaluation, real
 noise and GWOSC/GWTC access remain unauthorized. Canary artifacts are
 permanently excluded from all scientific splits.
 
+The authorized disposable canary completed successfully under parent run:
+
+`phase4-canary-2be777e727ef-718204954753`
+
+It produced exactly 8+8 engineering pairs, preserved the first namespace
+byte-identically across intentional interruption/resume, passed direct-target
+unit-weight, schema, array, storage, ID-disjointness, telemetry and checksum
+validation, and did not inspect throughput or ESS. The canonical canary
+manifest SHA-256 is:
+
+`c1984616f2f7cea3d9d07b799cf1578f7e5d702174d2f6ba749ffb78d59afb40`
+
+Passing the canary does not authorize Stage A. The release gate remains
+blocked with null official identities until a separate exact-count Stage A
+authorization is recorded.
+
 ## Scientific integrity
 
 - Never fabricate results, citations, completed runs or calibration.

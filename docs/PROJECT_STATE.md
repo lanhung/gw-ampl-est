@@ -203,6 +203,18 @@ unauthorized.
 - confirmed that the canary and Stage A output roots remain absent, no pair was
   generated and the release certificate remains blocked with null official
   identities.
+- merged the RC.4 pre-execution implementation and a narrow authorization-only
+  integration fix, freezing generator commit
+  `2be777e727ef9d8e1a85f89c68966df5d37932b0` and wheel hash `14104f8a...`;
+- installed the exact wheel non-editably on AutoDL and passed 220 tests plus
+  Ruff, mypy, environment-lock and authorization preflight checks;
+- generated exactly 8+8 disposable direct-target canary pairs, intentionally
+  interrupted after the first namespace and verified its shard byte-identical
+  after resume;
+- passed q=p/unit-weight, JSON/Parquet/Zarr/schema, array decomposition,
+  grouped-ID disjointness, telemetry-field and independent checksum checks;
+- retained Stage A as blocked with no official identities and did not inspect
+  canary throughput or ESS.
 
 ## Not started by design
 
@@ -216,8 +228,7 @@ unauthorized.
 
 ## Next recommended phase
 
-Human review should accept direct-target RC.4 and its pre-execution
-implementation. After the final generator commit/wheel is frozen, the next
-gate may authorize exactly 8+8 disposable canary pairs only. Stage A remains
-closed until that canary is reviewed and a separate exact-count authorization
-is recorded.
+Human review should inspect the passed 8+8 canary evidence. A separate
+authorization must freeze exactly 32,768 train plus 6,144 validation systems
+before the release gate may create official identities. Model training remains
+a later, independent gate.
