@@ -1,0 +1,81 @@
+phase: "4-probe"
+authorization_status: authorized_probe_training_only
+authorized_by: codex_as_delegated_scientific_and_engineering_reviewer
+authorization_date: "2026-07-16"
+
+authorization_basis:
+  owner_delegation: continue_without_routine_human_intervention
+  stage_a_status: passed_and_atomically_published
+  stage_a_completion_report: docs/reports/PHASE4_STAGE_A_COMPLETION_REPORT.md
+  training_implementation_report: docs/reports/PHASE4_PROBE_TRAINING_EXECUTION_RUNNER_REPORT.md
+  final_evaluation_commitment_status: finalized_before_training
+
+authorization:
+  stage_a_data_access_authorized: true
+  scientific_probe_training_authorized: true
+  probe_optimizer_execution_authorized: true
+  learning_curve_decision_authorized: true
+
+  model_tuning_authorized: false
+  calibration_authorized: false
+  sbc_authorized: false
+  final_evaluation_authorized: false
+  stage_b_authorized: false
+  real_noise_authorized: false
+  gwosc_gwtc_access_authorized: false
+
+authorized_training_rungs: [16384, 32768]
+authorized_training_seeds: [0, 1, 2]
+probe_membership_root_seed: 2026071401
+probe_membership_rule: deterministic_rank_of_sha256_over_complete_train_32k
+maximum_concurrent_fits: 3
+data_loader_worker_processes: 4
+
+stage_a_parent_run_id: phase4-stage-a-2be777e727ef-d3a60034bbd6
+stage_a_publication_root: /root/autodl-tmp/lensing-4/data_v2/scientific/stage_a/published/phase4-stage-a-2be777e727ef-d3a60034bbd6
+stage_a_generator_commit: "2be777e727ef9d8e1a85f89c68966df5d37932b0"
+stage_a_parent_manifest_sha256: "4f3e6b3a7ca1a995d7a7643c48410e479fb812e4a01ff66537232b9d64bf3314"
+stage_a_publication_tree_sha256: "1c9d95d0e0157e4123ecb27fe31114aae15cb257c34063aca1b3677a7f1e2621"
+
+final_evaluation_commitment_path: results/phase4/final_evaluation_commitment.json
+final_evaluation_commitment_sha256: "c13412eced163bac26abc4b22d054f3a6fa967e7e5a4dd7849ebf54f42df6083"
+
+immutable_training:
+  git_commit: "c22de311d435284c77b69ad0ba1c502d94c3f7e4"
+  no_training_code_change_since_reviewed_commit: true
+  prior_runner_merge_commit: "71fe4fd2563ef02e5c06cf6d907e1fb39e4d38e2"
+  wheel_filename: gwlens_mm-0.1.0-py3-none-any.whl
+  wheel_sha256: "8e50f0e455d8bdcf269654b469d51f536d99a27bfffab9f6f3b66fc4948466df"
+  model_configuration_path: configs/models/phase4_probe_nsf.yaml
+  model_configuration_hash: "4930651be569725748a0025311ea8b479a217ecab8137be9855a7ee6d2c0377c"
+  environment_lock_path: configs/environment/phase4-training-freeze.txt
+  environment_lock_sha256: "2e45000a8cea6712ae307c87782c593245ad56607a772f27a0cc5af726e37b95"
+  editable_install_authorized: false
+  cuda_required: true
+  gpu_model: NVIDIA RTX 5000 Ada Generation
+  minimum_gpu_count: 3
+
+execution_contract:
+  first_rung: 16384
+  second_rung: 32768
+  train_each_rung_from_scratch: true
+  same_validation_systems_across_all_fits: 6144
+  first_generated_16384_as_probe_forbidden: true
+  calibration_during_scale_selection_forbidden: true
+  final_evaluation_access_forbidden: true
+  best_seed_selection_forbidden: true
+  checkpoint_resume_authorized: true
+  paired_bootstrap_replicates: 10000
+
+resource_gates:
+  minimum_prelaunch_free_bytes: 100000000000
+  maximum_training_output_bytes: 50000000000
+  maximum_concurrent_fits: 3
+
+training_output_root: /root/autodl-tmp/lensing-4/training/phase4/probe
+
+completion_states:
+  - lock_train_32k
+  - continue_to_train_65k
+
+stop_after_learning_curve_decision: true

@@ -425,6 +425,27 @@ evaluation commitment, frozen training code/wheel, model configuration and
 immutable CUDA environment. Calibration, SBC, final evaluation, Stage B and
 GWOSC/GWTC remain closed.
 
+Delegated expert review accepts the Stage A publication and authorizes only the
+frozen 16k/32k three-seed probe workflow through:
+
+`configs/execution/phase4_probe_training_authorization.yaml`
+
+The frozen training-code commit is
+`c22de311d435284c77b69ad0ba1c502d94c3f7e4`, the exact wheel SHA-256 is
+`8e50f0e455d8bdcf269654b469d51f536d99a27bfffab9f6f3b66fc4948466df`, the
+model configuration hash is
+`4930651be569725748a0025311ea8b479a217ecab8137be9855a7ee6d2c0377c`, and
+the normalized CUDA environment SHA-256 is
+`2e45000a8cea6712ae307c87782c593245ad56607a772f27a0cc5af726e37b95`.
+
+This gate permits reading the one atomic Stage A publication, resolving the
+16,384-member subset by the frozen SHA-256 rank rule, fitting the 16k and 32k
+probe model from scratch for seeds 0, 1 and 2, and applying the frozen paired
+learning-curve decision. It does not authorize model tuning, calibration, SBC,
+final evaluation, Stage B, real noise or GWOSC/GWTC. A `continue_to_train_65k`
+decision is evidence for a later gate, not authorization to generate or train
+the 65k rung.
+
 ## Scientific integrity
 
 - Never fabricate results, citations, completed runs or calibration.
