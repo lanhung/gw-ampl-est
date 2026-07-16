@@ -4,13 +4,12 @@
 
 Direct-target RC.4 is frozen at hash
 `5aeaac395463bd073c44ead4ff4c5c729b5a2d4b4f1840c0825a53b30ab1bc98`.
-The exact-count Stage A run is active under parent
+The exact-count Stage A run passed and atomically published under parent
 `phase4-stage-a-2be777e727ef-d3a60034bbd6`, using frozen generator commit
-`2be777e727ef9d8e1a85f89c68966df5d37932b0`. At the read-only snapshot
-`2026-07-14T13:39:00Z`, 85/256 train shards were atomically complete, 16 train
-shards were partial, 10,880/32,768 train systems were complete, no error pattern
-was present and 308,282,417,152 bytes remained free. Validation generation and
-final publication have not started.
+`2be777e727ef9d8e1a85f89c68966df5d37932b0`. The publication contains exactly
+32,768 train plus 6,144 validation systems in 304 complete 128-system shards,
+with no partial shard. The parent manifest SHA-256 is
+`4f3e6b3a7ca1a995d7a7643c48410e479fb812e4a01ff66537232b9d64bf3314`.
 
 In parallel, the probe stack now has a fail-closed execution runner, atomic-parent
 publication resolver, streaming rung standardization, deterministic three-GPU seed
@@ -19,8 +18,9 @@ It may run unit/integration and in-memory engineering smoke tests but cannot rea
 Stage A or start scientific training. The final-evaluation generation commitment
 is finalized at SHA-256
 `c13412eced163bac26abc4b22d054f3a6fa967e7e5a4dd7849ebf54f42df6083`.
-Scientific probe training still requires Stage A atomic publication and a separate
-authorization binding the publication, training code and environment.
+Scientific probe training now requires only the separate reviewed authorization
+binding this exact publication, training code, model configuration, finalized
+evaluation commitment and immutable CUDA environment.
 
 ## Completed
 
@@ -269,11 +269,15 @@ authorization binding the publication, training code and environment.
 - installed and normalized the isolated AutoDL candidate environment at freeze
   SHA-256 `2e45000a...`; a full-length GPU engineering smoke passed twice with
   replay SHA-256 `ae4e68c0...`, without reading Stage A.
+- atomically published and validated exact direct-target Stage A: 32,768 train
+  plus 6,144 validation systems, 304 complete shards, exact unit weights,
+  group-disjoint splits and publication-tree SHA-256 `1c9d95d0...`;
+- completed Stage A in 39.63 elapsed hours with 46,491,822,064 published bytes
+  and 264,872,910,848 bytes remaining free.
 
 ## Not started or not yet complete by design
 
 - further proposal engineering qualification (permanently closed);
-- Stage A validation generation and final atomic publication;
 - scientific model or posterior training (implementation exists, execution is closed);
 - calibration, SBC or final scientific evaluation;
 - GWOSC/GWTC download;
@@ -282,9 +286,8 @@ authorization binding the publication, training code and environment.
 
 ## Current execution and next gate
 
-Stage A is actively materializing under parent
-`phase4-stage-a-2be777e727ef-d3a60034bbd6`. It must finish all 304 shards,
-complete full validation and atomically publish before a Phase 4 completion
-report can be written. The final-evaluation implementation and commitment are
-now frozen without opening materialization. Model training remains a later,
-independent gate.
+Stage A is complete and publication evidence is recorded in
+`docs/reports/PHASE4_STAGE_A_COMPLETION_REPORT.md`. The final-evaluation
+implementation and commitment remain frozen without opening materialization.
+The next gate is a separate 16k/32k probe-training authorization; calibration,
+SBC, final evaluation, Stage B and GWOSC/GWTC remain closed.

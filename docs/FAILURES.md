@@ -423,3 +423,15 @@ silently choose a solver search window or approximate caustic area.
   CPU and CUDA RNG-state tensors back to host before restoration and is covered
   by a regression plus byte-identical interruption/resume canary. No scientific
   data or checkpoint was involved.
+
+## Phase 4 Stage A completed without a new hard failure
+
+- The exact 38,912-system direct-target run passed all publication validators
+  and atomically published. No partial shard, grouped-ID leakage, nonunit weight,
+  external-data access or legacy-root mutation was found.
+- Actual attempts were 5.25% above and published bytes 9.96% above their planning
+  estimates. These were projection deviations, not gate failures: elapsed time
+  was 29.8% below projection, bytes stayed below the projected peak envelope and
+  post-publication free space exceeded the hard floor by 164.87 GB.
+- No scientific training result exists. Treating the passed data publication as
+  model performance evidence remains forbidden.
