@@ -684,3 +684,17 @@ The executable AutoDL candidate uses Python 3.10.12, Torch 2.10.0+cu128, Zarr
 2.18.3 and Numcodecs 0.13.1. The latter two are the Python-3.10-compatible Zarr-v2
 pair already proven by the Stage A writer. A dependency pair requiring Python
 3.11 is not an acceptable nominal lock for a Python 3.10 host.
+
+## D070 — Accept the atomic direct-target Stage A publication
+
+Stage A passed with exactly 32,768 train and 6,144 validation systems in 304
+complete shards. The parent manifest SHA-256 is
+`4f3e6b3a7ca1a995d7a7643c48410e479fb812e4a01ff66537232b9d64bf3314`.
+The publication is the sole data parent eligible for the later 16k/32k probe
+gate. The 16k membership is still resolved only from the complete 32k train ID
+set by the frozen SHA-256 rank rule.
+
+The publication does not itself authorize training. A later authorization must
+bind the parent manifest, Stage A generator, finalized evaluation commitment,
+training code and wheel, model configuration and normalized CUDA environment.
+Calibration, SBC, final evaluation, Stage B and GWOSC/GWTC stay closed.

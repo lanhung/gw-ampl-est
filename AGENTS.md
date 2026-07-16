@@ -409,6 +409,22 @@ commitment, the training-code merge commit, model configuration and immutable CU
 environment. Calibration, SBC, final evaluation, Stage B and GWOSC/GWTC remain
 closed even after a future probe authorization.
 
+The exact Stage A run completed and atomically published under parent
+`phase4-stage-a-2be777e727ef-d3a60034bbd6`. It contains exactly 32,768 train plus
+6,144 validation systems in 304 complete shards. The parent manifest SHA-256 is
+`4f3e6b3a7ca1a995d7a7643c48410e479fb812e4a01ff66537232b9d64bf3314` and the
+publication-tree SHA-256 is
+`1c9d95d0e0157e4123ecb27fe31114aae15cb257c34063aca1b3677a7f1e2621`.
+Direct-target equality, exact unit weights, split disjointness, counts, resource
+gates and publication validation passed. No GWOSC/GWTC access occurred.
+
+Passing Stage A does not itself authorize model training. Before reading the
+published Parquet/Zarr data or resolving the 16k membership, a separate exact
+probe-training authorization must bind this parent manifest, the finalized
+evaluation commitment, frozen training code/wheel, model configuration and
+immutable CUDA environment. Calibration, SBC, final evaluation, Stage B and
+GWOSC/GWTC remain closed.
+
 ## Scientific integrity
 
 - Never fabricate results, citations, completed runs or calibration.

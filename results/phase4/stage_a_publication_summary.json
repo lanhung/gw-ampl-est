@@ -1,0 +1,43 @@
+{
+  "accepted_pair_count": 38912,
+  "acceptance_rate": 0.002673438755257029,
+  "all_importance_weights_one": true,
+  "completed_utc": "2026-07-15T17:45:15Z",
+  "elapsed_wall_hours": 39.63251617388889,
+  "execution_result_sha256": "214bc74254f8f4c46f58297ffcc5d840449b6aee769e87650f1965f788bf98a7",
+  "final_evaluation_authorized": false,
+  "generator_commit": "2be777e727ef9d8e1a85f89c68966df5d37932b0",
+  "gwosc_gwtc_accessed": false,
+  "model_training_authorized": false,
+  "parent_manifest_sha256": "4f3e6b3a7ca1a995d7a7643c48410e479fb812e4a01ff66537232b9d64bf3314",
+  "parent_run_id": "phase4-stage-a-2be777e727ef-d3a60034bbd6",
+  "preregistration_hash": "5aeaac395463bd073c44ead4ff4c5c729b5a2d4b4f1840c0825a53b30ab1bc98",
+  "preregistration_version": "1.1.0-rc.4",
+  "proposal_equals_evaluation": true,
+  "publication_bytes": 46491822064,
+  "publication_path": "/root/autodl-tmp/lensing-4/data_v2/scientific/stage_a/published/phase4-stage-a-2be777e727ef-d3a60034bbd6",
+  "publication_tree_sha256": "1c9d95d0e0157e4123ecb27fe31114aae15cb257c34063aca1b3677a7f1e2621",
+  "remaining_free_bytes": 264872910848,
+  "status": "passed",
+  "total_attempt_count": 14555037,
+  "total_complete_shard_count": 304,
+  "train": {
+    "accepted_pair_count": 32768,
+    "attempt_count": 12234366,
+    "complete_shard_count": 256,
+    "dataset_id": "gwlens-v2-2.0.0-alpha.3-ef4baee395dbe94b-train",
+    "epl_external_shear_count": 15944,
+    "pairs_per_shard": 128,
+    "sie_external_shear_count": 16824
+  },
+  "train_validation_group_disjoint": true,
+  "validation": {
+    "accepted_pair_count": 6144,
+    "attempt_count": 2320671,
+    "complete_shard_count": 48,
+    "dataset_id": "gwlens-v2-2.0.0-alpha.3-33c3e6cb507a03e9-validation",
+    "epl_external_shear_count": 2985,
+    "pairs_per_shard": 128,
+    "sie_external_shear_count": 3159
+  }
+}
