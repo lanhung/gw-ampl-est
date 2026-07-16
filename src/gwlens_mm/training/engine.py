@@ -283,6 +283,23 @@ def _validate_execution_evidence(
         raise TrainingGateError("authorization evidence does not bind the full run identity")
 
 
+def optimization_batch_geometry(
+    optimization: Mapping[str, Any],
+) -> Tuple[int, int, int]:
+    """Return frozen effective batch, physical microbatch and accumulation steps."""
+
+    effective = int(optimization["batch_size"])
+    microbatch = int(optimization.get("physical_microbatch_size", effective))
+    steps = int(optimization.get("gradient_accumulation_steps", 1))
+    if effective <= 0 or microbatch <= 0 or steps <= 0:
+        raise TrainingGateError("training batch geometry must be positive")
+    if microbatch * steps != effective:
+        raise TrainingGateError(
+            "physical microbatch times accumulation steps must equal frozen batch size"
+        )
+    return effective, microbatch, steps
+
+
 def train_probe(
     model: Any,
     train_loader: Iterable[Mapping[str, Any]],
@@ -349,27 +366,50 @@ def train_probe(
     maximum_epochs = int(optimization["maximum_epochs"])
     patience = int(optimization["early_stopping_patience_epochs"])
     minimum_delta = float(optimization["early_stopping_minimum_delta"])
+    effective_batch_size, physical_microbatch_size, accumulation_steps = (
+        optimization_batch_geometry(optimization)
+    )
     for epoch in range(start_epoch, maximum_epochs):
         _set_training_epoch(train_loader, epoch)
         model.train()
         training_sum = 0.0
         training_count = 0
+        accumulated_examples = 0
+        accumulated_microbatches = 0
+        optimizer.zero_grad(set_to_none=True)
         for batch in train_loader:
             moved = _move_batch(batch, device)
             target = moved.pop("target")
-            optimizer.zero_grad(set_to_none=True)
+            if len(target) > physical_microbatch_size:
+                raise TrainingGateError("train loader exceeded the physical microbatch size")
+            if accumulated_examples + len(target) > effective_batch_size:
+                raise TrainingGateError("microbatches crossed the frozen effective batch boundary")
             standardized = _standardize_target(target, standardizer, torch)
             log_probability = model.log_prob(standardized, moved)
-            loss = -log_probability.mean()
+            loss = -log_probability.sum() / effective_batch_size
             if not torch.isfinite(loss):
                 raise FloatingPointError("training loss became nonfinite")
             loss.backward()
-            torch.nn.utils.clip_grad_norm_(
-                model.parameters(), float(optimization["gradient_clip_norm"])
-            )
-            optimizer.step()
-            training_sum += float(loss.detach()) * len(target)
+            training_sum += float((-log_probability).sum().detach())
             training_count += len(target)
+            accumulated_examples += len(target)
+            accumulated_microbatches += 1
+            if accumulated_examples == effective_batch_size:
+                if accumulated_microbatches != accumulation_steps:
+                    raise TrainingGateError(
+                        "effective batch used the wrong number of physical microbatches"
+                    )
+                torch.nn.utils.clip_grad_norm_(
+                    model.parameters(), float(optimization["gradient_clip_norm"])
+                )
+                optimizer.step()
+                optimizer.zero_grad(set_to_none=True)
+                accumulated_examples = 0
+                accumulated_microbatches = 0
+        if accumulated_examples or accumulated_microbatches:
+            raise TrainingGateError(
+                "training rung did not end on a complete frozen effective batch"
+            )
         model.eval()
         validation_sum = 0.0
         validation_count = 0
@@ -431,6 +471,9 @@ def train_probe(
         "best_epoch": best_epoch,
         "best_validation_nlp_nat_per_target_dimension": best_value,
         "epochs_completed": len(history),
+        "effective_batch_size": effective_batch_size,
+        "physical_microbatch_size": physical_microbatch_size,
+        "gradient_accumulation_steps": accumulation_steps,
         "posthoc_calibration_applied": False,
         "final_evaluation_accessed": False,
     }

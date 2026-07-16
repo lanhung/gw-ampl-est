@@ -33,6 +33,7 @@ from gwlens_mm.training.engine import (
     TargetStandardizer,
     TrainingRunIdentity,
     _restore_rng_state,
+    optimization_batch_geometry,
     standardizer_hash,
     validate_engineering_smoke_limits,
 )
@@ -522,6 +523,25 @@ def test_shard_sampler_is_resume_stable_and_keeps_shards_local() -> None:
     assert set(first) == set(range(24))
     transitions = sum(keys[left] != keys[right] for left, right in zip(first, first[1:]))
     assert transitions == 5
+
+
+def test_physical_microbatch_preserves_frozen_effective_batch() -> None:
+    effective, microbatch, steps = optimization_batch_geometry(
+        {
+            "batch_size": 256,
+            "physical_microbatch_size": 64,
+            "gradient_accumulation_steps": 4,
+        }
+    )
+    assert (effective, microbatch, steps) == (256, 64, 4)
+    with pytest.raises(TrainingGateError, match="must equal frozen batch size"):
+        optimization_batch_geometry(
+            {
+                "batch_size": 256,
+                "physical_microbatch_size": 64,
+                "gradient_accumulation_steps": 2,
+            }
+        )
 
 
 def test_input_standardizer_uses_only_observed_values_and_preserves_missing_zero() -> None:
