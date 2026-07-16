@@ -431,12 +431,20 @@ frozen 16k/32k three-seed probe workflow through:
 `configs/execution/phase4_probe_training_authorization.yaml`
 
 The frozen training-code commit is
-`c22de311d435284c77b69ad0ba1c502d94c3f7e4`, the exact wheel SHA-256 is
-`8e50f0e455d8bdcf269654b469d51f536d99a27bfffab9f6f3b66fc4948466df`, the
+`5baabfe229ad187f6bcdcc1dea7cf42aa43c41e9`, the exact wheel SHA-256 is
+`262b6446cb200f2ae432e0e33ed35d986ad475321d59ea39bcae9cb528b9c393`, the
 model configuration hash is
-`4930651be569725748a0025311ea8b479a217ecab8137be9855a7ee6d2c0377c`, and
+`8d0919c211b6aa057712a402f689f06d9ea916ba3c0c11cc32d0561aeb8d3087`, and
 the normalized CUDA environment SHA-256 is
 `2e45000a8cea6712ae307c87782c593245ad56607a772f27a0cc5af726e37b95`.
+
+The first 16k execution failed before its first optimizer step because a
+physical batch of 256 exceeded GPU memory. It produced no checkpoint or
+scientific metric and its output root is immutable. Delegated engineering
+review authorizes a fresh run under the new frozen identities above using four
+ordered physical microbatches of 64 per effective batch of 256. The optimizer,
+learning rate, sample order, effective batch, architecture, data, target and
+stopping rules are unchanged. This is not a resume of the failed execution.
 
 This gate permits reading the one atomic Stage A publication, resolving the
 16,384-member subset by the frozen SHA-256 rank rule, fitting the 16k and 32k
