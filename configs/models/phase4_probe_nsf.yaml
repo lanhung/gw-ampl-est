@@ -108,6 +108,9 @@ optimization:
   gradient_clip_norm: 5.0
   maximum_epochs: 200
   batch_size: 256
+  physical_microbatch_size: 64
+  gradient_accumulation_steps: 4
+  effective_batch_semantics: exact_ordered_gradient_accumulation
   early_stopping_metric: validation_nlp_nat_per_target_dimension
   early_stopping_patience_epochs: 20
   early_stopping_minimum_delta: 0.001

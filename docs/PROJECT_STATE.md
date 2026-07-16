@@ -291,3 +291,10 @@ Stage A is complete and publication evidence is recorded in
 implementation and commitment remain frozen without opening materialization.
 The next gate is a separate 16k/32k probe-training authorization; calibration,
 SBC, final evaluation, Stage B and GWOSC/GWTC remain closed.
+
+The first authorized 16k execution resolved the frozen membership and completed
+metadata-only standardization, then failed before its first optimizer step because
+a physical batch of 256 exceeded the 32 GB GPU memory. A same-phase engineering
+patch preserves the effective batch of 256 through four ordered 64-example
+microbatches with exact gradient accumulation. The failed run has no checkpoint
+or scientific metric and will not be reused as a result.

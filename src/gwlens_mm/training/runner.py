@@ -35,6 +35,7 @@ from .engine import (
     TrainingRunIdentity,
     evaluate_development_validation,
     membership_hash,
+    optimization_batch_geometry,
     standardizer_hash,
     train_probe,
 )
@@ -456,10 +457,12 @@ def run_authorized_probe(
     standardized_validation = StandardizedStageADataset(
         validation_dataset, input_standardizer
     )
-    batch_size = int(model["optimization"]["batch_size"])
+    _, physical_microbatch_size, _ = optimization_batch_geometry(
+        model["optimization"]
+    )
     train_loader = _data_loader(
         standardized_train,
-        batch_size=batch_size,
+        batch_size=physical_microbatch_size,
         seed=seed,
         training=True,
         worker_processes=worker_processes,
@@ -467,7 +470,7 @@ def run_authorized_probe(
     )
     validation_loader = _data_loader(
         standardized_validation,
-        batch_size=batch_size,
+        batch_size=physical_microbatch_size,
         seed=seed,
         training=False,
         worker_processes=worker_processes,

@@ -435,3 +435,18 @@ silently choose a solver search window or approximate caustic area.
   post-publication free space exceeded the hard floor by 164.87 GB.
 - No scientific training result exists. Treating the passed data publication as
   model performance evidence remains forbidden.
+
+## Phase 4 probe first-batch physical-memory failure
+
+- The authorized 16k rung membership and metadata-only standardization passed,
+  but all three initial seed processes exhausted 32 GB GPU memory on their first
+  physical batch of 256 full-length six-stream waveforms. No optimizer step,
+  checkpoint or development metric was produced.
+- The frozen scientific batch remains 256. The same-phase engineering correction
+  splits each ordered effective batch into four physical microbatches of 64 and
+  accumulates their exactly scaled gradients before one clip and optimizer step.
+  Learning rate, optimizer, sample order, effective batch, model architecture,
+  data, target and stopping rules are unchanged.
+- The failed output root is immutable and excluded from later results. Corrected
+  execution requires a new code/wheel/model-config identity and a new output root;
+  it is not a resume of the failed pre-checkpoint processes.

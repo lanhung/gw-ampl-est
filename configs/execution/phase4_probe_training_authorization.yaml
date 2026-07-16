@@ -9,6 +9,8 @@ authorization_basis:
   stage_a_completion_report: docs/reports/PHASE4_STAGE_A_COMPLETION_REPORT.md
   training_implementation_report: docs/reports/PHASE4_PROBE_TRAINING_EXECUTION_RUNNER_REPORT.md
   final_evaluation_commitment_status: finalized_before_training
+  first_execution_status: failed_before_first_optimizer_step_cuda_oom
+  engineering_correction: exact_ordered_gradient_accumulation
 
 authorization:
   stage_a_data_access_authorized: true
@@ -41,13 +43,13 @@ final_evaluation_commitment_path: results/phase4/final_evaluation_commitment.jso
 final_evaluation_commitment_sha256: "c13412eced163bac26abc4b22d054f3a6fa967e7e5a4dd7849ebf54f42df6083"
 
 immutable_training:
-  git_commit: "c22de311d435284c77b69ad0ba1c502d94c3f7e4"
+  git_commit: "5baabfe229ad187f6bcdcc1dea7cf42aa43c41e9"
   no_training_code_change_since_reviewed_commit: true
   prior_runner_merge_commit: "71fe4fd2563ef02e5c06cf6d907e1fb39e4d38e2"
   wheel_filename: gwlens_mm-0.1.0-py3-none-any.whl
-  wheel_sha256: "8e50f0e455d8bdcf269654b469d51f536d99a27bfffab9f6f3b66fc4948466df"
+  wheel_sha256: "262b6446cb200f2ae432e0e33ed35d986ad475321d59ea39bcae9cb528b9c393"
   model_configuration_path: configs/models/phase4_probe_nsf.yaml
-  model_configuration_hash: "4930651be569725748a0025311ea8b479a217ecab8137be9855a7ee6d2c0377c"
+  model_configuration_hash: "8d0919c211b6aa057712a402f689f06d9ea916ba3c0c11cc32d0561aeb8d3087"
   environment_lock_path: configs/environment/phase4-training-freeze.txt
   environment_lock_sha256: "2e45000a8cea6712ae307c87782c593245ad56607a772f27a0cc5af726e37b95"
   editable_install_authorized: false
@@ -66,13 +68,25 @@ execution_contract:
   best_seed_selection_forbidden: true
   checkpoint_resume_authorized: true
   paired_bootstrap_replicates: 10000
+  frozen_effective_batch_size: 256
+  physical_microbatch_size: 64
+  gradient_accumulation_steps: 4
+  effective_batch_semantics: exact_ordered_gradient_accumulation
+  optimizer_steps_and_sample_order_unchanged: true
+
+failed_execution_evidence:
+  output_root: /root/autodl-tmp/lensing-4/training/phase4/probe
+  status: failed_before_first_optimizer_step_cuda_oom
+  reuse_or_resume_authorized: false
+  scientific_metric_exists: false
+  scientific_checkpoint_exists: false
 
 resource_gates:
   minimum_prelaunch_free_bytes: 100000000000
   maximum_training_output_bytes: 50000000000
   maximum_concurrent_fits: 3
 
-training_output_root: /root/autodl-tmp/lensing-4/training/phase4/probe
+training_output_root: /root/autodl-tmp/lensing-4/training/phase4/probe-microbatch-v1
 
 completion_states:
   - lock_train_32k
