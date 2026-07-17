@@ -1,0 +1,48 @@
+contract_version: "1.0.0"
+parent_preregistration:
+  version: "1.1.0-rc.4"
+  path: configs/statistics/direct_target_stage_a_preregistration.yaml
+  canonical_hash: "5aeaac395463bd073c44ead4ff4c5c729b5a2d4b4f1840c0825a53b30ab1bc98"
+
+base_model_configuration: configs/models/phase4_probe_nsf.yaml
+locked_rung_source: future_terminal_learning_curve_decision
+development_split: validation
+development_case_count: 6144
+
+architecture_grid:
+  flow_transforms: [6, 10]
+  conditioner_widths: [128, 256]
+  seeds: [0, 1, 2]
+  architecture_ids:
+    - nsf-t06-w128
+    - nsf-t06-w256
+    - nsf-t10-w128
+    - nsf-t10-w256
+
+fit_contract:
+  train_each_architecture_and_seed_from_scratch: true
+  reuse_probe_architecture_id: nsf-t10-w256
+  reuse_probe_fits_at_locked_rung: true
+  retrain_reused_probe_without_declared_failure: false
+  maximum_architecture_results: 12
+  maximum_new_architecture_fits_after_lock: 9
+  same_training_systems_across_architectures: true
+  same_validation_systems_across_architectures: true
+  same_optimizer_epoch_and_early_stopping_contract: true
+  posthoc_calibration_during_selection: false
+
+selection_contract:
+  primary_metric: mean_validation_nlp_nat_per_target_dimension_across_three_seeds
+  select_best_seed: false
+  report_all_seeds: true
+  tie_break: lower_trainable_parameter_count
+  final_evaluation_access: forbidden
+  calibration_fit_access: forbidden
+  sbc_access: forbidden
+  open_later_gate_automatically: false
+
+execution:
+  architecture_fit_execution_enabled: false
+  architecture_selection_execution_enabled: false
+  scientific_data_access_enabled: false
+  engineering_fixture_tests_only: true

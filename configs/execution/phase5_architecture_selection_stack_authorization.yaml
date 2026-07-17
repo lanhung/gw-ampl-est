@@ -1,0 +1,35 @@
+phase: "5-architecture-stack"
+authorization_status: authorized_implementation_only
+authorized_by: codex_as_delegated_scientific_and_engineering_reviewer
+authorization_date: "2026-07-17"
+
+authorization_basis:
+  owner_delegation: continue_without_routine_human_intervention
+  scientific_contract: adaptive_scientific_production_1.1.0-rc.4
+  implementation_may_overlap_stage_b: true
+
+authorization:
+  architecture_grid_implementation_authorized: true
+  fail_closed_runner_implementation_authorized: true
+  synthetic_fixture_tests_authorized: true
+
+  stage_b_staging_access_authorized: false
+  scientific_data_access_authorized: false
+  architecture_fit_execution_authorized: false
+  architecture_selection_execution_authorized: false
+  model_tuning_authorized: false
+  calibration_authorized: false
+  sbc_authorized: false
+  final_evaluation_authorized: false
+  gwosc_gwtc_access_authorized: false
+
+future_execution_requires:
+  - locked_training_size_decision_and_sha256
+  - atomic_locked_rung_publication_hashes
+  - three_completed_reused_probe_fit_hashes
+  - merged_architecture_training_commit_and_wheel_sha256
+  - immutable_cuda_environment_sha256
+  - exact_architecture_grid_hash
+  - separate_execution_authorization
+
+stop_after_implementation: true
