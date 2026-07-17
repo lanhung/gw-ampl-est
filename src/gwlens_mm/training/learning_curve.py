@@ -110,13 +110,19 @@ def _paired_bootstrap(
     }
 
 
-def compare_16k_to_32k(
-    output_root: Path,
+def _compare_rungs(
+    smaller_root: Path,
+    larger_root: Path,
     *,
+    smaller_rung: int,
+    larger_rung: int,
+    comparison_label: str,
+    saturation_decision: str,
+    nonsaturation_decision: str,
     bootstrap_replicates: int = 10000,
     bootstrap_seed_domain: str = "adaptive_learning_curve_bootstrap_v1",
 ) -> Mapping[str, Any]:
-    """Apply the frozen all-conditions stopping decision to six completed fits."""
+    """Apply the frozen all-conditions comparison to two three-seed rungs."""
 
     aligned_by_seed = {}
     nlp_improvements = []
@@ -125,8 +131,18 @@ def compare_16k_to_32k(
     tail_counts: Optional[Mapping[str, int]] = None
     conditions: list[bool] = []
     for seed in SEEDS:
-        smaller = _load_cases(output_root / "rung-16384" / f"seed-{seed}" / "development_cases.csv")
-        larger = _load_cases(output_root / "rung-32768" / f"seed-{seed}" / "development_cases.csv")
+        smaller = _load_cases(
+            smaller_root
+            / f"rung-{smaller_rung}"
+            / f"seed-{seed}"
+            / "development_cases.csv"
+        )
+        larger = _load_cases(
+            larger_root
+            / f"rung-{larger_rung}"
+            / f"seed-{seed}"
+            / "development_cases.csv"
+        )
         aligned = _aligned(smaller, larger)
         identifiers = tuple(pair[0]["physical_system_id"] for pair in aligned)
         if all_identifiers is None:
@@ -217,7 +233,7 @@ def compare_16k_to_32k(
     passed = all(bool(value) for value in conditions)
     return {
         "status": "learning_curve_decision_complete",
-        "comparison": "train_16k_probe_subset_to_train_32k",
+        "comparison": comparison_label,
         "validation_case_count": len(all_identifiers),
         "seed_summaries": seed_summaries,
         "paired_nlp_bootstrap": bootstrap,
@@ -225,10 +241,61 @@ def compare_16k_to_32k(
         "tail_view_case_counts": tail_counts or {},
         "tail_minimum_case_requirement_passed": tail_requirement_passed,
         "all_saturation_conditions_passed": passed,
-        "decision": "lock_train_32k" if passed else "continue_to_train_65k",
+        "decision": saturation_decision if passed else nonsaturation_decision,
         "calibration_accessed": False,
         "final_evaluation_accessed": False,
     }
+
+
+def compare_16k_to_32k(
+    output_root: Path,
+    *,
+    bootstrap_replicates: int = 10000,
+    bootstrap_seed_domain: str = "adaptive_learning_curve_bootstrap_v1",
+) -> Mapping[str, Any]:
+    """Apply the frozen 16k-to-32k decision."""
+
+    return _compare_rungs(
+        output_root,
+        output_root,
+        smaller_rung=16384,
+        larger_rung=32768,
+        comparison_label="train_16k_probe_subset_to_train_32k",
+        saturation_decision="lock_train_32k",
+        nonsaturation_decision="continue_to_train_65k",
+        bootstrap_replicates=bootstrap_replicates,
+        bootstrap_seed_domain=bootstrap_seed_domain,
+    )
+
+
+def compare_32k_to_65k(
+    smaller_output_root: Path,
+    larger_output_root: Path,
+    *,
+    bootstrap_replicates: int = 10000,
+    bootstrap_seed_domain: str = "adaptive_learning_curve_bootstrap_v1",
+) -> Mapping[str, Any]:
+    """Apply the terminal 32k-to-65k rule without authorizing a larger rung."""
+
+    result = dict(
+        _compare_rungs(
+            smaller_output_root,
+            larger_output_root,
+            smaller_rung=32768,
+            larger_rung=65536,
+            comparison_label="train_32k_to_train_65k",
+            saturation_decision="lock_train_65k",
+            nonsaturation_decision="stop_inconclusive_and_new_preregistration",
+            bootstrap_replicates=bootstrap_replicates,
+            bootstrap_seed_domain=bootstrap_seed_domain,
+        )
+    )
+    if not result["all_saturation_conditions_passed"]:
+        bootstrap = result["paired_nlp_bootstrap"]
+        if float(bootstrap["lower_95"]) >= 0.01:
+            result["decision"] = "stop_data_limited_and_new_preregistration"
+    result["extension_above_65536_authorized"] = False
+    return result
 
 
 def write_learning_curve_decision(output_root: Path, path: Path) -> Mapping[str, Any]:

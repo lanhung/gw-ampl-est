@@ -714,3 +714,20 @@ does not itself authorize Stage B. A separate exact-count gate must add 32,768
 new direct-target training systems with group identities disjoint from Stage A,
 then train the 65k rung from scratch for seeds 0, 1 and 2. Calibration, SBC and
 final evaluation remain sealed. No extension beyond 65k is automatic.
+
+## D072 — Materialize Stage B as an immutable second component
+
+The 65,536-system rung is represented by one atomic reference over the
+immutable 32,768-system Stage A train parent and one new 32,768-system Stage B
+parent. Existing data are not copied, renamed or regenerated. Stage B uses the
+unchanged direct evaluation target, root seed `2026071403`, an independent
+attempt namespace and exact unit weights.
+
+Publication requires cross-component pair, source, lens, physical-system and
+noise-ID disjointness, plus disjointness from the unchanged validation split.
+The combined manifest must not self-authorize training. A later exact gate must
+bind both parent hashes, the combined hash, frozen training code/model/environment
+and the finalized evaluation commitment before any 65k optimizer starts.
+
+The terminal comparison has no automatic forward rung. Saturation locks 65k;
+meaningful improvement or ambiguity stops for a new preregistration.

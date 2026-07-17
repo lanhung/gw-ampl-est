@@ -24,6 +24,12 @@ paired decision is `continue_to_train_65k`: the mean NLP improvement was
 Calibration and final evaluation were not accessed. The next gate is a separate
 exact-count Stage B authorization for 32,768 new direct-target training systems.
 
+That Stage B gate passed and the official 256-shard job is now materializing
+under parent `phase4-stage-b-2be777e727ef-6a4f106f9640`. It will add exactly
+32,768 train systems and no validation systems. In parallel, the 65k combined
+reader, three-seed launcher and terminal learning-curve comparison are being
+completed as execution-disabled software; the 65k optimizer remains closed.
+
 ## Completed
 
 - established Vultr as the sole authoritative Git repository;
@@ -306,3 +312,8 @@ The corrected execution completed all six 16k/32k fits under training commit
 did not lock 32k and requires continuation to 65k. Stage B, the 65k optimizer,
 calibration, SBC, final evaluation and GWOSC/GWTC remain closed until their
 individual gates are recorded.
+
+Stage B release `a198b90cc3ebd695a5b6c277e0843e0e19919b18` passed 267 AutoDL
+tests and every release-gate check before launch. The implementation for the
+future terminal 65k probe remains data-access disabled until the atomic Stage B
+and combined manifests exist and are bound by a new authorization.
