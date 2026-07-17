@@ -650,3 +650,23 @@ def test_learning_curve_decision_is_paired_and_has_a_forward_exit(tmp_path: Path
     improving = compare_16k_to_32k(tmp_path, bootstrap_replicates=100)
     assert improving["decision"] == "continue_to_train_65k"
     assert improving["all_saturation_conditions_passed"] is False
+
+
+def test_committed_probe_decision_preserves_development_only_boundary() -> None:
+    result = json.loads(
+        (ROOT / "results/phase4/probe/learning_curve_decision.json").read_text()
+    )
+    summary = json.loads(
+        (ROOT / "results/phase4/probe/probe_training_summary.json").read_text()
+    )
+    assert result["status"] == "learning_curve_decision_complete"
+    assert result["decision"] == "continue_to_train_65k"
+    assert result["all_saturation_conditions_passed"] is False
+    assert result["validation_case_count"] == 6144
+    assert result["paired_nlp_bootstrap"]["replicates"] == 10000
+    assert result["paired_nlp_bootstrap"]["lower_95"] > 0.01
+    assert result["calibration_accessed"] is False
+    assert result["final_evaluation_accessed"] is False
+    assert summary["stage_b_authorized_by_decision"] is False
+    assert summary["calibration_accessed"] is False
+    assert summary["final_evaluation_accessed"] is False

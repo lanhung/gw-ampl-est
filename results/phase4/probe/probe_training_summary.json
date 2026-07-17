@@ -1,0 +1,92 @@
+{
+  "all_saturation_conditions_passed": false,
+  "calibration_accessed": false,
+  "decision": "continue_to_train_65k",
+  "environment_lock_sha256": "2e45000a8cea6712ae307c87782c593245ad56607a772f27a0cc5af726e37b95",
+  "final_evaluation_accessed": false,
+  "final_evaluation_commitment_sha256": "c13412eced163bac26abc4b22d054f3a6fa967e7e5a4dd7849ebf54f42df6083",
+  "fits": {
+    "16384": [
+      {
+        "best_epoch": 15,
+        "best_validation_nlp_nat_per_target_dimension": 0.27358411671593785,
+        "development_mean_nlp_nat_per_target_dimension": 0.2735841215229205,
+        "epochs_completed": 36,
+        "median_crps": 0.21584667790173845,
+        "seed": 0
+      },
+      {
+        "best_epoch": 17,
+        "best_validation_nlp_nat_per_target_dimension": 0.246713080133001,
+        "development_mean_nlp_nat_per_target_dimension": 0.2467130402122469,
+        "epochs_completed": 38,
+        "median_crps": 0.1961564495068106,
+        "seed": 1
+      },
+      {
+        "best_epoch": 22,
+        "best_validation_nlp_nat_per_target_dimension": 0.2759289775664608,
+        "development_mean_nlp_nat_per_target_dimension": 0.27592897612339584,
+        "epochs_completed": 43,
+        "median_crps": 0.18722279154726912,
+        "seed": 2
+      }
+    ],
+    "32768": [
+      {
+        "best_epoch": 36,
+        "best_validation_nlp_nat_per_target_dimension": 0.04729731209226884,
+        "development_mean_nlp_nat_per_target_dimension": 0.04729726678245546,
+        "epochs_completed": 57,
+        "median_crps": 0.1410600185605004,
+        "seed": 0
+      },
+      {
+        "best_epoch": 39,
+        "best_validation_nlp_nat_per_target_dimension": 0.01466684949506695,
+        "development_mean_nlp_nat_per_target_dimension": 0.014666840824550794,
+        "epochs_completed": 60,
+        "median_crps": 0.1365122246498272,
+        "seed": 1
+      },
+      {
+        "best_epoch": 32,
+        "best_validation_nlp_nat_per_target_dimension": 0.025319669182257105,
+        "development_mean_nlp_nat_per_target_dimension": 0.02531968807064307,
+        "epochs_completed": 53,
+        "median_crps": 0.14441966765393804,
+        "seed": 2
+      }
+    ]
+  },
+  "learning_curve_decision_sha256": "09dd9a3fb6a36c501d5d76412fe063f1612458ade444ff0c3e12eacd66c4f49e",
+  "model_configuration_hash": "8d0919c211b6aa057712a402f689f06d9ea916ba3c0c11cc32d0561aeb8d3087",
+  "output_bytes": 1285930640,
+  "output_root": "/root/autodl-tmp/lensing-4/training/phase4/probe-microbatch-v1",
+  "paired_nlp_bootstrap": {
+    "lower_95": 0.22354493290194014,
+    "point_estimate": 0.23631411406030464,
+    "replicates": 10000,
+    "upper_95": 0.24863754983916805
+  },
+  "rung_membership_sha256": {
+    "16384": "f2dddb02ca034d0f06a751b93cf6601321e9dd90e27c25770609c87f89fdb381",
+    "32768": "b0c28b57350c3cf196c047005fb04f4b3388db0cbcc3caee61016f1ff6e4280b"
+  },
+  "stage_a_parent_manifest_sha256": "4f3e6b3a7ca1a995d7a7643c48410e479fb812e4a01ff66537232b9d64bf3314",
+  "stage_a_parent_run_id": "phase4-stage-a-2be777e727ef-d3a60034bbd6",
+  "stage_b_authorized_by_decision": false,
+  "status": "completed_six_probe_fits_and_learning_curve_decision",
+  "supervisor_status": "completed_six_fits_and_learning_curve_decision",
+  "supervisor_summary_sha256": "d689b6fa89bc65f9eb593eb7650f330ac961c2cf3dfef7bfbb36452d50197bad",
+  "tail_minimum_case_requirement_passed": false,
+  "tail_view_case_counts": {
+    "extreme_profile_or_environment": 223,
+    "extreme_relative_magnification": 40,
+    "high_absolute_magnification": 422,
+    "second_image_near_threshold": 1894
+  },
+  "training_commit": "5baabfe229ad187f6bcdcc1dea7cf42aa43c41e9",
+  "training_wheel_sha256": "262b6446cb200f2ae432e0e33ed35d986ad475321d59ea39bcae9cb528b9c393",
+  "validation_case_count": 6144
+}

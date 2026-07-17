@@ -1,0 +1,149 @@
+{
+  "case_count": 6144,
+  "coverage": {
+    "0.50": {
+      "joint": 0.4523111979166667,
+      "joint_absolute_error": 0.047688802083333315,
+      "marginal": [
+        0.4435221354166667,
+        0.4856770833333333
+      ],
+      "maximum_marginal_absolute_error": 0.056477864583333315,
+      "mean_width": [
+        0.580654815265815,
+        0.6443462433599988
+      ]
+    },
+    "0.80": {
+      "joint": 0.7568359375,
+      "joint_absolute_error": 0.043164062500000044,
+      "marginal": [
+        0.7478841145833334,
+        0.7801106770833334
+      ],
+      "maximum_marginal_absolute_error": 0.052115885416666674,
+      "mean_width": [
+        1.1100099757038981,
+        1.2131464974680302
+      ]
+    },
+    "0.90": {
+      "joint": 0.8649088541666666,
+      "joint_absolute_error": 0.03509114583333339,
+      "marginal": [
+        0.8562825520833334,
+        0.87451171875
+      ],
+      "maximum_marginal_absolute_error": 0.04371744791666665,
+      "mean_width": [
+        1.44164884759435,
+        1.5599261344611495
+      ]
+    },
+    "0.95": {
+      "joint": 0.9290364583333334,
+      "joint_absolute_error": 0.020963541666666585,
+      "marginal": [
+        0.9109700520833334,
+        0.93310546875
+      ],
+      "maximum_marginal_absolute_error": 0.039029947916666585,
+      "mean_width": [
+        1.7293794577447503,
+        1.8702024287140138
+      ]
+    }
+  },
+  "em_cell_coverage": {
+    "einstein_radius,environment_convergence,image_astrometry,lens_center,lens_redshift,source_redshift": {
+      "case_count": 768,
+      "joint_0.90": 0.8736979166666666,
+      "marginal_0.90": [
+        0.8606770833333334,
+        0.8684895833333334
+      ]
+    },
+    "einstein_radius,environment_convergence,image_astrometry,lens_center,lens_redshift,source_redshift,velocity_dispersion": {
+      "case_count": 1536,
+      "joint_0.90": 0.873046875,
+      "marginal_0.90": [
+        0.8665364583333334,
+        0.8802083333333334
+      ]
+    },
+    "einstein_radius,environment_convergence,image_astrometry,lens_center,lens_redshift,velocity_dispersion": {
+      "case_count": 768,
+      "joint_0.90": 0.90234375,
+      "marginal_0.90": [
+        0.90625,
+        0.9192708333333334
+      ]
+    },
+    "einstein_radius,environment_convergence,image_astrometry,lens_center,source_redshift,velocity_dispersion": {
+      "case_count": 768,
+      "joint_0.90": 0.8736979166666666,
+      "marginal_0.90": [
+        0.8580729166666666,
+        0.8919270833333334
+      ]
+    },
+    "environment_convergence,image_astrometry,lens_center,lens_redshift,source_redshift,velocity_dispersion": {
+      "case_count": 768,
+      "joint_0.90": 0.8697916666666666,
+      "marginal_0.90": [
+        0.8697916666666666,
+        0.8802083333333334
+      ]
+    },
+    "image_astrometry,lens_center": {
+      "case_count": 768,
+      "joint_0.90": 0.8020833333333334,
+      "marginal_0.90": [
+        0.7955729166666666,
+        0.8046875
+      ]
+    },
+    "image_astrometry,lens_center,lens_redshift,source_redshift": {
+      "case_count": 768,
+      "joint_0.90": 0.8515625,
+      "marginal_0.90": [
+        0.8268229166666666,
+        0.87109375
+      ]
+    }
+  },
+  "evaluation_seed": 12053509990973880068,
+  "final_evaluation_accessed": false,
+  "mean_nlp_nat_per_target_dimension": 0.2467130402122469,
+  "median_crps": 0.1961564495068106,
+  "median_nlp_nat_per_target_dimension": 0.07200630009174347,
+  "posterior_draws_per_case": 1024,
+  "posthoc_calibration_applied": false,
+  "status": "completed_development_validation",
+  "validation_internal_tail_views": {
+    "extreme_profile_or_environment": {
+      "case_count": 223,
+      "median_crps": 0.19146875287995657,
+      "median_nlp_nat_per_target_dimension": 0.08412010967731476,
+      "minimum_case_requirement_met": true
+    },
+    "extreme_relative_magnification": {
+      "case_count": 40,
+      "median_crps": 0.26210177213032215,
+      "median_nlp_nat_per_target_dimension": 0.40108582377433777,
+      "minimum_case_requirement_met": false
+    },
+    "high_absolute_magnification": {
+      "case_count": 422,
+      "median_crps": 0.5794627674972349,
+      "median_nlp_nat_per_target_dimension": 0.6265931725502014,
+      "minimum_case_requirement_met": true
+    },
+    "second_image_near_threshold": {
+      "case_count": 1894,
+      "median_crps": 0.19327165129889762,
+      "median_nlp_nat_per_target_dimension": 0.08243368566036224,
+      "minimum_case_requirement_met": true
+    }
+  }
+}

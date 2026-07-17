@@ -450,3 +450,18 @@ silently choose a solver search window or approximate caustic area.
 - The failed output root is immutable and excluded from later results. Corrected
   execution requires a new code/wheel/model-config identity and a new output root;
   it is not a resume of the failed pre-checkpoint processes.
+
+## Phase 4 32k probe is not saturated
+
+- This is a preregistered scientific decision, not an execution failure. Six
+  corrected fits completed and the 32k rung materially improved over 16k.
+- The paired NLP-improvement 95% interval was [0.223545, 0.248638], far above
+  the less-than-0.01 saturation condition. All three CRPS improvements also
+  exceeded 22%.
+- Uncalibrated development coverage and EM-cell conditions did not support a
+  32k lock, and the extreme-relative-magnification internal view contained 40
+  rather than the required 128 cases. No final evaluation was opened to resolve
+  the decision.
+- The frozen response is a separately authorized 65k extension. This result
+  does not permit changing the model, inspecting final tests or generating more
+  than the single 32,768-system Stage B increment.

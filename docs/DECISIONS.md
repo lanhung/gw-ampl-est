@@ -698,3 +698,19 @@ The publication does not itself authorize training. A later authorization must
 bind the parent manifest, Stage A generator, finalized evaluation commitment,
 training code and wheel, model configuration and normalized CUDA environment.
 Calibration, SBC, final evaluation, Stage B and GWOSC/GWTC stay closed.
+
+## D071 — Continue the nested training ladder to 65k
+
+All six authorized 16k/32k probe fits completed under one frozen model,
+optimizer, validation set and three-seed contract. The paired 10,000-replicate
+bootstrap measured a 16k-to-32k NLP improvement of 0.236314 nat per target
+dimension with 95% interval [0.223545, 0.248638]. The upper bound is not below
+the 0.01 saturation threshold. Each seed also improved median CRPS by more than
+22%, while development coverage and EM-cell conditions did not meet the
+all-conditions lock rule.
+
+The preregistered decision is therefore `continue_to_train_65k`. This decision
+does not itself authorize Stage B. A separate exact-count gate must add 32,768
+new direct-target training systems with group identities disjoint from Stage A,
+then train the 65k rung from scratch for seeds 0, 1 and 2. Calibration, SBC and
+final evaluation remain sealed. No extension beyond 65k is automatic.

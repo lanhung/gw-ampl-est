@@ -18,9 +18,11 @@ It may run unit/integration and in-memory engineering smoke tests but cannot rea
 Stage A or start scientific training. The final-evaluation generation commitment
 is finalized at SHA-256
 `c13412eced163bac26abc4b22d054f3a6fa967e7e5a4dd7849ebf54f42df6083`.
-Scientific probe training now requires only the separate reviewed authorization
-binding this exact publication, training code, model configuration, finalized
-evaluation commitment and immutable CUDA environment.
+The separately authorized 16k/32k probe workflow has now completed. Its frozen
+paired decision is `continue_to_train_65k`: the mean NLP improvement was
+0.236314 nat per target dimension with 95% interval [0.223545, 0.248638].
+Calibration and final evaluation were not accessed. The next gate is a separate
+exact-count Stage B authorization for 32,768 new direct-target training systems.
 
 ## Completed
 
@@ -298,3 +300,9 @@ a physical batch of 256 exceeded the 32 GB GPU memory. A same-phase engineering
 patch preserves the effective batch of 256 through four ordered 64-example
 microbatches with exact gradient accumulation. The failed run has no checkpoint
 or scientific metric and will not be reused as a result.
+
+The corrected execution completed all six 16k/32k fits under training commit
+`5baabfe229ad187f6bcdcc1dea7cf42aa43c41e9`. The development-only stopping rule
+did not lock 32k and requires continuation to 65k. Stage B, the 65k optimizer,
+calibration, SBC, final evaluation and GWOSC/GWTC remain closed until their
+individual gates are recorded.

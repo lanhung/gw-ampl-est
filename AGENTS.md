@@ -454,6 +454,18 @@ final evaluation, Stage B, real noise or GWOSC/GWTC. A `continue_to_train_65k`
 decision is evidence for a later gate, not authorization to generate or train
 the 65k rung.
 
+All six authorized 16k/32k probe fits have completed under training commit
+`5baabfe229ad187f6bcdcc1dea7cf42aa43c41e9`. The frozen 10,000-replicate paired
+bootstrap measured an NLP improvement of 0.236314 nat per target dimension with
+95% interval [0.223545, 0.248638]. The preregistered decision is
+`continue_to_train_65k`.
+
+This decision does not authorize Stage B. Before generating another system, a
+separate gate must bind exactly 32,768 new direct-target training systems,
+group-disjoint identities, the unchanged RC.4 target and an atomic extension
+publication. Calibration, SBC, final evaluation, training the 65k rung,
+GWOSC/GWTC and any extension beyond 65k remain closed.
+
 ## Scientific integrity
 
 - Never fabricate results, citations, completed runs or calibration.
