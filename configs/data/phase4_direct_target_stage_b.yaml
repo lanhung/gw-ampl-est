@@ -1,0 +1,122 @@
+phase: "4"
+stage: stage_b_direct_target_extension
+status: preexecution_frozen
+
+base_data_config: configs/data/phase3a_qualification.yaml
+authorization_path: configs/execution/phase4_direct_target_stage_b_authorization.yaml
+
+preregistration:
+  path: configs/statistics/direct_target_stage_a_preregistration.yaml
+  version: "1.1.0-rc.4"
+  canonical_hash: "5aeaac395463bd073c44ead4ff4c5c729b5a2d4b4f1840c0825a53b30ab1bc98"
+
+adaptive_preregistration:
+  path: configs/statistics/adaptive_scientific_production_preregistration.yaml
+  version: "1.1.0-rc.3"
+  canonical_hash: "6082475631539d3069edacc52f41b37fb8fe725ccd7c6bc9980cc3008795a927"
+
+parent_scientific_preregistration:
+  path: configs/statistics/phase2_preregistration.yaml
+  version: "1.0.0-rc.5"
+  canonical_hash: "4dde279cf1bea78d1ddbd4fab99d88e88e334c80c180dc7850679736c5e53edb"
+
+learning_curve_evidence:
+  path: results/phase4/probe/learning_curve_decision.json
+  sha256: "09dd9a3fb6a36c501d5d76412fe063f1612458ade444ff0c3e12eacd66c4f49e"
+  required_decision: continue_to_train_65k
+
+direct_target_density_implementation:
+  path: configs/proposals/proposal_v3_target_anchored_mixture.yaml
+  evaluation_target_id: balanced_literature_informed_benchmark_v1
+  mode: evaluation_target_direct
+  proposal_equals_evaluation: true
+  log_importance_weight: 0.0
+  importance_weight: 1.0
+
+schema_version: "2.0.0-alpha.3"
+dataset_purpose: adaptive_scientific_stage_b_train_extension
+
+stage_a_reference:
+  parent_run_id: phase4-stage-a-2be777e727ef-d3a60034bbd6
+  publication_path: /root/autodl-tmp/lensing-4/data_v2/scientific/stage_a/published/phase4-stage-a-2be777e727ef-d3a60034bbd6
+  parent_manifest_path: /root/autodl-tmp/lensing-4/data_v2/scientific/stage_a/published/phase4-stage-a-2be777e727ef-d3a60034bbd6/dataset_manifest.json
+  parent_manifest_sha256: "4f3e6b3a7ca1a995d7a7643c48410e479fb812e4a01ff66537232b9d64bf3314"
+  publication_tree_sha256: "1c9d95d0e0157e4123ecb27fe31114aae15cb257c34063aca1b3677a7f1e2621"
+  train_dataset_id: gwlens-v2-2.0.0-alpha.3-ef4baee395dbe94b-train
+  validation_dataset_id: gwlens-v2-2.0.0-alpha.3-33c3e6cb507a03e9-validation
+  train_accepted_count: 32768
+  validation_accepted_count: 6144
+
+stage_b:
+  split: train
+  root_seed: 2026071403
+  attempt_stream_namespace: phase4-stage-b-train-direct-target-v1
+  id_prefix: phase4-stage-b-train
+  accepted_pair_count: 32768
+  shard_count: 256
+  pairs_per_shard: 128
+  attempt_id_stride: 512
+
+cumulative_train_contract:
+  accepted_physical_system_count: 65536
+  component_count: 2
+  components:
+    - stage_a_train
+    - stage_b_train_extension
+  stage_a_is_strict_subset: true
+  group_disjoint_across_components: true
+  validation_count_unchanged: 6144
+  no_new_validation_materialization: true
+  calibration_sbc_final_evaluation_materialized: false
+
+paths:
+  staging_root: /root/autodl-tmp/lensing-4/data_v2/scientific/stage_b/staging
+  publication_root: /root/autodl-tmp/lensing-4/data_v2/scientific/stage_b/published
+  combined_staging_root: /root/autodl-tmp/lensing-4/data_v2/scientific/train_65k/staging
+  combined_publication_root: /root/autodl-tmp/lensing-4/data_v2/scientific/train_65k/published
+  manifest_root: /root/autodl-tmp/lensing-4/manifests/phase4/stage_b
+  log_root: /root/autodl-tmp/lensing-4/logs/phase4
+
+resource_gates:
+  projection_basis: phase4_stage_a_measured_linear_direct_target_v1
+  stage_a_measured_accepted_count: 38912
+  stage_a_measured_publication_bytes: 46491822064
+  stage_a_measured_active_hours: 39.63
+  projected_stage_b_publication_bytes: 39151008054
+  projected_stage_b_peak_bytes: 61247642662
+  projected_stage_b_active_hours: 33.3727
+  maximum_stage_b_output_bytes: 50000000000
+  maximum_active_hours: 60.0
+  minimum_post_peak_free_bytes: 100000000000
+  minimum_prelaunch_free_bytes: 161247642662
+
+environment:
+  lock_path: configs/environment/phase4-autodl-environment.yaml
+  dependency_lock_path: configs/environment/phase4-autodl-requirements.lock.txt
+
+execution:
+  scientific_execution_enabled: false
+  worker_processes: 16
+  maximum_attempts_per_worker: 500000
+  maximum_active_seconds_per_worker: 21600
+  atomic_shards: true
+  resume_completed_shards_without_rewrite: true
+  atomic_parent_publication: true
+  atomic_combined_reference_publication: true
+
+release:
+  generator_commit: "2be777e727ef9d8e1a85f89c68966df5d37932b0"
+  generator_wheel_path: /root/autodl-tmp/lensing-4/artifacts/phase4/2be777e727ef9d8e1a85f89c68966df5d37932b0/gwlens_mm-0.1.0-py3-none-any.whl
+  generator_wheel_sha256: "14104f8aab3aa911fe43e27c311079f118add7ca8ad22178ca158c13d81d0a88"
+  environment_lock_sha256: "792a93f24f6c38c18ec214665d34c8348e042b21beebd177333dae2c30224d8f"
+
+authorization_boundaries:
+  stage_b_materialization_authorized_by_config: false
+  train_65k_training_authorized: false
+  model_tuning_authorized: false
+  calibration_authorized: false
+  sbc_authorized: false
+  final_evaluation_authorized: false
+  extension_above_65536_authorized: false
+  real_noise_authorized: false
+  gwosc_gwtc_access_authorized: false
