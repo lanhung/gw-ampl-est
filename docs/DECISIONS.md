@@ -731,3 +731,18 @@ and the finalized evaluation commitment before any 65k optimizer starts.
 
 The terminal comparison has no automatic forward rung. Saturation locks 65k;
 meaningful improvement or ambiguity stops for a new preregistration.
+
+## D073 — Implement one closed four-architecture selection grid
+
+Architecture selection retains the RC.3 grid exactly: transforms 6/10 by
+conditioner widths 128/256, with seeds 0/1/2. The locked-rung 10-transform,
+width-256 probe results must supply three of the twelve results; only the other
+nine fits are new. The identical probe cannot be retrained without a recorded
+failure.
+
+Selection uses mean development-validation NLP across all three seeds and
+never chooses a best seed. An exact metric tie is broken by lower trainable
+parameter count. Calibration, SBC and final evaluation remain inaccessible,
+and the selection result cannot open a later gate by itself. Implementation may
+proceed against synthetic fixtures while Stage B runs, but execution requires a
+locked 65k decision and a separate identity-bound authorization.

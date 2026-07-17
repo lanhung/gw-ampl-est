@@ -481,6 +481,14 @@ not permit reading Stage B staging, resolving the 65k membership, starting an
 optimizer, selecting an architecture, calibrating, opening final evaluation or
 accessing GWOSC/GWTC.
 
+The delegated implementation gate also permits the frozen post-size-lock
+architecture grid, nine-new-fit runner and validation-only selector to be
+implemented through
+`configs/execution/phase5_architecture_selection_stack_authorization.yaml`.
+This is software work only: architecture fitting and selection remain closed
+until the 65k decision locks the training size and a later authorization binds
+all twelve results, including reuse of the three locked-rung probe fits.
+
 ## Scientific integrity
 
 - Never fabricate results, citations, completed runs or calibration.

@@ -30,6 +30,11 @@ under parent `phase4-stage-b-2be777e727ef-6a4f106f9640`. It will add exactly
 reader, three-seed launcher and terminal learning-curve comparison are being
 completed as execution-disabled software; the 65k optimizer remains closed.
 
+The post-lock architecture-selection software is implemented without
+scientific data access. It freezes the fixed 2x2 grid, reuses the locked-rung
+10-transform/width-256 probe and limits future work to nine new fits. No
+architecture fit or selection has been executed.
+
 ## Completed
 
 - established Vultr as the sole authoritative Git repository;
