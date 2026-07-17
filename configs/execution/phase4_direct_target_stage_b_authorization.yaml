@@ -1,0 +1,83 @@
+phase: "4-stage-b"
+authorization_status: authorized_exact_stage_b_materialization_only
+authorized_by: human_project_owner_delegated_to_codex_expert_review
+authorization_date: "2026-07-17"
+
+base_main_commit: "fca1c174da7241579c7cc4c1b7cc8c5d05ec740c"
+implementation_commit: "d639d9377d07e4e58eb2a71ceb5d842f0742f7b3"
+
+authorization_basis:
+  delegation: explicit_full_scientific_and_engineering_gate_proxy
+  stage_a_parent_manifest_sha256: "4f3e6b3a7ca1a995d7a7643c48410e479fb812e4a01ff66537232b9d64bf3314"
+  learning_curve_decision_sha256: "09dd9a3fb6a36c501d5d76412fe063f1612458ade444ff0c3e12eacd66c4f49e"
+  learning_curve_decision: continue_to_train_65k
+  expert_review_result: passed
+
+preregistration:
+  version: "1.1.0-rc.4"
+  path: configs/statistics/direct_target_stage_a_preregistration.yaml
+  canonical_hash: "5aeaac395463bd073c44ead4ff4c5c729b5a2d4b4f1840c0825a53b30ab1bc98"
+
+immutable_generator:
+  git_commit: "2be777e727ef9d8e1a85f89c68966df5d37932b0"
+  wheel_path: /root/autodl-tmp/lensing-4/artifacts/phase4/2be777e727ef9d8e1a85f89c68966df5d37932b0/gwlens_mm-0.1.0-py3-none-any.whl
+  wheel_sha256: "14104f8aab3aa911fe43e27c311079f118add7ca8ad22178ca158c13d81d0a88"
+  environment_lock_sha256: "792a93f24f6c38c18ec214665d34c8348e042b21beebd177333dae2c30224d8f"
+  editable_install_authorized: false
+
+stage_a_immutable_reference:
+  parent_run_id: phase4-stage-a-2be777e727ef-d3a60034bbd6
+  train_dataset_id: gwlens-v2-2.0.0-alpha.3-ef4baee395dbe94b-train
+  validation_dataset_id: gwlens-v2-2.0.0-alpha.3-33c3e6cb507a03e9-validation
+  train_accepted_count: 32768
+  validation_accepted_count: 6144
+  mutation_authorized: false
+
+stage_b_contract:
+  distribution_id: balanced_literature_informed_benchmark_v1
+  q_train_equals_p_eval: true
+  log_importance_weight: 0.0
+  importance_weight: 1.0
+  split: train
+  root_seed: 2026071403
+  attempt_stream_namespace: phase4-stage-b-train-direct-target-v1
+  id_prefix: phase4-stage-b-train
+  additional_train_accepted_count: 32768
+  shard_count: 256
+  pairs_per_shard: 128
+  cumulative_train_accepted_count: 65536
+  new_validation_accepted_count: 0
+  stage_a_stage_b_group_disjoint_required: true
+  stage_b_validation_group_disjoint_required: true
+
+authorization:
+  stage_b_scientific_materialization_authorized: true
+  accepted_pair_generator_authorized_within_stage_b_only: true
+
+  train_65k_optimizer_authorized: false
+  model_tuning_authorized: false
+  calibration_authorized: false
+  sbc_authorized: false
+  final_evaluation_authorized: false
+  extension_above_65536_authorized: false
+  real_noise_authorized: false
+  gwosc_gwtc_access_authorized: false
+
+resource_gates:
+  projected_publication_bytes: 39151008054
+  projected_peak_bytes: 61247642662
+  maximum_output_bytes: 50000000000
+  projected_active_hours: 33.3727
+  maximum_active_hours: 60.0
+  minimum_prelaunch_free_bytes: 161247642662
+  minimum_post_peak_free_bytes: 100000000000
+
+dataset_policy:
+  purpose: adaptive_scientific_stage_b_train_extension
+  scientific_training_membership_authorized_after_publication_review: true
+  model_training_use_authorized_now: false
+  calibration_use_authorized: false
+  final_test_use_authorized: false
+  engineering_artifact_ids_forbidden: true
+
+stop_after_atomic_stage_b_and_combined_reference_publication: true
