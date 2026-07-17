@@ -1,0 +1,46 @@
+{
+  "all_saturation_conditions_passed": false,
+  "bootstrap_seed": 17147803212921076285,
+  "calibration_accessed": false,
+  "comparison": "train_16k_probe_subset_to_train_32k",
+  "decision": "continue_to_train_65k",
+  "final_evaluation_accessed": false,
+  "paired_nlp_bootstrap": {
+    "lower_95": 0.22354493290194014,
+    "point_estimate": 0.23631411406030464,
+    "replicates": 10000,
+    "upper_95": 0.24863754983916805
+  },
+  "seed_summaries": {
+    "0": {
+      "em_cell_tolerances_passed": false,
+      "maximum_em_cell_coverage_error_degradation": 0.07421875,
+      "maximum_marginal_coverage_error_improvement": 0.03776041666666663,
+      "mean_nlp_improvement": 0.22628685474046506,
+      "median_crps_relative_improvement": 0.34648047432670587
+    },
+    "1": {
+      "em_cell_tolerances_passed": false,
+      "maximum_em_cell_coverage_error_degradation": 0.061718750000000044,
+      "maximum_marginal_coverage_error_improvement": 0.02662760416666654,
+      "mean_nlp_improvement": 0.2320461993876961,
+      "median_crps_relative_improvement": 0.30406456176661445
+    },
+    "2": {
+      "em_cell_tolerances_passed": false,
+      "maximum_em_cell_coverage_error_degradation": 0.06757812500000004,
+      "maximum_marginal_coverage_error_improvement": 0.0185546875,
+      "mean_nlp_improvement": 0.2506092880527528,
+      "median_crps_relative_improvement": 0.2286213315141407
+    }
+  },
+  "status": "learning_curve_decision_complete",
+  "tail_minimum_case_requirement_passed": false,
+  "tail_view_case_counts": {
+    "extreme_profile_or_environment": 223,
+    "extreme_relative_magnification": 40,
+    "high_absolute_magnification": 422,
+    "second_image_near_threshold": 1894
+  },
+  "validation_case_count": 6144
+}

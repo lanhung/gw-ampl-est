@@ -1,0 +1,191 @@
+{
+  "calibration_accessed": false,
+  "development": {
+    "case_count": 6144,
+    "coverage": {
+      "0.50": {
+        "joint": 0.4523111979166667,
+        "joint_absolute_error": 0.047688802083333315,
+        "marginal": [
+          0.4435221354166667,
+          0.4856770833333333
+        ],
+        "maximum_marginal_absolute_error": 0.056477864583333315,
+        "mean_width": [
+          0.580654815265815,
+          0.6443462433599988
+        ]
+      },
+      "0.80": {
+        "joint": 0.7568359375,
+        "joint_absolute_error": 0.043164062500000044,
+        "marginal": [
+          0.7478841145833334,
+          0.7801106770833334
+        ],
+        "maximum_marginal_absolute_error": 0.052115885416666674,
+        "mean_width": [
+          1.1100099757038981,
+          1.2131464974680302
+        ]
+      },
+      "0.90": {
+        "joint": 0.8649088541666666,
+        "joint_absolute_error": 0.03509114583333339,
+        "marginal": [
+          0.8562825520833334,
+          0.87451171875
+        ],
+        "maximum_marginal_absolute_error": 0.04371744791666665,
+        "mean_width": [
+          1.44164884759435,
+          1.5599261344611495
+        ]
+      },
+      "0.95": {
+        "joint": 0.9290364583333334,
+        "joint_absolute_error": 0.020963541666666585,
+        "marginal": [
+          0.9109700520833334,
+          0.93310546875
+        ],
+        "maximum_marginal_absolute_error": 0.039029947916666585,
+        "mean_width": [
+          1.7293794577447503,
+          1.8702024287140138
+        ]
+      }
+    },
+    "em_cell_coverage": {
+      "einstein_radius,environment_convergence,image_astrometry,lens_center,lens_redshift,source_redshift": {
+        "case_count": 768,
+        "joint_0.90": 0.8736979166666666,
+        "marginal_0.90": [
+          0.8606770833333334,
+          0.8684895833333334
+        ]
+      },
+      "einstein_radius,environment_convergence,image_astrometry,lens_center,lens_redshift,source_redshift,velocity_dispersion": {
+        "case_count": 1536,
+        "joint_0.90": 0.873046875,
+        "marginal_0.90": [
+          0.8665364583333334,
+          0.8802083333333334
+        ]
+      },
+      "einstein_radius,environment_convergence,image_astrometry,lens_center,lens_redshift,velocity_dispersion": {
+        "case_count": 768,
+        "joint_0.90": 0.90234375,
+        "marginal_0.90": [
+          0.90625,
+          0.9192708333333334
+        ]
+      },
+      "einstein_radius,environment_convergence,image_astrometry,lens_center,source_redshift,velocity_dispersion": {
+        "case_count": 768,
+        "joint_0.90": 0.8736979166666666,
+        "marginal_0.90": [
+          0.8580729166666666,
+          0.8919270833333334
+        ]
+      },
+      "environment_convergence,image_astrometry,lens_center,lens_redshift,source_redshift,velocity_dispersion": {
+        "case_count": 768,
+        "joint_0.90": 0.8697916666666666,
+        "marginal_0.90": [
+          0.8697916666666666,
+          0.8802083333333334
+        ]
+      },
+      "image_astrometry,lens_center": {
+        "case_count": 768,
+        "joint_0.90": 0.8020833333333334,
+        "marginal_0.90": [
+          0.7955729166666666,
+          0.8046875
+        ]
+      },
+      "image_astrometry,lens_center,lens_redshift,source_redshift": {
+        "case_count": 768,
+        "joint_0.90": 0.8515625,
+        "marginal_0.90": [
+          0.8268229166666666,
+          0.87109375
+        ]
+      }
+    },
+    "evaluation_seed": 12053509990973880068,
+    "final_evaluation_accessed": false,
+    "mean_nlp_nat_per_target_dimension": 0.2467130402122469,
+    "median_crps": 0.1961564495068106,
+    "median_nlp_nat_per_target_dimension": 0.07200630009174347,
+    "posterior_draws_per_case": 1024,
+    "posthoc_calibration_applied": false,
+    "status": "completed_development_validation",
+    "validation_internal_tail_views": {
+      "extreme_profile_or_environment": {
+        "case_count": 223,
+        "median_crps": 0.19146875287995657,
+        "median_nlp_nat_per_target_dimension": 0.08412010967731476,
+        "minimum_case_requirement_met": true
+      },
+      "extreme_relative_magnification": {
+        "case_count": 40,
+        "median_crps": 0.26210177213032215,
+        "median_nlp_nat_per_target_dimension": 0.40108582377433777,
+        "minimum_case_requirement_met": false
+      },
+      "high_absolute_magnification": {
+        "case_count": 422,
+        "median_crps": 0.5794627674972349,
+        "median_nlp_nat_per_target_dimension": 0.6265931725502014,
+        "minimum_case_requirement_met": true
+      },
+      "second_image_near_threshold": {
+        "case_count": 1894,
+        "median_crps": 0.19327165129889762,
+        "median_nlp_nat_per_target_dimension": 0.08243368566036224,
+        "minimum_case_requirement_met": true
+      }
+    }
+  },
+  "final_evaluation_accessed": false,
+  "identity": {
+    "final_evaluation_commitment_sha256": "c13412eced163bac26abc4b22d054f3a6fa967e7e5a4dd7849ebf54f42df6083",
+    "input_standardizer_sha256": "9e68cd211f5729c25c11e60ead8112cfe65f80d2ebcf79e66eaf4bc64073e9c8",
+    "membership_sha256": "f2dddb02ca034d0f06a751b93cf6601321e9dd90e27c25770609c87f89fdb381",
+    "model_configuration_hash": "8d0919c211b6aa057712a402f689f06d9ea916ba3c0c11cc32d0561aeb8d3087",
+    "seed": 1,
+    "target_standardizer_sha256": "ce5b41ed6c411f56cdc704cff0f2e88f6e539403bf5c7f526a8d572ec21936b4",
+    "train_manifest_sha256": "10751b587319afff47d6eed24edfb0cb666dccc508fb0c6ff1084ca84950c518",
+    "training_code_commit": "5baabfe229ad187f6bcdcc1dea7cf42aa43c41e9",
+    "training_environment_sha256": "2e45000a8cea6712ae307c87782c593245ad56607a772f27a0cc5af726e37b95",
+    "training_rung_count": 16384,
+    "validation_manifest_sha256": "4348e278980bd81033a2db80568444262c165e0dea13f9d57d374f932ca823a3"
+  },
+  "status": "completed_probe_fit_and_development_validation",
+  "training": {
+    "best_epoch": 17,
+    "best_validation_nlp_nat_per_target_dimension": 0.246713080133001,
+    "effective_batch_size": 256,
+    "epochs_completed": 38,
+    "final_evaluation_accessed": false,
+    "gradient_accumulation_steps": 4,
+    "identity": {
+      "final_evaluation_commitment_sha256": "c13412eced163bac26abc4b22d054f3a6fa967e7e5a4dd7849ebf54f42df6083",
+      "input_standardizer_sha256": "9e68cd211f5729c25c11e60ead8112cfe65f80d2ebcf79e66eaf4bc64073e9c8",
+      "membership_sha256": "f2dddb02ca034d0f06a751b93cf6601321e9dd90e27c25770609c87f89fdb381",
+      "model_configuration_hash": "8d0919c211b6aa057712a402f689f06d9ea916ba3c0c11cc32d0561aeb8d3087",
+      "seed": 1,
+      "target_standardizer_sha256": "ce5b41ed6c411f56cdc704cff0f2e88f6e539403bf5c7f526a8d572ec21936b4",
+      "train_manifest_sha256": "10751b587319afff47d6eed24edfb0cb666dccc508fb0c6ff1084ca84950c518",
+      "training_code_commit": "5baabfe229ad187f6bcdcc1dea7cf42aa43c41e9",
+      "training_environment_sha256": "2e45000a8cea6712ae307c87782c593245ad56607a772f27a0cc5af726e37b95",
+      "training_rung_count": 16384,
+      "validation_manifest_sha256": "4348e278980bd81033a2db80568444262c165e0dea13f9d57d374f932ca823a3"
+    },
+    "physical_microbatch_size": 64,
+    "posthoc_calibration_applied": false,
+    "status": "completed"
+  }
+}
