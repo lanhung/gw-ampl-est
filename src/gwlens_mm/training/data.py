@@ -52,6 +52,22 @@ class StageAPublication:
 
 
 @dataclass(frozen=True)
+class CombinedTrainingPublication:
+    """Validated two-parent identity for the nested 65k training rung."""
+
+    combined_root: Path
+    combined_manifest_path: Path
+    combined_manifest_sha256: str
+    stage_a: StageAPublication
+    stage_b_parent_root: Path
+    stage_b_parent_manifest_path: Path
+    stage_b_parent_manifest_sha256: str
+    stage_b_dataset_id: str
+    stage_b_train_root: Path
+    train_manifest_sha256: str
+
+
+@dataclass(frozen=True)
 class DevelopmentCase:
     """One validation example plus nondeployable diagnostic group labels."""
 
@@ -187,6 +203,134 @@ def resolve_stage_a_publication(
         train_root=roots["train"],
         validation_root=roots["validation"],
         namespace_manifest_sha256=namespace_hashes,
+    )
+
+
+def resolve_combined_training_publication(
+    combined_root: Path,
+    *,
+    stage_a_parent_root: Path,
+    stage_b_parent_root: Path,
+    expected_generator_commit: str,
+    expected_preregistration_hash: str,
+    expected_combined_manifest_sha256: Optional[str] = None,
+) -> CombinedTrainingPublication:
+    """Resolve Stage A + Stage B only from the passed atomic reference manifest."""
+
+    combined = combined_root.resolve()
+    if "published" not in combined.parts or not combined.is_dir():
+        raise TrainingGateError("65k input is not an atomic published reference")
+    combined_manifest_path = combined / "dataset_manifest.json"
+    if not combined_manifest_path.is_file():
+        raise TrainingGateError("65k combined manifest is absent")
+    combined_manifest_sha256 = _sha256_file(combined_manifest_path)
+    if (
+        expected_combined_manifest_sha256 is not None
+        and combined_manifest_sha256 != expected_combined_manifest_sha256
+    ):
+        raise TrainingGateError("65k combined manifest hash mismatch")
+    manifest = _load_mapping(combined_manifest_path)
+    if (
+        manifest.get("status"),
+        int(manifest.get("accepted_physical_system_count", -1)),
+        int(manifest.get("validation_physical_system_count", -1)),
+        manifest.get("strict_nested_train_ladder"),
+        manifest.get("proposal_equals_evaluation"),
+        manifest.get("all_importance_weights_one"),
+        manifest.get("training_authorized"),
+    ) != ("passed", 65536, 6144, True, True, True, False):
+        raise TrainingGateError("65k combined manifest contract failed")
+    group_validation = manifest.get("group_validation")
+    if not isinstance(group_validation, dict) or not (
+        group_validation.get("stage_a_stage_b_group_disjoint") is True
+        and group_validation.get("stage_b_validation_group_disjoint") is True
+    ):
+        raise TrainingGateError("65k combined manifest lacks group-disjoint validation")
+    components = manifest.get("components")
+    if not isinstance(components, list) or len(components) != 2:
+        raise TrainingGateError("65k combined manifest must name exactly two components")
+    by_role = {
+        str(component.get("role")): component
+        for component in components
+        if isinstance(component, dict)
+    }
+    if set(by_role) != {"stage_a_train", "stage_b_train_extension"}:
+        raise TrainingGateError("65k combined component roles are invalid")
+    if any(int(value.get("accepted_count", -1)) != 32768 for value in by_role.values()):
+        raise TrainingGateError("65k combined component counts are invalid")
+    stage_a = resolve_stage_a_publication(
+        stage_a_parent_root,
+        expected_generator_commit=expected_generator_commit,
+        expected_preregistration_hash=expected_preregistration_hash,
+    )
+    if by_role["stage_a_train"].get("dataset_id") != stage_a.train_dataset_id:
+        raise TrainingGateError("65k reference names the wrong Stage A train dataset")
+    if by_role["stage_a_train"].get("parent_manifest_sha256") != stage_a.manifest_sha256:
+        raise TrainingGateError("65k reference names the wrong Stage A parent manifest")
+    stage_b_parent = stage_b_parent_root.resolve()
+    if "published" not in stage_b_parent.parts or not stage_b_parent.is_dir():
+        raise TrainingGateError("Stage B input is not an atomic parent publication")
+    stage_b_manifest_path = stage_b_parent / "dataset_manifest.json"
+    if not stage_b_manifest_path.is_file():
+        raise TrainingGateError("Stage B parent manifest is absent")
+    stage_b_manifest_sha256 = _sha256_file(stage_b_manifest_path)
+    stage_b_component = by_role["stage_b_train_extension"]
+    if stage_b_component.get("parent_manifest_sha256") != stage_b_manifest_sha256:
+        raise TrainingGateError("65k reference names the wrong Stage B parent manifest")
+    stage_b_manifest = _load_mapping(stage_b_manifest_path)
+    validation = stage_b_manifest.get("validation")
+    if not isinstance(validation, dict):
+        raise TrainingGateError("Stage B parent lacks namespace validation")
+    stage_b_dataset_id = str(validation.get("dataset_id", ""))
+    if (
+        stage_b_manifest.get("status"),
+        stage_b_manifest.get("generator_commit"),
+        stage_b_manifest.get("preregistration_hash"),
+        int(stage_b_manifest.get("accepted_pair_count", -1)),
+        int(stage_b_manifest.get("complete_shard_count", -1)),
+        stage_b_manifest.get("proposal_equals_evaluation"),
+        stage_b_manifest.get("all_importance_weights_one"),
+        validation.get("status"),
+        validation.get("split"),
+        int(validation.get("accepted_pair_count", -1)),
+        int(validation.get("complete_shard_count", -1)),
+    ) != (
+        "passed",
+        expected_generator_commit,
+        expected_preregistration_hash,
+        32768,
+        256,
+        True,
+        True,
+        "passed",
+        "train",
+        32768,
+        256,
+    ):
+        raise TrainingGateError("Stage B parent manifest contract failed")
+    if stage_b_component.get("dataset_id") != stage_b_dataset_id:
+        raise TrainingGateError("65k reference names the wrong Stage B dataset")
+    stage_b_train_root = stage_b_parent / stage_b_dataset_id
+    if not stage_b_train_root.is_dir():
+        raise TrainingGateError("Stage B train dataset directory is absent")
+    train_manifest_sha256 = _canonical_mapping_sha256(
+        {
+            "combined_manifest_sha256": combined_manifest_sha256,
+            "stage_a_train_manifest_sha256": stage_a.namespace_manifest_sha256["train"],
+            "stage_b_parent_manifest_sha256": stage_b_manifest_sha256,
+        }
+    )
+    return CombinedTrainingPublication(
+        combined_root=combined,
+        combined_manifest_path=combined_manifest_path,
+        combined_manifest_sha256=combined_manifest_sha256,
+        stage_a=stage_a,
+        stage_b_parent_root=stage_b_parent,
+        stage_b_parent_manifest_path=stage_b_manifest_path,
+        stage_b_parent_manifest_sha256=stage_b_manifest_sha256,
+        stage_b_dataset_id=stage_b_dataset_id,
+        stage_b_train_root=stage_b_train_root,
+        train_manifest_sha256=train_manifest_sha256,
     )
 
 
@@ -408,6 +552,43 @@ class PublishedStageADataset:
 
     def physical_system_ids(self) -> Tuple[str, ...]:
         return tuple(entry.physical_system_id for entry in self.entries)
+
+
+class ConcatenatedPublishedStageADataset(PublishedStageADataset):
+    """Expose immutable direct-target components as one bounded-memory dataset."""
+
+    def __init__(self, components: Sequence[PublishedStageADataset]) -> None:
+        datasets = tuple(components)
+        if len(datasets) < 2:
+            raise ValueError("concatenated training data requires at least two components")
+        first = datasets[0]
+        if any(dataset.expected_split is not first.expected_split for dataset in datasets):
+            raise TrainingGateError("concatenated components belong to different splits")
+        curve_ids = tuple((curve.identity, curve.sha256) for curve in first.detector_curves)
+        for dataset in datasets[1:]:
+            if tuple((curve.identity, curve.sha256) for curve in dataset.detector_curves) != (
+                curve_ids
+            ):
+                raise TrainingGateError("concatenated components use different PSD curves")
+            if (
+                dataset.minimum_frequency_hz != first.minimum_frequency_hz
+                or dataset.maximum_frequency_hz != first.maximum_frequency_hz
+            ):
+                raise TrainingGateError("concatenated components use different whitening bands")
+        entries = tuple(entry for dataset in datasets for entry in dataset.entries)
+        identifiers = tuple(entry.physical_system_id for entry in entries)
+        if len(identifiers) != len(set(identifiers)):
+            raise TrainingGateError("concatenated components contain duplicate systems")
+        self.components = datasets
+        self.dataset_root = first.dataset_root.parent
+        self.expected_split = first.expected_split
+        self.detector_curves = first.detector_curves
+        self.minimum_frequency_hz = first.minimum_frequency_hz
+        self.maximum_frequency_hz = first.maximum_frequency_hz
+        self.entries = entries
+        self._cached_path = None
+        self._cached_records = None
+        self._cached_noisy = None
 
 
 class StandardizedStageADataset:

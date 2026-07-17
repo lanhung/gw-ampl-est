@@ -466,6 +466,21 @@ group-disjoint identities, the unchanged RC.4 target and an atomic extension
 publication. Calibration, SBC, final evaluation, training the 65k rung,
 GWOSC/GWTC and any extension beyond 65k remain closed.
 
+Delegated expert review authorized that exact Stage B increment through
+`configs/execution/phase4_direct_target_stage_b_authorization.yaml`. Its frozen
+orchestration release is merged at `a198b90cc3ebd695a5b6c277e0843e0e19919b18`.
+The official parent is `phase4-stage-b-2be777e727ef-6a4f106f9640`, and exactly
+32,768 direct-target train systems in 256 atomic shards are now materializing.
+No new validation system is authorized. The 65k optimizer remains closed until
+Stage B and its combined reference publish and receive a separate gate.
+
+While Stage B runs, the implementation-only training-stack gate permits the
+fail-closed combined-publication reader, 65k three-seed launcher and terminal
+32k-to-65k comparison to be completed using synthetic fixtures only. This does
+not permit reading Stage B staging, resolving the 65k membership, starting an
+optimizer, selecting an architecture, calibrating, opening final evaluation or
+accessing GWOSC/GWTC.
+
 ## Scientific integrity
 
 - Never fabricate results, citations, completed runs or calibration.
