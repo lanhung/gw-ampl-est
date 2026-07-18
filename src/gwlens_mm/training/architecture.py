@@ -151,6 +151,18 @@ def candidate_model_configuration(
     return model
 
 
+def selected_model_configuration(root: Path, architecture: str) -> Mapping[str, Any]:
+    """Return the exact fitted configuration, preserving the reused probe identity."""
+
+    specifications = {item.architecture_id: item for item in load_architecture_specs(root)}
+    if architecture not in specifications:
+        raise TrainingGateError("selected architecture is outside the frozen grid")
+    specification = specifications[architecture]
+    if specification.reused_probe:
+        return load_yaml(root / BASE_MODEL_PATH)
+    return candidate_model_configuration(root, specification)
+
+
 def _load_mapping(path: Path) -> Mapping[str, Any]:
     value = json.loads(path.read_text(encoding="utf-8"))
     if not isinstance(value, dict):

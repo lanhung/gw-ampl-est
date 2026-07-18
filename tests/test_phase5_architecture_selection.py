@@ -13,6 +13,7 @@ from gwlens_mm.training.architecture import (
     candidate_model_configuration,
     load_architecture_specs,
     select_architecture,
+    selected_model_configuration,
     validate_architecture_execution_gate,
 )
 from gwlens_mm.training.contracts import TrainingGateError, model_configuration_hash
@@ -44,6 +45,14 @@ def test_architecture_grid_is_exact_and_candidate_hashes_are_distinct() -> None:
     assert set(NEW_ARCHITECTURE_IDS) == {
         spec.architecture_id for spec in specifications if not spec.reused_probe
     }
+    for specification in specifications:
+        selected = selected_model_configuration(ROOT, specification.architecture_id)
+        expected = (
+            load_yaml(ROOT / "configs/models/phase4_probe_nsf.yaml")
+            if specification.reused_probe
+            else candidate_model_configuration(ROOT, specification)
+        )
+        assert model_configuration_hash(selected) == model_configuration_hash(expected)
 
 
 def test_candidate_configuration_changes_only_frozen_grid_axes_and_identity() -> None:

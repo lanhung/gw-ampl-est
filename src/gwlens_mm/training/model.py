@@ -213,14 +213,23 @@ def build_probe_model(config: Mapping[str, Any], *, seed: int) -> Any:
             return self.flow.log_prob(target, context=self.encode_context(batch))
 
         def sample(self, sample_count: int, batch: Mapping[str, Any]) -> Any:
-            return self.flow.sample(sample_count, context=self.encode_context(batch))
+            return self.sample_from_context(sample_count, self.encode_context(batch))
+
+        def sample_from_context(self, sample_count: int, context: Any) -> Any:
+            return self.flow.sample(sample_count, context=context)
 
         def sample_log_prob(self, samples: Any, batch: Mapping[str, Any]) -> Any:
             """Evaluate each conditional draw for joint HPD coverage diagnostics."""
 
             if samples.ndim != 3 or samples.shape[0] != batch["gw_strain"].shape[0]:
                 raise ValueError("conditional samples must be (cases, draws, targets)")
-            context = self.encode_context(batch)
+            return self.sample_log_prob_from_context(samples, self.encode_context(batch))
+
+        def sample_log_prob_from_context(self, samples: Any, context: Any) -> Any:
+            """Evaluate conditional draws without recomputing an encoded context."""
+
+            if samples.ndim != 3 or samples.shape[0] != context.shape[0]:
+                raise ValueError("conditional samples and context have incompatible cases")
             draws = samples.shape[1]
             flat_samples = samples.reshape(samples.shape[0] * draws, samples.shape[2])
             flat_context = context.repeat_interleave(draws, dim=0)

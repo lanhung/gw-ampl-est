@@ -298,7 +298,7 @@ SBC execution and final evaluation remain closed.
 ## Not started or not yet complete by design
 
 - further proposal engineering qualification (permanently closed);
-- scientific model or posterior training (implementation exists, execution is closed);
+- terminal 65k probe training and post-lock architecture selection;
 - calibration, SBC or final scientific evaluation;
 - GWOSC/GWTC download;
 - real-noise injection or catalog scan;
@@ -306,11 +306,14 @@ SBC execution and final evaluation remain closed.
 
 ## Current execution and next gate
 
-Stage A is complete and publication evidence is recorded in
-`docs/reports/PHASE4_STAGE_A_COMPLETION_REPORT.md`. The final-evaluation
-implementation and commitment remain frozen without opening materialization.
-The next gate is a separate 16k/32k probe-training authorization; calibration,
-SBC, final evaluation, Stage B and GWOSC/GWTC remain closed.
+Stage A and all six 16k/32k probe fits are complete. Their development-only
+decision requires continuation to 65k. Stage B release
+`a198b90cc3ebd695a5b6c277e0843e0e19919b18` is actively materializing exactly
+32,768 additional direct-target train systems under parent
+`phase4-stage-b-2be777e727ef-6a4f106f9640`. At the read-only
+`2026-07-18T02:27:10Z` snapshot, 124/256 shards (15,872 systems) were complete,
+16 shards were partial, all 16 workers were active and the log contained zero
+error-like lines. Publication and the combined 65k reference do not yet exist.
 
 The first authorized 16k execution resolved the frozen membership and completed
 metadata-only standardization, then failed before its first optimizer step because
@@ -325,7 +328,9 @@ did not lock 32k and requires continuation to 65k. Stage B, the 65k optimizer,
 calibration, SBC, final evaluation and GWOSC/GWTC remain closed until their
 individual gates are recorded.
 
-Stage B release `a198b90cc3ebd695a5b6c277e0843e0e19919b18` passed 267 AutoDL
-tests and every release-gate check before launch. The implementation for the
-future terminal 65k probe remains data-access disabled until the atomic Stage B
-and combined manifests exist and are bound by a new authorization.
+The future terminal 65k probe, architecture-selection, calibration/SBC
+materialization and selected-checkpoint score-extraction stacks are implemented
+as fail-closed software. They remain data-access disabled until their exact
+entry evidence exists and separate authorizations bind every publication,
+checkpoint, code, environment and output identity. Calibration fitting, SBC
+testing, final evaluation and GWOSC/GWTC remain closed.

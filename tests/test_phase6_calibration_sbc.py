@@ -17,6 +17,7 @@ from gwlens_mm.training.calibration import (
     SBC_STATISTICS,
     _chi_square_survival,
     calibrated_region_coverage,
+    calibration_score_artifact,
     conformal_order_statistic,
     deterministic_sbc_subset,
     empirical_pit_scores,
@@ -24,7 +25,9 @@ from gwlens_mm.training.calibration import (
     fit_region_calibration,
     holm_step_down,
     joint_hpd_scores,
+    randomized_rank_from_counts,
     sbc_ranks,
+    sbc_score_artifact,
     wilson_interval,
 )
 
@@ -154,6 +157,19 @@ def test_sbc_ranks_cover_marginal_derived_and_joint_statistics() -> None:
     assert all(value.shape == (2,) for value in ranks.values())
     assert ranks["log_abs_mu_primary"].tolist() == [2, 2]
     assert ranks["joint_log_density_rank"].tolist() == [2, 2]
+    assert randomized_rank_from_counts(
+        2,
+        0,
+        physical_system_id="system-a",
+        statistic="log_abs_mu_primary",
+    ) == ranks["log_abs_mu_primary"][0]
+    tied = randomized_rank_from_counts(
+        1,
+        3,
+        physical_system_id="system-tie",
+        statistic="log_abs_mu_primary",
+    )
+    assert 1 <= tied <= 4
 
 
 def test_discrete_uniform_histogram_and_holm_are_machine_readable() -> None:
@@ -197,6 +213,15 @@ def test_statistics_runner_keeps_calibration_fit_and_sbc_independent(
         marginal_scores=np.column_stack((base, base[::-1])),
         joint_scores=base,
         em_cells=cells,
+        physical_system_ids=np.asarray(
+            [f"calibration-{index:04d}" for index in range(4096)]
+        ),
+        split=np.asarray("calibration_fit"),
+        model_seed=np.asarray(0, dtype=np.int64),
+        architecture_id=np.asarray("nsf-t10-w256"),
+        checkpoint_sha256=np.asarray("a" * 64),
+        publication_manifest_sha256=np.asarray("b" * 64),
+        inference_commit=np.asarray("c" * 40),
     )
     sbc_cells = np.asarray(tuple(EM_CELLS[index % 8] for index in range(1024)))
     rank_arrays = {
@@ -208,6 +233,15 @@ def test_statistics_runner_keeps_calibration_fit_and_sbc_independent(
         marginal_scores=np.column_stack((base[:1024], base[1024:2048])),
         joint_scores=base[:1024],
         em_cells=sbc_cells,
+        physical_system_ids=np.asarray(
+            [f"sbc-{index:04d}" for index in range(1024)]
+        ),
+        split=np.asarray("sbc_diagnostic"),
+        model_seed=np.asarray(0, dtype=np.int64),
+        architecture_id=np.asarray("nsf-t10-w256"),
+        checkpoint_sha256=np.asarray("a" * 64),
+        publication_manifest_sha256=np.asarray("b" * 64),
+        inference_commit=np.asarray("c" * 40),
         **rank_arrays,
     )
     output = tmp_path / "output"
@@ -229,6 +263,13 @@ def test_statistics_runner_keeps_calibration_fit_and_sbc_independent(
             "sbc_ranks_and_scores_sha256": hashlib.sha256(
                 sbc_path.read_bytes()
             ).hexdigest(),
+        },
+        "score_identity": {
+            "model_seed": "0",
+            "architecture_id": "nsf-t10-w256",
+            "checkpoint_sha256": "a" * 64,
+            "publication_manifest_sha256": "b" * 64,
+            "inference_commit": "c" * 40,
         },
         "statistics_output_root": str(output),
     }
@@ -261,3 +302,36 @@ def test_statistics_runner_keeps_calibration_fit_and_sbc_independent(
     assert summary["final_evaluation_accessed"] is False
     assert (output / "calibration_region_maps.json").is_file()
     assert (output / "sbc_rank_summary.json").is_file()
+
+
+def test_exact_score_artifacts_keep_ids_cells_and_splits_independent() -> None:
+    calibration_draws = np.zeros((16, 32, 2), dtype=np.float64)
+    calibration_truth = np.zeros((16, 2), dtype=np.float64)
+    calibration_density = np.zeros((16, 32), dtype=np.float64)
+    cells = tuple(cell for cell in EM_CELLS for _ in range(2))
+    calibration = calibration_score_artifact(
+        calibration_draws,
+        calibration_truth,
+        calibration_density,
+        np.zeros(16),
+        tuple(f"cal-{index}" for index in range(16)),
+        cells,
+        expected_count=16,
+        expected_draw_count=32,
+    )
+    assert calibration["marginal_scores"].shape == (16, 2)
+    assert calibration["physical_system_ids"].dtype.kind == "U"
+    sbc = sbc_score_artifact(
+        calibration_draws,
+        calibration_truth,
+        calibration_density,
+        np.zeros(16),
+        tuple(f"sbc-{index}" for index in range(16)),
+        cells,
+        expected_count=16,
+        expected_draw_count=32,
+    )
+    assert set(f"rank_{name}" for name in SBC_STATISTICS) < set(sbc)
+    assert not set(calibration["physical_system_ids"]) & set(
+        sbc["physical_system_ids"]
+    )
