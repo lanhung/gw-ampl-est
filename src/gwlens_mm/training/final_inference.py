@@ -455,10 +455,10 @@ def calibrated_final_batch_metrics(
                 )
                 alpha = (1.0 - threshold) / 2.0
                 values = draws[selected, :, target_index]
-                lower = np.quantile(values, alpha, axis=1, interpolation="linear")
-                upper = np.quantile(
-                    values, 1.0 - alpha, axis=1, interpolation="linear"
-                )
+                # NumPy's default is the frozen linear quantile. Omitting the
+                # version-renamed keyword keeps both supported type stubs valid.
+                lower = np.quantile(values, alpha, axis=1)
+                upper = np.quantile(values, 1.0 - alpha, axis=1)
                 marginal_width[selected, target_index] = upper - lower
             joint_threshold = float(
                 mapping["joint"][key]["raw_region_mass_threshold"]
