@@ -503,6 +503,17 @@ Only pure implementation and synthetic tests are authorized through
 materialization, checkpoint access, calibration fitting and SBC execution
 remain closed.
 
+The same implementation-only boundary permits a fail-closed direct-target
+materialization runner and selected-checkpoint score-extraction runner through
+`configs/execution/phase6_calibration_sbc_materialization_stack_authorization.yaml`.
+The future data plan is exactly 4,096 calibration-fit plus 2,048 SBC systems in
+48 atomic shards, configuration hash
+`c55dd46d1afefe60753e2b112363261015ea914d55e80c4a5108721cb0b6a17e`.
+It has no official identities and every execution flag is false. The runners
+may not access a checkpoint, generate a pair, fit a calibration map or execute
+SBC until training size and architecture are locked and later exact gates bind
+the publications, checkpoints, code, environment and output identities.
+
 ## Scientific integrity
 
 - Never fabricate results, citations, completed runs or calibration.

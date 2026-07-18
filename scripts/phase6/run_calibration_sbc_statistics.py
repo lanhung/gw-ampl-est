@@ -37,6 +37,15 @@ def _load_npz(path: Path) -> Mapping[str, np.ndarray]:
         return {name: np.asarray(archive[name]) for name in archive.files}
 
 
+def _scalar_string(value: np.ndarray, *, name: str) -> str:
+    if value.shape != ():
+        raise ValueError(f"{name} score metadata is not scalar")
+    result = str(value.item())
+    if not result:
+        raise ValueError(f"{name} score metadata is empty")
+    return result
+
+
 def main(argv: Optional[Sequence[str]] = None) -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--authorization", type=Path)
@@ -96,12 +105,46 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         raise ValueError("calibration/SBC output identity is unauthorized or already exists")
     calibration = _load_npz(arguments.calibration_scores)
     sbc = _load_npz(arguments.sbc_ranks_and_scores)
+    calibration_ids = tuple(
+        str(value) for value in calibration.get("physical_system_ids", ())
+    )
+    sbc_ids = tuple(str(value) for value in sbc.get("physical_system_ids", ()))
     if (
-        sbc.get("marginal_scores", np.empty((0, 0))).shape != (1024, 2)
+        calibration.get("marginal_scores", np.empty((0, 0))).shape != (4096, 2)
+        or calibration.get("joint_scores", np.empty(0)).shape != (4096,)
+        or calibration.get("em_cells", np.empty(0)).shape != (4096,)
+        or len(calibration_ids) != 4096
+        or len(set(calibration_ids)) != 4096
+        or sbc.get("marginal_scores", np.empty((0, 0))).shape != (1024, 2)
         or sbc.get("joint_scores", np.empty(0)).shape != (1024,)
         or sbc.get("em_cells", np.empty(0)).shape != (1024,)
+        or len(sbc_ids) != 1024
+        or len(set(sbc_ids)) != 1024
+        or bool(set(calibration_ids) & set(sbc_ids))
     ):
-        raise ValueError("SBC score artifact must contain exactly 1,024 replicates")
+        raise ValueError("calibration/SBC score artifacts violate count or disjointness")
+    score_identity = {}
+    for name in (
+        "model_seed",
+        "architecture_id",
+        "checkpoint_sha256",
+        "publication_manifest_sha256",
+        "inference_commit",
+    ):
+        calibration_value = _scalar_string(calibration[name], name=name)
+        if calibration_value != _scalar_string(sbc[name], name=name):
+            raise ValueError(f"calibration/SBC score artifacts mix {name}")
+        score_identity[name] = calibration_value
+    if score_identity != {
+        str(key): str(value)
+        for key, value in authorization.get("score_identity", {}).items()
+    }:
+        raise ValueError("calibration/SBC score identity differs from authorization")
+    if (
+        _scalar_string(calibration["split"], name="split") != "calibration_fit"
+        or _scalar_string(sbc["split"], name="split") != "sbc_diagnostic"
+    ):
+        raise ValueError("calibration/SBC score split identities are invalid")
     calibration_map = fit_region_calibration(
         calibration["marginal_scores"],
         calibration["joint_scores"],
@@ -126,6 +169,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "status": "completed_calibration_fit_and_independent_sbc",
         "calibration_score_sha256": artifacts["calibration_scores_sha256"],
         "sbc_score_sha256": artifacts["sbc_ranks_and_scores_sha256"],
+        "score_identity": score_identity,
         "calibration_map_fitted_from_calibration_fit_only": True,
         "sbc_used_to_fit_calibration_map": False,
         "model_retrained_or_tuned": False,

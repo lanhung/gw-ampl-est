@@ -479,3 +479,18 @@ level maps, exact finite-sample order statistics and independent SBC. It does
 not modify already generated RC.4 data or claim to recalibrate the analytic
 flow density. All Phase 6 execution remains closed pending size and
 architecture lock plus separate materialization and inference gates.
+
+## Phase 6 execution-stack audit found no new scientific failure
+
+- The first implementation draft bound published child roots too weakly and
+  did not embed enough identity metadata to prevent a calibration score from
+  one seed being paired with SBC scores from another. This was found before any
+  Phase 6 data, checkpoint or official identity existed.
+- The release gate now resolves the exact atomic Stage A parent and validates
+  the Stage B parent contract; score artifacts bind split, seed, architecture,
+  checkpoint, publication and code identities; the statistics runner rejects
+  duplicate, overlapping or mixed artifacts.
+- Publication free space is checked before the atomic rename. These are
+  fail-closed engineering corrections, not post-result scientific changes.
+- No calibration/SBC pair was generated, no checkpoint was accessed, and no
+  calibration map or SBC statistic was fitted or evaluated.

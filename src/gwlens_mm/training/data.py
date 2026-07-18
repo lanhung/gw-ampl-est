@@ -75,6 +75,39 @@ class DevelopmentCase:
     tail_view: Optional[str]
 
 
+@dataclass(frozen=True)
+class CalibrationSBCCase:
+    """One nondeployable development case with its frozen availability cell."""
+
+    example: PreparedExample
+    em_cell: str
+
+
+class StandardizedCalibrationSBCDataset:
+    """Apply training-only scales while retaining offline cell labels beside inputs."""
+
+    def __init__(
+        self, dataset: "PublishedStageADataset", standardizer: InputStandardizer
+    ) -> None:
+        if dataset.expected_split not in {
+            SplitName.CALIBRATION_FIT,
+            SplitName.SBC_DIAGNOSTIC,
+        }:
+            raise ValueError("calibration/SBC wrapper received another split")
+        self.dataset = dataset
+        self.standardizer = standardizer
+
+    def __len__(self) -> int:
+        return len(self.dataset)
+
+    def __getitem__(self, index: int) -> CalibrationSBCCase:
+        case = self.dataset.calibration_sbc_case(index)
+        return CalibrationSBCCase(
+            example=self.standardizer.transform(case.example),
+            em_cell=case.em_cell,
+        )
+
+
 def _sha256_file(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
@@ -531,6 +564,24 @@ class PublishedStageADataset:
             example=self[index], tail_view=None if tail is None else tail.value
         )
 
+    def calibration_sbc_case(self, index: int) -> CalibrationSBCCase:
+        """Return labels beside, never inside, calibration/SBC model inputs."""
+
+        if self.expected_split not in {
+            SplitName.CALIBRATION_FIT,
+            SplitName.SBC_DIAGNOSTIC,
+        }:
+            raise TrainingGateError(
+                "calibration/SBC labels require a dedicated development split"
+            )
+        entry = self.entries[index]
+        records = self._open_records(entry.path)
+        row = records.iloc[entry.row_index]
+        cell = str(row["em_cell"])
+        if not cell:
+            raise TrainingGateError("calibration/SBC record has no EM-cell label")
+        return CalibrationSBCCase(example=self[index], em_cell=cell)
+
     def __getitem__(self, index: int) -> PreparedExample:
         entry = self.entries[index]
         record = self._record(entry)
@@ -650,6 +701,23 @@ def torch_development_collate(
             "lens_family": case.example.lens_family,
             "em_cell_signature": case.example.em_cell_signature,
             "tail_view": case.tail_view,
+        }
+        for case in cases
+    )
+    return tensors, metadata
+
+
+def torch_calibration_sbc_collate(
+    cases: Sequence[CalibrationSBCCase],
+) -> Tuple[Mapping[str, Any], Tuple[Mapping[str, str], ...]]:
+    """Keep calibration/SBC identity labels outside the deployable tensor map."""
+
+    tensors = torch_collate([case.example for case in cases])
+    metadata = tuple(
+        {
+            "physical_system_id": case.example.physical_system_id,
+            "lens_family": case.example.lens_family,
+            "em_cell": case.em_cell,
         }
         for case in cases
     )

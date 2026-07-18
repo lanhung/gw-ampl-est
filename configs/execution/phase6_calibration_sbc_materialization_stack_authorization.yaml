@@ -1,0 +1,28 @@
+phase: "6-calibration-sbc-materialization-stack"
+authorization_status: authorized_implementation_only
+authorized_by: codex_as_delegated_scientific_and_engineering_reviewer
+authorization_date: "2026-07-18"
+
+authorization_basis:
+  owner_delegation: continue_without_routine_human_intervention
+  parent_calibration_sbc_preregistration_hash: "033b996930c93e7e4a9881fc3de49bb85cf4be96fcbd890bf2543b46368c9d8e"
+  frozen_split_counts_unchanged: true
+  direct_target_distribution_unchanged: true
+
+authorization:
+  materialization_runner_implementation_authorized: true
+  release_gate_implementation_authorized: true
+  checkpoint_score_inference_runner_implementation_authorized: true
+  synthetic_fixture_tests_authorized: true
+
+  waveform_pair_generation_authorized: false
+  calibration_sbc_materialization_authorized: false
+  scientific_data_access_authorized: false
+  model_checkpoint_access_authorized: false
+  calibration_fit_authorized: false
+  sbc_execution_authorized: false
+  final_evaluation_authorized: false
+  model_retraining_or_tuning_authorized: false
+  gwosc_gwtc_access_authorized: false
+
+stop_after_implementation: true

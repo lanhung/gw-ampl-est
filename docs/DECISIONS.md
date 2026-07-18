@@ -766,3 +766,20 @@ SBC remains independent: 1,024 deterministically ranked systems from the 2,048
 SBC split supply ranks for both targets, their sum, their difference and joint
 log-density. Twenty-bin chi-square tests use the exact discrete-rank bin
 expectation and Holm step-down familywise alpha 0.01. SBC never fits a map.
+
+## D075 — Separate development-pool materialization from checkpoint inference
+
+Calibration-fit and SBC pools will be materialized only after training size and
+architecture lock, as two direct-target, unit-weight, group-disjoint atomic
+datasets: 4,096 calibration-fit systems and 2,048 SBC systems. Materialization
+does not grant checkpoint access or permission to fit a map or execute an SBC
+test. The release gate must bind the complete Stage A and Stage B parent
+publications and must reject staging roots.
+
+Selected-checkpoint inference is a later, separately authorized operation. For
+each retained model seed it produces immutable score artifacts with the model
+seed, architecture, checkpoint hash, publication hash, split and inference
+commit embedded in the NPZ. Calibration and SBC use six distinct deterministic
+random namespaces. The statistics runner must prove the two physical-system ID
+sets are unique and disjoint and reject mixed seed, architecture, checkpoint or
+code identities before fitting any map. No best-seed selection is permitted.

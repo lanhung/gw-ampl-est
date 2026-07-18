@@ -165,6 +165,94 @@ def fit_region_calibration(
     }
 
 
+def calibration_score_artifact(
+    posterior_draws: np.ndarray,
+    truth: np.ndarray,
+    posterior_draw_log_density: np.ndarray,
+    truth_log_density: np.ndarray,
+    physical_system_ids: Sequence[str],
+    em_cells: Sequence[str],
+    *,
+    expected_count: int = 4096,
+    expected_draw_count: int = 4096,
+) -> Mapping[str, np.ndarray]:
+    """Create one seed's exact calibration-fit score payload in memory."""
+
+    draws = _finite(posterior_draws, name="calibration posterior draws")
+    targets = _finite(truth, name="calibration truths")
+    draw_density = _finite(
+        posterior_draw_log_density, name="calibration draw log density"
+    )
+    truth_density = _finite(truth_log_density, name="calibration truth log density")
+    identifiers = tuple(str(value) for value in physical_system_ids)
+    cells = tuple(str(value) for value in em_cells)
+    if (
+        draws.shape != (expected_count, expected_draw_count, 2)
+        or targets.shape != (expected_count, 2)
+        or draw_density.shape != (expected_count, expected_draw_count)
+        or truth_density.shape != (expected_count,)
+        or len(identifiers) != expected_count
+        or len(set(identifiers)) != expected_count
+        or len(cells) != expected_count
+        or len(set(cells)) != 8
+        or any(cells.count(cell) != expected_count // 8 for cell in set(cells))
+    ):
+        raise ValueError("calibration score payload violates frozen counts or balance")
+    return {
+        "marginal_scores": empirical_pit_scores(draws, targets),
+        "joint_scores": joint_hpd_scores(draw_density, truth_density),
+        "physical_system_ids": np.asarray(identifiers, dtype=np.str_),
+        "em_cells": np.asarray(cells, dtype=np.str_),
+    }
+
+
+def sbc_score_artifact(
+    posterior_draws: np.ndarray,
+    truth: np.ndarray,
+    posterior_draw_log_density: np.ndarray,
+    truth_log_density: np.ndarray,
+    physical_system_ids: Sequence[str],
+    em_cells: Sequence[str],
+    *,
+    expected_count: int = 1024,
+    expected_draw_count: int = 1024,
+) -> Mapping[str, np.ndarray]:
+    """Create one seed's independent SBC ranks and coverage-score payload."""
+
+    draws = _finite(posterior_draws, name="SBC posterior draws")
+    targets = _finite(truth, name="SBC truths")
+    draw_density = _finite(posterior_draw_log_density, name="SBC draw log density")
+    truth_density = _finite(truth_log_density, name="SBC truth log density")
+    identifiers = tuple(str(value) for value in physical_system_ids)
+    cells = tuple(str(value) for value in em_cells)
+    if (
+        draws.shape != (expected_count, expected_draw_count, 2)
+        or targets.shape != (expected_count, 2)
+        or draw_density.shape != (expected_count, expected_draw_count)
+        or truth_density.shape != (expected_count,)
+        or len(identifiers) != expected_count
+        or len(set(identifiers)) != expected_count
+        or len(cells) != expected_count
+        or not set(cells)
+    ):
+        raise ValueError("SBC score payload violates frozen counts")
+    ranks = sbc_ranks(
+        draws,
+        targets,
+        identifiers,
+        posterior_draw_log_density=draw_density,
+        truth_log_density=truth_density,
+    )
+    result = {
+        "marginal_scores": empirical_pit_scores(draws, targets),
+        "joint_scores": joint_hpd_scores(draw_density, truth_density),
+        "physical_system_ids": np.asarray(identifiers, dtype=np.str_),
+        "em_cells": np.asarray(cells, dtype=np.str_),
+    }
+    result.update({f"rank_{name}": values for name, values in ranks.items()})
+    return result
+
+
 def wilson_interval(
     successes: int, total: int, *, z: float = 1.959963984540054
 ) -> Tuple[float, float]:
@@ -303,6 +391,25 @@ def _randomized_rank(
         raise ValueError("SBC rank inputs are invalid")
     less = int(np.count_nonzero(values < truth))
     equal = int(np.count_nonzero(values == truth))
+    return randomized_rank_from_counts(
+        less,
+        equal,
+        physical_system_id=physical_system_id,
+        statistic=statistic,
+    )
+
+
+def randomized_rank_from_counts(
+    less: int,
+    equal: int,
+    *,
+    physical_system_id: str,
+    statistic: str,
+) -> int:
+    """Apply the frozen deterministic tie rule to streaming rank counts."""
+
+    if less < 0 or equal < 0 or not physical_system_id or statistic not in SBC_STATISTICS:
+        raise ValueError("streaming SBC rank counts or identity are invalid")
     if equal == 0:
         return less
     digest = hashlib.sha256(
