@@ -605,12 +605,14 @@ def _write_learning_curve_cases(path: Path, *, nlp: float, crps: float) -> None:
         "second_image_near_threshold",
         "extreme_profile_or_environment",
     )
-    for index in range(512):
+    case_count = 6144
+    for index in range(case_count):
+        tail_view = tail_groups[index // 128] if index < 512 else "none"
         row = {
             "physical_system_id": f"validation-system-{index:04d}",
             "lens_family": "sie_external_shear" if index % 2 == 0 else "epl_external_shear",
             "em_cell_signature": "all_modalities",
-            "tail_view": tail_groups[index // 128],
+            "tail_view": tail_view,
             "nlp_nat_per_target_dimension": nlp,
             "crps_log_mu_primary": crps,
             "crps_log_mu_secondary": crps,
@@ -618,7 +620,7 @@ def _write_learning_curve_cases(path: Path, *, nlp: float, crps: float) -> None:
         }
         for level in (0.50, 0.80, 0.90, 0.95):
             key = f"{level:.2f}"
-            covered = index < round(level * 512)
+            covered = index < round(level * case_count)
             row[f"covered_primary_{key}"] = covered
             row[f"covered_secondary_{key}"] = covered
             row[f"covered_joint_{key}"] = covered

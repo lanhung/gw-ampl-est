@@ -14,6 +14,7 @@ from .contracts import TrainingGateError
 
 LEVELS = (0.50, 0.80, 0.90, 0.95)
 SEEDS = (0, 1, 2)
+VALIDATION_CASE_COUNT = 6144
 
 
 def _load_cases(path: Path) -> Tuple[Mapping[str, str], ...]:
@@ -143,6 +144,13 @@ def _compare_rungs(
             / f"seed-{seed}"
             / "development_cases.csv"
         )
+        if not (
+            len(smaller) == VALIDATION_CASE_COUNT
+            and len(larger) == VALIDATION_CASE_COUNT
+        ):
+            raise TrainingGateError(
+                "learning-curve comparison requires exactly 6,144 validation cases"
+            )
         aligned = _aligned(smaller, larger)
         identifiers = tuple(pair[0]["physical_system_id"] for pair in aligned)
         if all_identifiers is None:

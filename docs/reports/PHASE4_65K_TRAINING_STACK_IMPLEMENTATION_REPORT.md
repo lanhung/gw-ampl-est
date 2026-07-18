@@ -99,6 +99,8 @@ Tests cover:
 - rejection of self-authorized or tampered manifests;
 - fail-closed behavior before the future 65k authorization exists;
 - exact reuse of Stage A validation;
+- rejection of any truncated or expanded learning-curve table instead of the
+  frozen 6,144 validation physical systems;
 - terminal lock and data-limited decision exits;
 - prohibition on automatic extension above 65k;
 - deterministic three-seed launcher and shared rung preprocessing.
