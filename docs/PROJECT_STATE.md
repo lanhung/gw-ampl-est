@@ -364,7 +364,11 @@ frozen cross-family conditions and writes bounded per-case scores without
 persisting posterior draws. It has not accessed final data, checkpoints or
 calibration products. Final materialization and unsealing remain closed.
 
-At the read-only `2026-07-18T08:14:34Z` Stage B snapshot, 172/256 shards
-(22,016 systems, 67.19%) were complete, 16 shards were partial, all 16 workers
-were active, the log contained zero error-like lines and 235,837,157,376 bytes
-remained free. The result and atomic publication were not yet present.
+At the read-only `2026-07-18T09:32:29Z` Stage B snapshot, 181/256 shards
+(23,168 systems, 70.70%) were complete, 16 shards were partial, all 16 workers
+were active at approximately one CPU core each, the log contained zero
+error-like lines and 234,291,400,704 bytes remained free. The most recent
+32-shard window measured approximately 1,072 accepted systems/hour, implying
+about nine generation hours remaining before final validation and publication.
+The result, atomic Stage B parent and combined 65k reference were not yet
+present.
