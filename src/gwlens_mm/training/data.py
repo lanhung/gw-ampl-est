@@ -5,7 +5,7 @@ from __future__ import annotations
 import hashlib
 import importlib
 import json
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import Any, Dict, List, Mapping, Optional, Sequence, Tuple
 
@@ -599,7 +599,10 @@ class PublishedStageADataset:
             minimum_frequency_hz=self.minimum_frequency_hz,
             maximum_frequency_hz=self.maximum_frequency_hz,
         )
-        return prepare_example(record, whitened)
+        cell = str(records.iloc[entry.row_index]["em_cell"])
+        if not cell:
+            raise TrainingGateError("published record has no EM-cell partition label")
+        return replace(prepare_example(record, whitened), em_cell=cell)
 
     def physical_system_ids(self) -> Tuple[str, ...]:
         return tuple(entry.physical_system_id for entry in self.entries)

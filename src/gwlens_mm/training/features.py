@@ -62,6 +62,7 @@ class PreparedExample:
     physical_system_id: str
     lens_family: str
     em_cell_signature: str
+    em_cell: Optional[str] = None
 
 
 @dataclass(frozen=True)

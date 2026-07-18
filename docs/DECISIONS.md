@@ -808,3 +808,25 @@ EM-only ablations are separately trained at the locked architecture/size under
 the same budget; the former retains GW timing and the latter removes it. The
 matched non-neural and gold likelihood baselines remain a hard pre-unsealing
 implementation obligation.
+
+## D077 — Do not claim a full-latent correction from a target-only marginal NSF
+
+DINGO-style importance correction requires a normalized neural proposal on the
+same complete latent state used by the likelihood and prior. This project's
+selected NSF intentionally outputs only the two log absolute magnifications.
+The exact simulator likelihood additionally depends on lens/source structure,
+external convergence and dynamics, BBH parameters, orientation and the
+selected-image mapping. No full-latent proposal density exists, so the
+inherited 10% importance-efficiency statistic is undefined.
+
+RC.7 supersedes that obligation before final materialization and forbids the
+terms likelihood-corrected and gold posterior for the selected estimator. It
+does not change the model, target, data, split, calibration or evaluation gate.
+Independent SBC and IID/tail coverage remain the primary validation evidence.
+
+The matched non-neural comparator is instead a fixed selected-prior EM/timing
+simulation reference: exactly 256 same-family, same-EM-cell training neighbors
+under a frozen standardized deployable-input distance, followed by a weighted
+two-target KDE. It excludes GW strain and is explicitly approximate. Its
+finite-bank and distance limitations must be reported; no final result may tune
+its neighbor count, distance or kernel.

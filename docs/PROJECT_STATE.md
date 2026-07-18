@@ -56,6 +56,14 @@ semantics. Pure metric and ablation-view code is implemented; final
 materialization, unsealing, checkpoint inference, ablation training, baselines
 and GWOSC/GWTC remain closed.
 
+An additional pre-data audit established that the historical DINGO-style
+likelihood-gold gate cannot be applied to a two-target marginal NSF: no neural
+density exists on the complete nuisance state required for full likelihood
+weights. RC.7 now forbids that claim and freezes an executable non-neural
+selected-prior EM/timing kNN/KDE simulation reference. The pure stack is under
+implementation only; it has not opened the scientific reference bank,
+validation or final data.
+
 ## Completed
 
 - established Vultr as the sole authoritative Git repository;

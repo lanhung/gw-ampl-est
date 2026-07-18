@@ -15,7 +15,7 @@ work usually treats separately:
   truth and proposal weights denied to the estimator;
 - proposal/evaluation population separation, group-disjoint model development,
   independent post-hoc calibration and SBC, frozen IID/OOD tests, and
-  likelihood-based gold diagnostics;
+  a prospectively frozen non-neural simulation reference;
 - explicit mass-sheet, distance–magnification, lens-family, waveform, and PSD
   misspecification tests.
 
@@ -33,8 +33,10 @@ the catalog-level detection context. Those are baselines or context, not work
 to be relabeled as equivalent to an optical-lens-conditioned absolute
 magnification posterior.
 
-DINGO establishes that amortized GW posterior inference can be checked with
-importance sampling and calibration diagnostics. DINGO-lensing and neural
+DINGO establishes that a full-parameter amortized GW posterior can be checked
+with importance sampling and calibration diagnostics. The present target-only
+NSF has no full nuisance-space proposal and therefore makes no likelihood-
+correction or importance-efficiency claim. DINGO-lensing and neural
 micro/millilensing papers demonstrate related neural inference in overlapping
 or wave-optics regimes. Their scientific regime is not interchangeable with
 well-separated galaxy macro images.
@@ -55,9 +57,9 @@ ablation conclusions, and eventually a separately preregistered real-data/noise
 study.
 
 The eventual abstract and title must be chosen after frozen evaluation. If
-coverage, gold-likelihood efficiency, or mismatch performance fails, the paper
-must report the failure or narrow its claim; the IID test may not be reused for
-method development.
+coverage, the frozen non-neural reference, or mismatch performance fails, the
+paper must report the failure or narrow its claim; the IID test may not be
+reused for method development.
 
 ## Baseline map
 

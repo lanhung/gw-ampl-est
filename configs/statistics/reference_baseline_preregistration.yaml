@@ -1,0 +1,118 @@
+preregistration_version: "1.1.0-rc.7"
+status: design_frozen_execution_disabled
+scope: executable_reference_baselines_and_gold_claim_correction_only
+
+parent_final_analysis_contract:
+  version: "1.1.0-rc.6"
+  path: configs/statistics/final_evaluation_analysis_preregistration.yaml
+  canonical_hash: "7e0e252f0a972e0b0ad2fe8f93f74f1f0172639a6fb258fc7a953be5fb7973e1"
+  estimand_changed: false
+  training_or_evaluation_distribution_changed: false
+  split_count_or_membership_changed: false
+  model_or_calibration_changed: false
+
+superseded_non_executable_obligation:
+  id: likelihood_gold_joint_model
+  status: superseded_before_final_materialization
+  reason: primary_nsf_is_a_two_target_marginal_and_has_no_full_nuisance_latent_density
+  dingo_style_importance_weight_requires_proposal_and_likelihood_on_same_full_latent_space: true
+  full_latent_proposal_implemented: false
+  importance_sampling_efficiency_claim_authorized: false
+  exact_likelihood_correction_claim_authorized: false
+  inherited_256_case_namespaces_changed: false
+  inherited_256_case_ids_may_be_reported_as_reference_subset_only: true
+
+primary_validation_evidence:
+  simulation_based_calibration: inherit_rc5
+  independent_iid_coverage: inherit_rc6
+  balanced_tail_coverage: inherit_rc6
+  no_likelihood_gold_claim: true
+
+non_neural_reference:
+  id: selected_prior_em_timing_knn_kde_v1
+  role: matched_non_neural_simulation_reference_not_gold
+  reference_bank: locked_scientific_training_rung_only
+  query_splits:
+    - validation
+    - iid_test
+    - balanced_tail_diagnostic
+  group_disjoint_query_required: true
+  exact_same_lens_family_required: true
+  exact_same_em_cell_required: true
+  query_self_exclusion_by_physical_system_id: true
+  deployable_inputs:
+    include:
+      - observed_time_difference
+      - observed_image_astrometry
+      - em_scalar_values_and_uncertainties
+      - em_availability_and_censoring_masks
+      - adopted_lens_family
+    exclude:
+      - gw_strain
+      - detector_mask
+      - every_truth_value
+      - proposal_or_selection_provenance
+  preprocessing: selected_primary_model_training_rung_standardizer
+  distance:
+    representation: flattened_standardized_em_timing_values_and_masks
+    metric: squared_euclidean
+    mask_values_included_as_features: true
+    padded_astrometry_values_zeroed_by_mask: true
+  neighbors:
+    exact_count: 256
+    selection: stable_smallest_distance_then_physical_system_id
+    distance_bandwidth_squared: maximum_selected_neighbor_distance_squared
+    weight_kernel: exp_minus_one_half_distance_squared_over_bandwidth_squared
+    weight_normalization: sum_one
+  target_kde:
+    target: [log_abs_mu_primary, log_abs_mu_secondary]
+    covariance: weighted_covariance
+    bandwidth: scott_effective_sample_size_power_minus_one_sixth
+    diagonal_variance_floor: 1.0e-6
+    density: normalized_weighted_gaussian_mixture
+    posterior_draws_per_case: 4096
+    deterministic_seed_domain: non_neural_reference_posterior_sampling_v1
+  hyperparameter_tuning_authorized: false
+  validation_may_report_but_not_change_k_or_kernel: true
+  metrics:
+    - crps
+    - marginal_coverage
+    - joint_central_coverage_descriptive_only
+    - interval_width
+    - negative_log_probability
+  limitations:
+    - discrete_finite_reference_bank
+    - simulation_distance_not_an_exact_observation_likelihood
+    - no_gw_strain_input
+    - not_a_likelihood_corrected_gold_posterior
+
+analytic_control:
+  id: sis_analytic_identity
+  status: retained
+  role: algebra_and_ordering_control_only
+  may_support_sie_or_epl_accuracy_claim: false
+
+reporting:
+  report_every_model_seed_for_primary_nsf: true
+  reference_baseline_has_no_model_seed: true
+  raw_counts_and_wilson_intervals: true
+  reference_must_not_be_called_gold_or_exact: true
+  removed_gold_requirement_must_be_disclosed_as_preregistered_limitation: true
+  final_results_may_only_narrow_claims: true
+
+hard_stops:
+  - use_query_truth_to_select_neighbors_or_bandwidth
+  - use_gw_strain_in_em_timing_reference
+  - reference_bank_overlap_with_query_split
+  - change_neighbor_count_or_kernel_after_validation_or_final_results
+  - call_knn_kde_reference_an_exact_likelihood_or_gold_posterior
+  - report_dingo_style_importance_efficiency_without_full_latent_proposal
+
+execution:
+  reference_bank_access_enabled: false
+  validation_reference_enabled: false
+  final_reference_enabled: false
+  analytic_control_execution_enabled: false
+  checkpoint_access_enabled: false
+  final_evaluation_access_enabled: false
+  gwosc_gwtc_access_enabled: false

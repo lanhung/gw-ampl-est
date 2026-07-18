@@ -97,11 +97,12 @@ removing EM values/masks/astrometry. EM-only removes strain, detector masks,
 and observed GW timing while retaining EM values and the family condition.
 No additional architecture search is allowed.
 
-The inherited matched non-neural lens posterior and 256-case joint-likelihood
-gold standard still require a separately reviewed executable likelihood
-specification before final evaluation can be unsealed. The legacy SIS point
-regressor remains an explicitly out-of-domain stress control, not a matched
-competitor.
+RC.7 supersedes the inherited non-executable joint-likelihood gold label. The
+selected NSF has no normalized full-nuisance proposal, so an exact DINGO-style
+importance weight is undefined. The replacement is a frozen, same-family/
+same-EM-cell selected-prior EM/timing kNN/KDE simulation reference, explicitly
+not an exact likelihood or gold posterior. The legacy SIS point regressor
+remains an out-of-domain stress control, not a matched competitor.
 
 ## Fail-closed boundary
 
