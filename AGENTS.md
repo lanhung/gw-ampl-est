@@ -489,6 +489,20 @@ This is software work only: architecture fitting and selection remain closed
 until the 65k decision locks the training size and a later authorization binds
 all twelve results, including reuse of the three locked-rung probe fits.
 
+Expert audit found that the inherited preregistration fixed calibration data,
+coverage criteria and SBC counts but did not machine-freeze the post-hoc map.
+Before any calibration data exist, delegated scientific review therefore
+freezes the downstream-only addendum `1.1.0-rc.5` at
+`configs/statistics/calibration_sbc_preregistration.yaml`, canonical hash
+`033b996930c93e7e4a9881fc3de49bb85cf4be96fcbd890bf2543b46368c9d8e`.
+It uses split-conformal credible-region level maps fitted only on 4,096
+calibration-fit systems and independent five-statistic SBC on 1,024 of 2,048
+SBC systems. It does not change RC.4 data, the target or the model density.
+Only pure implementation and synthetic tests are authorized through
+`configs/execution/phase6_calibration_sbc_stack_authorization.yaml`;
+materialization, checkpoint access, calibration fitting and SBC execution
+remain closed.
+
 ## Scientific integrity
 
 - Never fabricate results, citations, completed runs or calibration.

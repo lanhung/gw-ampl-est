@@ -35,6 +35,13 @@ scientific data access. It freezes the fixed 2x2 grid, reuses the locked-rung
 10-transform/width-256 probe and limits future work to nine new fits. No
 architecture fit or selection has been executed.
 
+Before calibration data exist, a downstream-only RC.5 addendum now freezes the
+previously unspecified post-hoc algorithm as split-conformal marginal and
+joint credible-region level maps. Independent SBC uses five frozen rank
+statistics with Holm correction. Pure statistical code and synthetic fixtures
+are implemented; materialization, checkpoint inference, calibration fitting,
+SBC execution and final evaluation remain closed.
+
 ## Completed
 
 - established Vultr as the sole authoritative Git repository;
