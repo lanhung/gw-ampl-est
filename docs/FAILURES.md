@@ -511,3 +511,18 @@ architecture lock plus separate materialization and inference gates.
   an exact equal-density SIE/EPL mixture.
 - Final execution remains closed. The finding is a prospective contract
   correction, not a scientific result or post-result threshold change.
+
+## Phase 7 baseline audit found an undefined importance weight
+
+- The inherited likelihood-gold gate was modeled on DINGO-IS, which uses a
+  proposal over the complete parameters entering its likelihood.
+- The selected NSF has only two target dimensions. It does not provide a
+  density for the full lens, source, dynamics, BBH and image-selection nuisance
+  state, so a full simulator-likelihood `p/q` cannot be evaluated.
+- No importance-sampling run failed; the statistic was undefined by model
+  construction. The gap was found before reference-bank or final-data access.
+- RC.7 prospectively removes the exact/gold/IS-efficiency claim and freezes a
+  clearly labeled non-neural simulation reference. SBC and held-out coverage
+  are unchanged.
+- Treating the approximate kNN/KDE reference as an exact likelihood is a hard
+  stop. Scientific execution remains separately gated.

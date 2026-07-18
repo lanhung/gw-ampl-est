@@ -534,6 +534,25 @@ closed. The inherited matched non-neural and gold likelihood baselines require
 a separately reviewed executable likelihood specification before final data
 may be unsealed.
 
+That review found the inherited DINGO-style likelihood-gold obligation
+mathematically incompatible with the selected estimator: the NSF defines only
+a two-magnification marginal and has no normalized proposal density over the
+complete source/lens/dynamics nuisance space required by the simulator
+likelihood. Before any final data exist, delegated review therefore freezes
+the downstream-only RC.7 correction at
+`configs/statistics/reference_baseline_preregistration.yaml`, canonical hash
+`1df98c89fc418eddfd9ec766cb04311e0f3d9f40836a0d9ba1dd691d6bc1724e`.
+
+RC.7 forbids likelihood-correction and importance-sampling-efficiency claims.
+It replaces the non-executable gold label with a frozen, non-neural
+same-family/same-EM-cell selected-prior kNN/KDE simulation reference, explicitly
+not an exact likelihood or gold posterior. Pure implementation is authorized
+only through
+`configs/execution/phase7_reference_baseline_stack_authorization.yaml`.
+Scientific reference-bank access, validation/final baseline execution, final
+unsealing, checkpoint access and GWOSC/GWTC remain closed. SBC, IID and tail
+coverage remain the primary approximation/calibration evidence.
+
 ## Scientific integrity
 
 - Never fabricate results, citations, completed runs or calibration.
