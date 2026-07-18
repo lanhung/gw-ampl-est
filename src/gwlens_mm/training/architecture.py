@@ -20,6 +20,7 @@ from .data import (
 )
 from .engine import (
     TrainingRunIdentity,
+    authorized_probe_execution_evidence,
     evaluate_development_validation,
     membership_hash,
     optimization_batch_geometry,
@@ -66,6 +67,31 @@ def _sha256(path: Path) -> str:
 
 def architecture_id(transforms: int, width: int) -> str:
     return f"nsf-t{transforms:02d}-w{width}"
+
+
+def architecture_execution_evidence(
+    identity: TrainingRunIdentity,
+    *,
+    architecture: str,
+    immutable_wheel_sha256: str,
+) -> Mapping[str, Any]:
+    """Add architecture identity to the common pre-optimizer envelope."""
+
+    if architecture not in NEW_ARCHITECTURE_IDS:
+        raise TrainingGateError("execution evidence requires a new grid architecture")
+    if len(immutable_wheel_sha256) != 64 or any(
+        character not in "0123456789abcdef" for character in immutable_wheel_sha256
+    ):
+        raise TrainingGateError("architecture wheel identity must be SHA-256")
+    return {
+        **authorized_probe_execution_evidence(identity),
+        "fit_role": "authorized_architecture_fit",
+        "architecture_id": architecture,
+        "reused_probe_retraining": False,
+        "immutable_wheel_sha256": immutable_wheel_sha256,
+        "calibration_authorized": False,
+        "final_evaluation_accessed": False,
+    }
 
 
 def load_architecture_specs(root: Path) -> Tuple[ArchitectureSpec, ...]:
@@ -425,15 +451,11 @@ def run_authorized_architecture_fit(
     run_directory = output_root / architecture / f"seed-{seed}"
     if run_directory.exists() and resume_checkpoint is None:
         raise FileExistsError("architecture result identity already exists")
-    evidence = {
-        "status": "authorized_architecture_fit",
-        "architecture_id": architecture,
-        "run_identity": asdict(identity),
-        "reused_probe_retraining": False,
-        "immutable_wheel_sha256": artifacts["wheel_sha256"],
-        "calibration_authorized": False,
-        "final_evaluation_accessed": False,
-    }
+    evidence = architecture_execution_evidence(
+        identity,
+        architecture=architecture,
+        immutable_wheel_sha256=artifacts["wheel_sha256"],
+    )
     _atomic_json(run_directory / "run_preparation.json", evidence)
     workers = int(authorization.get("data_loader_worker_processes", 0))
     if not 0 <= workers <= 16:

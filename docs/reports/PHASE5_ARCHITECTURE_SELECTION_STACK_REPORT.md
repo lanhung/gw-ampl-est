@@ -42,6 +42,12 @@ The launcher runs one architecture at a time and its three seeds concurrently,
 so no more than three fits share the machine. It rejects the reused probe
 architecture, limiting the new work to nine fits.
 
+Every new candidate fit uses the same engine-level authorization envelope as
+the completed probe and terminal 65k runners. Architecture identity and reuse
+policy are additional fields rather than replacements for the common
+publication, evaluation-commitment and full-run-identity evidence checked
+immediately before optimizer construction.
+
 ## Selection
 
 The selector requires exactly twelve complete development results. It ranks

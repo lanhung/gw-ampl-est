@@ -10,6 +10,7 @@ from gwlens_mm.training.architecture import (
     ALL_ARCHITECTURE_IDS,
     NEW_ARCHITECTURE_IDS,
     PROBE_ARCHITECTURE_ID,
+    architecture_execution_evidence,
     candidate_model_configuration,
     load_architecture_specs,
     select_architecture,
@@ -17,6 +18,7 @@ from gwlens_mm.training.architecture import (
     validate_architecture_execution_gate,
 )
 from gwlens_mm.training.contracts import TrainingGateError, model_configuration_hash
+from gwlens_mm.training.engine import TrainingRunIdentity, _validate_execution_evidence
 
 ROOT = Path(__file__).resolve().parents[1]
 GRID_HASH = "abb3ef575e0f37a8f0150169391efb350b1c53893508bf8ba2505f9219075355"
@@ -73,6 +75,31 @@ def test_candidate_configuration_changes_only_frozen_grid_axes_and_identity() ->
     restored["architecture"]["flow"]["transforms"] = 10
     restored["architecture"]["flow"]["conditioner_width"] = 256
     assert restored == base
+
+
+def test_architecture_fit_uses_common_engine_authorization_envelope() -> None:
+    identity = TrainingRunIdentity(
+        model_configuration_hash="0" * 64,
+        training_code_commit="1" * 40,
+        training_environment_sha256="2" * 64,
+        train_manifest_sha256="3" * 64,
+        validation_manifest_sha256="4" * 64,
+        final_evaluation_commitment_sha256="5" * 64,
+        membership_sha256="6" * 64,
+        input_standardizer_sha256="7" * 64,
+        target_standardizer_sha256="8" * 64,
+        training_rung_count=65536,
+        seed=0,
+    )
+    evidence = architecture_execution_evidence(
+        identity,
+        architecture="nsf-t06-w128",
+        immutable_wheel_sha256="9" * 64,
+    )
+    _validate_execution_evidence(evidence, identity)
+    assert evidence["status"] == "authorized_probe_training"
+    assert evidence["fit_role"] == "authorized_architecture_fit"
+    assert evidence["reused_probe_retraining"] is False
 
 
 def _results(*, tie: bool = False) -> list[dict[str, object]]:
