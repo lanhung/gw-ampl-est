@@ -42,6 +42,20 @@ statistics with Holm correction. Pure statistical code and synthetic fixtures
 are implemented; materialization, checkpoint inference, calibration fitting,
 SBC execution and final evaluation remain closed.
 
+The Phase 6 direct-target materialization and selected-checkpoint score stacks
+are now also implemented and execution-disabled. They bind future atomic Stage
+A/Stage B parents, exact 4,096+2,048 counts and per-seed checkpoint/publication
+identities; no calibration/SBC data or checkpoint has been accessed.
+
+Before final data exist, downstream-only RC.6 now freezes executable final-
+evaluation analysis semantics. The 20,480-system generation commitment remains
+unchanged. A legacy fixed-EPL-slope cross-family label was not executable by the
+family-conditioned estimator, so RC.6 prospectively maps it to the frozen EPL
+training-prior-marginalized condition and freezes exact equal-family mixture
+semantics. Pure metric and ablation-view code is implemented; final
+materialization, unsealing, checkpoint inference, ablation training, baselines
+and GWOSC/GWTC remain closed.
+
 ## Completed
 
 - established Vultr as the sole authoritative Git repository;

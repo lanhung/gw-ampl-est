@@ -1,0 +1,192 @@
+preregistration_version: "1.1.0-rc.6"
+status: design_frozen_execution_disabled
+scope: post_calibration_final_evaluation_analysis_only
+
+parent_calibration_sbc_contract:
+  version: "1.1.0-rc.5"
+  path: configs/statistics/calibration_sbc_preregistration.yaml
+  canonical_hash: "033b996930c93e7e4a9881fc3de49bb85cf4be96fcbd890bf2543b46368c9d8e"
+  estimand_changed: false
+  evaluation_target_changed: false
+  training_or_calibration_data_changed: false
+  final_split_counts_changed: false
+
+frozen_generation_commitment:
+  generator_commit: "bc02054c1f95e7f6cd143fb9dc796ae48f0a15ac"
+  generator_configuration_path: configs/data/phase4_final_evaluation.yaml
+  generator_configuration_hash: "11277a2a4c5d233e6f525b3ab5d6ece90c115d818d752849076f3a136e574d66"
+  commitment_path: results/phase4/final_evaluation_commitment.json
+  commitment_sha256: "c13412eced163bac26abc4b22d054f3a6fa967e7e5a4dd7849ebf54f42df6083"
+  truth_generation_contexts_changed: false
+  namespace_ids_seeds_counts_and_distributions_changed: false
+
+entry_gate:
+  training_size_locked: required
+  architecture_locked: required
+  selected_architecture_seeds: [0, 1, 2]
+  calibration_maps_for_all_seeds: required
+  independent_sbc_completed_for_all_seeds: required
+  best_seed_selection_forbidden: true
+  final_evaluation_materialization_and_unsealing_require_separate_gates: true
+
+final_pool:
+  total_accepted_physical_systems: 20480
+  iid_test: 8192
+  balanced_tail_diagnostic: 4096
+  cross_family_misspecification_test: 2048
+  parameter_region_ood: 2048
+  waveform_mismatch_test: 2048
+  psd_mismatch_test: 2048
+  group_disjoint_from_training_development_and_each_other: true
+  final_data_cannot_affect_model_or_calibration: true
+
+posterior_inference:
+  posterior_draws_per_case: 4096
+  maximum_draw_microbatch: 512
+  exact_draw_microbatch_frozen_by_execution_gate: true
+  seeds: [0, 1, 2]
+  evaluate_every_seed: true
+  pooling_seed_draws_for_case_level_regions: false
+  inference_seed_domain: final_evaluation_posterior_sampling_v1
+
+cross_family_executable_semantics:
+  contradiction_resolved_before_materialization: true
+  legacy_materialization_context_ids_preserved: true
+  analysis_interpretation_only: true
+  obsolete_non_executable_cell:
+    truth: sie_external_shear
+    assumed: epl_external_shear_fixed_slope_2.08
+    status: replaced_before_data
+    reason: selected_estimator_conditions_on_family_but_has_no_fixed_slope_input
+  cells:
+    - id: sie_truth_epl_prior_marginalized_assumed
+      materialization_context_id: sie_truth_epl_assumed
+      truth: sie_external_shear
+      inference: epl_family_condition_with_frozen_training_slope_prior_marginalized
+      cases: 512
+    - id: epl_truth_sie_assumed
+      materialization_context_id: epl_truth_sie_assumed
+      truth: epl_external_shear
+      inference: sie_family_condition
+      cases: 512
+    - id: sie_truth_equal_family_mixture
+      materialization_context_id: sie_truth_family_marginalized
+      truth: sie_external_shear
+      inference: equal_density_mixture_of_sie_and_epl_family_conditions
+      cases: 512
+    - id: epl_truth_equal_family_mixture
+      materialization_context_id: epl_truth_family_marginalized
+      truth: epl_external_shear
+      inference: equal_density_mixture_of_sie_and_epl_family_conditions
+      cases: 512
+  family_mixture:
+    sie_probability: 0.5
+    epl_probability: 0.5
+    samples_per_family: 2048
+    density: logsumexp_of_family_log_densities_plus_log_half
+    component_calibration_maps_combined: false
+    report_as_model_misspecification_diagnostic_only: true
+
+calibration_application:
+  use_same_seed_calibration_map: true
+  primary_case_map: matching_em_cell
+  global_map_reported_as_secondary: true
+  no_refitting_on_final_data: true
+  no_tail_specific_map: true
+  cross_family_mixture_uses_matching_em_cell_threshold_from_same_seed: true
+
+per_case_metrics:
+  - negative_log_probability_nat_per_target_dimension
+  - crps_log_abs_mu_primary
+  - crps_log_abs_mu_secondary
+  - marginal_credible_region_scores
+  - joint_hpd_region_score
+  - calibrated_marginal_coverage
+  - calibrated_joint_coverage
+  - calibrated_interval_width
+
+reporting:
+  nominal_levels: [0.50, 0.80, 0.90, 0.95]
+  raw_counts_required: true
+  wilson_95_intervals_required: true
+  report_each_seed: true
+  aggregate_across_seeds: mean_and_sample_standard_deviation
+  report_each_lens_family: true
+  report_each_em_cell_for_iid: true
+  report_each_frozen_tail_stratum: true
+  report_each_cross_family_cell: true
+  report_each_parameter_ood_stratum: true
+  report_waveform_and_psd_mismatch_separately: true
+  final_results_may_only_lower_or_narrow_claims: true
+
+primary_iid_coverage_gate:
+  marginal_absolute_error_tolerance: max_of_0.01_and_3_binomial_standard_errors
+  joint_absolute_error_tolerance: max_of_0.015_and_3_binomial_standard_errors
+  em_cell_absolute_error_tolerance: max_of_0.04_and_3_binomial_standard_errors
+  require_each_seed: true
+  average_cannot_override_failed_seed_or_cell: true
+
+balanced_tail_coverage_gate:
+  absolute_error_tolerance: max_of_0.06_and_3_binomial_standard_errors
+  cases_per_stratum: 1024
+  require_each_seed_and_stratum: true
+  average_cannot_override_failed_stratum: true
+
+diagnostic_only_splits:
+  splits:
+    - cross_family_misspecification_test
+    - parameter_region_ood
+    - waveform_mismatch_test
+    - psd_mismatch_test
+  action: report_degradation_and_limitations_without_retuning
+
+ablations:
+  gw_only_same_backbone:
+    separately_trained: true
+    locked_architecture_and_training_size: true
+    seeds: [0, 1, 2]
+    remove_em_values_masks_and_astrometry: true
+    retain_lens_family_as_model_condition: true
+    optimizer_and_budget_identical_to_primary: true
+  em_only_same_backbone:
+    separately_trained: true
+    locked_architecture_and_training_size: true
+    seeds: [0, 1, 2]
+    remove_gw_strain_and_detector_masks: true
+    remove_observed_time_difference_value_and_mask: true
+    retain_lens_family_as_model_condition: true
+    optimizer_and_budget_identical_to_primary: true
+  selection_metric: validation_mean_nlp_across_three_seeds
+  additional_architecture_tuning: forbidden
+  final_evaluation_use_for_selection: forbidden
+
+inherited_baseline_obligations:
+  non_neural_lens_posterior_matched_prior:
+    status: requires_separate_executable_likelihood_spec_before_final_unsealing
+  legacy_sis_point_regression_out_of_domain:
+    status: descriptive_stress_control_not_a_matched_competitor
+  likelihood_gold_joint_model:
+    status: requires_separate_executable_likelihood_spec_before_final_unsealing
+    iid_cases: 256
+    may_trigger_retuning: false
+    failure_action: downgrade_claim_or_new_preregistration
+
+hard_stops:
+  - any_final_case_used_for_training_architecture_or_calibration
+  - calibration_map_refit_on_final_data
+  - missing_seed_or_best_seed_selection
+  - mixed_seed_checkpoint_or_calibration_identity
+  - fixed_slope_cross_family_claim_without_fixed_slope_input
+  - final_group_leakage
+  - nonfinite_posterior_draw_or_density
+  - undeclared_post_result_metric_or_threshold_change
+
+execution:
+  final_materialization_enabled: false
+  final_unsealing_enabled: false
+  checkpoint_inference_enabled: false
+  ablation_training_enabled: false
+  baseline_execution_enabled: false
+  gold_likelihood_enabled: false
+  manuscript_claim_finalization_enabled: false
+  gwosc_gwtc_access_enabled: false

@@ -783,3 +783,28 @@ commit embedded in the NPZ. Calibration and SBC use six distinct deterministic
 random namespaces. The statistics runner must prove the two physical-system ID
 sets are unique and disjoint and reject mixed seed, architecture, checkpoint or
 code identities before fitting any map. No best-seed selection is permitted.
+
+## D076 — Make every final cross-family diagnostic executable before data exist
+
+The finalized generator commitment named a SIE-truth cross-family cell whose
+analysis assumed EPL at fixed density slope 2.08. The frozen estimator exposes
+only the adopted lens-family one-hot and has no fixed-slope model input. That
+label therefore described an analysis the deployed model could not perform.
+The contradiction was found before final materialization, unsealing or metric
+inspection.
+
+RC.6 leaves the generator configuration, commitment, namespaces, seeds, counts
+and truth distributions byte-identical. It maps the legacy materialization
+context to EPL-family-conditioned inference, which marginalizes the frozen
+training EPL slope prior. Family-marginalized contexts are an exact equal-
+density mixture of SIE- and EPL-conditioned posteriors, evaluated separately
+within each retained model seed. They are model-misspecification diagnostics,
+not fixed-slope claims.
+
+Final analysis evaluates all three seeds with no best-seed selection, applies
+the matching seed's already-fitted EM-cell calibration map, reports raw counts
+and Wilson intervals, and never uses a final case to refit or tune. GW-only and
+EM-only ablations are separately trained at the locked architecture/size under
+the same budget; the former retains GW timing and the latter removes it. The
+matched non-neural and gold likelihood baselines remain a hard pre-unsealing
+implementation obligation.

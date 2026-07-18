@@ -1,0 +1,37 @@
+phase: "7-analysis-stack"
+authorization_status: authorized_preregistration_and_pure_implementation_only
+authorized_by: codex_as_delegated_scientific_and_engineering_reviewer
+authorization_date: "2026-07-18"
+
+authorization_basis:
+  owner_delegation: continue_without_routine_human_intervention
+  executable_cross_family_contradiction_found_before_final_materialization: true
+  no_final_case_or_metric_inspected: true
+
+frozen_parent:
+  path: configs/statistics/calibration_sbc_preregistration.yaml
+  version: "1.1.0-rc.5"
+  canonical_hash: "033b996930c93e7e4a9881fc3de49bb85cf4be96fcbd890bf2543b46368c9d8e"
+
+frozen_addendum:
+  path: configs/statistics/final_evaluation_analysis_preregistration.yaml
+  version: "1.1.0-rc.6"
+  canonical_hash: "7e0e252f0a972e0b0ad2fe8f93f74f1f0172639a6fb258fc7a953be5fb7973e1"
+
+authorization:
+  downstream_preregistration_authorized: true
+  pure_metric_implementation_authorized: true
+  synthetic_fixture_tests_authorized: true
+
+  final_evaluation_materialization_authorized: false
+  final_evaluation_unsealing_authorized: false
+  scientific_checkpoint_access_authorized: false
+  final_evaluation_inference_authorized: false
+  ablation_training_authorized: false
+  baseline_execution_authorized: false
+  gold_likelihood_execution_authorized: false
+  model_retraining_or_tuning_authorized: false
+  calibration_refit_authorized: false
+  gwosc_gwtc_access_authorized: false
+
+stop_after_implementation: true
