@@ -8,6 +8,13 @@ concatenates the immutable 32,768-system Stage A and Stage B components,
 preserves the existing 6,144-system validation publication and trains the
 unchanged probe architecture from scratch for seeds 0, 1 and 2.
 
+An independent closeout command now sits between the Stage B publisher and any
+future training authorization. It verifies the immutable execution result,
+both parent manifests, the combined manifest, all 256 complete-shard markers
+and physical-system ID uniqueness without opening Parquet or Zarr products.
+It also requires every optimizer/calibration/SBC/final-evaluation boundary to
+remain closed.
+
 This is an implementation result only. Stage B is still materializing and no
 65k authorization exists. The implementation did not read Stage B staging,
 construct a 65k membership, start an optimizer, fit calibration or open final
@@ -27,6 +34,13 @@ The new resolver requires:
 - recorded Stage A/Stage B and Stage B/validation group-disjoint checks;
 - hashes for both parent manifests and the combined manifest;
 - a manifest that does not self-authorize training.
+
+`scripts/phase4/verify_stage_b_publication.py` additionally binds the Stage B
+result to the expected generator and orchestration commits, exact dataset and
+parent identities, recorded publication tree hash and byte count, group-
+disjointness evidence and the 100 GB remaining-space floor. Its output is an
+atomic small JSON closeout artifact; a failed check produces no passing
+evidence and cannot open the optimizer gate.
 
 The future execution gate must additionally bind and verify the immutable
 training wheel file and SHA-256, the non-editable-install policy, training
@@ -82,12 +96,15 @@ Tests cover:
 - terminal lock and data-limited decision exits;
 - prohibition on automatic extension above 65k;
 - deterministic three-seed launcher and shared rung preprocessing.
+- exact independent Stage B result/manifest/shard closeout and rejection of an
+  execution result that self-authorizes the 65k optimizer.
 
 The final scientific execution identity, training wheel and authorization will
 be resolved only after this implementation passes PR CI and Stage B publishes.
 No scientific result is claimed by this report.
 
-Local release verification completed with 262 tests passed and six optional
-dependency skips. Maintained-scope Ruff, mypy over 50 source files, sdist and
-wheel construction all passed. The authoritative CUDA/dependency suite remains
-part of PR CI and the later pre-execution AutoDL gate.
+The latest local release verification completed with 311 tests passed and
+seven documented optional-dependency skips. Maintained-scope Ruff, mypy over
+57 source files, sdist and wheel construction all passed. The authoritative
+CUDA/dependency suite remains part of PR CI and the later pre-execution AutoDL
+gate.

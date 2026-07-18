@@ -14,6 +14,7 @@ from gwlens_mm.training.learning_curve import compare_32k_to_65k
 from gwlens_mm.training.rung65 import (
     validate_65k_training_gate,
     validate_immutable_training_artifacts,
+    validate_stage_b_completion_evidence,
 )
 
 GENERATOR = "2be777e727ef9d8e1a85f89c68966df5d37932b0"
@@ -81,12 +82,17 @@ def _combined_publication(tmp_path: Path) -> tuple[Path, Path, Path]:
     stage_b_dataset.mkdir(parents=True)
     stage_b_manifest = {
         "status": "passed",
+        "parent_run_id": "parent-b",
         "generator_commit": GENERATOR,
         "preregistration_hash": RC4_HASH,
         "accepted_pair_count": 32768,
         "complete_shard_count": 256,
         "proposal_equals_evaluation": True,
         "all_importance_weights_one": True,
+        "cross_component_validation": {
+            "stage_a_stage_b_group_disjoint": True,
+            "stage_b_validation_group_disjoint": True,
+        },
         "validation": {
             "status": "passed",
             "split": "train",
@@ -124,9 +130,12 @@ def _combined_publication(tmp_path: Path) -> tuple[Path, Path, Path]:
             },
             {
                 "role": "stage_b_train_extension",
+                "parent_run_id": "parent-b",
                 "dataset_id": "stage-b-train",
                 "accepted_count": 32768,
                 "parent_manifest_sha256": stage_b_hash,
+                "publication_tree_sha256": "c" * 64,
+                "publication_bytes": 123456,
             },
         ],
     }
@@ -134,6 +143,28 @@ def _combined_publication(tmp_path: Path) -> tuple[Path, Path, Path]:
         json.dumps(manifest, sort_keys=True) + "\n"
     )
     return stage_a, stage_b, combined
+
+
+def _populate_stage_b_shards(stage_b: Path) -> None:
+    shards = stage_b / "stage-b-train" / "shards"
+    for shard_index in range(256):
+        shard = shards / f"shard-{shard_index:05d}"
+        shard.mkdir(parents=True)
+        identifiers = [
+            f"stage-b-system-{shard_index:05d}-{row_index:03d}"
+            for row_index in range(128)
+        ]
+        (shard / "shard_manifest.json").write_text(
+            json.dumps(
+                {
+                    "status": "complete",
+                    "accepted_pair_count": 128,
+                    "physical_system_ids": identifiers,
+                }
+            )
+            + "\n"
+        )
+        (shard / "COMPLETE.json").write_text("{}\n")
 
 
 def test_combined_65k_resolver_binds_both_atomic_parents(tmp_path: Path) -> None:
@@ -243,6 +274,71 @@ def test_65k_gate_accepts_only_exact_atomic_evidence(tmp_path: Path) -> None:
             stage_a_publication_root=stage_a,
             stage_b_publication_root=stage_b,
             combined_publication_root=combined,
+        )
+
+
+def test_independent_stage_b_closeout_binds_result_and_atomic_shards(
+    tmp_path: Path,
+) -> None:
+    stage_a, stage_b, combined = _combined_publication(tmp_path)
+    _populate_stage_b_shards(stage_b)
+    result_path = tmp_path / "stage_b_execution_result.json"
+    combined_manifest = combined / "dataset_manifest.json"
+    result = {
+        "status": "passed",
+        "parent_run_id": "parent-b",
+        "train_dataset_id": "stage-b-train",
+        "combined_train_id": "combined-65k",
+        "generator_commit": GENERATOR,
+        "orchestration_commit": "d" * 40,
+        "accepted_pair_count": 32768,
+        "complete_shard_count": 256,
+        "cumulative_train_accepted_pair_count": 65536,
+        "stage_b_publication_path": str(stage_b),
+        "stage_b_publication_tree_sha256": "c" * 64,
+        "stage_b_publication_bytes": 123456,
+        "combined_manifest_path": str(combined_manifest),
+        "combined_manifest_sha256": hashlib.sha256(
+            combined_manifest.read_bytes()
+        ).hexdigest(),
+        "remaining_free_bytes": 200_000_000_000,
+        "proposal_equals_evaluation": True,
+        "all_importance_weights_one": True,
+        "cross_component_validation": {
+            "stage_a_stage_b_group_disjoint": True,
+            "stage_b_validation_group_disjoint": True,
+        },
+        "train_65k_optimizer_authorized": False,
+        "calibration_authorized": False,
+        "sbc_authorized": False,
+        "final_evaluation_authorized": False,
+        "gwosc_gwtc_accessed": False,
+    }
+    result_path.write_text(json.dumps(result) + "\n")
+    evidence = validate_stage_b_completion_evidence(
+        result_path=result_path,
+        stage_a_publication_root=stage_a,
+        stage_b_publication_root=stage_b,
+        combined_publication_root=combined,
+        expected_generator_commit=GENERATOR,
+        expected_orchestration_commit="d" * 40,
+        expected_preregistration_hash=RC4_HASH,
+    )
+    assert evidence["status"] == "passed_independent_stage_b_closeout"
+    assert evidence["accepted_pair_count"] == 32768
+    assert evidence["train_65k_optimizer_authorized"] is False
+
+    result["train_65k_optimizer_authorized"] = True
+    result_path.write_text(json.dumps(result) + "\n")
+    with pytest.raises(TrainingGateError, match="execution result contract"):
+        validate_stage_b_completion_evidence(
+            result_path=result_path,
+            stage_a_publication_root=stage_a,
+            stage_b_publication_root=stage_b,
+            combined_publication_root=combined,
+            expected_generator_commit=GENERATOR,
+            expected_orchestration_commit="d" * 40,
+            expected_preregistration_hash=RC4_HASH,
         )
 
 

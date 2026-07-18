@@ -21,6 +21,7 @@ from .data import (
     DevelopmentStageADataset,
     PublishedStageADataset,
     StandardizedStageADataset,
+    index_complete_shards,
     resolve_combined_training_publication,
 )
 from .engine import (
@@ -173,6 +174,150 @@ def validate_65k_training_gate(
         "authorization": authorization,
         "publication": publication,
         "final_evaluation_commitment_sha256": commitment_hash,
+    }
+
+
+def validate_stage_b_completion_evidence(
+    *,
+    result_path: Path,
+    stage_a_publication_root: Path,
+    stage_b_publication_root: Path,
+    combined_publication_root: Path,
+    expected_generator_commit: str,
+    expected_orchestration_commit: str,
+    expected_preregistration_hash: str,
+    minimum_remaining_free_bytes: int = 100_000_000_000,
+) -> Mapping[str, Any]:
+    """Independently accept only the exact atomic Stage B/combined publication.
+
+    This closeout check reads manifests and complete-shard markers only.  It is
+    intentionally separate from the generator process and does not grant data
+    access to an optimizer.  Full artifact hashes remain those computed by the
+    frozen publisher and bound through the parent and combined manifests.
+    """
+
+    if not result_path.is_file():
+        raise TrainingGateError("Stage B execution result is absent")
+    result = _load_json(result_path)
+    expected_result = (
+        "passed",
+        32768,
+        256,
+        65536,
+        expected_generator_commit,
+        expected_orchestration_commit,
+        True,
+        True,
+        False,
+        False,
+        False,
+        False,
+        False,
+    )
+    observed_result = (
+        result.get("status"),
+        int(result.get("accepted_pair_count", -1)),
+        int(result.get("complete_shard_count", -1)),
+        int(result.get("cumulative_train_accepted_pair_count", -1)),
+        result.get("generator_commit"),
+        result.get("orchestration_commit"),
+        result.get("proposal_equals_evaluation"),
+        result.get("all_importance_weights_one"),
+        result.get("train_65k_optimizer_authorized"),
+        result.get("calibration_authorized"),
+        result.get("sbc_authorized"),
+        result.get("final_evaluation_authorized"),
+        result.get("gwosc_gwtc_accessed"),
+    )
+    if observed_result != expected_result:
+        raise TrainingGateError("Stage B execution result contract failed")
+    if int(result.get("remaining_free_bytes", -1)) < minimum_remaining_free_bytes:
+        raise TrainingGateError("Stage B recorded free space below the reviewed floor")
+
+    publication = resolve_combined_training_publication(
+        combined_publication_root,
+        stage_a_parent_root=stage_a_publication_root,
+        stage_b_parent_root=stage_b_publication_root,
+        expected_generator_commit=expected_generator_commit,
+        expected_preregistration_hash=expected_preregistration_hash,
+        expected_combined_manifest_sha256=str(
+            result.get("combined_manifest_sha256", "")
+        ),
+    )
+    if Path(str(result.get("stage_b_publication_path", ""))).resolve() != (
+        publication.stage_b_parent_root
+    ):
+        raise TrainingGateError("Stage B result names the wrong parent publication")
+    if Path(str(result.get("combined_manifest_path", ""))).resolve() != (
+        publication.combined_manifest_path
+    ):
+        raise TrainingGateError("Stage B result names the wrong combined manifest")
+    if (
+        result.get("combined_train_id") != publication.combined_root.name
+        or result.get("train_dataset_id") != publication.stage_b_dataset_id
+    ):
+        raise TrainingGateError("Stage B result dataset identities are inconsistent")
+
+    stage_b_manifest = _load_json(publication.stage_b_parent_manifest_path)
+    combined_manifest = _load_json(publication.combined_manifest_path)
+    components = {
+        str(component.get("role")): component
+        for component in combined_manifest.get("components", ())
+        if isinstance(component, dict)
+    }
+    stage_b_component = components.get("stage_b_train_extension")
+    if not isinstance(stage_b_component, dict):
+        raise TrainingGateError("combined manifest lacks its Stage B component")
+    if not (
+        result.get("parent_run_id") == stage_b_manifest.get("parent_run_id")
+        == stage_b_component.get("parent_run_id")
+    ):
+        raise TrainingGateError("Stage B parent run identity is inconsistent")
+    if (
+        result.get("stage_b_publication_tree_sha256")
+        != stage_b_component.get("publication_tree_sha256")
+        or int(result.get("stage_b_publication_bytes", -1))
+        != int(stage_b_component.get("publication_bytes", -2))
+        or stage_b_component.get("parent_manifest_sha256")
+        != publication.stage_b_parent_manifest_sha256
+    ):
+        raise TrainingGateError("Stage B result and combined artifact evidence disagree")
+    if result.get("cross_component_validation") != combined_manifest.get(
+        "group_validation"
+    ):
+        raise TrainingGateError("Stage B cross-component validation evidence differs")
+    if stage_b_manifest.get("cross_component_validation") != result.get(
+        "cross_component_validation"
+    ):
+        raise TrainingGateError("Stage B parent and execution group evidence differ")
+
+    entries = index_complete_shards(
+        publication.stage_b_train_root,
+        expected_pairs_per_shard=128,
+        expected_total_pairs=32768,
+        require_published=False,
+    )
+    return {
+        "status": "passed_independent_stage_b_closeout",
+        "parent_run_id": result.get("parent_run_id"),
+        "stage_b_dataset_id": publication.stage_b_dataset_id,
+        "combined_train_id": publication.combined_root.name,
+        "accepted_pair_count": len(entries),
+        "complete_shard_count": 256,
+        "cumulative_train_accepted_pair_count": 65536,
+        "stage_b_parent_manifest_sha256": publication.stage_b_parent_manifest_sha256,
+        "stage_b_publication_tree_sha256": result.get(
+            "stage_b_publication_tree_sha256"
+        ),
+        "combined_manifest_sha256": publication.combined_manifest_sha256,
+        "remaining_free_bytes": int(result["remaining_free_bytes"]),
+        "proposal_equals_evaluation": True,
+        "all_importance_weights_one": True,
+        "train_65k_optimizer_authorized": False,
+        "calibration_authorized": False,
+        "sbc_authorized": False,
+        "final_evaluation_authorized": False,
+        "gwosc_gwtc_accessed": False,
     }
 
 
