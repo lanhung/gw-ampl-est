@@ -526,3 +526,18 @@ architecture lock plus separate materialization and inference gates.
   are unchanged.
 - Treating the approximate kNN/KDE reference as an exact likelihood is a hard
   stop. Scientific execution remains separately gated.
+
+## Phase 7 execution-stack audit found incomplete downstream identity binding
+
+- The first pure inference draft could validate the sealed final parent and
+  compute in-memory metrics, but did not yet implement the complete
+  checkpoint-to-score execution path.
+- The Phase 6 statistics summary also omitted the hashes of the calibration
+  map, independent SBC summary and independent calibrated-coverage files.
+  A later final gate could therefore have bound the run summary without
+  cryptographically binding every product it consumed.
+- This was found before final materialization, checkpoint access, calibration
+  fitting or final inference. The runner now binds 45 seed/namespace outputs,
+  and the Phase 6 summary records all downstream hashes.
+- This is a prospective engineering hardening, not a failed scientific run or
+  a change to RC.5/RC.6/RC.7 metrics and thresholds.

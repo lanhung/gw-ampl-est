@@ -553,6 +553,19 @@ Scientific reference-bank access, validation/final baseline execution, final
 unsealing, checkpoint access and GWOSC/GWTC remain closed. SBC, IID and tail
 coverage remain the primary approximation/calibration evidence.
 
+The implementation-only boundary also permits a fail-closed final inference
+and score-artifact stack through
+`configs/execution/phase7_final_inference_stack_authorization.yaml`. It may
+resolve synthetic sealed manifests, exercise synthetic checkpoint inference,
+apply synthetic calibration maps and test the frozen cross-family semantics.
+It may not materialize or unseal final data, access a scientific checkpoint or
+calibration map, create a scientific score artifact, refit calibration, train
+or tune a model, finalize a manuscript claim or access GWOSC/GWTC. A later
+exact gate must bind the sealed parent, all three retained checkpoints,
+same-seed calibration/SBC outputs, the selected architecture, immutable
+inference environment and every output identity before one final record may be
+opened.
+
 ## Scientific integrity
 
 - Never fabricate results, citations, completed runs or calibration.

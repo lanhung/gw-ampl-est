@@ -1,0 +1,26 @@
+{
+  "accepted_case_count": 20480,
+  "calibration_map_accessed": false,
+  "calibration_map_identities": null,
+  "checkpoint_accessed": false,
+  "final_analysis_hash": "7e0e252f0a972e0b0ad2fe8f93f74f1f0172639a6fb258fc7a953be5fb7973e1",
+  "final_data_accessed": false,
+  "final_generation_commitment_sha256": "c13412eced163bac26abc4b22d054f3a6fa967e7e5a4dd7849ebf54f42df6083",
+  "gwosc_gwtc_accessed": false,
+  "maximum_draw_microbatch": 512,
+  "model_seeds": [
+    0,
+    1,
+    2
+  ],
+  "model_trained_or_tuned": false,
+  "namespace_count": 15,
+  "posterior_draws_per_case": 4096,
+  "reference_baseline_hash": "1df98c89fc418eddfd9ec766cb04311e0f3d9f40836a0d9ba1dd691d6bc1724e",
+  "sbc_summary_identities": null,
+  "score_artifact_created": false,
+  "sealed_publication_identity": null,
+  "selected_checkpoint_identities": null,
+  "shard_count": 160,
+  "status": "implementation_ready_execution_closed"
+}
