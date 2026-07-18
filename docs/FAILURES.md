@@ -559,3 +559,17 @@ architecture lock plus separate materialization and inference gates.
   optimizer construction.
 - Model, data, optimizer, batch geometry, sample order and scientific stopping
   rules are unchanged. This is a prospective software-integration correction.
+
+## Learning-curve pre-execution audit found a missing exact-count assertion
+
+- The paired comparator required identical validation IDs between rungs and
+  seeds, but did not independently require the frozen count of 6,144 systems.
+  A consistently truncated set could therefore have reached the terminal
+  decision path.
+- The completed 16k/32k evidence contains all 6,144 cases and is unchanged.
+  Stage B was still materializing and no 65k optimizer or decision existed
+  when the omission was found.
+- Both learning-curve comparisons now reject any count other than 6,144, and a
+  regression removes one row from an otherwise valid three-seed terminal-rung
+  fixture. Thresholds, bootstrap, membership and decision semantics are
+  unchanged.

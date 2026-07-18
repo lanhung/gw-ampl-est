@@ -411,12 +411,14 @@ def _cases(path: Path, *, nlp: float, crps: float) -> None:
         "extreme_profile_or_environment",
     )
     rows = []
-    for index in range(512):
+    case_count = 6144
+    for index in range(case_count):
+        tail_view = groups[index // 128] if index < 512 else "none"
         row = {
             "physical_system_id": f"validation-system-{index:04d}",
             "lens_family": "sie_external_shear" if index % 2 == 0 else "epl_external_shear",
             "em_cell_signature": "all_modalities",
-            "tail_view": groups[index // 128],
+            "tail_view": tail_view,
             "nlp_nat_per_target_dimension": nlp,
             "crps_log_mu_primary": crps,
             "crps_log_mu_secondary": crps,
@@ -424,7 +426,7 @@ def _cases(path: Path, *, nlp: float, crps: float) -> None:
         }
         for level in (0.50, 0.80, 0.90, 0.95):
             key = f"{level:.2f}"
-            covered = index < round(level * 512)
+            covered = index < round(level * case_count)
             for target in ("primary", "secondary", "joint"):
                 row[f"covered_{target}_{key}"] = covered
             row[f"width_primary_{key}"] = 1.0
@@ -457,6 +459,16 @@ def test_terminal_learning_curve_locks_or_stops_without_auto_extension(
     )
     assert saturated["decision"] == "lock_train_65k"
     assert saturated["extension_above_65536_authorized"] is False
+    truncated_path = (
+        larger / "rung-65536" / "seed-2" / "development_cases.csv"
+    )
+    complete_table = truncated_path.read_text(encoding="utf-8")
+    truncated_path.write_text(
+        "\n".join(complete_table.splitlines()[:-1]) + "\n", encoding="utf-8"
+    )
+    with pytest.raises(TrainingGateError, match="exactly 6,144 validation cases"):
+        compare_32k_to_65k(smaller, larger, bootstrap_replicates=100)
+    truncated_path.write_text(complete_table, encoding="utf-8")
     for seed in (0, 1, 2):
         _cases(
             larger / "rung-65536" / f"seed-{seed}" / "development_cases.csv",
