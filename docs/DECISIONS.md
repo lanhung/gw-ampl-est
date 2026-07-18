@@ -746,3 +746,23 @@ parameter count. Calibration, SBC and final evaluation remain inaccessible,
 and the selection result cannot open a later gate by itself. Implementation may
 proceed against synthetic fixtures while Stage B runs, but execution requires a
 locked 65k decision and a separate identity-bound authorization.
+
+## D074 — Calibrate reported credible regions with split conformal maps
+
+The earlier contracts fixed the calibration/SBC splits and acceptance
+criteria, but not the post-hoc map itself. Before those data exist, RC.5 freezes
+split-conformal level calibration rather than allowing a method to be chosen
+after seeing coverage. For each of the three selected-architecture seeds,
+4,096 calibration-fit cases provide central-marginal and joint-HPD inclusion
+scores. Finite-sample order statistics produce one global map and eight primary
+EM-cell conditional maps.
+
+This calibration changes requested credible-region mass levels; it does not
+claim to transform flow samples or define a recalibrated analytic density.
+Tail-specific maps are not fitted. Tail coverage later applies the frozen
+EM-cell map and is reported honestly.
+
+SBC remains independent: 1,024 deterministically ranked systems from the 2,048
+SBC split supply ranks for both targets, their sum, their difference and joint
+log-density. Twenty-bin chi-square tests use the exact discrete-rank bin
+expectation and Holm step-down familywise alpha 0.01. SBC never fits a map.

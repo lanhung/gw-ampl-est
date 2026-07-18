@@ -1,0 +1,25 @@
+phase: "6-calibration-sbc-stack"
+authorization_status: authorized_preregistration_and_implementation_only
+authorized_by: codex_as_delegated_scientific_and_engineering_reviewer
+authorization_date: "2026-07-17"
+
+authorization_basis:
+  owner_delegation: continue_without_routine_human_intervention
+  identified_gap: posthoc_calibration_algorithm_was_not_machine_frozen
+  parent_data_contract_unchanged: true
+
+authorization:
+  calibration_sbc_preregistration_authorized: true
+  pure_statistical_implementation_authorized: true
+  synthetic_fixture_tests_authorized: true
+
+  calibration_or_sbc_data_materialization_authorized: false
+  scientific_data_access_authorized: false
+  selected_model_checkpoint_access_authorized: false
+  calibration_fit_authorized: false
+  sbc_execution_authorized: false
+  iid_ood_mismatch_access_authorized: false
+  model_retraining_or_tuning_authorized: false
+  gwosc_gwtc_access_authorized: false
+
+stop_after_implementation: true

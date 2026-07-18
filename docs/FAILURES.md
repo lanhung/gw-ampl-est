@@ -465,3 +465,17 @@ silently choose a solver search window or approximate caustic area.
 - The frozen response is a separately authorized 65k extension. This result
   does not permit changing the model, inspecting final tests or generating more
   than the single 32,768-system Stage B increment.
+
+## Phase 6 preregistration audit caught an unspecified calibration map
+
+The parent contracts named a post-hoc calibration split and froze coverage/SBC
+thresholds, but did not define the map that would be fitted. Leaving that choice
+until after calibration data existed would permit outcome-dependent method
+selection. No calibration or SBC data had been generated or inspected when the
+gap was found.
+
+RC.5 resolves the issue prospectively with split-conformal credible-region
+level maps, exact finite-sample order statistics and independent SBC. It does
+not modify already generated RC.4 data or claim to recalibrate the analytic
+flow density. All Phase 6 execution remains closed pending size and
+architecture lock plus separate materialization and inference gates.

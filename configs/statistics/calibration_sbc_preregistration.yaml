@@ -1,0 +1,112 @@
+preregistration_version: "1.1.0-rc.5"
+status: design_frozen_execution_disabled
+scope: post_lock_calibration_and_sbc_only
+
+parent_direct_target_contract:
+  version: "1.1.0-rc.4"
+  path: configs/statistics/direct_target_stage_a_preregistration.yaml
+  canonical_hash: "5aeaac395463bd073c44ead4ff4c5c729b5a2d4b4f1840c0825a53b30ab1bc98"
+  estimand_changed: false
+  evaluation_target_changed: false
+  training_distribution_changed: false
+  selection_or_observation_model_changed: false
+  split_counts_changed: false
+
+entry_gate:
+  training_size_must_be_locked: true
+  architecture_must_be_locked: true
+  selected_architecture_seeds: [0, 1, 2]
+  best_seed_selection_forbidden: true
+  separate_materialization_and_execution_authorization_required: true
+
+calibration_fit_split:
+  split: calibration_fit
+  accepted_physical_system_count: 4096
+  direct_evaluation_target_draws: true
+  proposal_equals_evaluation: true
+  importance_weight: 1.0
+  group_disjoint_from_train_validation_sbc_and_final: true
+  balanced_em_cells: true
+  accepted_systems_per_em_cell: 512
+  posterior_draws_per_case: 4096
+
+credible_region_calibration:
+  method: split_conformal_raw_posterior_region_level_map
+  changes_posterior_samples_or_density: false
+  claim_boundary: calibrated_credible_regions_not_a_recalibrated_flow_density
+  nominal_levels: [0.50, 0.80, 0.90, 0.95]
+  finite_sample_quantile:
+    order_statistic: ceil_of_n_plus_1_times_nominal_level
+    cap_at_sample_count: true
+    interpolation: none
+  marginal_score:
+    targets: [log_abs_mu_primary, log_abs_mu_secondary]
+    posterior_pit_estimator: midrank_empirical_cdf_from_4096_draws
+    score: two_times_absolute_pit_minus_one_half
+    calibrated_region: raw_equal_tailed_interval_at_fitted_score_threshold
+  joint_score:
+    region: flow_log_density_highest_density_region
+    score: fraction_of_posterior_draw_log_densities_greater_equal_truth_log_density
+    calibrated_region: raw_hpd_region_at_fitted_score_threshold
+  maps:
+    global_map: required
+    em_cell_conditional_maps: required
+    em_cell_map_is_primary_for_case_level_reporting: true
+    tail_specific_map_fitting: false
+  fit_separately_for_each_model_seed: true
+  pooling_across_model_seeds: false
+  clipping_or_post_result_smoothing: false
+
+independent_sbc:
+  split: sbc_diagnostic
+  accepted_physical_system_count: 2048
+  direct_evaluation_target_draws: true
+  group_disjoint_from_calibration_fit: true
+  deterministic_replicate_count: 1024
+  replicate_selection: lowest_sha256_rank_within_sbc_namespace
+  replicate_selection_seed: 2026071601
+  posterior_draws_per_replicate: 1024
+  scalar_rank_statistics:
+    - log_abs_mu_primary
+    - log_abs_mu_secondary
+    - log_abs_mu_sum
+    - log_abs_mu_difference
+    - joint_log_density_rank
+  continuous_tie_rule: deterministic_hash_randomized_within_ties
+  histogram_bins: 20
+  bin_assignment: floor_rank_times_20_over_1025
+  test: pearson_chi_square_against_discrete_uniform_bin_expectation
+  familywise_correction: holm_step_down
+  familywise_alpha: 0.01
+  report_raw_p_values: true
+  report_corrected_rejections: true
+  calibration_map_fitting_from_sbc_forbidden: true
+  apply_frozen_calibration_map_for_independent_coverage_check: true
+
+reporting:
+  nominal_coverage_levels: [0.50, 0.80, 0.90, 0.95]
+  interval: wilson_95_percent
+  report_raw_counts: true
+  report_global_and_each_em_cell: true
+  report_each_model_seed: true
+  report_seed_mean_and_standard_deviation: true
+  final_evaluation_access: forbidden
+  failure_action: downgrade_claim_or_new_preregistration_no_return_to_training
+
+em_cells:
+  - full_precise_spectroscopic
+  - full_photometric_redshifts
+  - no_velocity_dispersion
+  - no_source_redshift
+  - no_lens_redshift
+  - astrometry_redshifts_only
+  - astrometry_kinematics_no_einstein_scale
+  - sparse_astrometry_timing_only
+
+execution:
+  calibration_sbc_materialization_enabled: false
+  calibration_fit_enabled: false
+  sbc_enabled: false
+  selected_model_access_enabled: false
+  final_evaluation_access_enabled: false
+  gwosc_gwtc_access_enabled: false
