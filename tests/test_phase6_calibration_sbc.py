@@ -302,6 +302,14 @@ def test_statistics_runner_keeps_calibration_fit_and_sbc_independent(
     assert summary["final_evaluation_accessed"] is False
     assert (output / "calibration_region_maps.json").is_file()
     assert (output / "sbc_rank_summary.json").is_file()
+    for key, filename in (
+        ("calibration_map_sha256", "calibration_region_maps.json"),
+        ("sbc_summary_sha256", "sbc_rank_summary.json"),
+        ("independent_coverage_sha256", "independent_calibrated_coverage.json"),
+    ):
+        assert summary[key] == hashlib.sha256(
+            (output / filename).read_bytes()
+        ).hexdigest()
 
 
 def test_exact_score_artifacts_keep_ids_cells_and_splits_independent() -> None:

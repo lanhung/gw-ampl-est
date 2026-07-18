@@ -830,3 +830,25 @@ under a frozen standardized deployable-input distance, followed by a weighted
 two-target KDE. It excludes GW strain and is explicitly approximate. Its
 finite-bank and distance limitations must be reported; no final result may tune
 its neighbor count, distance or kernel.
+
+## D078 — Bind final inference as immutable seed/namespace score jobs
+
+Final evaluation is executed as 45 independently identified jobs: three
+retained model seeds times 15 frozen generator namespaces. Every job binds one
+selected checkpoint, the same seed's completed calibration/SBC statistics,
+the sealed parent manifest, the selected architecture, an immutable inference
+environment and a unique output path. A missing or mixed identity fails before
+Parquet, Zarr or a checkpoint is opened.
+
+Each case receives exactly 4,096 posterior draws in microbatches no larger
+than 512. Draws are retained only for the current physical batch and never
+persisted. The immutable output contains per-case score arrays and diagnostic
+labels. Final data cannot refit calibration, select a model, change a threshold
+or pool model seeds.
+
+The two family-marginalized cross-family cells draw equally from the SIE- and
+EPL-conditioned posteriors and evaluate the exact equal-density mixture. All
+other cells use the frozen deployable condition. Calibration always uses the
+matching model seed and EM cell. Phase 6 statistics summaries must publish
+hashes for their calibration map, SBC summary and independent-coverage output
+so a downstream gate cannot silently mix products.

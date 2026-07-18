@@ -1,0 +1,44 @@
+phase: "7-final-inference-stack"
+authorization_status: authorized_implementation_and_synthetic_fixture_only
+authorized_by: codex_as_delegated_scientific_and_engineering_reviewer
+authorization_date: "2026-07-18"
+
+authorization_basis:
+  owner_delegation: continue_without_routine_human_intervention
+  final_data_materialized: false
+  final_data_unsealed: false
+  training_size_or_architecture_locked: false
+  calibration_or_sbc_executed: false
+
+frozen_contracts:
+  final_analysis_path: configs/statistics/final_evaluation_analysis_preregistration.yaml
+  final_analysis_version: "1.1.0-rc.6"
+  final_analysis_hash: "7e0e252f0a972e0b0ad2fe8f93f74f1f0172639a6fb258fc7a953be5fb7973e1"
+  reference_baseline_path: configs/statistics/reference_baseline_preregistration.yaml
+  reference_baseline_version: "1.1.0-rc.7"
+  reference_baseline_hash: "1df98c89fc418eddfd9ec766cb04311e0f3d9f40836a0d9ba1dd691d6bc1724e"
+  final_generator_configuration_hash: "11277a2a4c5d233e6f525b3ab5d6ece90c115d818d752849076f3a136e574d66"
+  final_generation_commitment_sha256: "c13412eced163bac26abc4b22d054f3a6fa967e7e5a4dd7849ebf54f42df6083"
+
+authorization:
+  sealed_publication_resolver_implementation_authorized: true
+  checkpoint_inference_runner_implementation_authorized: true
+  calibrated_metric_artifact_implementation_authorized: true
+  cross_family_executor_implementation_authorized: true
+  synthetic_fixture_tests_authorized: true
+
+  final_evaluation_materialization_authorized: false
+  final_evaluation_unsealing_authorized: false
+  final_evaluation_data_access_authorized: false
+  checkpoint_access_authorized: false
+  calibration_map_access_authorized: false
+  scientific_inference_execution_authorized: false
+  ablation_training_authorized: false
+  reference_baseline_execution_authorized: false
+  model_training_or_tuning_authorized: false
+  calibration_refit_authorized: false
+  architecture_or_size_selection_authorized: false
+  manuscript_claim_finalization_authorized: false
+  gwosc_gwtc_access_authorized: false
+
+stop_after_implementation: true

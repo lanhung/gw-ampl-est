@@ -165,6 +165,13 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         arguments.output_root / "independent_calibrated_coverage.json",
         independent_coverage,
     )
+    calibration_map_sha256 = _sha256(
+        arguments.output_root / "calibration_region_maps.json"
+    )
+    sbc_summary_sha256 = _sha256(arguments.output_root / "sbc_rank_summary.json")
+    independent_coverage_sha256 = _sha256(
+        arguments.output_root / "independent_calibrated_coverage.json"
+    )
     result = {
         "status": "completed_calibration_fit_and_independent_sbc",
         "calibration_score_sha256": artifacts["calibration_scores_sha256"],
@@ -172,6 +179,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "score_identity": score_identity,
         "calibration_map_fitted_from_calibration_fit_only": True,
         "sbc_used_to_fit_calibration_map": False,
+        "calibration_map_sha256": calibration_map_sha256,
+        "sbc_summary_sha256": sbc_summary_sha256,
+        "independent_coverage_sha256": independent_coverage_sha256,
         "model_retrained_or_tuned": False,
         "final_evaluation_accessed": False,
     }

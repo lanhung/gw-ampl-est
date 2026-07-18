@@ -356,3 +356,15 @@ as fail-closed software. They remain data-access disabled until their exact
 entry evidence exists and separate authorizations bind every publication,
 checkpoint, code, environment and output identity. Calibration fitting, SBC
 testing, final evaluation and GWOSC/GWTC remain closed.
+
+The final inference/result-artifact layer is also implemented under a pure
+software gate. It resolves the sealed 15-namespace parent, binds all three
+selected checkpoints and same-seed calibration/SBC products, executes the
+frozen cross-family conditions and writes bounded per-case scores without
+persisting posterior draws. It has not accessed final data, checkpoints or
+calibration products. Final materialization and unsealing remain closed.
+
+At the read-only `2026-07-18T08:14:34Z` Stage B snapshot, 172/256 shards
+(22,016 systems, 67.19%) were complete, 16 shards were partial, all 16 workers
+were active, the log contained zero error-like lines and 235,837,157,376 bytes
+remained free. The result and atomic publication were not yet present.
