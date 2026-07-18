@@ -494,3 +494,20 @@ architecture lock plus separate materialization and inference gates.
   fail-closed engineering corrections, not post-result scientific changes.
 - No calibration/SBC pair was generated, no checkpoint was accessed, and no
   calibration map or SBC statistic was fitted or evaluated.
+
+## Phase 7 preregistration audit found an impossible fixed-slope analysis
+
+- The immutable final generator context `sie_truth_epl_assumed` carried a
+  legacy analysis label `epl_external_shear_fixed_slope_2.08`.
+- The selected conditional NSF accepts only a two-value lens-family condition;
+  it has no deployable density-slope input. A fixed-slope counterfactual could
+  not be evaluated by this estimator.
+- The issue was found before any final-evaluation system was materialized or
+  unsealed and before any checkpoint, calibration map or final metric was
+  accessed.
+- RC.6 changes only downstream analysis interpretation. The legacy generator
+  namespace and finalized commitment remain byte-identical; EPL conditioning
+  marginalizes the frozen training slope prior, and family marginalization is
+  an exact equal-density SIE/EPL mixture.
+- Final execution remains closed. The finding is a prospective contract
+  correction, not a scientific result or post-result threshold change.

@@ -514,6 +514,26 @@ may not access a checkpoint, generate a pair, fit a calibration map or execute
 SBC until training size and architecture are locked and later exact gates bind
 the publications, checkpoints, code, environment and output identities.
 
+Before final-evaluation data exist, delegated scientific review also freezes
+the downstream-only analysis addendum `1.1.0-rc.6` at
+`configs/statistics/final_evaluation_analysis_preregistration.yaml`, canonical
+hash `7e0e252f0a972e0b0ad2fe8f93f74f1f0172639a6fb258fc7a953be5fb7973e1`.
+The addendum preserves the finalized 20,480-system generator commitment and
+resolves only a non-executable cross-family analysis label: the deployed model
+has a lens-family condition but no fixed EPL-slope input. The executable
+diagnostic therefore uses the frozen EPL training-prior-marginalized family
+condition or an exact equal-density SIE/EPL mixture. Truth generation, counts,
+seeds, IDs and split distributions are unchanged.
+
+Only pure metric, counterfactual-condition and ablation-view implementation is
+authorized through
+`configs/execution/phase7_final_evaluation_analysis_stack_authorization.yaml`.
+Final materialization/unsealing, checkpoint access, ablation training,
+baseline/gold execution, calibration refitting and GWOSC/GWTC access remain
+closed. The inherited matched non-neural and gold likelihood baselines require
+a separately reviewed executable likelihood specification before final data
+may be unsealed.
+
 ## Scientific integrity
 
 - Never fabricate results, citations, completed runs or calibration.
