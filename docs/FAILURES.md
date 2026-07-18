@@ -541,3 +541,19 @@ architecture lock plus separate materialization and inference gates.
   and the Phase 6 summary records all downstream hashes.
 - This is a prospective engineering hardening, not a failed scientific run or
   a change to RC.5/RC.6/RC.7 metrics and thresholds.
+
+## Phase 4 65k pre-execution audit caught an authorization-envelope mismatch
+
+- The terminal-rung runner built a 65k-specific evidence status and omitted the
+  two generic publication/commitment booleans required by the shared training
+  engine. The first future 65k fit would therefore have stopped before its
+  first optimizer step despite a valid external authorization.
+- The issue was found while Stage B was still materializing. No 65k membership
+  was resolved, no optimizer or checkpoint existed and no scientific metric was
+  observed.
+- All probe rungs now construct one typed engine-level authorization envelope;
+  rung-specific publication evidence is added beside, rather than substituted
+  for, that common contract. A regression exercises the 65k identity through
+  the same engine validator used immediately before optimizer construction.
+- Model, data, optimizer, batch geometry, sample order and scientific stopping
+  rules are unchanged. This is a prospective software-integration correction.

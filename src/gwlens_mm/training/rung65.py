@@ -27,6 +27,7 @@ from .data import (
 from .engine import (
     TargetStandardizer,
     TrainingRunIdentity,
+    authorized_probe_execution_evidence,
     evaluate_development_validation,
     membership_hash,
     optimization_batch_geometry,
@@ -526,8 +527,7 @@ def run_authorized_65k_probe(
     if run_directory.exists() and resume_checkpoint is None:
         raise FileExistsError("65k run identity already has an output directory")
     execution_evidence = {
-        "status": "authorized_65k_probe_training",
-        "run_identity": asdict(identity),
+        **authorized_probe_execution_evidence(identity),
         "combined_publication_validated": True,
         "combined_manifest_sha256": publication.combined_manifest_sha256,
         "immutable_wheel_sha256": artifacts["wheel_sha256"],

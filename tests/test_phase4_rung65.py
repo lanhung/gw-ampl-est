@@ -10,6 +10,11 @@ import yaml
 
 from gwlens_mm.training.contracts import TrainingGateError
 from gwlens_mm.training.data import resolve_combined_training_publication
+from gwlens_mm.training.engine import (
+    TrainingRunIdentity,
+    _validate_execution_evidence,
+    authorized_probe_execution_evidence,
+)
 from gwlens_mm.training.learning_curve import compare_32k_to_65k
 from gwlens_mm.training.rung65 import (
     validate_65k_training_gate,
@@ -340,6 +345,30 @@ def test_independent_stage_b_closeout_binds_result_and_atomic_shards(
             expected_orchestration_commit="d" * 40,
             expected_preregistration_hash=RC4_HASH,
         )
+
+
+def test_65k_uses_the_common_engine_authorization_envelope() -> None:
+    identity = TrainingRunIdentity(
+        model_configuration_hash="0" * 64,
+        training_code_commit="1" * 40,
+        training_environment_sha256="2" * 64,
+        train_manifest_sha256="3" * 64,
+        validation_manifest_sha256="4" * 64,
+        final_evaluation_commitment_sha256="5" * 64,
+        membership_sha256="6" * 64,
+        input_standardizer_sha256="7" * 64,
+        target_standardizer_sha256="8" * 64,
+        training_rung_count=65536,
+        seed=0,
+    )
+    evidence = {
+        **authorized_probe_execution_evidence(identity),
+        "combined_publication_validated": True,
+    }
+    _validate_execution_evidence(evidence, identity)
+    assert evidence["status"] == "authorized_probe_training"
+    assert evidence["final_evaluation_commitment_finalized"] is True
+    assert evidence["stage_a_publication_validated"] is True
 
 
 def test_65k_immutable_artifacts_bind_wheel_and_environment(tmp_path: Path) -> None:
