@@ -15,6 +15,7 @@ from gwlens_mm.config import load_yaml
 from gwlens_mm.provenance import configuration_hash
 from gwlens_mm.training.calibration import (
     SBC_STATISTICS,
+    _chi_square_survival,
     calibrated_region_coverage,
     conformal_order_statistic,
     deterministic_sbc_subset,
@@ -156,6 +157,12 @@ def test_sbc_ranks_cover_marginal_derived_and_joint_statistics() -> None:
 
 
 def test_discrete_uniform_histogram_and_holm_are_machine_readable() -> None:
+    assert _chi_square_survival(30.0, 19) == pytest.approx(
+        0.05179845889302389, rel=1e-12
+    )
+    assert _chi_square_survival(10.0, 4) == pytest.approx(
+        0.04042768199451279, rel=1e-12
+    )
     possible_ranks = np.arange(1024, dtype=np.int64)
     ranks = {statistic: possible_ranks.copy() for statistic in SBC_STATISTICS}
     result = evaluate_sbc_histograms(ranks)

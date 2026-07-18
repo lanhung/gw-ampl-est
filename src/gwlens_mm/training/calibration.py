@@ -7,7 +7,6 @@ import math
 from typing import Any, Mapping, Sequence, Tuple
 
 import numpy as np
-from scipy.stats import chi2  # type: ignore[import-untyped]
 
 LEVELS = (0.50, 0.80, 0.90, 0.95)
 TARGETS = ("log_abs_mu_primary", "log_abs_mu_secondary")
@@ -18,6 +17,40 @@ SBC_STATISTICS = (
     "log_abs_mu_difference",
     "joint_log_density_rank",
 )
+
+
+def _chi_square_survival(value: float, degrees_of_freedom: int) -> float:
+    """Chi-square survival function for integer degrees of freedom.
+
+    Chi-square shape is always integer or half-integer here, so the regularized
+    upper incomplete gamma has a stable finite recurrence from either exp(-x)
+    or erfc(sqrt(x)). This keeps the frozen statistic available in the
+    lightweight package without making SciPy a runtime dependency.
+    """
+
+    if not math.isfinite(value) or value < 0.0 or degrees_of_freedom <= 0:
+        raise ValueError("chi-square survival inputs are invalid")
+    scaled = value / 2.0
+    if scaled == 0.0:
+        return 1.0
+    if degrees_of_freedom % 2 == 0:
+        shape = degrees_of_freedom // 2
+        term = math.exp(-scaled)
+        result = term
+        for index in range(1, shape):
+            term *= scaled / index
+            result += term
+        return float(min(1.0, max(0.0, result)))
+    increments = (degrees_of_freedom - 1) // 2
+    result = math.erfc(math.sqrt(scaled))
+    for index in range(increments):
+        half_shape = 0.5 + index
+        result += math.exp(
+            half_shape * math.log(scaled)
+            - scaled
+            - math.lgamma(half_shape + 1.0)
+        )
+    return float(min(1.0, max(0.0, result)))
 
 
 def _finite(value: np.ndarray, *, name: str) -> np.ndarray:
@@ -415,7 +448,7 @@ def evaluate_sbc_histograms(
         observed = np.bincount(assignments, minlength=histogram_bins)
         expected = probabilities * len(values)
         statistic_value = float(np.sum((observed - expected) ** 2 / expected))
-        p_value = float(chi2.sf(statistic_value, histogram_bins - 1))
+        p_value = _chi_square_survival(statistic_value, histogram_bins - 1)
         p_values[statistic] = p_value
         summaries[statistic] = {
             "observed_bin_counts": observed.tolist(),

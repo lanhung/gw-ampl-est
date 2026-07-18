@@ -33,7 +33,9 @@ case was accessed.
 - ranks for primary, secondary, sum, difference and joint density;
 - deterministic tie handling;
 - exact 20-bin discrete-uniform expectations;
-- Pearson chi-square p-values and Holm familywise correction;
+- Pearson chi-square p-values from a tested integer/half-integer gamma
+  recurrence, without an undeclared base-package dependency, and Holm
+  familywise correction;
 - an identity-bound future statistics runner that refuses existing outputs.
 
 The future runner accepts separate, hashed calibration-fit and SBC score
