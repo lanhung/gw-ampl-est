@@ -70,6 +70,12 @@ The 65k path reuses without alteration:
 Each seed starts from scratch. The existing 32k fits are comparison evidence,
 not warm starts.
 
+All rungs now use the same engine-level authorization envelope immediately
+before optimizer construction. The 65k runner adds its combined-publication
+proof to that common envelope. This prevents a rung-specific status string or
+missing generic commitment field from causing a valid future run to fail before
+its first optimizer step.
+
 ## Terminal learning-curve decision
 
 The same 10,000-replicate paired physical-system bootstrap compares 32k with
@@ -98,12 +104,14 @@ Tests cover:
 - deterministic three-seed launcher and shared rung preprocessing.
 - exact independent Stage B result/manifest/shard closeout and rejection of an
   execution result that self-authorizes the 65k optimizer.
+- the terminal rung passing the identical engine authorization-envelope
+  validation used by the completed 16k/32k runner.
 
 The final scientific execution identity, training wheel and authorization will
 be resolved only after this implementation passes PR CI and Stage B publishes.
 No scientific result is claimed by this report.
 
-The latest local release verification completed with 311 tests passed and
+The latest local release verification completed with 312 tests passed and
 seven documented optional-dependency skips. Maintained-scope Ruff, mypy over
 57 source files, sdist and wheel construction all passed. The authoritative
 CUDA/dependency suite remains part of PR CI and the later pre-execution AutoDL

@@ -33,6 +33,7 @@ from .engine import (
     DeterministicShardEpochSampler,
     TargetStandardizer,
     TrainingRunIdentity,
+    authorized_probe_execution_evidence,
     evaluate_development_validation,
     membership_hash,
     optimization_batch_geometry,
@@ -434,11 +435,8 @@ def run_authorized_probe(
     if run_directory.exists() and resume_checkpoint is None:
         raise FileExistsError("probe run identity already has an output directory")
     preparation = {
-        "status": "authorized_probe_training",
-        "run_identity": asdict(identity),
-        "stage_a_publication_validated": True,
+        **authorized_probe_execution_evidence(identity),
         "stage_a_parent_manifest_sha256": publication.manifest_sha256,
-        "final_evaluation_commitment_finalized": True,
         "member_count": len(member_ids),
         "member_ids_sha256": membership_hash(member_ids),
         "member_ids": list(member_ids),

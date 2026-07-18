@@ -283,6 +283,20 @@ def _validate_execution_evidence(
         raise TrainingGateError("authorization evidence does not bind the full run identity")
 
 
+def authorized_probe_execution_evidence(
+    identity: TrainingRunIdentity,
+) -> Mapping[str, Any]:
+    """Build the one engine-level authorization envelope used by every rung."""
+
+    identity.validate()
+    return {
+        "status": "authorized_probe_training",
+        "run_identity": asdict(identity),
+        "final_evaluation_commitment_finalized": True,
+        "stage_a_publication_validated": True,
+    }
+
+
 def optimization_batch_geometry(
     optimization: Mapping[str, Any],
 ) -> Tuple[int, int, int]:
