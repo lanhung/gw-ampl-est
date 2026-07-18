@@ -357,6 +357,12 @@ entry evidence exists and separate authorizations bind every publication,
 checkpoint, code, environment and output identity. Calibration fitting, SBC
 testing, final evaluation and GWOSC/GWTC remain closed.
 
+The Stage B/65k boundary now also has an independent manifest-only closeout
+command. After the frozen publisher exits, it must reproduce the exact result,
+parent, combined-manifest and 256-shard contract before any training
+authorization is written. It never opens Parquet or Zarr and cannot authorize
+the optimizer itself.
+
 The final inference/result-artifact layer is also implemented under a pure
 software gate. It resolves the sealed 15-namespace parent, binds all three
 selected checkpoints and same-seed calibration/SBC products, executes the
