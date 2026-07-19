@@ -74,8 +74,10 @@ scientific phase remain separately gated.
 
 The post-lock architecture-selection software is implemented without
 scientific data access. It freezes the fixed 2x2 grid, reuses the locked-rung
-10-transform/width-256 probe and limits future work to nine new fits. No
-architecture fit or selection has been executed.
+10-transform/width-256 probe and limits future work to nine new fits. It now
+requires the same immutable correction overlay used by the terminal probe and
+cannot silently reopen the five excluded base systems. No architecture fit or
+selection has been executed.
 
 Before calibration data exist, a downstream-only RC.5 addendum now freezes the
 previously unspecified post-hoc algorithm as split-conformal marginal and

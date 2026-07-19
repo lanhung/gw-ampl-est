@@ -7,16 +7,25 @@ import hashlib
 import json
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Any, Mapping, Optional, Sequence, Tuple
+from typing import Any, Mapping, Optional, Sequence, Tuple, Union
 
 from ..config import load_yaml
 from ..schema import SplitName
-from .contracts import TrainingGateError, model_configuration_hash
+from .contracts import (
+    WAVEFORM_CORRECTION_HASH,
+    TrainingGateError,
+    model_configuration_hash,
+)
 from .data import (
+    CombinedTrainingPublication,
+    ConcatenatedPublishedStageADataset,
+    CorrectedTrainingPublication,
     DevelopmentStageADataset,
     PublishedStageADataset,
     StandardizedStageADataset,
+    corrected_65k_training_dataset,
     resolve_combined_training_publication,
+    resolve_corrected_training_publication,
 )
 from .engine import (
     TrainingRunIdentity,
@@ -45,12 +54,17 @@ from .runner import (
     _verified_curves,
     _verify_training_checkout,
 )
+from .whitening import ASDCurve
 
 GRID_PATH = "configs/models/phase5_architecture_grid.yaml"
 BASE_MODEL_PATH = "configs/models/phase4_probe_nsf.yaml"
 PROBE_ARCHITECTURE_ID = "nsf-t10-w256"
 NEW_ARCHITECTURE_IDS = ("nsf-t06-w128", "nsf-t06-w256", "nsf-t10-w128")
 ALL_ARCHITECTURE_IDS = NEW_ARCHITECTURE_IDS + (PROBE_ARCHITECTURE_ID,)
+
+LockedTrainingPublication = Union[
+    CombinedTrainingPublication, CorrectedTrainingPublication
+]
 
 
 @dataclass(frozen=True)
@@ -196,6 +210,33 @@ def _load_mapping(path: Path) -> Mapping[str, Any]:
     return value
 
 
+def _locked_train_manifest_sha256(
+    publication: LockedTrainingPublication,
+) -> str:
+    if isinstance(publication, CorrectedTrainingPublication):
+        return publication.corrected_combined_train_manifest_sha256
+    return publication.train_manifest_sha256
+
+
+def _locked_preparation_manifest_sha256(
+    publication: LockedTrainingPublication,
+) -> str:
+    if isinstance(publication, CorrectedTrainingPublication):
+        return publication.correction_manifest_sha256
+    return publication.combined_manifest_sha256
+
+
+def _locked_training_dataset(
+    publication: LockedTrainingPublication,
+    detector_curves: Mapping[str, ASDCurve],
+) -> ConcatenatedPublishedStageADataset:
+    """Use the immutable correction overlay whenever the size-lock probe did."""
+
+    if isinstance(publication, CorrectedTrainingPublication):
+        return corrected_65k_training_dataset(publication, detector_curves)
+    return _training_dataset(publication, detector_curves)
+
+
 def _validate_probe_reuse(
     *,
     probe_output_root: Path,
@@ -261,13 +302,19 @@ def validate_architecture_execution_gate(
     stage_a_publication_root: Path,
     stage_b_publication_root: Path,
     combined_publication_root: Path,
+    correction_publication_root: Optional[Path] = None,
     terminal_decision_path: Path,
     probe_output_root: Path,
 ) -> Mapping[str, Any]:
     """Require a size lock and exact reuse evidence before any new fit."""
 
     authorization = load_yaml(authorization_path)
-    if authorization.get("authorization_status") != "authorized_architecture_selection_only":
+    authorization_status = authorization.get("authorization_status")
+    corrected = authorization_status == "authorized_corrected_architecture_selection_only"
+    if authorization_status not in {
+        "authorized_architecture_selection_only",
+        "authorized_corrected_architecture_selection_only",
+    }:
         raise TrainingGateError("architecture-selection execution authorization is absent")
     flags = authorization.get("authorization", {})
     for required in (
@@ -278,6 +325,10 @@ def validate_architecture_execution_gate(
     ):
         if flags.get(required) is not True:
             raise TrainingGateError(f"architecture gate requires {required}=true")
+    if corrected and flags.get("replacement_data_access_authorized") is not True:
+        raise TrainingGateError(
+            "corrected architecture gate requires replacement_data_access_authorized=true"
+        )
     for forbidden in (
         "probe_architecture_retraining_authorized",
         "best_seed_selection_authorized",
@@ -310,17 +361,60 @@ def validate_architecture_execution_gate(
         != authorization.get("terminal_decision_sha256")
     ):
         raise TrainingGateError("architecture gate lacks the exact terminal size lock")
-    combined = authorization.get("combined_train", {})
-    publication = resolve_combined_training_publication(
-        combined_publication_root,
-        stage_a_parent_root=stage_a_publication_root,
-        stage_b_parent_root=stage_b_publication_root,
-        expected_generator_commit=str(authorization.get("generator_commit", "")),
-        expected_preregistration_hash=str(authorization.get("preregistration_hash", "")),
-        expected_combined_manifest_sha256=str(
-            combined.get("combined_manifest_sha256", "")
-        ),
-    )
+    if corrected:
+        if correction_publication_root is None:
+            raise TrainingGateError(
+                "corrected architecture gate requires the correction publication"
+            )
+        if authorization.get("preregistration_hash") != WAVEFORM_CORRECTION_HASH:
+            raise TrainingGateError(
+                "corrected architecture gate changed the numerical preregistration"
+            )
+        correction = authorization.get("correction_publication", {})
+        corrected_publication = resolve_corrected_training_publication(
+            correction_publication_root,
+            stage_a_parent_root=stage_a_publication_root,
+            stage_b_parent_root=stage_b_publication_root,
+            combined_base_root=combined_publication_root,
+            expected_base_generator_commit=str(
+                authorization.get("base_generator_commit", "")
+            ),
+            expected_base_preregistration_hash=str(
+                authorization.get("base_preregistration_hash", "")
+            ),
+            expected_correction_generator_commit=str(
+                correction.get("generator_commit", "")
+            ),
+            expected_correction_preregistration_hash=WAVEFORM_CORRECTION_HASH,
+            expected_correction_manifest_sha256=str(
+                correction.get("parent_manifest_sha256", "")
+            ),
+            expected_correction_tree_sha256=str(
+                correction.get("publication_tree_sha256", "")
+            ),
+            expected_combined_base_manifest_sha256=str(
+                authorization.get("combined_base_manifest_sha256", "")
+            ),
+        )
+        if authorization.get("corrected_combined_train_manifest_sha256") != (
+            corrected_publication.corrected_combined_train_manifest_sha256
+        ):
+            raise TrainingGateError("corrected architecture training-view hash mismatch")
+        publication: LockedTrainingPublication = corrected_publication
+    else:
+        combined = authorization.get("combined_train", {})
+        publication = resolve_combined_training_publication(
+            combined_publication_root,
+            stage_a_parent_root=stage_a_publication_root,
+            stage_b_parent_root=stage_b_publication_root,
+            expected_generator_commit=str(authorization.get("generator_commit", "")),
+            expected_preregistration_hash=str(
+                authorization.get("preregistration_hash", "")
+            ),
+            expected_combined_manifest_sha256=str(
+                combined.get("combined_manifest_sha256", "")
+            ),
+        )
     grid_hash = _sha256(root / GRID_PATH)
     if authorization.get("architecture_grid_sha256") != grid_hash:
         raise TrainingGateError("architecture grid hash mismatch")
@@ -333,7 +427,7 @@ def validate_architecture_execution_gate(
     reused = _validate_probe_reuse(
         probe_output_root=probe_output_root,
         authorization=authorization,
-        train_manifest_sha256=publication.train_manifest_sha256,
+        train_manifest_sha256=_locked_train_manifest_sha256(publication),
         validation_manifest_sha256=publication.stage_a.namespace_manifest_sha256[
             "validation"
         ],
@@ -363,6 +457,7 @@ def run_authorized_architecture_fit(
     stage_a_publication_root: Path,
     stage_b_publication_root: Path,
     combined_publication_root: Path,
+    correction_publication_root: Optional[Path] = None,
     terminal_decision_path: Path,
     probe_output_root: Path,
     environment_lock_path: Path,
@@ -387,6 +482,7 @@ def run_authorized_architecture_fit(
         stage_a_publication_root=stage_a_publication_root,
         stage_b_publication_root=stage_b_publication_root,
         combined_publication_root=combined_publication_root,
+        correction_publication_root=correction_publication_root,
         terminal_decision_path=terminal_decision_path,
         probe_output_root=probe_output_root,
     )
@@ -412,7 +508,7 @@ def run_authorized_architecture_fit(
     load_input_policy(root)
     publication = gate["publication"]
     curves = _verified_curves(model, psd_root)
-    train_dataset = _training_dataset(publication, curves)
+    train_dataset = _locked_training_dataset(publication, curves)
     validation_dataset = PublishedStageADataset(
         publication.stage_a.validation_root,
         expected_split=SplitName.VALIDATION,
@@ -426,7 +522,7 @@ def run_authorized_architecture_fit(
     if not (
         tuple(preparation.get("member_ids", ())) == train_ids
         and preparation.get("combined_manifest_sha256")
-        == publication.combined_manifest_sha256
+        == _locked_preparation_manifest_sha256(publication)
     ):
         raise TrainingGateError("architecture fits differ from the locked-rung membership")
     input_standardizer, target_standardizer = _load_standardizers(preparation)
@@ -434,7 +530,7 @@ def run_authorized_architecture_fit(
         model_configuration_hash=expected_model_hash,
         training_code_commit=training_commit,
         training_environment_sha256=artifacts["environment_lock_sha256"],
-        train_manifest_sha256=publication.train_manifest_sha256,
+        train_manifest_sha256=_locked_train_manifest_sha256(publication),
         validation_manifest_sha256=publication.stage_a.namespace_manifest_sha256[
             "validation"
         ],
@@ -656,7 +752,7 @@ def collect_architecture_results(
                 or identity.get("model_configuration_hash") != expected_model_hash
                 or int(identity.get("training_rung_count", -1)) != TRAIN_65K_COUNT
                 or identity.get("train_manifest_sha256")
-                != publication.train_manifest_sha256
+                != _locked_train_manifest_sha256(publication)
                 or identity.get("validation_manifest_sha256")
                 != publication.stage_a.namespace_manifest_sha256["validation"]
                 or identity.get("membership_sha256")

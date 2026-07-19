@@ -959,3 +959,16 @@ The terminal comparison uses the same 6,144 development systems and frozen
 10,000-replicate rule. It may lock 65k for later architecture review or stop as
 data-limited for a new preregistration. It cannot authorize another training
 rung, calibration, final evaluation or external-data access.
+
+## D086 — Carry the correction overlay through architecture selection
+
+Every architecture result must use the same corrected 65k membership that
+produced the terminal size decision. Reusing the corrected probe while fitting
+the other architectures on the original five-pathology base view would make
+the comparison scientifically invalid even if dimensions and counts matched.
+
+The architecture runner now resolves the correction parent explicitly, binds
+the corrected train-view hash and reuses the correction-derived preparation
+identity. Missing correction paths or a drifted correction/tree/view hash fail
+before data access. This is a software-release decision only; it does not open
+architecture fitting or selection before the terminal 65k lock.
