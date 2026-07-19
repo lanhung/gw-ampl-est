@@ -1,0 +1,23 @@
+{
+  "status": "ready_to_launch",
+  "phase": "4-stage-b",
+  "orchestration_commit": "a198b90cc3ebd695a5b6c277e0843e0e19919b18",
+  "generator_commit": "2be777e727ef9d8e1a85f89c68966df5d37932b0",
+  "configuration_hash": "6a4f106f9640bd480730976be91c94d6f87296f7d301a339bd8bb00e86cf4282",
+  "release_certificate": "/root/autodl-tmp/lensing-4/manifests/phase4/stage_b/stage_b_release_certificate.json",
+  "parent_run_id": "phase4-stage-b-2be777e727ef-6a4f106f9640",
+  "train_dataset_id": "gwlens-v2-2.0.0-alpha.3-d19597390506b6f8-train-extension",
+  "combined_train_id": "phase4-train-65k-2be777e727ef-6a4f106f9640",
+  "accepted_target": 32768,
+  "shard_target": 256,
+  "pairs_per_shard": 128,
+  "projected_publication_bytes": 39151008054,
+  "projected_active_hours": 33.3727,
+  "log_path": "/root/autodl-tmp/lensing-4/logs/phase4/stage_b-a198b90-6a4f106f9640.log",
+  "result_path": "/root/autodl-tmp/lensing-4/manifests/phase4/stage_b/stage_b_execution_result.json",
+  "resume_strategy": "rerun the identical execute command; verify and preserve every completed atomic shard and schedule only missing shard indexes",
+  "train_65k_optimizer_authorized": false,
+  "calibration_authorized": false,
+  "final_evaluation_authorized": false,
+  "gwosc_gwtc_access_authorized": false
+}

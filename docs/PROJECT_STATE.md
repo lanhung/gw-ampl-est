@@ -21,14 +21,19 @@ is finalized at SHA-256
 The separately authorized 16k/32k probe workflow has now completed. Its frozen
 paired decision is `continue_to_train_65k`: the mean NLP improvement was
 0.236314 nat per target dimension with 95% interval [0.223545, 0.248638].
-Calibration and final evaluation were not accessed. The next gate is a separate
-exact-count Stage B authorization for 32,768 new direct-target training systems.
+Calibration and final evaluation were not accessed. The resulting exact-count
+Stage B extension is now complete; the next gate is the identity-bound 65k
+three-seed probe authorization.
 
-That Stage B gate passed and the official 256-shard job is now materializing
-under parent `phase4-stage-b-2be777e727ef-6a4f106f9640`. It will add exactly
-32,768 train systems and no validation systems. In parallel, the 65k combined
-reader, three-seed launcher and terminal learning-curve comparison are being
-completed as execution-disabled software; the 65k optimizer remains closed.
+Stage B passed and atomically published exactly 32,768 additional train
+systems in 256 shards under parent
+`phase4-stage-b-2be777e727ef-6a4f106f9640`. Its parent manifest SHA-256 is
+`b4d7df6300d0919f148b98fd8ce658216bdfa64752026dc9477321874e31f0da`.
+The atomic combined 65k reference manifest SHA-256 is
+`753ace3d2fe475f1279b3bd8560005017f4e75a822fa951d94f9ada60eb3eca4`.
+Independent closeout validation passed exact counts, unit weights and group
+disjointness. No new validation system was generated. The 65k optimizer
+remains closed pending a separate identity-bound training authorization.
 
 The post-lock architecture-selection software is implemented without
 scientific data access. It freezes the fixed 2x2 grid, reuses the locked-rung

@@ -1,0 +1,47 @@
+{
+  "accepted_physical_system_count": 65536,
+  "all_importance_weights_one": true,
+  "calibration_authorized": false,
+  "combined_train_id": "phase4-train-65k-2be777e727ef-6a4f106f9640",
+  "components": [
+    {
+      "accepted_count": 32768,
+      "dataset_id": "gwlens-v2-2.0.0-alpha.3-ef4baee395dbe94b-train",
+      "parent_manifest_sha256": "4f3e6b3a7ca1a995d7a7643c48410e479fb812e4a01ff66537232b9d64bf3314",
+      "parent_run_id": "phase4-stage-a-2be777e727ef-d3a60034bbd6",
+      "role": "stage_a_train"
+    },
+    {
+      "accepted_count": 32768,
+      "dataset_id": "gwlens-v2-2.0.0-alpha.3-d19597390506b6f8-train-extension",
+      "parent_manifest_sha256": "b4d7df6300d0919f148b98fd8ce658216bdfa64752026dc9477321874e31f0da",
+      "parent_run_id": "phase4-stage-b-2be777e727ef-6a4f106f9640",
+      "publication_bytes": 39441798884,
+      "publication_tree_sha256": "373590aa01001a20e0631e672245dba050447cef0e03d45f185645476d735ee1",
+      "role": "stage_b_train_extension"
+    }
+  ],
+  "extension_above_65536_authorized": false,
+  "final_evaluation_authorized": false,
+  "group_validation": {
+    "lens_count": 65536,
+    "lens_ids_sha256": "33197d5f22f76d97fea1cb368554b0a20ab5530ff64d09dac9b675db28732fab",
+    "noise_count": 393216,
+    "noise_ids_sha256": "f238e9c8826bcd6ec8675c8f7b960738ed789f8742906004e8b918e7a22ff7f3",
+    "pair_count": 65536,
+    "pair_ids_sha256": "19deb088733170fa39751c9b8ab158df647c4b9eda0157bc5d9dc393b514e692",
+    "source_count": 65536,
+    "source_ids_sha256": "30dd7566e1ca2bbd9bf7df4ad0052f819926ffca8797ab35daccf9ca71e9c33d",
+    "stage_a_stage_b_group_disjoint": true,
+    "stage_b_validation_group_disjoint": true,
+    "system_count": 65536,
+    "system_ids_sha256": "66a2fe9cdc6f72124ecdd940981f1f1aa48e4338d86d65bc44bf100cf67a99b8"
+  },
+  "gwosc_gwtc_accessed": false,
+  "proposal_equals_evaluation": true,
+  "sbc_authorized": false,
+  "status": "passed",
+  "strict_nested_train_ladder": true,
+  "training_authorized": false,
+  "validation_physical_system_count": 6144
+}

@@ -469,17 +469,31 @@ GWOSC/GWTC and any extension beyond 65k remain closed.
 Delegated expert review authorized that exact Stage B increment through
 `configs/execution/phase4_direct_target_stage_b_authorization.yaml`. Its frozen
 orchestration release is merged at `a198b90cc3ebd695a5b6c277e0843e0e19919b18`.
-The official parent is `phase4-stage-b-2be777e727ef-6a4f106f9640`, and exactly
-32,768 direct-target train systems in 256 atomic shards are now materializing.
-No new validation system is authorized. The 65k optimizer remains closed until
-Stage B and its combined reference publish and receive a separate gate.
+The official parent `phase4-stage-b-2be777e727ef-6a4f106f9640` has now
+atomically published exactly 32,768 direct-target train systems in 256 shards.
+The Stage B parent manifest SHA-256 is
+`b4d7df6300d0919f148b98fd8ce658216bdfa64752026dc9477321874e31f0da` and
+the publication-tree SHA-256 is
+`373590aa01001a20e0631e672245dba050447cef0e03d45f185645476d735ee1`.
 
-While Stage B runs, the implementation-only training-stack gate permits the
-fail-closed combined-publication reader, 65k three-seed launcher and terminal
-32k-to-65k comparison to be completed using synthetic fixtures only. This does
-not permit reading Stage B staging, resolving the 65k membership, starting an
-optimizer, selecting an architecture, calibrating, opening final evaluation or
-accessing GWOSC/GWTC.
+The atomic combined 65k reference is
+`phase4-train-65k-2be777e727ef-6a4f106f9640`, manifest SHA-256
+`753ace3d2fe475f1279b3bd8560005017f4e75a822fa951d94f9ada60eb3eca4`.
+It binds exactly 65,536 unique train systems and the unchanged 6,144-system
+validation publication. Independent closeout validation passed, including
+q=p, exact unit weights and cross-component group disjointness. No new
+validation system was generated and no GWOSC/GWTC product was accessed.
+
+Passing Stage B does not authorize the 65k optimizer. A separate gate must
+bind these manifests, the training release, model configuration, finalized
+evaluation commitment and immutable CUDA environment before any Stage B array
+or 65k membership may be opened for training.
+
+The implementation-only training-stack gate completed the fail-closed
+combined-publication reader, 65k three-seed launcher and terminal 32k-to-65k
+comparison using synthetic fixtures only. This completion does not permit
+resolving the 65k membership, starting an optimizer, selecting an architecture,
+calibrating, opening final evaluation or accessing GWOSC/GWTC.
 
 The delegated implementation gate also permits the frozen post-size-lock
 architecture grid, nine-new-fit runner and validation-only selector to be

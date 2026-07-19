@@ -1,0 +1,34 @@
+{
+  "accepted_target": 32768,
+  "blockers": [],
+  "calibration_authorized": false,
+  "checks": {
+    "authorization_status": "authorized_exact_stage_b_materialization_only",
+    "environment_lock_sha256": "792a93f24f6c38c18ec214665d34c8348e042b21beebd177333dae2c30224d8f",
+    "free_bytes": 263457390592,
+    "generator_wheel_sha256": "14104f8aab3aa911fe43e27c311079f118add7ca8ad22178ca158c13d81d0a88",
+    "psd_files": {
+      "H1": "/root/autodl-tmp/lensing-4/envs/phase1b-smoke/lib/python3.10/site-packages/bilby/gw/detector/noise_curves/aLIGO_O4_high_asd.txt:eb5ec9b081c3d86d2f4257b9aff6a57566d168b8a95e5e57b7909eebad021780",
+      "L1": "/root/autodl-tmp/lensing-4/envs/phase1b-smoke/lib/python3.10/site-packages/bilby/gw/detector/noise_curves/aLIGO_O4_high_asd.txt:eb5ec9b081c3d86d2f4257b9aff6a57566d168b8a95e5e57b7909eebad021780",
+      "V1": "/root/autodl-tmp/lensing-4/envs/phase1b-smoke/lib/python3.10/site-packages/bilby/gw/detector/noise_curves/AdV_psd.txt:c2532150f63dbaa76d451e2c074390272e259e4e2eedc3e684d2205582aa0764"
+    },
+    "stage_a_parent_manifest_sha256": "4f3e6b3a7ca1a995d7a7643c48410e479fb812e4a01ff66537232b9d64bf3314",
+    "static_contract": "passed"
+  },
+  "configuration_hash": "6a4f106f9640bd480730976be91c94d6f87296f7d301a339bd8bb00e86cf4282",
+  "cumulative_train_target": 65536,
+  "final_evaluation_authorized": false,
+  "generator_commit": "2be777e727ef9d8e1a85f89c68966df5d37932b0",
+  "gwosc_gwtc_access_authorized": false,
+  "official_identities": {
+    "combined_train_id": "phase4-train-65k-2be777e727ef-6a4f106f9640",
+    "orchestration_commit": "a198b90cc3ebd695a5b6c277e0843e0e19919b18",
+    "parent_run_id": "phase4-stage-b-2be777e727ef-6a4f106f9640",
+    "train_dataset_id": "gwlens-v2-2.0.0-alpha.3-d19597390506b6f8-train-extension"
+  },
+  "orchestration_commit": "a198b90cc3ebd695a5b6c277e0843e0e19919b18",
+  "phase": "4-stage-b",
+  "preregistration_hash": "5aeaac395463bd073c44ead4ff4c5c729b5a2d4b4f1840c0825a53b30ab1bc98",
+  "status": "ready_for_official_execution",
+  "train_65k_optimizer_authorized": false
+}

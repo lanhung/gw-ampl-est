@@ -852,3 +852,17 @@ other cells use the frozen deployable condition. Calibration always uses the
 matching model seed and EM cell. Phase 6 statistics summaries must publish
 hashes for their calibration map, SBC summary and independent-coverage output
 so a downstream gate cannot silently mix products.
+
+## D079 — Accept the exact Stage B extension without opening the optimizer
+
+The authorized direct-target Stage B run completed exactly 32,768 systems in
+256 atomic shards and published a combined reference to the unchanged Stage A
+train component. The combined manifest validates 65,536 unique train systems,
+6,144 unchanged validation systems, exact unit weights and disjoint source,
+lens, physical-system, pair and noise identities across components.
+
+Publication is necessary but not sufficient for training. The Stage B
+execution result explicitly keeps the 65k optimizer false. A separate gate
+must bind both parent manifests, the combined manifest, the finalized
+evaluation commitment, model configuration, immutable CUDA environment and a
+reviewed training wheel before resolving membership or reading strain arrays.

@@ -573,3 +573,15 @@ architecture lock plus separate materialization and inference gates.
   regression removes one row from an otherwise valid three-seed terminal-rung
   fixture. Thresholds, bootstrap, membership and decision semantics are
   unchanged.
+
+## Stage B independent verifier required the synchronized source package
+
+- The first post-publication verifier invocation used the old generator
+  environment without the newly added `gwlens_mm.training` package and exited
+  at import time.
+- It did not open or modify Stage B or the combined publication.
+- The same read-only verifier was rerun against the synchronized authoritative
+  repository with `PYTHONPATH=src` and passed all count, identity, manifest,
+  shard, unit-weight, free-space and group-disjointness checks.
+- Future immutable training execution uses a separately hashed wheel, so this
+  verifier-only launch issue does not weaken the training environment gate.
