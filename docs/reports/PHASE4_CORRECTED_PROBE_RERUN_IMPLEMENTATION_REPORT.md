@@ -51,6 +51,18 @@ decision again requires continuation.
 - mypy passed for 58 source files;
 - source/script compilation and package build passed.
 
+The real AutoDL metadata-only resolver then reproduced the immutable correction
+manifest and tree hashes and derived:
+
+- corrected Stage A 32k training-view SHA-256:
+  `b9390a7faad4bb8097abb09041f1f229e13c6419677926f05642ac611dc6ced2`;
+- corrected combined 65k training-view SHA-256:
+  `da8aaa8d86afb4d93156191976b420bfc7bbc7dfe0fdc6c6f627515d804a7379`.
+
+This resolution used all real published shard manifests while explicitly
+recording that Parquet, Zarr, the optimizer, calibration and final evaluation
+were not opened.
+
 No Stage A/B Parquet or Zarr file was opened by this implementation work. No
 membership, standardizer, checkpoint, metric or scientific decision was
 created. The next step is a metadata-only AutoDL resolution followed by an
