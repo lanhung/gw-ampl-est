@@ -396,7 +396,12 @@ def test_published_reader_traverses_parent_parquet_zarr_path(tmp_path: Path) -> 
         )
         physical_ids.append(record["pair"]["physical_system_id"])
         serialized.append(json.dumps(record, sort_keys=True))
-    pandas.DataFrame({"record_json": serialized}).to_parquet(shard / "records.parquet")
+    pandas.DataFrame(
+        {
+            "record_json": serialized,
+            "em_cell": ["full_precise_spectroscopic"] * len(serialized),
+        }
+    ).to_parquet(shard / "records.parquet")
     noisy = zarr.open_array(
         str(shard / "noisy.zarr"),
         mode="w",
