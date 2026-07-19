@@ -791,6 +791,17 @@ opening GW strain. Current authorization permits synthetic fixtures only;
 scientific bank access, validation/final query execution, checkpoint access,
 final unsealing and GWOSC/GWTC remain closed.
 
+The inherited legacy SIS point regressor is implemented only as a read-only
+descriptive stress-control verifier through:
+
+`configs/execution/phase7_legacy_sis_stress_control_authorization.yaml`
+
+It may hash the opaque legacy checkpoint and recompute the saved 500-row
+model-selected validation point metrics under a later exact read-only gate. It
+must never deserialize or write the legacy checkpoint, open v2 final data, or
+be called a posterior, calibrated result, independent test or matched H1/L1/V1
+competitor. Current authorization permits synthetic fixtures only.
+
 ## Scientific integrity
 
 - Never fabricate results, citations, completed runs or calibration.

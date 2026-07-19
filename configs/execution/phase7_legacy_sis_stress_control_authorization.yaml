@@ -1,0 +1,60 @@
+phase: "7-legacy-sis-stress-control"
+authorization_status: authorized_implementation_only
+authorized_by: codex_as_delegated_scientific_and_engineering_reviewer
+authorization_date: "2026-07-19"
+
+authorization_basis:
+  owner_delegation: continue_without_routine_human_intervention
+  inherited_baseline_id: legacy_sis_point_regression_out_of_domain
+  legacy_use_permitted_by_agents: baseline_reproduction_only
+
+frozen_legacy_identity:
+  checkpoint_path: /root/autodl-tmp/tmp/runs/mu_direct_baseline_realobs_quality_waveobs/all/best_mu_direct_realobs_quality_all.pt
+  checkpoint_sha256: c558afbc638b7c04e1889b76b375d777129736c174831ba4477f461489e39bd1
+  validation_predictions_path: /root/autodl-tmp/tmp/runs/mu_direct_baseline_realobs_quality_waveobs/all/mu_direct_realobs_quality_all_val_predictions.csv
+  validation_predictions_sha256: 64f85960c6ada5cd7ad85c3f9e9e017e5e57beba544f27be162805531a072023
+  validation_rows: 500
+  training_entry_sha256: 10777f8888b2f6fca2da24670716d492b6d0de98b200ee4662aaca100f2d1d12
+  generator_sha256: ae3879fbe30137bf72a3d8cc746ab473aeaea593e06897c4e672ff57f650a604
+
+descriptive_metric_contract:
+  target: mu0_absolute_magnification
+  mae: 0.7741573453
+  rmse: 1.3239392042
+  mape_percent: 13.164715
+  pearson: 0.8529922361
+  absolute_numeric_tolerance: 0.000001
+  sis_identity_absolute_tolerance: 0.000002
+
+claim_boundary:
+  model_selected_validation_not_independent_test: true
+  point_prediction_not_posterior: true
+  sis_only: true
+  et_single_detector: true
+  synthetic_gaussian_design_noise: true
+  incompatible_with_h1_l1_v1_final_input: true
+  matched_competitor_claim_authorized: false
+  calibrated_coverage_claim_authorized: false
+  v2_final_data_application_authorized: false
+
+authorization:
+  verifier_implementation_authorized: true
+  synthetic_fixture_tests_authorized: true
+
+  legacy_asset_read_authorized: false
+  legacy_checkpoint_deserialization_authorized: false
+  legacy_asset_write_authorized: false
+  scientific_data_access_authorized: false
+  final_evaluation_access_authorized: false
+  baseline_execution_authorized: false
+  manuscript_claim_finalization_authorized: false
+  gwosc_gwtc_access_authorized: false
+
+future_execution_requires:
+  - merged_verifier_commit_and_wheel_sha256
+  - exact_legacy_paths_and_hashes
+  - read_only_legacy_mount_or_before_after_stat_identity
+  - new_project_evidence_output_root
+  - separate_read_only_execution_authorization
+
+stop_after_implementation: true

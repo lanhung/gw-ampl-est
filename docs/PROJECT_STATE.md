@@ -129,6 +129,13 @@ future launcher is capped at exactly six fits and three concurrent seeds. No
 scientific array, checkpoint, optimizer, calibration/SBC or final case has been
 opened; a later exact execution gate remains mandatory.
 
+The remaining inherited legacy SIS point-regression control now has a
+read-only verifier. It binds the audited PDF-era checkpoint and 500-row saved
+validation prediction hashes, recomputes point metrics and the SIS signed-
+magnification identity without deserializing the checkpoint, and rejects every
+v2/final-data use. Current authorization is implementation-only; the legacy
+assets remain immutable and no official reproduction result has been written.
+
 ## Completed
 
 - established Vultr as the sole authoritative Git repository;
