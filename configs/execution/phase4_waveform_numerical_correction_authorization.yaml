@@ -4,7 +4,7 @@ authorized_by: codex_as_delegated_scientific_and_engineering_reviewer
 authorization_date: "2026-07-19"
 
 base_main_commit: "d4c941876346e2f838c111ae7837d0018478b340"
-implementation_commit: "fefa32679bd5e6fc1a41fe4953dd432acca8bff2"
+implementation_commit: "d238a605c2e0382a10afd75153feeb498a8753e3"
 
 preregistration:
   version: "1.1.1-rc.1"
@@ -30,9 +30,9 @@ authorization:
   gwosc_gwtc_access_authorized: false
 
 immutable_implementation:
-  git_commit: "fefa32679bd5e6fc1a41fe4953dd432acca8bff2"
-  wheel_path: /root/autodl-tmp/lensing-4/artifacts/phase4/waveform-correction/fefa32679bd5e6fc1a41fe4953dd432acca8bff2/gwlens_mm-0.1.0-py3-none-any.whl
-  wheel_sha256: "3a37bed1f5a3c15d7f296edfdac4b77a7e8b4408e6dad27b1175896994f4e0ec"
+  git_commit: "d238a605c2e0382a10afd75153feeb498a8753e3"
+  wheel_path: /root/autodl-tmp/lensing-4/artifacts/phase4/waveform-correction/d238a605c2e0382a10afd75153feeb498a8753e3/gwlens_mm-0.1.0-py3-none-any.whl
+  wheel_sha256: "b1379bfe4aa45d86126965af99f108708a41c816ab9b738cdba4087f230eb614"
   editable_install_authorized: false
 
 preexecution_evidence:
