@@ -1061,3 +1061,22 @@ the terminal probe runs, but scientific ablation fitting requires a later gate
 after both training size and architecture are locked. Calibration, SBC and
 final evaluation cannot be used by the ablation training or its development
 summary.
+
+## D092 — Execute the RC.7 reference as a bounded metadata-only query job
+
+The selected-prior reference is an offline simulation baseline, not an exact
+likelihood and not a neural checkpoint. Its bank must therefore be built only
+from the corrected locked scientific training rung through the metadata-only
+reader, standardized with the selected primary rung's frozen input
+standardizer, and indexed once by exact lens family and exact EM cell.
+
+Each separately authorized query role is streamed one physical system at a
+time. The job persists deterministic per-case CRPS, KDE NLP, central marginal
+and joint coverage, interval widths and neighbor identities, followed by raw
+success counts, rates and Wilson intervals. It never persists the 4,096
+posterior draws or opens GW strain. Validation, IID and balanced-tail roles
+retain their exact counts of 6,144, 8,192 and 4,096; final roles also require
+the independent final-unsealing gate. A future execution authorization must
+bind the terminal 65k lock, selected architecture, corrected publication,
+primary preprocessing artifact, exact query publication, immutable software
+and output identity. The current implementation gate opens none of them.

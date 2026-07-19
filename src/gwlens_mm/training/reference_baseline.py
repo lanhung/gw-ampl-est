@@ -307,6 +307,25 @@ class ReferenceBankIndex:
             distances[order],
         )
 
+    def manifest(self) -> Mapping[str, Any]:
+        """Return a small deterministic identity without exposing bank targets."""
+
+        strata = {
+            f"{family}::{cell}": len(group.physical_system_ids)
+            for (family, cell), group in sorted(self.groups.items())
+        }
+        return {
+            "reference_id": "selected_prior_em_timing_knn_kde_v1",
+            "identity_sha256": self.identity_sha256,
+            "physical_system_count": len(self.physical_system_ids),
+            "feature_dimension": self.feature_dimension,
+            "stratum_counts": strata,
+            "neighbor_count": NEIGHBOR_COUNT,
+            "posterior_draws_per_case": POSTERIOR_DRAW_COUNT,
+            "gw_strain_opened": False,
+            "targets_exposed_as_deployable_inputs": False,
+        }
+
     def score(self, query: PreparedExample) -> ReferenceCaseScore:
         """Score one disjoint query using the frozen deterministic draw contract."""
 
