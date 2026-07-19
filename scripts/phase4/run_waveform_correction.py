@@ -86,6 +86,21 @@ def _load_authorization(
     ]["canonical_hash"]:
         raise ValueError("waveform-correction authorization hash mismatch")
     flags = authorization.get("authorization", {})
+    immutable = authorization.get("immutable_implementation", {})
+    if immutable.get("git_commit") != implementation_commit:
+        raise ValueError("waveform-correction immutable commit mismatch")
+    wheel_path = Path(str(immutable.get("wheel_path", "")))
+    if (
+        immutable.get("editable_install_authorized") is not False
+        or not wheel_path.is_absolute()
+        or not wheel_path.is_relative_to(APPROVED_REMOTE_ROOT)
+        or _sha256(wheel_path) != immutable.get("wheel_sha256")
+    ):
+        raise ValueError("waveform-correction immutable wheel contract failed")
+    evidence = authorization.get("preexecution_evidence", {})
+    regression_path = ROOT / str(evidence.get("real_record_regression_path", ""))
+    if _sha256(regression_path) != evidence.get("real_record_regression_sha256"):
+        raise ValueError("waveform-correction regression evidence hash mismatch")
     if execution:
         for key in (
             "replacement_materialization_authorized",
