@@ -19,13 +19,15 @@ from .contracts import (
     TrainingGateError,
     deterministic_probe_subset,
     model_configuration_hash,
+    validate_corrected_probe_training_gate,
     validate_scientific_training_gate,
 )
 from .data import (
+    CorrectedTrainingPublication,
     DevelopmentStageADataset,
     PublishedStageADataset,
-    StageAPublication,
     StandardizedStageADataset,
+    corrected_stage_a_training_dataset,
     torch_collate,
     torch_development_collate,
 )
@@ -93,7 +95,17 @@ def _verify_training_checkout(
         capture_output=True,
         text=True,
     ).stdout.splitlines()
-    allowed = {relative_authorization, "AGENTS.md"}
+    authorization = load_yaml(authorization_path)
+    configured_allowed = authorization.get("post_freeze_allowed_paths", [])
+    if not isinstance(configured_allowed, list) or any(
+        not isinstance(value, str)
+        or not value
+        or Path(value).is_absolute()
+        or ".." in Path(value).parts
+        for value in configured_allowed
+    ):
+        raise TrainingGateError("post-freeze allowed-path contract is invalid")
+    allowed = {relative_authorization, "AGENTS.md", *configured_allowed}
     unexpected = sorted(set(changed) - allowed)
     if unexpected:
         raise TrainingGateError(
@@ -212,7 +224,8 @@ def _development_loader(
 
 def _build_run_identity(
     *,
-    publication: StageAPublication,
+    train_manifest_sha256: str,
+    validation_manifest_sha256: str,
     model: Mapping[str, Any],
     training_commit: str,
     environment_sha256: str,
@@ -227,8 +240,8 @@ def _build_run_identity(
         model_configuration_hash=model_configuration_hash(model),
         training_code_commit=training_commit,
         training_environment_sha256=environment_sha256,
-        train_manifest_sha256=publication.namespace_manifest_sha256["train"],
-        validation_manifest_sha256=publication.namespace_manifest_sha256["validation"],
+        train_manifest_sha256=train_manifest_sha256,
+        validation_manifest_sha256=validation_manifest_sha256,
         final_evaluation_commitment_sha256=final_evaluation_commitment_sha256,
         membership_sha256=membership_hash(member_ids),
         input_standardizer_sha256=standardizer_hash(input_standardizer),
@@ -243,6 +256,9 @@ def run_authorized_probe(
     *,
     authorization_path: Path,
     stage_a_publication_root: Path,
+    stage_b_publication_root: Optional[Path] = None,
+    combined_base_publication_root: Optional[Path] = None,
+    correction_publication_root: Optional[Path] = None,
     environment_lock_path: Path,
     psd_root: Path,
     output_root: Path,
@@ -257,11 +273,33 @@ def run_authorized_probe(
 
     if rung_count not in (16384, 32768) or seed not in (0, 1, 2):
         raise TrainingGateError("probe execution is limited to 16k/32k and seeds 0/1/2")
-    gate = validate_scientific_training_gate(
-        root,
-        authorization_path=authorization_path,
-        stage_a_publication_root=stage_a_publication_root,
+    authorization_preview = load_yaml(authorization_path)
+    corrected = authorization_preview.get("authorization_status") == (
+        "authorized_corrected_probe_training_only"
     )
+    if corrected:
+        if (
+            stage_b_publication_root is None
+            or combined_base_publication_root is None
+            or correction_publication_root is None
+        ):
+            raise TrainingGateError(
+                "corrected probe execution requires all base and correction parents"
+            )
+        gate = validate_corrected_probe_training_gate(
+            root,
+            authorization_path=authorization_path,
+            stage_a_publication_root=stage_a_publication_root,
+            stage_b_publication_root=stage_b_publication_root,
+            combined_base_publication_root=combined_base_publication_root,
+            correction_publication_root=correction_publication_root,
+        )
+    else:
+        gate = validate_scientific_training_gate(
+            root,
+            authorization_path=authorization_path,
+            stage_a_publication_root=stage_a_publication_root,
+        )
     authorization = gate["authorization"]
     immutable = authorization.get("immutable_training", {})
     expected_environment_hash = str(immutable.get("environment_lock_sha256", ""))
@@ -274,6 +312,17 @@ def run_authorized_probe(
         raise TrainingGateError("training environment lock path mismatch")
     if _sha256_file(environment_lock_path) != expected_environment_hash:
         raise TrainingGateError("training environment lock hash mismatch")
+    wheel_path_value = immutable.get("wheel_path")
+    if corrected:
+        wheel_path = Path(str(wheel_path_value or "")).resolve()
+        if (
+            not wheel_path.is_file()
+            or not wheel_path.is_relative_to(Path("/root/autodl-tmp/lensing-4"))
+            or wheel_path.name != immutable.get("wheel_filename")
+            or _sha256_file(wheel_path) != immutable.get("wheel_sha256")
+            or immutable.get("editable_install_authorized") is not False
+        ):
+            raise TrainingGateError("corrected probe immutable wheel contract failed")
     _verify_training_checkout(root, training_commit, authorization_path)
     configured_output = Path(str(authorization.get("training_output_root", ""))).resolve()
     if configured_output != output_root.resolve():
@@ -289,18 +338,33 @@ def run_authorized_probe(
         raise TrainingGateError("authorized model configuration hash mismatch")
     _validate_runtime_versions(model)
     load_input_policy(root)
-    publication = gate["publication"]
     curves = _verified_curves(model, psd_root)
-    full_train = PublishedStageADataset(
-        publication.train_root,
-        expected_split=SplitName.TRAIN,
-        detector_curves=curves,
-        expected_total_pairs=32768,
-    )
+    publication = gate["publication"]
+    full_train: PublishedStageADataset
+    if corrected:
+        if not isinstance(publication, CorrectedTrainingPublication):
+            raise TrainingGateError("corrected gate returned the wrong publication type")
+        full_train = corrected_stage_a_training_dataset(publication, curves)
+        stage_a = publication.stage_a
+        training_view_manifest_sha256 = (
+            publication.corrected_stage_a_train_manifest_sha256
+        )
+        publication_binding_sha256 = publication.correction_manifest_sha256
+    else:
+        full_train = PublishedStageADataset(
+            publication.train_root,
+            expected_split=SplitName.TRAIN,
+            detector_curves=curves,
+            expected_total_pairs=32768,
+        )
+        stage_a = publication
+        training_view_manifest_sha256 = publication.namespace_manifest_sha256["train"]
+        publication_binding_sha256 = publication.manifest_sha256
+    validation_manifest_sha256 = stage_a.namespace_manifest_sha256["validation"]
     full_ids = full_train.physical_system_ids()
     if set(full_ids) & set(
         PublishedStageADataset(
-            publication.validation_root,
+            stage_a.validation_root,
             expected_split=SplitName.VALIDATION,
             detector_curves=curves,
             expected_total_pairs=6144,
@@ -313,15 +377,21 @@ def run_authorized_probe(
         if rung_count == 16384
         else full_ids
     )
-    train_dataset = PublishedStageADataset(
-        publication.train_root,
-        expected_split=SplitName.TRAIN,
-        detector_curves=curves,
-        expected_total_pairs=32768,
-        selected_physical_system_ids=member_ids,
+    train_dataset: PublishedStageADataset = (
+        corrected_stage_a_training_dataset(
+            publication, curves, selected_physical_system_ids=member_ids
+        )
+        if corrected
+        else PublishedStageADataset(
+            stage_a.train_root,
+            expected_split=SplitName.TRAIN,
+            detector_curves=curves,
+            expected_total_pairs=32768,
+            selected_physical_system_ids=member_ids,
+        )
     )
     validation_dataset = PublishedStageADataset(
-        publication.validation_root,
+        stage_a.validation_root,
         expected_split=SplitName.VALIDATION,
         detector_curves=curves,
         expected_total_pairs=6144,
@@ -333,8 +403,8 @@ def run_authorized_probe(
         if (
             rung_preparation.get("status") != "ready_for_authorized_probe_fits"
             or tuple(rung_preparation.get("member_ids", ())) != member_ids
-            or rung_preparation.get("stage_a_parent_manifest_sha256")
-            != publication.manifest_sha256
+            or rung_preparation.get("training_publication_binding_sha256")
+            != publication_binding_sha256
             or rung_preparation.get("model_configuration_hash")
             != model_configuration_hash(model)
         ):
@@ -393,13 +463,11 @@ def run_authorized_probe(
             "member_count": len(member_ids),
             "member_ids": list(member_ids),
             "member_ids_sha256": membership_hash(member_ids),
-            "stage_a_parent_manifest_sha256": publication.manifest_sha256,
-            "train_namespace_manifest_sha256": publication.namespace_manifest_sha256[
-                "train"
-            ],
-            "validation_namespace_manifest_sha256": publication.namespace_manifest_sha256[
-                "validation"
-            ],
+            "stage_a_parent_manifest_sha256": stage_a.manifest_sha256,
+            "training_publication_binding_sha256": publication_binding_sha256,
+            "train_namespace_manifest_sha256": training_view_manifest_sha256,
+            "validation_namespace_manifest_sha256": validation_manifest_sha256,
+            "waveform_correction_applied": corrected,
             "final_evaluation_commitment_sha256": gate[
                 "final_evaluation_commitment_sha256"
             ],
@@ -417,7 +485,8 @@ def run_authorized_probe(
     if not execute_optimizer:
         return rung_preparation
     identity = _build_run_identity(
-        publication=publication,
+        train_manifest_sha256=training_view_manifest_sha256,
+        validation_manifest_sha256=validation_manifest_sha256,
         model=model,
         training_commit=training_commit,
         environment_sha256=expected_environment_hash,
@@ -436,7 +505,9 @@ def run_authorized_probe(
         raise FileExistsError("probe run identity already has an output directory")
     preparation = {
         **authorized_probe_execution_evidence(identity),
-        "stage_a_parent_manifest_sha256": publication.manifest_sha256,
+        "stage_a_parent_manifest_sha256": stage_a.manifest_sha256,
+        "training_publication_binding_sha256": publication_binding_sha256,
+        "waveform_correction_applied": corrected,
         "member_count": len(member_ids),
         "member_ids_sha256": membership_hash(member_ids),
         "member_ids": list(member_ids),

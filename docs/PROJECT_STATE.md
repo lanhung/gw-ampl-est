@@ -57,6 +57,21 @@ failed training output remain immutable. Training is still closed until a new
 release binds the corrected views, recomputed membership, model, wheel and CUDA
 environment.
 
+The corrected probe stack is now implemented. It resolves the correction parent
+and all immutable base manifests metadata-only, filters exactly the five affected
+physical systems, lazily concatenates the five replacements, and derives new
+training-view hashes for both 32k and 65k. The existing 16k SHA-256 rank rule is
+applied only after the full corrected 32k membership exists. The runner supports
+a fresh 16k/32k rerun and a conditional fresh 65k rerun, but no corrected data
+access or optimizer is authorized yet.
+
+Delegated review has now bound the corrected 32k view, implementation commit,
+wheel, model, CUDA environment and final-evaluation commitment in
+`phase4_corrected_probe_training_authorization.yaml`. A fresh 16k/32k
+three-seed rerun is authorized from scratch; all earlier probe checkpoints and
+metrics remain superseded. Corrected 65k training and every downstream
+scientific phase remain separately gated.
+
 The post-lock architecture-selection software is implemented without
 scientific data access. It freezes the fixed 2x2 grid, reuses the locked-rung
 10-transform/width-256 probe and limits future work to nine new fits. No
@@ -343,6 +358,16 @@ validation or final data.
   group-disjoint splits and publication-tree SHA-256 `1c9d95d0...`;
 - completed Stage A in 39.63 elapsed hours with 46,491,822,064 published bytes
   and 264,872,910,848 bytes remaining free.
+- published an immutable five-system correction overlay and independently
+  validated exact corrected counts, numerical source spectra, decomposition,
+  unit weights, hashes and grouped identities;
+- implemented and froze typed corrected 32k/65k training views at commit
+  `adcb1a79e1534e4d742238aa99869c57da95dd96`;
+- recomputed the 16k membership after applying the overlay and completed all
+  six fresh 16k/32k seed fits from scratch;
+- independently reproduced the 10,000-replicate paired comparison byte-for-byte;
+  corrected NLP improvement was 0.211849 with 95% interval
+  [0.200116, 0.223464], requiring continuation to the 65k probe.
 
 ## Not started or not yet complete by design
 
@@ -355,51 +380,20 @@ validation or final data.
 
 ## Current execution and next gate
 
-Stage A and Stage B are atomically published, but their scientific training view
-is temporarily closed by the five-record waveform numerical incident. The
-previous six 16k/32k fits are retained only as superseded evidence. The immediate
-gate is a five-system immutable correction overlay followed by recomputation of
-the 16k membership and complete three-seed 16k/32k rerun. Only that corrected
-decision can determine whether the 65k probe is run again.
+Stage A, Stage B and the five-system correction overlay are atomically
+published. The corrected 16k and 32k probe fits are complete and the only valid
+development decision is `continue_to_train_65k`. The exact decision SHA-256 is
+`fe2890e025f5574a4ea45942b698e0b24db3801650125cd5f128126e435633cf`.
 
-The first authorized 16k execution resolved the frozen membership and completed
-metadata-only standardization, then failed before its first optimizer step because
-a physical batch of 256 exceeded the 32 GB GPU memory. A same-phase engineering
-patch preserves the effective batch of 256 through four ordered 64-example
-microbatches with exact gradient accumulation. The failed run has no checkpoint
-or scientific metric and will not be reused as a result.
+The immediate next gate is a fresh corrected 65k three-seed authorization. It
+must bind the corrected combined-view hash `da8aaa8d...`, the completed
+16k-to-32k decision, code `adcb1a7...`, the exact wheel and the immutable CUDA
+environment. It must start all three seeds from scratch and stop after the
+terminal 32k-to-65k development comparison. The failed pre-correction 65k root
+cannot be resumed or reused.
 
-The earlier execution completed all six 16k/32k fits under training commit
-`5baabfe229ad187f6bcdcc1dea7cf42aa43c41e9`, but those metrics are now superseded
-because affected waveforms entered both rungs. Stage B data remain published;
-the 65k optimizer, calibration, SBC, final evaluation and GWOSC/GWTC remain
-closed until corrected evidence and their individual gates are recorded.
-
-The future terminal 65k probe, architecture-selection, calibration/SBC
-materialization and selected-checkpoint score-extraction stacks are implemented
-as fail-closed software. They remain data-access disabled until their exact
-entry evidence exists and separate authorizations bind every publication,
-checkpoint, code, environment and output identity. Calibration fitting, SBC
-testing, final evaluation and GWOSC/GWTC remain closed.
-
-The Stage B/65k boundary now also has an independent manifest-only closeout
-command. After the frozen publisher exits, it must reproduce the exact result,
-parent, combined-manifest and 256-shard contract before any training
-authorization is written. It never opens Parquet or Zarr and cannot authorize
-the optimizer itself.
-
-The final inference/result-artifact layer is also implemented under a pure
-software gate. It resolves the sealed 15-namespace parent, binds all three
-selected checkpoints and same-seed calibration/SBC products, executes the
-frozen cross-family conditions and writes bounded per-case scores without
-persisting posterior draws. It has not accessed final data, checkpoints or
-calibration products. Final materialization and unsealing remain closed.
-
-At the read-only `2026-07-18T09:32:29Z` Stage B snapshot, 181/256 shards
-(23,168 systems, 70.70%) were complete, 16 shards were partial, all 16 workers
-were active at approximately one CPU core each, the log contained zero
-error-like lines and 234,291,400,704 bytes remained free. The most recent
-32-shard window measured approximately 1,072 accepted systems/hour, implying
-about nine generation hours remaining before final validation and publication.
-The result, atomic Stage B parent and combined 65k reference were not yet
-present.
+Architecture selection remains closed until the terminal size decision locks
+65k. The existing architecture implementation must first be hardened to use the
+corrected overlay rather than the immutable base 65k reader. Calibration/SBC
+materialization, final evaluation, real noise and GWOSC/GWTC all remain closed
+behind their separate downstream gates.

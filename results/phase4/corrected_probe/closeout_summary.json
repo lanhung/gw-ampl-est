@@ -1,0 +1,101 @@
+{
+  "audit_completed_at_utc": "2026-07-19T11:03:18Z",
+  "audit_status": "passed_independent_corrected_probe_closeout",
+  "authorization_sha256": "6f707e9e2d193b64b95bb0cea816f81bed21fd2bd8a747c5da83a6aa9ec5ee40",
+  "calibration_accessed": false,
+  "corrected_combined_train_manifest_sha256": "da8aaa8d86afb4d93156191976b420bfc7bbc7dfe0fdc6c6f627515d804a7379",
+  "corrected_stage_a_train_manifest_sha256": "b9390a7faad4bb8097abb09041f1f229e13c6419677926f05642ac611dc6ced2",
+  "decision": "continue_to_train_65k",
+  "decision_replay_byte_identical": true,
+  "decision_sha256": "fe2890e025f5574a4ea45942b698e0b24db3801650125cd5f128126e435633cf",
+  "final_evaluation_accessed": false,
+  "final_evaluation_commitment_sha256": "c13412eced163bac26abc4b22d054f3a6fa967e7e5a4dd7849ebf54f42df6083",
+  "free_bytes_after_closeout": 222270361600,
+  "launcher_summary_sha256": {
+    "16384": "b369a173f8d232725663f33df587d82071d485cab63dc0a2c24ac3d063514c94",
+    "32768": "5cafaff51449a4bec547f2b93c05dd656caca233ad3f173820144e9ab7f6442a"
+  },
+  "membership_sha256": {
+    "16384": "0879fb2802688f132e04c97313fced4c465e4152023ad61c5d6812eaa2170a29",
+    "32768": "5c9f0e890034d4aac6e0f3fe22bdb5bfe567d3203e614460877dea398e9b83d6"
+  },
+  "model_configuration_hash": "8d0919c211b6aa057712a402f689f06d9ea916ba3c0c11cc32d0561aeb8d3087",
+  "output_bytes": 1288181300,
+  "output_root": "/root/autodl-tmp/lensing-4/training/phase4/corrected-probe-adcb1a7",
+  "paired_nlp_bootstrap": {
+    "lower_95": 0.2001161370429145,
+    "point_estimate": 0.21184878276552707,
+    "replicates": 10000,
+    "upper_95": 0.223464016379795
+  },
+  "result_summaries": [
+    {
+      "best_epoch": 20,
+      "development_cases_sha256": "a1e8e9e3670645de28d4cdf7eb5e3d8812aa64c3e39047d90e833b9d9d67aa85",
+      "development_mean_nlp": 0.23787178367031933,
+      "epochs": 41,
+      "median_crps": 0.19233133133479746,
+      "run_summary_sha256": "fbbafe3f03ce8eab861780bda25a7e5027bbb57633b36cd4834b90cf9bf9891e",
+      "rung": 16384,
+      "seed": 0
+    },
+    {
+      "best_epoch": 17,
+      "development_cases_sha256": "59c66088df12db8bab6ef0cbe356a19de85e5a9fee242caa206d39a419bd542f",
+      "development_mean_nlp": 0.2506694451088454,
+      "epochs": 38,
+      "median_crps": 0.19462724156793162,
+      "run_summary_sha256": "e3afc14cf3cea498160318ba943dfaf04009013b7935c40916e924da4a5c143c",
+      "rung": 16384,
+      "seed": 1
+    },
+    {
+      "best_epoch": 29,
+      "development_cases_sha256": "139705acc810119f508d2819f5f0816078348cc39a58c2a19b795a9e4598d0f7",
+      "development_mean_nlp": 0.23100263282079445,
+      "epochs": 50,
+      "median_crps": 0.18205598464618183,
+      "run_summary_sha256": "6cf0ea412054900d363bdaa53ee75d998ee59b5f59bf4b94b84b548abe8d3a1b",
+      "rung": 16384,
+      "seed": 2
+    },
+    {
+      "best_epoch": 33,
+      "development_cases_sha256": "f64274d0b319e15f9355fac0ee245199f1f8c5fe49bfd6f9a3a1da52ca32dbeb",
+      "development_mean_nlp": 0.022420133793881785,
+      "epochs": 54,
+      "median_crps": 0.13861362397462884,
+      "run_summary_sha256": "db5328cc4ae6c4debd53373e40c14abf2c0ef700bc9787f35f1902f0e89a76d2",
+      "rung": 32768,
+      "seed": 0
+    },
+    {
+      "best_epoch": 40,
+      "development_cases_sha256": "bf7806b06eaec57bb3c57e83187ab3ae1ce0611a27381fc90cae285c670f93eb",
+      "development_mean_nlp": 0.07132431515492499,
+      "epochs": 61,
+      "median_crps": 0.1447132459579033,
+      "run_summary_sha256": "ee4bdfba1c1e03420af8d65b97e951fec655095c9c1a28b34d288295c7f0a034",
+      "rung": 32768,
+      "seed": 1
+    },
+    {
+      "best_epoch": 38,
+      "development_cases_sha256": "317e82c68428a7a8f6b7d10427d8a5b411cd446b06a1ed6e94234234ff67d6a6",
+      "development_mean_nlp": -0.009746935645428797,
+      "epochs": 59,
+      "median_crps": 0.13685932202458057,
+      "run_summary_sha256": "26d010b95f63354573d582eba66468db4f4d7580855910faa65abca0f5243b47",
+      "rung": 32768,
+      "seed": 2
+    }
+  ],
+  "six_fit_process_return_codes_all_zero": true,
+  "supervisor_active_after_closeout": false,
+  "supervisor_manifest_sha256": "8421d306850bebcd197044138721c559be715b51dd3053fb2650b218b502ae3a",
+  "training_code_commit": "adcb1a79e1534e4d742238aa99869c57da95dd96",
+  "training_environment_sha256": "2e45000a8cea6712ae307c87782c593245ad56607a772f27a0cc5af726e37b95",
+  "validation_case_count_per_fit": 6144,
+  "validation_manifest_sha256": "4348e278980bd81033a2db80568444262c165e0dea13f9d57d374f932ca823a3",
+  "wheel_sha256": "44208c61577b71488872c75eced03dbca3384cf5d03baaecc9f3447bdaeef24a"
+}

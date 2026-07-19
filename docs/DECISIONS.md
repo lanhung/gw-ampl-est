@@ -905,3 +905,45 @@ versioned corrected views. The earlier 16k/32k metrics remain superseded.
 Training can reopen only through a new exact authorization that binds the
 correction manifest and a reader proven to include all five replacements and
 exclude all five affected systems.
+
+## D082 — Treat the correction as a typed training view, not a rewritten dataset
+
+Training resolves the correction parent beside the immutable Stage A and Stage B
+parents. The reader filters base entries by the five frozen physical-system IDs
+and lazily concatenates the corresponding replacement namespaces. It never
+copies, edits or reorders files inside a base publication. The derived
+training-view hash binds the base manifests, correction manifest, exclusions,
+replacement validations and replacement physical-system IDs.
+
+The 16k subset is recomputed by the existing order-invariant SHA-256 rank over
+the complete corrected 32k membership. The 65k view uses the same correction
+identity and can run only if the fresh 16k/32k comparison again requires it.
+Old checkpoints and metrics remain immutable superseded evidence and cannot be
+resumed into a corrected run.
+
+## D083 — Reopen only the corrected 16k/32k probe under a new release
+
+Expert review binds the real corrected-view resolution, implementation commit
+`adcb1a79e1534e4d742238aa99869c57da95dd96`, exact wheel, unchanged model and
+CUDA lock before data access. The rerun recomputes 16k membership from the full
+corrected 32k population and fits all six seed/rung combinations from scratch.
+
+The frozen 16k-to-32k paired decision is the only output that may open a later
+65k review. The previous learning curve and failed 65k output remain immutable
+negative/superseded evidence and are never resumed.
+
+## D084 — Continue only to a fresh corrected 65k probe
+
+All six corrected-view 16k/32k fits completed from scratch with identical code,
+model, environment and 6,144-case validation identity. The independently
+replayed 10,000-replicate paired bootstrap measured an NLP improvement of
+0.211849 nat per target dimension with 95% interval [0.200116, 0.223464]. This
+is incompatible with the frozen 32k saturation rule, so the decision is
+`continue_to_train_65k`.
+
+The decision opens review, not execution. A new authorization must bind the
+corrected combined 65k view, exact decision hash and immutable training release.
+The three 65k seeds start from scratch. The pre-correction failed 65k root and
+the superseded 16k/32k checkpoints are never resumed. No extension above 65k is
+permitted: the terminal result either locks 65k or stops for a new scientific
+contract.

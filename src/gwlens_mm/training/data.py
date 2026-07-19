@@ -68,6 +68,26 @@ class CombinedTrainingPublication:
 
 
 @dataclass(frozen=True)
+class CorrectedTrainingPublication:
+    """Validated immutable overlay for corrected 32k and 65k training views."""
+
+    correction_root: Path
+    correction_manifest_path: Path
+    correction_manifest_sha256: str
+    correction_tree_sha256: str
+    stage_a: StageAPublication
+    combined_base: CombinedTrainingPublication
+    stage_a_excluded_ids: Tuple[str, ...]
+    stage_b_excluded_ids: Tuple[str, ...]
+    stage_a_replacement_root: Path
+    stage_b_replacement_root: Path
+    stage_a_replacement_ids: Tuple[str, ...]
+    stage_b_replacement_ids: Tuple[str, ...]
+    corrected_stage_a_train_manifest_sha256: str
+    corrected_combined_train_manifest_sha256: str
+
+
+@dataclass(frozen=True)
 class DevelopmentCase:
     """One validation example plus nondeployable diagnostic group labels."""
 
@@ -367,6 +387,260 @@ def resolve_combined_training_publication(
     )
 
 
+def resolve_corrected_training_publication(
+    correction_root: Path,
+    *,
+    stage_a_parent_root: Path,
+    stage_b_parent_root: Path,
+    combined_base_root: Path,
+    expected_base_generator_commit: str,
+    expected_base_preregistration_hash: str,
+    expected_correction_generator_commit: str,
+    expected_correction_preregistration_hash: str,
+    expected_correction_manifest_sha256: str,
+    expected_correction_tree_sha256: str,
+    expected_combined_base_manifest_sha256: str,
+) -> CorrectedTrainingPublication:
+    """Resolve the immutable five-system overlay without opening strain arrays."""
+
+    from ..production.storage import tree_checksum
+
+    root = correction_root.resolve()
+    if "published" not in root.parts or not root.is_dir():
+        raise TrainingGateError("waveform correction is not an atomic publication")
+    manifest_path = root / "dataset_manifest.json"
+    if not manifest_path.is_file():
+        raise TrainingGateError("waveform-correction parent manifest is absent")
+    manifest_sha256 = _sha256_file(manifest_path)
+    if manifest_sha256 != expected_correction_manifest_sha256:
+        raise TrainingGateError("waveform-correction parent manifest hash mismatch")
+    tree_sha256, _ = tree_checksum(root)
+    if tree_sha256 != expected_correction_tree_sha256:
+        raise TrainingGateError("waveform-correction publication tree hash mismatch")
+    manifest = _load_mapping(manifest_path)
+    if (
+        manifest.get("status"),
+        manifest.get("generator_commit"),
+        manifest.get("preregistration_hash"),
+        int(manifest.get("corrected_stage_a_train_count", -1)),
+        int(manifest.get("validation_count", -1)),
+        int(manifest.get("corrected_stage_b_train_count", -1)),
+        int(manifest.get("corrected_combined_train_count", -1)),
+        int(manifest.get("total_excluded_count", -1)),
+        int(manifest.get("total_replacement_count", -1)),
+        manifest.get("proposal_equals_evaluation"),
+        manifest.get("all_importance_weights_one"),
+        manifest.get("replacement_components_group_disjoint"),
+        manifest.get("replacement_group_disjoint_from_all_base_components"),
+        manifest.get("original_publications_modified"),
+        manifest.get("model_training_authorized"),
+        manifest.get("gwosc_gwtc_accessed"),
+    ) != (
+        "passed",
+        expected_correction_generator_commit,
+        expected_correction_preregistration_hash,
+        32768,
+        6144,
+        32768,
+        65536,
+        5,
+        5,
+        True,
+        True,
+        True,
+        True,
+        False,
+        False,
+        False,
+    ):
+        raise TrainingGateError("waveform-correction parent contract failed")
+    stage_a = resolve_stage_a_publication(
+        stage_a_parent_root,
+        expected_generator_commit=expected_base_generator_commit,
+        expected_preregistration_hash=expected_base_preregistration_hash,
+    )
+    combined = resolve_combined_training_publication(
+        combined_base_root,
+        stage_a_parent_root=stage_a_parent_root,
+        stage_b_parent_root=stage_b_parent_root,
+        expected_generator_commit=expected_base_generator_commit,
+        expected_preregistration_hash=expected_base_preregistration_hash,
+        expected_combined_manifest_sha256=expected_combined_base_manifest_sha256,
+    )
+    views = manifest.get("views")
+    validations = manifest.get("validations")
+    if not isinstance(views, dict) or not isinstance(validations, dict):
+        raise TrainingGateError("waveform-correction views or validations are absent")
+    if set(views) != {"stage_a_train", "stage_a_validation", "stage_b_train"}:
+        raise TrainingGateError("waveform-correction view roles are incomplete")
+    if set(validations) != {"stage_a_train", "stage_b_train"}:
+        raise TrainingGateError("waveform-correction replacement validations are incomplete")
+    if Path(str(views["stage_a_train"].get("base_parent_root", ""))).resolve() != (
+        stage_a.parent_root
+    ) or Path(str(views["stage_a_validation"].get("base_parent_root", ""))).resolve() != (
+        stage_a.parent_root
+    ):
+        raise TrainingGateError("waveform correction names the wrong Stage A parent")
+    if Path(str(views["stage_b_train"].get("base_parent_root", ""))).resolve() != (
+        combined.stage_b_parent_root
+    ):
+        raise TrainingGateError("waveform correction names the wrong Stage B parent")
+    if not (
+        views["stage_a_train"].get("base_dataset_id") == stage_a.train_dataset_id
+        and views["stage_a_validation"].get("base_dataset_id")
+        == stage_a.validation_dataset_id
+        and views["stage_b_train"].get("base_dataset_id")
+        == combined.stage_b_dataset_id
+        and views["stage_a_validation"].get("unchanged") is True
+    ):
+        raise TrainingGateError("waveform correction names the wrong base datasets")
+
+    component_contract = {
+        "stage_a_train": (2, views["stage_a_train"], stage_a.train_root),
+        "stage_b_train": (3, views["stage_b_train"], combined.stage_b_train_root),
+    }
+    replacement_roots: Dict[str, Path] = {}
+    replacement_ids: Dict[str, Tuple[str, ...]] = {}
+    excluded_ids: Dict[str, Tuple[str, ...]] = {}
+    replacement_validation_hashes: Dict[str, str] = {}
+    for component, (count, view, base_root) in component_contract.items():
+        validation = validations[component]
+        dataset_id = str(view.get("replacement_dataset_id", ""))
+        if (
+            validation.get("status"),
+            validation.get("dataset_id"),
+            validation.get("split"),
+            int(validation.get("accepted_pair_count", -1)),
+            int(validation.get("complete_shard_count", -1)),
+            int(validation.get("pairs_per_shard", -1)),
+            validation.get("generator_commit"),
+            validation.get("proposal_equals_evaluation"),
+            validation.get("all_importance_weights_one"),
+            int(view.get("base_count", -1)),
+            int(view.get("replacement_count", -1)),
+            int(view.get("corrected_count", -1)),
+        ) != (
+            "passed",
+            dataset_id,
+            "train",
+            count,
+            1,
+            count,
+            expected_correction_generator_commit,
+            True,
+            True,
+            32768,
+            count,
+            32768,
+        ):
+            raise TrainingGateError(f"waveform-correction {component} contract failed")
+        replacement_root = root / dataset_id
+        entries = index_complete_shards(
+            replacement_root,
+            expected_pairs_per_shard=count,
+            expected_total_pairs=count,
+        )
+        base_entries = index_complete_shards(
+            base_root,
+            expected_pairs_per_shard=128,
+            expected_total_pairs=32768,
+            require_published=component == "stage_a_train",
+        )
+        base_system_ids = {entry.physical_system_id for entry in base_entries}
+        excluded = tuple(str(value) for value in view.get("excluded_physical_system_ids", ()))
+        replacements = tuple(entry.physical_system_id for entry in entries)
+        if (
+            len(excluded) != count
+            or len(set(excluded)) != count
+            or not set(excluded) <= base_system_ids
+            or set(replacements) & base_system_ids
+        ):
+            raise TrainingGateError(f"waveform-correction {component} membership failed")
+        replacement_roots[component] = replacement_root
+        replacement_ids[component] = replacements
+        excluded_ids[component] = excluded
+        replacement_validation_hashes[component] = _canonical_mapping_sha256(validation)
+
+    validation_ids = {
+        entry.physical_system_id
+        for entry in index_complete_shards(
+            stage_a.validation_root,
+            expected_pairs_per_shard=128,
+            expected_total_pairs=6144,
+        )
+    }
+    corrected_stage_a_ids = (
+        {
+            entry.physical_system_id
+            for entry in index_complete_shards(
+                stage_a.train_root,
+                expected_pairs_per_shard=128,
+                expected_total_pairs=32768,
+            )
+        }
+        - set(excluded_ids["stage_a_train"])
+    ) | set(replacement_ids["stage_a_train"])
+    corrected_stage_b_ids = (
+        {
+            entry.physical_system_id
+            for entry in index_complete_shards(
+                combined.stage_b_train_root,
+                expected_pairs_per_shard=128,
+                expected_total_pairs=32768,
+                require_published=False,
+            )
+        }
+        - set(excluded_ids["stage_b_train"])
+    ) | set(replacement_ids["stage_b_train"])
+    if not (
+        len(corrected_stage_a_ids) == len(corrected_stage_b_ids) == 32768
+        and len(corrected_stage_a_ids | corrected_stage_b_ids) == 65536
+        and not ((corrected_stage_a_ids | corrected_stage_b_ids) & validation_ids)
+    ):
+        raise TrainingGateError("corrected train/validation membership is invalid")
+
+    corrected_stage_a_hash = _canonical_mapping_sha256(
+        {
+            "correction_manifest_sha256": manifest_sha256,
+            "base_train_manifest_sha256": stage_a.namespace_manifest_sha256["train"],
+            "excluded_physical_system_ids": excluded_ids["stage_a_train"],
+            "replacement_validation_sha256": replacement_validation_hashes[
+                "stage_a_train"
+            ],
+            "replacement_physical_system_ids": replacement_ids["stage_a_train"],
+        }
+    )
+    corrected_combined_hash = _canonical_mapping_sha256(
+        {
+            "correction_manifest_sha256": manifest_sha256,
+            "combined_base_manifest_sha256": combined.combined_manifest_sha256,
+            "corrected_stage_a_train_manifest_sha256": corrected_stage_a_hash,
+            "stage_b_parent_manifest_sha256": combined.stage_b_parent_manifest_sha256,
+            "stage_b_excluded_physical_system_ids": excluded_ids["stage_b_train"],
+            "stage_b_replacement_validation_sha256": replacement_validation_hashes[
+                "stage_b_train"
+            ],
+            "stage_b_replacement_physical_system_ids": replacement_ids["stage_b_train"],
+        }
+    )
+    return CorrectedTrainingPublication(
+        correction_root=root,
+        correction_manifest_path=manifest_path,
+        correction_manifest_sha256=manifest_sha256,
+        correction_tree_sha256=tree_sha256,
+        stage_a=stage_a,
+        combined_base=combined,
+        stage_a_excluded_ids=excluded_ids["stage_a_train"],
+        stage_b_excluded_ids=excluded_ids["stage_b_train"],
+        stage_a_replacement_root=replacement_roots["stage_a_train"],
+        stage_b_replacement_root=replacement_roots["stage_b_train"],
+        stage_a_replacement_ids=replacement_ids["stage_a_train"],
+        stage_b_replacement_ids=replacement_ids["stage_b_train"],
+        corrected_stage_a_train_manifest_sha256=corrected_stage_a_hash,
+        corrected_combined_train_manifest_sha256=corrected_combined_hash,
+    )
+
+
 def _load_mapping(path: Path) -> Mapping[str, Any]:
     value = json.loads(path.read_text(encoding="utf-8"))
     if not isinstance(value, dict):
@@ -643,6 +917,111 @@ class ConcatenatedPublishedStageADataset(PublishedStageADataset):
         self._cached_path = None
         self._cached_records = None
         self._cached_noisy = None
+
+
+def corrected_stage_a_training_dataset(
+    publication: CorrectedTrainingPublication,
+    detector_curves: Mapping[str, ASDCurve],
+    *,
+    selected_physical_system_ids: Optional[Sequence[str]] = None,
+) -> ConcatenatedPublishedStageADataset:
+    """Build the exact 32k corrected Stage A view, optionally restricted by ID."""
+
+    base_all = PublishedStageADataset(
+        publication.stage_a.train_root,
+        expected_split=SplitName.TRAIN,
+        detector_curves=detector_curves,
+        expected_total_pairs=32768,
+    )
+    base_ids = tuple(
+        physical_id
+        for physical_id in base_all.physical_system_ids()
+        if physical_id not in set(publication.stage_a_excluded_ids)
+    )
+    replacement_all = PublishedStageADataset(
+        publication.stage_a_replacement_root,
+        expected_split=SplitName.TRAIN,
+        detector_curves=detector_curves,
+        expected_pairs_per_shard=2,
+        expected_total_pairs=2,
+    )
+    replacement_ids = replacement_all.physical_system_ids()
+    complete_ids = base_ids + replacement_ids
+    if len(complete_ids) != 32768 or len(set(complete_ids)) != 32768:
+        raise TrainingGateError("corrected Stage A view is not exactly 32k")
+    if selected_physical_system_ids is None:
+        selected = frozenset(complete_ids)
+    else:
+        requested = tuple(selected_physical_system_ids)
+        selected = frozenset(requested)
+        if len(selected) != len(requested) or not selected <= set(complete_ids):
+            raise TrainingGateError("corrected Stage A selection is invalid")
+    base = PublishedStageADataset(
+        publication.stage_a.train_root,
+        expected_split=SplitName.TRAIN,
+        detector_curves=detector_curves,
+        expected_total_pairs=32768,
+        selected_physical_system_ids=tuple(
+            physical_id for physical_id in base_ids if physical_id in selected
+        ),
+    )
+    replacement = PublishedStageADataset(
+        publication.stage_a_replacement_root,
+        expected_split=SplitName.TRAIN,
+        detector_curves=detector_curves,
+        expected_pairs_per_shard=2,
+        expected_total_pairs=2,
+        selected_physical_system_ids=tuple(
+            physical_id for physical_id in replacement_ids if physical_id in selected
+        ),
+    )
+    result = ConcatenatedPublishedStageADataset((base, replacement))
+    if len(result) != len(selected):
+        raise TrainingGateError("corrected Stage A selection count is inconsistent")
+    return result
+
+
+def corrected_65k_training_dataset(
+    publication: CorrectedTrainingPublication,
+    detector_curves: Mapping[str, ASDCurve],
+) -> ConcatenatedPublishedStageADataset:
+    """Build the exact corrected Stage A + Stage B 65k view."""
+
+    stage_a = corrected_stage_a_training_dataset(publication, detector_curves)
+    stage_b_base_all = PublishedStageADataset(
+        publication.combined_base.stage_b_train_root,
+        expected_split=SplitName.TRAIN,
+        detector_curves=detector_curves,
+        expected_total_pairs=32768,
+        require_published=False,
+    )
+    excluded = set(publication.stage_b_excluded_ids)
+    stage_b_base_ids = tuple(
+        physical_id
+        for physical_id in stage_b_base_all.physical_system_ids()
+        if physical_id not in excluded
+    )
+    stage_b_base = PublishedStageADataset(
+        publication.combined_base.stage_b_train_root,
+        expected_split=SplitName.TRAIN,
+        detector_curves=detector_curves,
+        expected_total_pairs=32768,
+        selected_physical_system_ids=stage_b_base_ids,
+        require_published=False,
+    )
+    stage_b_replacement = PublishedStageADataset(
+        publication.stage_b_replacement_root,
+        expected_split=SplitName.TRAIN,
+        detector_curves=detector_curves,
+        expected_pairs_per_shard=3,
+        expected_total_pairs=3,
+    )
+    result = ConcatenatedPublishedStageADataset(
+        (stage_a, stage_b_base, stage_b_replacement)
+    )
+    if len(result) != 65536:
+        raise TrainingGateError("corrected combined training view is not exactly 65k")
+    return result
 
 
 class StandardizedStageADataset:

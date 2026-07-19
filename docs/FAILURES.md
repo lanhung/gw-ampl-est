@@ -611,3 +611,7 @@ architecture lock plus separate materialization and inference gates.
   spectral ratios are below 1.096, arrays satisfy exact decomposition, weights
   are one and all grouped identities are disjoint. This repairs the data view,
   not the superseded learning-curve result; no optimizer was authorized.
+- The subsequent corrected 16k/32k rerun completed all six fresh fits with zero
+  process failures. Its independently replayed decision is
+  `continue_to_train_65k`. This resolves the invalid learning-curve evidence but
+  does not revive the failed pre-correction 65k run or authorize a 65k optimizer.

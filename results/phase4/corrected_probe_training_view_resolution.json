@@ -1,0 +1,34 @@
+{
+  "calibration_accessed": false,
+  "combined_train_count": 65536,
+  "corrected_combined_train_manifest_sha256": "da8aaa8d86afb4d93156191976b420bfc7bbc7dfe0fdc6c6f627515d804a7379",
+  "corrected_stage_a_train_manifest_sha256": "b9390a7faad4bb8097abb09041f1f229e13c6419677926f05642ac611dc6ced2",
+  "correction_manifest_sha256": "0fcfb117c620d58a2e0ccd8b19c0d3f3a371dd844fb637b50c8b565eee6864f2",
+  "correction_tree_sha256": "a57aa2691e256b34403392f595e964dceec1325cfc54a38ed4d2a0b714d38c12",
+  "final_evaluation_accessed": false,
+  "gwosc_gwtc_accessed": false,
+  "optimizer_started": false,
+  "parquet_opened": false,
+  "stage_a_excluded_ids": [
+    "phase4-train-system-011864",
+    "phase4-train-system-019063"
+  ],
+  "stage_a_replacement_ids": [
+    "phase4-waveform-correction-stage-a-system-000000",
+    "phase4-waveform-correction-stage-a-system-000001"
+  ],
+  "stage_a_train_count": 32768,
+  "stage_a_validation_count": 6144,
+  "stage_b_excluded_ids": [
+    "phase4-stage-b-train-system-005392",
+    "phase4-stage-b-train-system-007589",
+    "phase4-stage-b-train-system-012017"
+  ],
+  "stage_b_replacement_ids": [
+    "phase4-waveform-correction-stage-b-system-000000",
+    "phase4-waveform-correction-stage-b-system-000001",
+    "phase4-waveform-correction-stage-b-system-000002"
+  ],
+  "status": "corrected_training_view_resolved_metadata_only",
+  "zarr_opened": false
+}

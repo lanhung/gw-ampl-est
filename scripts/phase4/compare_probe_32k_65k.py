@@ -23,7 +23,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     arguments = parser.parse_args(argv)
     authorization = load_yaml(arguments.authorization)
     ready = (
-        authorization.get("authorization_status") == "authorized_train_65k_probe_only"
+        authorization.get("authorization_status")
+        in {
+            "authorized_train_65k_probe_only",
+            "authorized_corrected_train_65k_probe_only",
+        }
         and authorization.get("authorization", {}).get(
             "learning_curve_decision_authorized"
         )

@@ -12,6 +12,9 @@ from ..provenance import configuration_hash
 
 RC4_HASH = "5aeaac395463bd073c44ead4ff4c5c729b5a2d4b4f1840c0825a53b30ab1bc98"
 RC3_HASH = "6082475631539d3069edacc52f41b37fb8fe725ccd7c6bc9980cc3008795a927"
+WAVEFORM_CORRECTION_HASH = (
+    "7fca209de9f06e98da1c5a96ae0f4fc6daec5d2f0c2339a718e1f899bb915b69"
+)
 PROBE_SEED_DOMAIN = "adaptive_scientific_split_assignment_v1"
 TRAIN_32K_COUNT = 32768
 PROBE_16K_COUNT = 16384
@@ -196,6 +199,113 @@ def validate_scientific_training_gate(
         "publication": publication,
         "authorization_status": authorization["authorization_status"],
         "final_evaluation_commitment_sha256": actual_commitment_hash,
+    }
+
+
+def validate_corrected_probe_training_gate(
+    root: Path,
+    *,
+    authorization_path: Path,
+    stage_a_publication_root: Path,
+    stage_b_publication_root: Path,
+    combined_base_publication_root: Path,
+    correction_publication_root: Path,
+) -> Mapping[str, Any]:
+    """Authorize only a fresh 16k/32k rerun over the immutable correction view."""
+
+    load_training_stack_contract(root)
+    authorization = load_yaml(authorization_path)
+    if authorization.get("authorization_status") != (
+        "authorized_corrected_probe_training_only"
+    ):
+        raise TrainingGateError("corrected probe-training authorization is absent")
+    flags = authorization.get("authorization", {})
+    for required in (
+        "corrected_stage_a_data_access_authorized",
+        "replacement_data_access_authorized",
+        "scientific_probe_training_authorized",
+        "probe_optimizer_execution_authorized",
+        "learning_curve_decision_authorized",
+    ):
+        if flags.get(required) is not True:
+            raise TrainingGateError(f"corrected probe gate requires {required}=true")
+    for forbidden in (
+        "superseded_checkpoint_resume_authorized",
+        "model_tuning_authorized",
+        "architecture_selection_authorized",
+        "calibration_authorized",
+        "sbc_authorized",
+        "final_evaluation_authorized",
+        "stage_b_training_authorized",
+        "extension_above_65536_authorized",
+        "gwosc_gwtc_access_authorized",
+    ):
+        if flags.get(forbidden) is not False:
+            raise TrainingGateError(f"corrected probe gate must keep {forbidden}=false")
+    if authorization.get("authorized_training_rungs") != [16384, 32768]:
+        raise TrainingGateError("corrected probe gate covers only 16k/32k")
+    if authorization.get("authorized_training_seeds") != [0, 1, 2]:
+        raise TrainingGateError("corrected probe gate covers exactly seeds 0/1/2")
+    if authorization.get("preregistration_hash") != WAVEFORM_CORRECTION_HASH:
+        raise TrainingGateError("corrected probe gate references the wrong preregistration")
+    commitment_path = root / "results/phase4/final_evaluation_commitment.json"
+    commitment = _load_json(commitment_path)
+    commitment_hash = hashlib.sha256(commitment_path.read_bytes()).hexdigest()
+    if (
+        commitment.get("commitment_status") != "finalized_before_training"
+        or authorization.get("final_evaluation_commitment_sha256") != commitment_hash
+    ):
+        raise TrainingGateError("corrected probe gate lacks the frozen commitment")
+    closeout = authorization.get("correction_publication", {})
+    closeout_path = root / str(closeout.get("independent_closeout_path", ""))
+    if not closeout_path.is_file() or hashlib.sha256(closeout_path.read_bytes()).hexdigest() != (
+        closeout.get("independent_closeout_sha256")
+    ):
+        raise TrainingGateError("corrected probe gate closeout evidence hash mismatch")
+    closeout_evidence = _load_json(closeout_path)
+    if closeout_evidence.get("status") != (
+        "passed_independent_waveform_correction_closeout"
+    ):
+        raise TrainingGateError("waveform correction lacks independent closeout")
+    from .data import resolve_corrected_training_publication
+
+    publication = resolve_corrected_training_publication(
+        correction_publication_root,
+        stage_a_parent_root=stage_a_publication_root,
+        stage_b_parent_root=stage_b_publication_root,
+        combined_base_root=combined_base_publication_root,
+        expected_base_generator_commit=str(authorization.get("base_generator_commit", "")),
+        expected_base_preregistration_hash=RC4_HASH,
+        expected_correction_generator_commit=str(
+            closeout.get("generator_commit", "")
+        ),
+        expected_correction_preregistration_hash=WAVEFORM_CORRECTION_HASH,
+        expected_correction_manifest_sha256=str(
+            closeout.get("parent_manifest_sha256", "")
+        ),
+        expected_correction_tree_sha256=str(
+            closeout.get("publication_tree_sha256", "")
+        ),
+        expected_combined_base_manifest_sha256=str(
+            authorization.get("combined_base_manifest_sha256", "")
+        ),
+    )
+    if (
+        closeout_evidence.get("parent_manifest_sha256")
+        != publication.correction_manifest_sha256
+        or closeout_evidence.get("publication_tree_sha256")
+        != publication.correction_tree_sha256
+    ):
+        raise TrainingGateError("tracked closeout and remote correction disagree")
+    if authorization.get("corrected_stage_a_train_manifest_sha256") != (
+        publication.corrected_stage_a_train_manifest_sha256
+    ):
+        raise TrainingGateError("corrected Stage A training-view hash mismatch")
+    return {
+        "authorization": authorization,
+        "publication": publication,
+        "authorization_status": authorization["authorization_status"],
+        "final_evaluation_commitment_sha256": commitment_hash,
     }
 
 
