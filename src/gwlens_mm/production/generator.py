@@ -34,6 +34,7 @@ from .dynamics import galkin_velocity_dispersion, sample_kinematics_nuisance
 from .gw import (
     ProductionWaveformEngine,
     StrainProducts,
+    WaveformNumericalPathology,
     select_earliest_detectable_images,
 )
 from .observations import balanced_em_cell, generate_observations
@@ -212,7 +213,21 @@ class QualificationGenerator:
         base_time = float(self.config["gps_schedule"]["start_gps"]) + float(
             self.config["gps_schedule"]["stride_seconds"]
         ) * attempt_id
-        projections = self.waveforms.project_images(draw, transformed.physical_images, base_time)
+        try:
+            projections = self.waveforms.project_images(
+                draw, transformed.physical_images, base_time
+            )
+        except WaveformNumericalPathology as error:
+            timings["waveform_and_projection_seconds"] = time.perf_counter() - started
+            return self._rejected(
+                attempt_id,
+                lens_seed,
+                draw.lens_family.value,
+                em_cell,
+                f"waveform_numerical_pathology:{error}",
+                timings,
+                proposal,
+            )
         timings["waveform_and_projection_seconds"] = time.perf_counter() - started
         selection = select_earliest_detectable_images(projections)
         ordered_network_snrs = sorted(

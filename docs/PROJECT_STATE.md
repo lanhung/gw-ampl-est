@@ -18,12 +18,10 @@ It may run unit/integration and in-memory engineering smoke tests but cannot rea
 Stage A or start scientific training. The final-evaluation generation commitment
 is finalized at SHA-256
 `c13412eced163bac26abc4b22d054f3a6fa967e7e5a4dd7849ebf54f42df6083`.
-The separately authorized 16k/32k probe workflow has now completed. Its frozen
-paired decision is `continue_to_train_65k`: the mean NLP improvement was
-0.236314 nat per target dimension with 95% interval [0.223545, 0.248638].
-Calibration and final evaluation were not accessed. The resulting exact-count
-Stage B extension is now complete; the next gate is the identity-bound 65k
-three-seed probe authorization.
+The earlier authorized 16k/32k probe workflow completed, but its learning-curve
+result is now superseded because the numerical-waveform audit found affected
+systems in both rungs. Calibration and final evaluation were not accessed. The
+exact-count Stage B extension remains immutable and complete.
 
 Stage B passed and atomically published exactly 32,768 additional train
 systems in 256 shards under parent
@@ -34,6 +32,30 @@ The atomic combined 65k reference manifest SHA-256 is
 Independent closeout validation passed exact counts, unit weights and group
 disjointness. No new validation system was generated. The 65k optimizer
 remains closed pending a separate identity-bound training authorization.
+
+The first authorized 65k launch subsequently stopped before its first optimizer
+step when whitening encountered a finite but catastrophic source-waveform bin.
+A read-only exhaustive audit of all 71,680 published records found exactly five
+IMRPhenomXPHM isolated-bin pathologies: two Stage A train and three Stage B train,
+with none in validation. One entered the deterministic 16k subset and both Stage
+A failures entered 32k, so the prior 16k/32k learning-curve result is superseded.
+No valid 65k checkpoint or terminal decision exists.
+
+Numerical-correction preregistration `1.1.1-rc.1`, hash
+`7fca209de9f06e98da1c5a96ae0f4fc6daec5d2f0c2339a718e1f899bb915b69`, is now
+frozen. It adds a source-polarization isolated-bin rejection before lensing and
+selection while preserving the target, q=p, physical selection, approximant,
+counts, model and stopping rule. The five-system correction has atomically
+published and passed independent closeout under parent
+`phase4-waveform-correction-499f86b3159a-1db109b08189`; manifest SHA-256 is
+`0fcfb117c620d58a2e0ccd8b19c0d3f3a371dd844fb637b50c8b565eee6864f2` and tree
+SHA-256 is
+`a57aa2691e256b34403392f595e964dceec1325cfc54a38ed4d2a0b714d38c12`.
+Corrected counts are 32,768 Stage A train, 32,768 Stage B train, 65,536 combined
+train and 6,144 unchanged validation systems. The original publications and
+failed training output remain immutable. Training is still closed until a new
+release binds the corrected views, recomputed membership, model, wheel and CUDA
+environment.
 
 The post-lock architecture-selection software is implemented without
 scientific data access. It freezes the fixed 2x2 grid, reuses the locked-rung
@@ -333,14 +355,12 @@ validation or final data.
 
 ## Current execution and next gate
 
-Stage A and all six 16k/32k probe fits are complete. Their development-only
-decision requires continuation to 65k. Stage B release
-`a198b90cc3ebd695a5b6c277e0843e0e19919b18` is actively materializing exactly
-32,768 additional direct-target train systems under parent
-`phase4-stage-b-2be777e727ef-6a4f106f9640`. At the read-only
-`2026-07-18T02:27:10Z` snapshot, 124/256 shards (15,872 systems) were complete,
-16 shards were partial, all 16 workers were active and the log contained zero
-error-like lines. Publication and the combined 65k reference do not yet exist.
+Stage A and Stage B are atomically published, but their scientific training view
+is temporarily closed by the five-record waveform numerical incident. The
+previous six 16k/32k fits are retained only as superseded evidence. The immediate
+gate is a five-system immutable correction overlay followed by recomputation of
+the 16k membership and complete three-seed 16k/32k rerun. Only that corrected
+decision can determine whether the 65k probe is run again.
 
 The first authorized 16k execution resolved the frozen membership and completed
 metadata-only standardization, then failed before its first optimizer step because
@@ -349,11 +369,11 @@ patch preserves the effective batch of 256 through four ordered 64-example
 microbatches with exact gradient accumulation. The failed run has no checkpoint
 or scientific metric and will not be reused as a result.
 
-The corrected execution completed all six 16k/32k fits under training commit
-`5baabfe229ad187f6bcdcc1dea7cf42aa43c41e9`. The development-only stopping rule
-did not lock 32k and requires continuation to 65k. Stage B, the 65k optimizer,
-calibration, SBC, final evaluation and GWOSC/GWTC remain closed until their
-individual gates are recorded.
+The earlier execution completed all six 16k/32k fits under training commit
+`5baabfe229ad187f6bcdcc1dea7cf42aa43c41e9`, but those metrics are now superseded
+because affected waveforms entered both rungs. Stage B data remain published;
+the 65k optimizer, calibration, SBC, final evaluation and GWOSC/GWTC remain
+closed until corrected evidence and their individual gates are recorded.
 
 The future terminal 65k probe, architecture-selection, calibration/SBC
 materialization and selected-checkpoint score-extraction stacks are implemented

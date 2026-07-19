@@ -1,0 +1,64 @@
+phase: "4-waveform-correction"
+authorization_status: authorized_exact_replacement_and_corrected_view_publication
+authorized_by: codex_as_delegated_scientific_and_engineering_reviewer
+authorization_date: "2026-07-19"
+
+base_main_commit: "d4c941876346e2f838c111ae7837d0018478b340"
+implementation_commit: "499f86b3159af82612e38c134cd81003eedcc4e4"
+
+preregistration:
+  version: "1.1.1-rc.1"
+  path: configs/statistics/waveform_numerical_validity_preregistration.yaml
+  canonical_hash: "7fca209de9f06e98da1c5a96ae0f4fc6daec5d2f0c2339a718e1f899bb915b69"
+
+authorization:
+  numerical_validator_implementation_authorized: true
+  deterministic_rejection_implementation_authorized: true
+  read_only_published_waveform_audit_authorized: true
+  replacement_runner_implementation_authorized: true
+  corrected_view_resolver_implementation_authorized: true
+
+  replacement_materialization_authorized: true
+  corrected_view_publication_authorized: true
+  model_training_authorized: false
+  architecture_selection_authorized: false
+  calibration_authorized: false
+  sbc_authorized: false
+  final_evaluation_authorized: false
+  extension_above_65536_authorized: false
+  real_noise_authorized: false
+  gwosc_gwtc_access_authorized: false
+
+immutable_implementation:
+  git_commit: "499f86b3159af82612e38c134cd81003eedcc4e4"
+  wheel_path: /root/autodl-tmp/lensing-4/artifacts/phase4/waveform-correction/499f86b3159af82612e38c134cd81003eedcc4e4/gwlens_mm-0.1.0-py3-none-any.whl
+  wheel_sha256: "1088b2be49e879cbc44fc834b09c67947b45f2da444e15a3f41856abf60729f2"
+  editable_install_authorized: false
+
+preexecution_evidence:
+  local_pytest: "321 passed, 7 optional skips"
+  autodl_pytest: "331 passed, 1 optional skip"
+  maintained_scope_ruff: passed
+  mypy: passed_58_source_files
+  package_build: passed
+  real_record_regression_path: results/phase4/waveform_correction_real_record_regression.json
+  real_record_regression_sha256: "b9a82fd89c99d92aa1eb6d0ec361bb7215756ab51cd4388b87b89430b7c083a5"
+  all_five_known_pathologies_rejected: true
+  largest_known_valid_record_accepted: true
+  accepted_pair_generator_called_by_regression: false
+  immutable_base_hashes_reproduced: true
+
+replacement_contract:
+  stage_a_excluded_count: 2
+  stage_a_replacement_count: 2
+  stage_b_excluded_count: 3
+  stage_b_replacement_count: 3
+  total_replacement_count: 5
+  corrected_stage_a_train_count: 32768
+  unchanged_validation_count: 6144
+  corrected_stage_b_train_count: 32768
+  corrected_combined_train_count: 65536
+  new_parent_and_child_identities_required: true
+  original_publications_mutation_authorized: false
+
+stop_after_atomic_correction_publication: true

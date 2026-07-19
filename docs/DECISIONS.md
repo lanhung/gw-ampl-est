@@ -866,3 +866,42 @@ execution result explicitly keeps the 65k optimizer false. A separate gate
 must bind both parent manifests, the combined manifest, the finalized
 evaluation commitment, model configuration, immutable CUDA environment and a
 reviewed training wheel before resolving membership or reading strain arrays.
+
+## D080 — Correct numerical source-waveform pathologies without mutating data
+
+The first 65k launch exposed a finite IMRPhenomXPHM isolated-bin failure before
+any optimizer step. Exhaustive source-polarization regeneration found five and
+only five failures in 71,680 published records, separated from every retained
+record by more than four orders of magnitude. Because selection consumed the
+corrupted waveform, training-time clipping or omission would not repair the
+scientific sample.
+
+Version `1.1.1-rc.1` therefore makes numerical source-waveform validity an
+explicit pre-lensing, pre-selection simulator condition. For plus and cross
+independently, the peak strictly positive amplitude at or above 20 Hz is divided
+by the linear 99.9th percentile of strictly positive amplitudes. A maximum ratio
+above 10 is a rejected attempt. The threshold is frozen from a numerical gap
+(largest retained 1.705, smallest failure 12,983) before any 65k optimizer or
+downstream result; it is not tuned to model performance.
+
+The original Stage A/B publications remain immutable. A new atomic correction
+view removes exactly two plus three affected physical systems and adds exactly
+two plus three fresh direct-target, group-disjoint replacements. Validation and
+all counts remain fixed. The 16k membership is recomputed and all 16k/32k fits
+are rerun; 65k is rerun only if the unchanged stopping rule still requires it.
+
+## D081 — Accept the immutable five-system correction without reviving training
+
+The authorized correction published exactly two Stage A and three Stage B
+direct-target replacements under one atomic parent. Independent closeout
+reproduced the parent and tree hashes, every shard artifact, original parent
+hashes, exact array decomposition, unit weights, numerical-validity criterion
+and full grouped-ID disjointness. Corrected counts remain 32,768/32,768 train
+with 6,144 unchanged validation systems.
+
+This is an overlay, not an in-place rewrite: the five affected systems remain
+in their immutable historical publications and are excluded only by the
+versioned corrected views. The earlier 16k/32k metrics remain superseded.
+Training can reopen only through a new exact authorization that binds the
+correction manifest and a reader proven to include all five replacements and
+exclude all five affected systems.

@@ -1,0 +1,55 @@
+{
+  "accepted_pair_generator_called": false,
+  "all_known_pathologies_rejected": true,
+  "cases": [
+    {
+      "expected_rejected": true,
+      "maximum_peak_to_quantile_ratio": 2.5619812379083303e+24,
+      "physical_system_id": "phase4-stage-b-train-system-012017",
+      "rejected": true,
+      "split_component": "stage_b_train"
+    },
+    {
+      "expected_rejected": true,
+      "maximum_peak_to_quantile_ratio": 1.8007805575035463e+20,
+      "physical_system_id": "phase4-stage-b-train-system-007589",
+      "rejected": true,
+      "split_component": "stage_b_train"
+    },
+    {
+      "expected_rejected": true,
+      "maximum_peak_to_quantile_ratio": 1.1282128746106428e+20,
+      "physical_system_id": "phase4-train-system-019063",
+      "rejected": true,
+      "split_component": "stage_a_train"
+    },
+    {
+      "expected_rejected": true,
+      "maximum_peak_to_quantile_ratio": 12346468060.662058,
+      "physical_system_id": "phase4-train-system-011864",
+      "rejected": true,
+      "split_component": "stage_a_train"
+    },
+    {
+      "expected_rejected": true,
+      "maximum_peak_to_quantile_ratio": 12983.243135411329,
+      "physical_system_id": "phase4-stage-b-train-system-005392",
+      "rejected": true,
+      "split_component": "stage_b_train"
+    },
+    {
+      "expected_rejected": false,
+      "maximum_peak_to_quantile_ratio": 1.7047172393961227,
+      "physical_system_id": "phase4-stage-b-train-system-021121",
+      "rejected": false,
+      "split_component": "stage_b_train"
+    }
+  ],
+  "gwosc_gwtc_accessed": false,
+  "largest_known_valid_record_accepted": true,
+  "pathology_count": 5,
+  "published_data_modified": false,
+  "status": "passed",
+  "valid_boundary_case_count": 1,
+  "waveform_pairs_generated": 0
+}

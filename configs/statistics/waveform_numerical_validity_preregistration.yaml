@@ -1,0 +1,118 @@
+phase: "4"
+preregistration_version: "1.1.1-rc.1"
+status: scientific_correction_frozen_execution_disabled
+scope: waveform_numerical_validity_and_exact_count_replacement_only
+
+parent_direct_target_contract:
+  version: "1.1.0-rc.4"
+  path: configs/statistics/direct_target_stage_a_preregistration.yaml
+  canonical_hash: "5aeaac395463bd073c44ead4ff4c5c729b5a2d4b4f1840c0825a53b30ab1bc98"
+
+immutable_parent_data:
+  stage_a_parent_id: phase4-stage-a-2be777e727ef-d3a60034bbd6
+  stage_a_parent_manifest_sha256: "4f3e6b3a7ca1a995d7a7643c48410e479fb812e4a01ff66537232b9d64bf3314"
+  stage_b_parent_id: phase4-stage-b-2be777e727ef-6a4f106f9640
+  stage_b_parent_manifest_sha256: "b4d7df6300d0919f148b98fd8ce658216bdfa64752026dc9477321874e31f0da"
+  combined_65k_id: phase4-train-65k-2be777e727ef-6a4f106f9640
+  combined_65k_manifest_sha256: "753ace3d2fe475f1279b3bd8560005017f4e75a822fa951d94f9ada60eb3eca4"
+  mutation_authorized: false
+
+scientific_invariants:
+  estimand_changed: false
+  posterior_target_changed: false
+  preselection_evaluation_distribution_changed: false
+  direct_target_q_equals_p_changed: false
+  selection_thresholds_changed: false
+  observation_model_changed: false
+  waveform_approximant_changed: false
+  waveform_window_or_psd_changed: false
+  split_counts_changed: false
+  learning_curve_rule_changed: false
+  model_or_optimizer_changed: false
+
+numerical_validity_contract:
+  waveform_approximant: IMRPhenomXPHM
+  evaluation_point: unlensed_source_frequency_domain_polarizations_before_detector_projection_and_selection
+  polarization_names: [plus, cross]
+  finite_complete_arrays_required: true
+  minimum_frequency_hz: 20.0
+  include_minimum_frequency_bin: true
+  positive_amplitude_support: strictly_greater_than_zero
+  statistic_per_polarization: maximum_amplitude_divided_by_positive_in_band_quantile
+  positive_amplitude_quantile: 0.999
+  quantile_method: numpy_linear
+  aggregate_statistic: maximum_over_plus_and_cross
+  maximum_peak_to_quantile_ratio_inclusive: 10.0
+  pass_rule: finite_and_ratio_less_than_or_equal_to_10
+  failure_action: deterministic_attempt_rejection_before_lensing_selection
+  rejection_reason_prefix: waveform_numerical_pathology
+  clipping_authorized: false
+  waveform_repair_or_spin_substitution_authorized: false
+
+diagnostic_basis:
+  audit_path: results/phase4/waveform_spectral_audit.json
+  audited_record_count: 71680
+  audited_shard_count: 560
+  pathological_record_count: 5
+  largest_nonpathological_ratio: 1.7047172393961227
+  smallest_pathological_ratio: 12983.243135411329
+  threshold_selected_for_numerical_separation_not_model_performance: true
+  optimizer_steps_observed_before_freeze: 0
+  calibration_sbc_or_final_evaluation_observed: false
+
+correction_view_contract:
+  stage_a_train:
+    original_count: 32768
+    excluded_count: 2
+    replacement_count: 2
+    corrected_count: 32768
+    excluded_physical_system_ids:
+      - phase4-train-system-011864
+      - phase4-train-system-019063
+  stage_a_validation:
+    original_count: 6144
+    excluded_count: 0
+    replacement_count: 0
+    corrected_count: 6144
+  stage_b_train_extension:
+    original_count: 32768
+    excluded_count: 3
+    replacement_count: 3
+    corrected_count: 32768
+    excluded_physical_system_ids:
+      - phase4-stage-b-train-system-005392
+      - phase4-stage-b-train-system-007589
+      - phase4-stage-b-train-system-012017
+  combined_train_count: 65536
+  original_publications_remain_read_only: true
+  replacements_use_fresh_direct_target_seed_namespaces: true
+  replacements_are_group_disjoint_from_all_retained_train_and_validation_systems: true
+  corrected_views_are_atomically_published_and_hash_bound: true
+
+superseded_training_evidence:
+  prior_16k_32k_learning_curve_status: invalidated_by_waveform_numerical_pathology
+  prior_65k_attempt_status: failed_before_first_optimizer_step
+  prior_training_output_root: /root/autodl-tmp/lensing-4/training/phase4/probe-65k-a514e101
+  reuse_or_resume_authorized: false
+  corrected_16k_membership_recomputed_by_frozen_sha256_rank: true
+  rerun_16k_32k_all_three_seeds_required: true
+  rerun_65k_only_if_corrected_learning_curve_requires_continuation: true
+
+execution:
+  implementation_authorized: true
+  replacement_materialization_enabled: false
+  corrected_view_publication_enabled: false
+  model_training_enabled: false
+  architecture_selection_enabled: false
+  calibration_enabled: false
+  sbc_enabled: false
+  final_evaluation_enabled: false
+  extension_above_65536_enabled: false
+  real_noise_enabled: false
+  gwosc_gwtc_access_enabled: false
+
+downstream_addenda:
+  calibration_sbc_rc5_compatible: true
+  final_evaluation_analysis_rc6_compatible: true
+  reference_baseline_rc7_compatible: true
+  execution_remains_separately_gated: true

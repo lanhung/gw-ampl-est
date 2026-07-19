@@ -1,0 +1,122 @@
+phase: "4"
+stage: waveform_numerical_correction
+status: preexecution_frozen
+
+authorization_path: configs/execution/phase4_waveform_numerical_correction_authorization.yaml
+base_data_config: configs/data/phase3a_qualification.yaml
+
+preregistration:
+  path: configs/statistics/waveform_numerical_validity_preregistration.yaml
+  version: "1.1.1-rc.1"
+  canonical_hash: "7fca209de9f06e98da1c5a96ae0f4fc6daec5d2f0c2339a718e1f899bb915b69"
+
+parent_scientific_preregistration:
+  path: configs/statistics/phase2_preregistration.yaml
+  version: "1.0.0-rc.5"
+  canonical_hash: "4dde279cf1bea78d1ddbd4fab99d88e88e334c80c180dc7850679736c5e53edb"
+
+direct_target_density_implementation:
+  path: configs/proposals/proposal_v3_target_anchored_mixture.yaml
+  evaluation_target_id: balanced_literature_informed_benchmark_v1
+  mode: evaluation_target_direct
+  proposal_equals_evaluation: true
+  log_importance_weight: 0.0
+  importance_weight: 1.0
+
+audit:
+  path: results/phase4/waveform_spectral_audit.json
+  sha256: "a322c257ee6721fc92e33f22107aed8277a11e8d19b77ebef5a24db1b4172709"
+  record_count: 71680
+  pathology_count: 5
+
+numerical_validity:
+  enabled: true
+  minimum_frequency_hz: 20.0
+  positive_amplitude_quantile: 0.999
+  quantile_method: numpy_linear
+  maximum_peak_to_quantile_ratio: 10.0
+
+immutable_base_publications:
+  stage_a:
+    parent_id: phase4-stage-a-2be777e727ef-d3a60034bbd6
+    parent_root: /root/autodl-tmp/lensing-4/data_v2/scientific/stage_a/published/phase4-stage-a-2be777e727ef-d3a60034bbd6
+    parent_manifest_sha256: "4f3e6b3a7ca1a995d7a7643c48410e479fb812e4a01ff66537232b9d64bf3314"
+    train_dataset_id: gwlens-v2-2.0.0-alpha.3-ef4baee395dbe94b-train
+    validation_dataset_id: gwlens-v2-2.0.0-alpha.3-33c3e6cb507a03e9-validation
+    train_count: 32768
+    validation_count: 6144
+  stage_b:
+    parent_id: phase4-stage-b-2be777e727ef-6a4f106f9640
+    parent_root: /root/autodl-tmp/lensing-4/data_v2/scientific/stage_b/published/phase4-stage-b-2be777e727ef-6a4f106f9640
+    parent_manifest_sha256: "b4d7df6300d0919f148b98fd8ce658216bdfa64752026dc9477321874e31f0da"
+    train_dataset_id: gwlens-v2-2.0.0-alpha.3-d19597390506b6f8-train-extension
+    train_count: 32768
+  combined_65k:
+    combined_id: phase4-train-65k-2be777e727ef-6a4f106f9640
+    manifest_path: /root/autodl-tmp/lensing-4/data_v2/scientific/train_65k/published/phase4-train-65k-2be777e727ef-6a4f106f9640/dataset_manifest.json
+    manifest_sha256: "753ace3d2fe475f1279b3bd8560005017f4e75a822fa951d94f9ada60eb3eca4"
+
+replacement_namespaces:
+  stage_a_train:
+    split: train
+    root_seed: 2026071901
+    attempt_stream_namespace: phase4-waveform-correction-stage-a-v1
+    id_prefix: phase4-waveform-correction-stage-a
+    accepted_pair_count: 2
+    shard_count: 1
+    pairs_per_shard: 2
+    attempt_id_stride: 2
+    excluded_physical_system_ids:
+      - phase4-train-system-011864
+      - phase4-train-system-019063
+  stage_b_train:
+    split: train
+    root_seed: 2026071902
+    attempt_stream_namespace: phase4-waveform-correction-stage-b-v1
+    id_prefix: phase4-waveform-correction-stage-b
+    accepted_pair_count: 3
+    shard_count: 1
+    pairs_per_shard: 3
+    attempt_id_stride: 2
+    excluded_physical_system_ids:
+      - phase4-stage-b-train-system-005392
+      - phase4-stage-b-train-system-007589
+      - phase4-stage-b-train-system-012017
+
+corrected_counts:
+  stage_a_train: 32768
+  stage_a_validation: 6144
+  stage_b_train: 32768
+  combined_train: 65536
+  total_excluded: 5
+  total_replacements: 5
+
+paths:
+  staging_root: /root/autodl-tmp/lensing-4/data_v2/scientific/waveform_correction/staging
+  publication_root: /root/autodl-tmp/lensing-4/data_v2/scientific/waveform_correction/published
+  manifest_root: /root/autodl-tmp/lensing-4/manifests/phase4/waveform_correction
+  log_root: /root/autodl-tmp/lensing-4/logs/phase4/waveform_correction
+
+resource_gates:
+  minimum_prelaunch_free_bytes: 100250000000
+  minimum_post_publication_free_bytes: 100000000000
+  maximum_correction_output_bytes: 250000000
+
+execution:
+  replacement_materialization_enabled: false
+  corrected_view_publication_enabled: false
+  worker_processes: 2
+  maximum_attempts_per_worker: 100000
+  maximum_active_seconds_per_worker: 7200
+  atomic_parent_publication: true
+  resume_completed_replacement_shards_without_rewrite: true
+
+authorization_boundaries:
+  model_training_authorized: false
+  architecture_selection_authorized: false
+  calibration_authorized: false
+  sbc_authorized: false
+  final_evaluation_authorized: false
+  extension_above_65536_authorized: false
+  real_noise_authorized: false
+  gwosc_gwtc_access_authorized: false

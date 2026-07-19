@@ -1,0 +1,126 @@
+{
+  "all_importance_weights_one": true,
+  "architecture_selection_authorized": false,
+  "audit_sha256": "a322c257ee6721fc92e33f22107aed8277a11e8d19b77ebef5a24db1b4172709",
+  "calibration_authorized": false,
+  "configuration_hash": "1db109b0818932d2cea0652549937e39d75c6297cd3a81456eabbd2704f83296",
+  "corrected_combined_train_count": 65536,
+  "corrected_stage_a_train_count": 32768,
+  "corrected_stage_b_train_count": 32768,
+  "final_evaluation_authorized": false,
+  "generator_commit": "499f86b3159af82612e38c134cd81003eedcc4e4",
+  "gwosc_gwtc_accessed": false,
+  "model_training_authorized": false,
+  "original_publications_modified": false,
+  "parent_manifest_sha256": "0fcfb117c620d58a2e0ccd8b19c0d3f3a371dd844fb637b50c8b565eee6864f2",
+  "parent_run_id": "phase4-waveform-correction-499f86b3159a-1db109b08189",
+  "preregistration_hash": "7fca209de9f06e98da1c5a96ae0f4fc6daec5d2f0c2339a718e1f899bb915b69",
+  "preregistration_version": "1.1.1-rc.1",
+  "proposal_equals_evaluation": true,
+  "publication_bytes": 5667197,
+  "publication_path": "/root/autodl-tmp/lensing-4/data_v2/scientific/waveform_correction/published/phase4-waveform-correction-499f86b3159a-1db109b08189",
+  "publication_tree_sha256": "a57aa2691e256b34403392f595e964dceec1325cfc54a38ed4d2a0b714d38c12",
+  "remaining_free_bytes": 223748628480,
+  "replacement_components_group_disjoint": true,
+  "replacement_group_disjoint_from_all_base_components": true,
+  "sbc_authorized": false,
+  "status": "passed",
+  "total_excluded_count": 5,
+  "total_replacement_count": 5,
+  "validation_count": 6144,
+  "validations": {
+    "stage_a_train": {
+      "accepted_pair_count": 2,
+      "all_importance_weights_one": true,
+      "attempt_count": 338,
+      "complete_shard_count": 1,
+      "configuration_hash": "c0887482501a4231ecfd119a04e2ea3eb642223e94f9eac345bc06d90d4516f7",
+      "dataset_id": "gwlens-v2-2.0.0-alpha.3-f0edcf4beaf2bcdb-stage-a-train",
+      "em_cell_counts": {
+        "full_precise_spectroscopic": 1,
+        "no_source_redshift": 1
+      },
+      "family_counts": {
+        "sie_external_shear": 2
+      },
+      "generator_commit": "499f86b3159af82612e38c134cd81003eedcc4e4",
+      "pair_ids_sha256": "6b9019bcc6cdd9c818b29d62a92e12f20d8050a77fa75ba2f541dd0f62eff7a4",
+      "pairs_per_shard": 2,
+      "physical_system_ids_sha256": "ab6f779bffdbe41c372256e3f0d40a8892066e453d7138b537d8f5954f576005",
+      "proposal_equals_evaluation": true,
+      "shards": [
+        {
+          "bytes": 1929894,
+          "sha256": "4a4b49e73510e7474232412f068c4c54b49278843fc44f4ec2ebdb8e22f71b1b",
+          "shard_index": 0
+        }
+      ],
+      "split": "train",
+      "status": "passed"
+    },
+    "stage_b_train": {
+      "accepted_pair_count": 3,
+      "all_importance_weights_one": true,
+      "attempt_count": 890,
+      "complete_shard_count": 1,
+      "configuration_hash": "7c3cfff94ac77ac0fdbd8f262d7891314bb6687dd361ff3da2b14f97b02c60c9",
+      "dataset_id": "gwlens-v2-2.0.0-alpha.3-8e2131a31a7381c8-stage-b-train",
+      "em_cell_counts": {
+        "full_precise_spectroscopic": 1,
+        "no_source_redshift": 1,
+        "sparse_astrometry_timing_only": 1
+      },
+      "family_counts": {
+        "epl_external_shear": 2,
+        "sie_external_shear": 1
+      },
+      "generator_commit": "499f86b3159af82612e38c134cd81003eedcc4e4",
+      "pair_ids_sha256": "c54762dd89cefbcc867f998ccfa2603a765610577a0a5b9a0285884ddac62e58",
+      "pairs_per_shard": 3,
+      "physical_system_ids_sha256": "820d2e618f35b3911357ad6261e6722304d042ca5360c4e1d59f31bddc58a0ad",
+      "proposal_equals_evaluation": true,
+      "shards": [
+        {
+          "bytes": 2894933,
+          "sha256": "2b15afe08a2770898bc02fd0c190f8a556ce96f05b663765db4d365662ea88c3",
+          "shard_index": 0
+        }
+      ],
+      "split": "train",
+      "status": "passed"
+    }
+  },
+  "views": {
+    "stage_a_train": {
+      "base_count": 32768,
+      "base_dataset_id": "gwlens-v2-2.0.0-alpha.3-ef4baee395dbe94b-train",
+      "base_parent_root": "/root/autodl-tmp/lensing-4/data_v2/scientific/stage_a/published/phase4-stage-a-2be777e727ef-d3a60034bbd6",
+      "corrected_count": 32768,
+      "excluded_physical_system_ids": [
+        "phase4-train-system-011864",
+        "phase4-train-system-019063"
+      ],
+      "replacement_count": 2,
+      "replacement_dataset_id": "gwlens-v2-2.0.0-alpha.3-f0edcf4beaf2bcdb-stage-a-train"
+    },
+    "stage_a_validation": {
+      "base_dataset_id": "gwlens-v2-2.0.0-alpha.3-33c3e6cb507a03e9-validation",
+      "base_parent_root": "/root/autodl-tmp/lensing-4/data_v2/scientific/stage_a/published/phase4-stage-a-2be777e727ef-d3a60034bbd6",
+      "corrected_count": 6144,
+      "unchanged": true
+    },
+    "stage_b_train": {
+      "base_count": 32768,
+      "base_dataset_id": "gwlens-v2-2.0.0-alpha.3-d19597390506b6f8-train-extension",
+      "base_parent_root": "/root/autodl-tmp/lensing-4/data_v2/scientific/stage_b/published/phase4-stage-b-2be777e727ef-6a4f106f9640",
+      "corrected_count": 32768,
+      "excluded_physical_system_ids": [
+        "phase4-stage-b-train-system-005392",
+        "phase4-stage-b-train-system-007589",
+        "phase4-stage-b-train-system-012017"
+      ],
+      "replacement_count": 3,
+      "replacement_dataset_id": "gwlens-v2-2.0.0-alpha.3-8e2131a31a7381c8-stage-b-train"
+    }
+  }
+}

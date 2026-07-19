@@ -585,3 +585,29 @@ architecture lock plus separate materialization and inference gates.
   shard, unit-weight, free-space and group-disjointness checks.
 - Future immutable training execution uses a separately hashed wheel, so this
   verifier-only launch issue does not weaken the training environment gate.
+
+## The first 65k probe exposed five numerical source-waveform pathologies
+
+- Seed 0 and seed 1 stopped during input whitening before their first optimizer
+  step; seed 2 was terminated as part of the fail-closed launcher shutdown.
+- The immediate failing system contained a single IMRPhenomXPHM polarization
+  bin near 37.86 Hz with amplitude of order unity while neighboring bins were of
+  order 1e-24. Its recorded network SNR was consequently 4.37e22.
+- An exhaustive read-only audit regenerated source polarizations for all 71,680
+  published train and validation records. Exactly five train systems had
+  peak/positive-in-band-99.9%-quantile ratios above 10; validation had none.
+- Four failures had gross SNR outliers. A fifth ratio of 12,983 had network SNR
+  195.7, proving that an SNR-only filter is insufficient. Every retained record
+  had ratio at most 1.705.
+- One failure belongs to the frozen 16k subset and both Stage A failures belong
+  to 32k. The previous learning-curve decision is superseded. No 65k checkpoint
+  or metric exists.
+- Original publications and the failed training root are retained immutable.
+  Clipping, row deletion and in-place replacement are forbidden. The versioned
+  correction uses deterministic pre-selection rejection plus an exact-count,
+  fresh-identity replacement overlay.
+- The authorized overlay subsequently completed and passed independent
+  closeout. Exactly five replacements restore the frozen counts; their source
+  spectral ratios are below 1.096, arrays satisfy exact decomposition, weights
+  are one and all grouped identities are disjoint. This repairs the data view,
+  not the superseded learning-curve result; no optimizer was authorized.
