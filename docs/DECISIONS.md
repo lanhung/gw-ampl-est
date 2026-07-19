@@ -972,3 +972,20 @@ the corrected train-view hash and reuses the correction-derived preparation
 identity. Missing correction paths or a drifted correction/tree/view hash fail
 before data access. This is a software-release decision only; it does not open
 architecture fitting or selection before the terminal 65k lock.
+
+## D087 — Carry numerical rejection forward without rewriting old commitments
+
+The five-system incident established an IMRPhenomXPHM source-polarization
+numerical-validity condition before any calibration, SBC or final-evaluation
+system existed. Future generator paths must therefore apply the same frozen
+pre-lensing, pre-selection rejection rule rather than rediscovering the defect
+after publication.
+
+The Phase 6 data configuration and original final-evaluation commitment remain
+byte-identical. Hash-bound prospective addenda bind them to correction
+preregistration `1.1.1-rc.1`, and the typed generator builders inject the exact
+20 Hz, 99.9th-percentile and ratio-at-most-10 contract. Counts, seeds, target
+distributions and diagnostic contexts do not change. The intentionally distinct
+SEOBNRv4PHM mismatch namespace is explicitly marked non-applicable to this
+IMRPhenomXPHM-specific ratio rule and retains its independent finite-array and
+boundary checks. This closes a software consistency gap; it authorizes no data.

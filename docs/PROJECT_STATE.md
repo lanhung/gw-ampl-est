@@ -399,3 +399,13 @@ Architecture selection remains closed until the terminal size decision locks
 corrected overlay rather than the immutable base 65k reader. Calibration/SBC
 materialization, final evaluation, real noise and GWOSC/GWTC all remain closed
 behind their separate downstream gates.
+
+That architecture implementation is now correction-aware and merged. In
+parallel with the active corrected 65k three-seed probe, the future Phase 6 and
+Phase 7 generator builders were hardened to inherit numerical-validity
+preregistration `1.1.1-rc.1`. The Phase 6 supplemental commitment SHA-256 is
+`af87affbaf56695fe0a6c7f422a70fed154dd2df2255df819348ad204dd0ccd4`; the
+final-evaluation supplemental commitment SHA-256 is
+`431c09f2c279e1c745bd118fb1b0c06643de7dc42f605af78a49ca99b5b0019b`.
+The original final-evaluation commitment remains exactly `c13412ec...` and all
+downstream execution flags remain false.
