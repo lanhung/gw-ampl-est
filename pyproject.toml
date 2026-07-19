@@ -52,6 +52,7 @@ files = [
   "scripts/phase7/launch_ablation_fits.py",
   "scripts/phase7/summarize_ablation_fits.py",
   "scripts/phase7/run_reference_query.py",
+  "scripts/phase7/verify_legacy_sis_stress_control.py",
 ]
 warn_unused_ignores = true
 disallow_untyped_defs = true

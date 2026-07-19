@@ -1080,3 +1080,22 @@ the independent final-unsealing gate. A future execution authorization must
 bind the terminal 65k lock, selected architecture, corrected publication,
 primary preprocessing artifact, exact query publication, immutable software
 and output identity. The current implementation gate opens none of them.
+
+## D093 — Keep the legacy SIS regressor as a read-only descriptive control
+
+The PDF-era regressor was trained on 2,500 SIS systems with one synthetic ET
+detector and reports a model-selected 500-row validation partition. Its saved
+point predictions are traceable, but the checkpoint is neither a conditional
+posterior nor compatible with the new H1/L1/V1, SIE/EPL, multimessenger input
+contract. Applying it to v2 final records would therefore manufacture an
+invalid matched comparison.
+
+The executable obligation is limited to a read-only reproduction of the
+historical descriptive metrics. The verifier binds the opaque checkpoint and
+saved-prediction hashes, never deserializes the checkpoint, recomputes point
+MAE/RMSE/MAPE/Pearson and checks the SIS signed-magnification identity. It
+records that the rows are model-selected validation rather than independent
+test evidence. Legacy inode/size/mtime identity must remain unchanged, and any
+new result is written only under `/root/autodl-tmp/lensing-4`. This completes a
+historical stress control without calling it calibrated, posterior-valued,
+matched or scientifically comparable to the primary final evaluation.
