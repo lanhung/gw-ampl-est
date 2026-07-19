@@ -21,6 +21,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     parser.add_argument("--stage-a-publication", required=True, type=Path)
     parser.add_argument("--stage-b-publication", required=True, type=Path)
     parser.add_argument("--combined-publication", required=True, type=Path)
+    parser.add_argument("--correction-publication", type=Path)
     parser.add_argument("--terminal-decision", required=True, type=Path)
     parser.add_argument("--probe-output-root", required=True, type=Path)
     parser.add_argument("--environment-lock", required=True, type=Path)
@@ -64,6 +65,10 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "cuda:0",
         "--execute",
     ]
+    if arguments.correction_publication is not None:
+        common.extend(
+            ["--correction-publication", str(arguments.correction_publication)]
+        )
     log_root = arguments.output_root / "logs"
     result_root = arguments.output_root / "launcher-results"
     all_results = {}

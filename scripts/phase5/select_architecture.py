@@ -24,6 +24,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     parser.add_argument("--stage-a-publication", required=True, type=Path)
     parser.add_argument("--stage-b-publication", required=True, type=Path)
     parser.add_argument("--combined-publication", required=True, type=Path)
+    parser.add_argument("--correction-publication", type=Path)
     parser.add_argument("--terminal-decision", required=True, type=Path)
     parser.add_argument("--probe-output-root", required=True, type=Path)
     parser.add_argument("--architecture-output-root", required=True, type=Path)
@@ -58,6 +59,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         stage_a_publication_root=arguments.stage_a_publication,
         stage_b_publication_root=arguments.stage_b_publication,
         combined_publication_root=arguments.combined_publication,
+        correction_publication_root=arguments.correction_publication,
         terminal_decision_path=arguments.terminal_decision,
         probe_output_root=arguments.probe_output_root,
     )

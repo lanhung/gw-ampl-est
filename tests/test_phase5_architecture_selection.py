@@ -1,15 +1,21 @@
 from __future__ import annotations
 
+import hashlib
+import json
 from pathlib import Path
 
 import pytest
 
 from gwlens_mm.config import load_yaml
 from gwlens_mm.provenance import configuration_hash
+from gwlens_mm.training import architecture as architecture_module
 from gwlens_mm.training.architecture import (
     ALL_ARCHITECTURE_IDS,
     NEW_ARCHITECTURE_IDS,
     PROBE_ARCHITECTURE_ID,
+    _locked_preparation_manifest_sha256,
+    _locked_train_manifest_sha256,
+    _locked_training_dataset,
     architecture_execution_evidence,
     candidate_model_configuration,
     load_architecture_specs,
@@ -18,6 +24,11 @@ from gwlens_mm.training.architecture import (
     validate_architecture_execution_gate,
 )
 from gwlens_mm.training.contracts import TrainingGateError, model_configuration_hash
+from gwlens_mm.training.data import (
+    CombinedTrainingPublication,
+    CorrectedTrainingPublication,
+    StageAPublication,
+)
 from gwlens_mm.training.engine import TrainingRunIdentity, _validate_execution_evidence
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -173,5 +184,119 @@ def test_implementation_gate_cannot_execute_architecture_selection(tmp_path: Pat
             stage_b_publication_root=tmp_path / "stage-b",
             combined_publication_root=tmp_path / "combined",
             terminal_decision_path=tmp_path / "decision.json",
+            probe_output_root=tmp_path / "probe",
+        )
+
+
+def _publication_identities(tmp_path: Path) -> tuple[
+    CombinedTrainingPublication, CorrectedTrainingPublication
+]:
+    stage_a = StageAPublication(
+        parent_root=tmp_path / "stage-a",
+        manifest_path=tmp_path / "stage-a" / "dataset_manifest.json",
+        manifest_sha256="a" * 64,
+        generator_commit="b" * 40,
+        preregistration_hash="c" * 64,
+        train_dataset_id="train-a",
+        validation_dataset_id="validation-a",
+        train_root=tmp_path / "train-a",
+        validation_root=tmp_path / "validation-a",
+        namespace_manifest_sha256={"train": "d" * 64, "validation": "e" * 64},
+    )
+    combined = CombinedTrainingPublication(
+        combined_root=tmp_path / "combined",
+        combined_manifest_path=tmp_path / "combined" / "dataset_manifest.json",
+        combined_manifest_sha256="f" * 64,
+        stage_a=stage_a,
+        stage_b_parent_root=tmp_path / "stage-b",
+        stage_b_parent_manifest_path=tmp_path / "stage-b" / "dataset_manifest.json",
+        stage_b_parent_manifest_sha256="1" * 64,
+        stage_b_dataset_id="train-b",
+        stage_b_train_root=tmp_path / "train-b",
+        train_manifest_sha256="2" * 64,
+    )
+    corrected = CorrectedTrainingPublication(
+        correction_root=tmp_path / "correction",
+        correction_manifest_path=tmp_path / "correction" / "dataset_manifest.json",
+        correction_manifest_sha256="3" * 64,
+        correction_tree_sha256="4" * 64,
+        stage_a=stage_a,
+        combined_base=combined,
+        stage_a_excluded_ids=("bad-a",),
+        stage_b_excluded_ids=("bad-b",),
+        stage_a_replacement_root=tmp_path / "replacement-a",
+        stage_b_replacement_root=tmp_path / "replacement-b",
+        stage_a_replacement_ids=("replacement-a",),
+        stage_b_replacement_ids=("replacement-b",),
+        corrected_stage_a_train_manifest_sha256="5" * 64,
+        corrected_combined_train_manifest_sha256="6" * 64,
+    )
+    return combined, corrected
+
+
+def test_architecture_identity_helpers_never_fall_back_to_bad_base_view(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    combined, corrected = _publication_identities(tmp_path)
+    assert _locked_train_manifest_sha256(combined) == "2" * 64
+    assert _locked_preparation_manifest_sha256(combined) == "f" * 64
+    assert _locked_train_manifest_sha256(corrected) == "6" * 64
+    assert _locked_preparation_manifest_sha256(corrected) == "3" * 64
+
+    sentinel = object()
+    monkeypatch.setattr(
+        architecture_module,
+        "corrected_65k_training_dataset",
+        lambda publication, curves: sentinel,
+    )
+    assert _locked_training_dataset(corrected, {}) is sentinel
+
+
+def test_corrected_architecture_gate_requires_explicit_overlay_path(
+    tmp_path: Path,
+) -> None:
+    decision = {
+        "decision": "lock_train_65k",
+        "comparison": "train_32k_to_train_65k",
+        "extension_above_65536_authorized": False,
+    }
+    decision_path = tmp_path / "decision.json"
+    decision_path.write_text(json.dumps(decision) + "\n")
+    flags = {
+        "stage_a_data_access_authorized": True,
+        "stage_b_data_access_authorized": True,
+        "replacement_data_access_authorized": True,
+        "new_architecture_fit_execution_authorized": True,
+        "architecture_selection_execution_authorized": True,
+        "probe_architecture_retraining_authorized": False,
+        "best_seed_selection_authorized": False,
+        "model_tuning_authorized": False,
+        "calibration_authorized": False,
+        "sbc_authorized": False,
+        "final_evaluation_authorized": False,
+        "extension_above_65536_authorized": False,
+        "gwosc_gwtc_access_authorized": False,
+    }
+    authorization = {
+        "authorization_status": "authorized_corrected_architecture_selection_only",
+        "authorization": flags,
+        "locked_training_rung": 65536,
+        "authorized_new_architecture_ids": list(NEW_ARCHITECTURE_IDS),
+        "authorized_training_seeds": [0, 1, 2],
+        "terminal_decision_path": str(decision_path),
+        "terminal_decision_sha256": hashlib.sha256(
+            decision_path.read_bytes()
+        ).hexdigest(),
+    }
+    authorization_path = tmp_path / "authorization.yaml"
+    authorization_path.write_text(json.dumps(authorization) + "\n")
+    with pytest.raises(TrainingGateError, match="requires the correction publication"):
+        validate_architecture_execution_gate(
+            ROOT,
+            authorization_path=authorization_path,
+            stage_a_publication_root=tmp_path / "stage-a",
+            stage_b_publication_root=tmp_path / "stage-b",
+            combined_publication_root=tmp_path / "combined",
+            terminal_decision_path=decision_path,
             probe_output_root=tmp_path / "probe",
         )
