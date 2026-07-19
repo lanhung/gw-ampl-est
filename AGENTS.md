@@ -630,11 +630,13 @@ substitution are forbidden. The estimand, evaluation target, q=p unit weights,
 selection, waveform approximant, PSD, counts, model and learning-curve rule are
 unchanged.
 
-Only implementation and read-only preflight are currently authorized through
+Delegated expert review accepts implementation commit
+`fefa32679bd5e6fc1a41fe4953dd432acca8bff2`, exact wheel SHA-256
+`3a37bed1f5a3c15d7f296edfdac4b77a7e8b4408e6dad27b1175896994f4e0ec`,
+the real-record regression and immutable base hashes. Exact replacement
+materialization and corrected-view publication are now authorized through
 `configs/execution/phase4_waveform_numerical_correction_authorization.yaml`.
-Replacement materialization and corrected-view publication remain false until a
-clean implementation commit, exact wheel, AutoDL regression and immutable base
-hashes pass. The future correction must exclude exactly two Stage A plus three
+The correction must exclude exactly two Stage A plus three
 Stage B systems, publish exactly two plus three fresh direct-target replacements,
 retain all original publications read-only, keep validation at 6,144, and restore
 exact corrected counts of 32,768/32,768/65,536. Training, architecture selection,

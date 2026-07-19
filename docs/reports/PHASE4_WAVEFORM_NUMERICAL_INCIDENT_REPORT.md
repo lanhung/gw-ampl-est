@@ -54,3 +54,16 @@ train, and 6,144 validation systems before any training is reopened.
 The failed 65k output root is retained as immutable evidence. No checkpoint or
 metric from it may be resumed. Architecture selection, calibration, SBC, final
 evaluation, extension beyond 65k, real noise, and GWOSC/GWTC remain closed.
+
+## Implementation preflight
+
+The correction implementation is frozen at
+`fefa32679bd5e6fc1a41fe4953dd432acca8bff2`; wheel SHA-256 is
+`3a37bed1f5a3c15d7f296edfdac4b77a7e8b4408e6dad27b1175896994f4e0ec`.
+Local tests passed (321 with seven optional skips), as did maintained-scope
+Ruff, mypy and package build. AutoDL passed 331 tests with one optional PyTorch
+skip. The exact real-record regression rejected all five known pathologies and
+accepted the largest known valid boundary record. All three immutable base
+manifest hashes reproduced. Delegated review therefore authorizes only the
+five-system replacement and atomic corrected-view publication; training stays
+closed.
