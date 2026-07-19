@@ -777,6 +777,20 @@ implementation checkpoint may use synthetic fixtures only. It does not permit
 opening scientific arrays or checkpoints, starting an optimizer, selecting an
 architecture, accessing calibration/SBC/final data or using GWOSC/GWTC.
 
+The implementation-only boundary also contains the future RC.7 reference-query
+runner through:
+
+`configs/execution/phase7_reference_execution_stack_authorization.yaml`
+
+It binds a future terminal size lock, selected architecture, corrected logical
+training publication, selected-rung standardizer, one exact query publication,
+immutable software/environment and output identity. It streams metadata-only
+queries to deterministic per-case and aggregate score artifacts with raw
+coverage counts and Wilson intervals, without persisting posterior draws or
+opening GW strain. Current authorization permits synthetic fixtures only;
+scientific bank access, validation/final query execution, checkpoint access,
+final unsealing and GWOSC/GWTC remain closed.
+
 ## Scientific integrity
 
 - Never fabricate results, citations, completed runs or calibration.

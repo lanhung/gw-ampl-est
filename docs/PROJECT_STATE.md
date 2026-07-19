@@ -113,10 +113,12 @@ An additional pre-data audit established that the historical DINGO-style
 likelihood-gold gate cannot be applied to a two-target marginal NSF: no neural
 density exists on the complete nuisance state required for full likelihood
 weights. RC.7 now forbids that claim and freezes an executable non-neural
-selected-prior EM/timing kNN/KDE simulation reference. The pure stack is under
-implementation only; its deterministic grouped index and bounded per-case
-scoring core are complete, but it has not opened the scientific reference
-bank, validation or final data.
+selected-prior EM/timing kNN/KDE simulation reference. Its deterministic
+metadata-only bank index, exact-role execution gate and bounded streaming
+score writer are complete. The future runner records raw coverage counts and
+Wilson intervals while never persisting posterior draws. It remains
+implementation-only and has not opened the scientific reference bank,
+validation or final data.
 
 The two RC.6 input-ablation training views now have a complete fail-closed
 software stack. GW-only removes EM values, masks and astrometry while retaining
@@ -448,4 +450,10 @@ in-memory index groups the standardized corrected training rung by exact lens
 family and EM cell, selects 256 neighbors by `(distance, physical_system_id)`,
 and emits small per-case CRPS, KDE NLP, central-coverage and interval-width
 scores without persisting 4,096-draw arrays. All tests use synthetic fixtures;
-no scientific bank, validation query or final case was opened.
+no scientific bank, validation query or final case was opened. A fail-closed
+execution wrapper now additionally binds the terminal 65k decision, selected
+architecture, corrected logical publication, primary-rung standardizer,
+immutable wheel/environment and one exact query publication. It streams one
+query at a time into atomic JSONL and summary products with raw coverage counts
+and Wilson intervals; current authorization still rejects every scientific
+execution attempt.
