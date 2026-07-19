@@ -1,0 +1,42 @@
+phase: "4-waveform-correction"
+authorization_status: authorized_implementation_only_execution_unresolved
+authorized_by: codex_as_delegated_scientific_and_engineering_reviewer
+authorization_date: "2026-07-19"
+
+base_main_commit: "d4c941876346e2f838c111ae7837d0018478b340"
+implementation_commit: null
+
+preregistration:
+  version: "1.1.1-rc.1"
+  path: configs/statistics/waveform_numerical_validity_preregistration.yaml
+  canonical_hash: "7fca209de9f06e98da1c5a96ae0f4fc6daec5d2f0c2339a718e1f899bb915b69"
+
+authorization:
+  numerical_validator_implementation_authorized: true
+  deterministic_rejection_implementation_authorized: true
+  read_only_published_waveform_audit_authorized: true
+  replacement_runner_implementation_authorized: true
+  corrected_view_resolver_implementation_authorized: true
+
+  replacement_materialization_authorized: false
+  corrected_view_publication_authorized: false
+  model_training_authorized: false
+  architecture_selection_authorized: false
+  calibration_authorized: false
+  sbc_authorized: false
+  final_evaluation_authorized: false
+  extension_above_65536_authorized: false
+  real_noise_authorized: false
+  gwosc_gwtc_access_authorized: false
+
+required_before_execution:
+  - clean_implementation_commit
+  - exact_wheel_sha256
+  - local_and_autodl_tests_pass
+  - all_five_known_pathologies_rejected
+  - representative_valid_records_accepted
+  - immutable_base_hashes_reproduced
+  - fresh_parent_and_replacement_identities
+  - separate_execution_authorization_update
+
+stop_after_implementation_and_preflight: true

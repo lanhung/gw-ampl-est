@@ -4,9 +4,11 @@ from gwlens_mm.physics.quantities import ImageParity, MorseClass
 from gwlens_mm.physics.solver import PhysicalImage
 from gwlens_mm.production.gw import (
     ImageProjection,
+    WaveformNumericalPathology,
     detector_frame_newtonian_chirp_time_seconds,
     raised_cosine_guard_window,
     select_earliest_detectable_images,
+    validate_source_polarization_spectrum,
 )
 
 
@@ -62,3 +64,51 @@ def test_detector_frame_chirp_time_is_positive_and_decreases_with_mass() -> None
     low_mass = detector_frame_newtonian_chirp_time_seconds(30.0, 15.0, 20.0)
     high_mass = detector_frame_newtonian_chirp_time_seconds(320.0, 320.0, 20.0)
     assert low_mass > high_mass > 0.0
+
+
+def test_source_polarization_spectral_validity_accepts_smooth_support() -> None:
+    frequencies = np.arange(0.0, 64.0, 0.25)
+    envelope = np.exp(-0.025 * np.maximum(frequencies - 20.0, 0.0))
+    envelope[frequencies < 20.0] = 0.0
+    result = validate_source_polarization_spectrum(
+        {"plus": envelope.astype(complex), "cross": (0.7j * envelope)},
+        frequencies,
+        minimum_frequency_hz=20.0,
+        positive_amplitude_quantile=0.999,
+        maximum_peak_to_quantile_ratio=10.0,
+    )
+    assert result.maximum_peak_to_quantile_ratio < 2.0
+    assert set(result.peak_to_quantile_ratio_by_polarization) == {"plus", "cross"}
+
+
+def test_source_polarization_spectral_validity_rejects_isolated_bin() -> None:
+    frequencies = np.arange(0.0, 2048.0, 0.03125)
+    envelope = np.ones(frequencies.shape, dtype=complex) * 1.0e-24
+    envelope[frequencies < 20.0] = 0.0
+    envelope[1211] = 1.0e-18
+    with np.testing.assert_raises(WaveformNumericalPathology):
+        validate_source_polarization_spectrum(
+            {"plus": envelope, "cross": 0.5j * envelope},
+            frequencies,
+            minimum_frequency_hz=20.0,
+            positive_amplitude_quantile=0.999,
+            maximum_peak_to_quantile_ratio=10.0,
+        )
+
+
+def test_source_polarization_spectral_validity_ignores_zero_padding() -> None:
+    frequencies = np.arange(0.0, 128.0, 0.25)
+    support = np.zeros(frequencies.shape, dtype=complex)
+    active = (frequencies >= 20.0) & (frequencies < 40.0)
+    support[active] = np.linspace(1.0, 2.0, int(np.sum(active))) * 1.0e-24
+    result = validate_source_polarization_spectrum(
+        {"plus": support, "cross": 0.5j * support},
+        frequencies,
+        minimum_frequency_hz=20.0,
+        positive_amplitude_quantile=0.999,
+        maximum_peak_to_quantile_ratio=10.0,
+    )
+    assert result.positive_in_band_bin_count_by_polarization == {
+        "plus": int(np.sum(active)),
+        "cross": int(np.sum(active)),
+    }

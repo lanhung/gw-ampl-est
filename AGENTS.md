@@ -603,6 +603,44 @@ same-seed calibration/SBC outputs, the selected architecture, immutable
 inference environment and every output identity before one final record may be
 opened.
 
+The first authorized 65k probe launch under training commit
+`a514e101e6a09c513f03ce4c4633459498e77457` stopped before its first optimizer
+step. The training whitener exposed a finite but catastrophically large
+IMRPhenomXPHM source-polarization bin in the published train data. An exhaustive
+read-only regeneration audit of all 71,680 Stage A/Stage B records found exactly
+five numerical pathologies: two in Stage A train, three in Stage B train and none
+in validation. The largest nonpathological isolated-bin ratio was 1.704718; the
+five failures ranged from 12,983 to 2.562e24. No calibration, SBC or final result
+was inspected.
+
+Because one affected Stage A system entered the frozen 16k subset and both
+entered the 32k rung, the existing 16k/32k learning-curve evidence is superseded.
+The failed 65k output has no checkpoint or valid scientific metric and may not be
+resumed. The original Stage A, Stage B and combined 65k publications remain
+immutable.
+
+Delegated scientific review freezes the numerical correction preregistration
+`1.1.1-rc.1` at
+`configs/statistics/waveform_numerical_validity_preregistration.yaml`, canonical
+hash `7fca209de9f06e98da1c5a96ae0f4fc6daec5d2f0c2339a718e1f899bb915b69`.
+It rejects an attempted source waveform before lensing and selection when either
+polarization's maximum strictly positive in-band amplitude divided by its
+linear 99.9th percentile exceeds 10. Clipping, waveform repair and parameter
+substitution are forbidden. The estimand, evaluation target, q=p unit weights,
+selection, waveform approximant, PSD, counts, model and learning-curve rule are
+unchanged.
+
+Only implementation and read-only preflight are currently authorized through
+`configs/execution/phase4_waveform_numerical_correction_authorization.yaml`.
+Replacement materialization and corrected-view publication remain false until a
+clean implementation commit, exact wheel, AutoDL regression and immutable base
+hashes pass. The future correction must exclude exactly two Stage A plus three
+Stage B systems, publish exactly two plus three fresh direct-target replacements,
+retain all original publications read-only, keep validation at 6,144, and restore
+exact corrected counts of 32,768/32,768/65,536. Training, architecture selection,
+calibration, SBC, final evaluation, extension above 65k, real noise and
+GWOSC/GWTC remain closed.
+
 ## Scientific integrity
 
 - Never fabricate results, citations, completed runs or calibration.

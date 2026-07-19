@@ -1,0 +1,81 @@
+{
+  "frequency_minimum_hz": 20.0,
+  "gwosc_gwtc_accessed": false,
+  "largest_valid_ratio": {
+    "network_snr": 13.528818047526753,
+    "physical_system_id": "phase4-stage-b-train-system-021121",
+    "polarization_peak": 3.2414179819999375e-24,
+    "ratio": 1.7047172393961227,
+    "shard_index": 165,
+    "split_component": "stage_b_train"
+  },
+  "metric": "maximum_polarization_peak_over_positive_in_band_99.9_percentile",
+  "pathologies": [
+    {
+      "network_snr": 4.367822377648134e+22,
+      "physical_system_id": "phase4-stage-b-train-system-012017",
+      "polarization_peak": 4.796293204349917,
+      "ratio": 2.5619812379083303e+24,
+      "shard_index": 93,
+      "split_component": "stage_b_train"
+    },
+    {
+      "network_snr": 1.2448037651921893e+19,
+      "physical_system_id": "phase4-stage-b-train-system-007589",
+      "polarization_peak": 0.0005197260302235922,
+      "ratio": 1.8007805575035463e+20,
+      "shard_index": 59,
+      "split_component": "stage_b_train"
+    },
+    {
+      "network_snr": 1.285341277339421e+18,
+      "physical_system_id": "phase4-train-system-019063",
+      "polarization_peak": 0.0004134131940243288,
+      "ratio": 1.1282128746106428e+20,
+      "shard_index": 148,
+      "split_component": "stage_a_train"
+    },
+    {
+      "network_snr": 179932219.09406585,
+      "physical_system_id": "phase4-train-system-011864",
+      "polarization_peak": 2.9511055248217146e-14,
+      "ratio": 12346468060.662058,
+      "shard_index": 92,
+      "split_component": "stage_a_train"
+    },
+    {
+      "network_snr": 195.7290984509945,
+      "physical_system_id": "phase4-stage-b-train-system-005392",
+      "polarization_peak": 2.858627090932694e-20,
+      "ratio": 12983.243135411329,
+      "shard_index": 42,
+      "split_component": "stage_b_train"
+    }
+  ],
+  "peak_quantiles": {
+    "0.5": 7.130130321547678e-24,
+    "0.99": 1.8212346485135335e-23,
+    "0.999": 2.3082807592849115e-23,
+    "1.0": 4.796293204349917
+  },
+  "published_data_modified": false,
+  "ratio_quantiles": {
+    "0.5": 1.0292008615870945,
+    "0.9": 1.0929606260191405,
+    "0.99": 1.17926019002936,
+    "0.999": 1.2954707981759028,
+    "0.9999": 1.4870118220363824,
+    "1.0": 2.5619812379083303e24
+  },
+  "record_count": 71680,
+  "shard_count": 560,
+  "status": "completed_exhaustive_source_polarization_spectral_audit",
+  "threshold_counts": {
+    "10": 5,
+    "100": 5,
+    "1000": 5,
+    "1000000": 4,
+    "1000000000": 4
+  },
+  "waveform_pairs_generated": 0
+}

@@ -18,6 +18,84 @@ from ..schema import DETECTOR_SLOTS
 from .population import PopulationDraw
 
 
+class WaveformNumericalPathology(ValueError):
+    """A finite but numerically invalid source-polarization spectrum."""
+
+
+@dataclass(frozen=True)
+class SourcePolarizationValidity:
+    """Frozen isolated-bin diagnostic for one source waveform."""
+
+    maximum_peak_to_quantile_ratio: float
+    peak_to_quantile_ratio_by_polarization: Mapping[str, float]
+    positive_in_band_bin_count_by_polarization: Mapping[str, int]
+
+
+def validate_source_polarization_spectrum(
+    polarizations: Mapping[str, np.ndarray],
+    frequencies_hz: np.ndarray,
+    *,
+    minimum_frequency_hz: float,
+    positive_amplitude_quantile: float,
+    maximum_peak_to_quantile_ratio: float,
+) -> SourcePolarizationValidity:
+    """Reject isolated IMRPhenomXPHM spectral spikes before lensing or selection.
+
+    The statistic is evaluated independently for plus and cross.  It considers
+    strictly positive amplitudes at frequencies at or above the declared lower
+    waveform cutoff, computes the frozen high quantile, and compares the peak
+    with that quantile.  Zeros beyond physical waveform support therefore do not
+    change the diagnostic.
+    """
+
+    frequencies = np.asarray(frequencies_hz, dtype=np.float64)
+    if frequencies.ndim != 1 or not np.all(np.isfinite(frequencies)):
+        raise WaveformNumericalPathology("waveform frequency grid is invalid")
+    if minimum_frequency_hz <= 0.0:
+        raise ValueError("minimum waveform-validation frequency must be positive")
+    if not 0.0 < positive_amplitude_quantile < 1.0:
+        raise ValueError("waveform-validation quantile must lie strictly inside (0, 1)")
+    if maximum_peak_to_quantile_ratio <= 1.0:
+        raise ValueError("waveform-validation peak ratio must exceed one")
+    in_band = frequencies >= minimum_frequency_hz
+    if not np.any(in_band):
+        raise WaveformNumericalPathology("waveform frequency grid has no in-band bins")
+
+    ratios: Dict[str, float] = {}
+    counts: Dict[str, int] = {}
+    if set(polarizations) != {"plus", "cross"}:
+        raise WaveformNumericalPathology("waveform polarizations are incomplete")
+    for name in ("plus", "cross"):
+        values = np.asarray(polarizations[name])
+        if values.shape != frequencies.shape or not np.all(np.isfinite(values)):
+            raise WaveformNumericalPathology(
+                f"{name} source polarization is nonfinite or has the wrong shape"
+            )
+        amplitudes = np.abs(values[in_band])
+        positive = amplitudes[amplitudes > 0.0]
+        if positive.size == 0:
+            raise WaveformNumericalPathology(
+                f"{name} source polarization has no positive in-band support"
+            )
+        reference = float(np.quantile(positive, positive_amplitude_quantile))
+        peak = float(np.max(positive))
+        ratio = peak / reference if reference > 0.0 else math.inf
+        if not math.isfinite(ratio):
+            raise WaveformNumericalPathology(
+                f"{name} source-polarization peak ratio is nonfinite"
+            )
+        ratios[name] = ratio
+        counts[name] = int(positive.size)
+
+    maximum = max(ratios.values())
+    if maximum > maximum_peak_to_quantile_ratio:
+        raise WaveformNumericalPathology(
+            "source-polarization isolated-bin ratio "
+            f"{maximum:.17g} exceeds {maximum_peak_to_quantile_ratio:.17g}"
+        )
+    return SourcePolarizationValidity(maximum, ratios, counts)
+
+
 def psd_file_keyword(filename: str) -> str:
     """Return Bilby's explicit curve-file constructor keyword."""
 
@@ -270,6 +348,31 @@ class ProductionWaveformEngine:
     def _morse_factor(image: PhysicalImage) -> complex:
         return complex(np.exp(-1j * math.pi * image.morse_class.half_integer_index))
 
+    def source_polarizations(
+        self, parameters: Mapping[str, float]
+    ) -> Mapping[str, np.ndarray]:
+        """Generate and, when configured, validate unlensed source polarizations."""
+
+        polarizations = self._waveform_generator.frequency_domain_strain(parameters)
+        numerical_validity = self.config.get("source_polarization_numerical_validity")
+        if numerical_validity is not None:
+            if numerical_validity.get("enabled") is not True:
+                raise ValueError("source-polarization numerical validity must be enabled")
+            validate_source_polarization_spectrum(
+                polarizations,
+                np.asarray(self._waveform_generator.frequency_array),
+                minimum_frequency_hz=float(
+                    numerical_validity["minimum_frequency_hz"]
+                ),
+                positive_amplitude_quantile=float(
+                    numerical_validity["positive_amplitude_quantile"]
+                ),
+                maximum_peak_to_quantile_ratio=float(
+                    numerical_validity["maximum_peak_to_quantile_ratio"]
+                ),
+            )
+        return polarizations
+
     def project_images(
         self,
         draw: PopulationDraw,
@@ -277,7 +380,7 @@ class ProductionWaveformEngine:
         base_geocent_time: float,
     ) -> Tuple[ImageProjection, ...]:
         parameters = self.source_parameters(draw)
-        polarizations = self._waveform_generator.frequency_domain_strain(parameters)
+        polarizations = self.source_polarizations(parameters)
         projections = []
         for image in images:
             if image.arrival_time_seconds is None:
