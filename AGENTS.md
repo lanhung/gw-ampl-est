@@ -762,6 +762,21 @@ query access and reference execution remain closed until a later exact gate
 binds the locked training rung, selected preprocessing artifact and query
 publication.
 
+The implementation-only boundary now also includes a fail-closed runner for
+the two RC.6 input ablations through:
+
+`configs/execution/phase7_ablation_training_stack_authorization.yaml`
+
+It applies the GW-only or EM-only view after the primary locked-rung
+standardizer, preserves the selected architecture, optimizer, effective batch,
+budget and all targets, and limits future execution to exactly two views by
+seeds 0, 1 and 2. The future six-fit gate must bind the terminal 65k lock,
+selected-architecture decision, corrected publication, primary standardizers,
+training wheel, CUDA environment and finalized evaluation commitment. This
+implementation checkpoint may use synthetic fixtures only. It does not permit
+opening scientific arrays or checkpoints, starting an optimizer, selecting an
+architecture, accessing calibration/SBC/final data or using GWOSC/GWTC.
+
 ## Scientific integrity
 
 - Never fabricate results, citations, completed runs or calibration.
