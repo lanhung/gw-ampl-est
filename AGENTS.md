@@ -631,8 +631,8 @@ selection, waveform approximant, PSD, counts, model and learning-curve rule are
 unchanged.
 
 Delegated expert review accepts implementation commit
-`d238a605c2e0382a10afd75153feeb498a8753e3`, exact wheel SHA-256
-`b1379bfe4aa45d86126965af99f108708a41c816ab9b738cdba4087f230eb614`,
+`499f86b3159af82612e38c134cd81003eedcc4e4`, exact wheel SHA-256
+`1088b2be49e879cbc44fc834b09c67947b45f2da444e15a3f41856abf60729f2`,
 the real-record regression and immutable base hashes. Exact replacement
 materialization and corrected-view publication are now authorized through
 `configs/execution/phase4_waveform_numerical_correction_authorization.yaml`.

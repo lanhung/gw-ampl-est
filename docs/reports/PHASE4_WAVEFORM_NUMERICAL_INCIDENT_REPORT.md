@@ -58,8 +58,8 @@ evaluation, extension beyond 65k, real noise, and GWOSC/GWTC remain closed.
 ## Implementation preflight
 
 The correction implementation is frozen at
-`d238a605c2e0382a10afd75153feeb498a8753e3`; wheel SHA-256 is
-`b1379bfe4aa45d86126965af99f108708a41c816ab9b738cdba4087f230eb614`.
+`499f86b3159af82612e38c134cd81003eedcc4e4`; wheel SHA-256 is
+`1088b2be49e879cbc44fc834b09c67947b45f2da444e15a3f41856abf60729f2`.
 Local tests passed (321 with seven optional skips), as did maintained-scope
 Ruff, mypy and package build. AutoDL passed 331 tests with one optional PyTorch
 skip. The exact real-record regression rejected all five known pathologies and

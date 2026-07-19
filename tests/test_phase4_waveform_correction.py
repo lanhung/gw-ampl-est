@@ -68,7 +68,7 @@ def test_correction_execution_and_every_downstream_gate_are_closed() -> None:
     assert all(value is False for value in config["authorization_boundaries"].values())
     authorization = load_yaml(ROOT / config["authorization_path"])
     assert authorization["implementation_commit"] == (
-        "d238a605c2e0382a10afd75153feeb498a8753e3"
+        "499f86b3159af82612e38c134cd81003eedcc4e4"
     )
     assert authorization["authorization"]["replacement_materialization_authorized"] is True
     assert authorization["authorization"]["corrected_view_publication_authorized"] is True
