@@ -9,6 +9,7 @@ import json
 import shutil
 import sys
 from pathlib import Path
+from typing import Any, Mapping
 
 from gwlens_mm.config import load_yaml
 from gwlens_mm.production.final_evaluation import (
@@ -44,7 +45,7 @@ def _evaluate_future_release_gate(
     generator_commit: str,
     commitment_path: Path,
     addendum_path: Path,
-) -> dict:
+) -> Mapping[str, Any]:
     config, _ = load_final_evaluation_contract(root)
     authorization = load_yaml(authorization_path)
     commitment_sha256 = _sha256(commitment_path)
@@ -69,7 +70,7 @@ def _evaluate_future_release_gate(
     immutable = authorization["immutable_generator"]
     wheel = Path(str(immutable["wheel_path"]))
     environment = Path(str(immutable["environment_lock_path"]))
-    checks = {
+    checks: dict[str, Any] = {
         "wheel_sha256": _sha256(wheel),
         "environment_lock_sha256": _sha256(environment),
     }
@@ -143,6 +144,7 @@ def main() -> None:
     parser.add_argument("--numerical-validity-addendum", type=Path)
     arguments = parser.parse_args()
     root = arguments.root.resolve()
+    result: Mapping[str, Any]
     if arguments.execute:
         required = (
             arguments.authorization,

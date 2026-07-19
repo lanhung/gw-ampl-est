@@ -1041,3 +1041,23 @@ future score artifact contains only per-case metrics and identities, never the
 4,096 posterior draws. This is an implementation decision under frozen RC.7:
 it does not open a bank/query gate or change the distance, 256-neighbor rule,
 KDE, metrics or scientific claims.
+
+## D091 — Train input ablations only after the primary model is fully locked
+
+The RC.6 GW-only and EM-only comparisons are separately trained estimators,
+not post-hoc masks applied only at final inference. Both use the exact locked
+65,536-system corrected training view, the selected primary architecture, all
+three retained seeds and the primary optimizer, effective batch and stopping
+budget. The primary locked-rung standardizer is applied first; the ablation
+then replaces only the preregistered deployable tensors and masks with exact
+zeros. Targets, family condition, membership and split identity do not change.
+
+Each input view receives a distinct model-configuration identity while its
+base-architecture hash is retained. A six-fit summary requires one shared
+training/environment/data/commitment identity, distinct view hashes, all three
+seeds and development-only metrics. It never selects a best seed or retunes an
+architecture. Implementation can be completed with synthetic fixtures while
+the terminal probe runs, but scientific ablation fitting requires a later gate
+after both training size and architecture are locked. Calibration, SBC and
+final evaluation cannot be used by the ablation training or its development
+summary.

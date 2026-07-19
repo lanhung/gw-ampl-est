@@ -1,0 +1,55 @@
+phase: "7-ablation-training-stack"
+authorization_status: authorized_implementation_only
+authorized_by: codex_as_delegated_scientific_and_engineering_reviewer
+authorization_date: "2026-07-19"
+
+authorization_basis:
+  owner_delegation: continue_without_routine_human_intervention
+  frozen_analysis_contract: final_evaluation_analysis_1.1.0-rc.6
+  implementation_may_overlap_locked_rung_training: true
+  no_final_case_checkpoint_or_metric_inspected: true
+
+frozen_addendum:
+  path: configs/statistics/final_evaluation_analysis_preregistration.yaml
+  version: "1.1.0-rc.6"
+  canonical_hash: "7e0e252f0a972e0b0ad2fe8f93f74f1f0172639a6fb258fc7a953be5fb7973e1"
+
+implementation_contract:
+  ablation_views: [gw_only, em_only]
+  seeds: [0, 1, 2]
+  maximum_future_fits: 6
+  locked_training_size_required: true
+  locked_architecture_required: true
+  identical_optimizer_and_budget_required: true
+  final_evaluation_access_forbidden: true
+  additional_architecture_tuning_forbidden: true
+
+authorization:
+  ablation_view_implementation_authorized: true
+  fail_closed_runner_implementation_authorized: true
+  synthetic_fixture_tests_authorized: true
+
+  scientific_data_access_authorized: false
+  scientific_checkpoint_access_authorized: false
+  ablation_fit_execution_authorized: false
+  primary_model_retraining_authorized: false
+  architecture_or_size_selection_authorized: false
+  model_tuning_authorized: false
+  calibration_or_sbc_access_authorized: false
+  final_evaluation_materialization_authorized: false
+  final_evaluation_unsealing_authorized: false
+  final_evaluation_inference_authorized: false
+  gwosc_gwtc_access_authorized: false
+
+future_execution_requires:
+  - terminal_65k_size_lock_and_sha256
+  - selected_architecture_decision_and_sha256
+  - atomic_corrected_65k_publication_hashes
+  - frozen_primary_rung_standardizers_and_membership
+  - merged_ablation_training_commit_and_wheel_sha256
+  - immutable_cuda_environment_sha256
+  - finalized_evaluation_commitment_sha256
+  - exact_six_fit_output_identities
+  - separate_execution_authorization
+
+stop_after_implementation: true

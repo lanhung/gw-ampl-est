@@ -62,8 +62,17 @@ and all immutable base manifests metadata-only, filters exactly the five affecte
 physical systems, lazily concatenates the five replacements, and derives new
 training-view hashes for both 32k and 65k. The existing 16k SHA-256 rank rule is
 applied only after the full corrected 32k membership exists. The runner supports
-a fresh 16k/32k rerun and a conditional fresh 65k rerun, but no corrected data
-access or optimizer is authorized yet.
+a fresh 16k/32k rerun and a conditional fresh 65k rerun. Its implementation
+checkpoint itself opened no corrected data and authorized no optimizer.
+
+That implementation gate subsequently opened under exact identities. All six
+fresh corrected 16k/32k fits completed and the frozen comparison measured a
+development NLP improvement of 0.211849 nat per target dimension, with 95%
+interval [0.200116, 0.223464]. The resulting decision is
+`continue_to_train_65k`. The three corrected 65k probe seeds are now running
+from scratch under commit `adcb1a79e1534e4d742238aa99869c57da95dd96`;
+no seed summary or terminal size decision exists yet. The supervisor will run
+the frozen 32k-to-65k comparison only after all three summaries complete.
 
 Delegated review has now bound the corrected 32k view, implementation commit,
 wheel, model, CUDA environment and final-evaluation commitment in
@@ -105,8 +114,18 @@ likelihood-gold gate cannot be applied to a two-target marginal NSF: no neural
 density exists on the complete nuisance state required for full likelihood
 weights. RC.7 now forbids that claim and freezes an executable non-neural
 selected-prior EM/timing kNN/KDE simulation reference. The pure stack is under
-implementation only; it has not opened the scientific reference bank,
-validation or final data.
+implementation only; its deterministic grouped index and bounded per-case
+scoring core are complete, but it has not opened the scientific reference
+bank, validation or final data.
+
+The two RC.6 input-ablation training views now have a complete fail-closed
+software stack. GW-only removes EM values, masks and astrometry while retaining
+GW timing and family; EM-only removes strain, detector masks and observed GW
+timing while retaining EM and family. Both apply after the locked primary
+standardizer and reuse the selected architecture, optimizer and budget. The
+future launcher is capped at exactly six fits and three concurrent seeds. No
+scientific array, checkpoint, optimizer, calibration/SBC or final case has been
+opened; a later exact execution gate remains mandatory.
 
 ## Completed
 
