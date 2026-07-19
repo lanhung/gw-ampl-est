@@ -63,6 +63,19 @@ def test_built_namespaces_are_direct_target_and_disjoint() -> None:
     }
     assert len({item["production_context"]["id_prefix"] for item in built}) == 2
     assert all(item["accepted_pair_count"] == item["shard_count"] * 128 for item in built)
+    for item in built:
+        assert item["gw"]["source_polarization_numerical_validity"] == {
+            "enabled": True,
+            "minimum_frequency_hz": 20.0,
+            "positive_amplitude_quantile": 0.999,
+            "maximum_peak_to_quantile_ratio": 10.0,
+        }
+        assert item["production_context"][
+            "source_polarization_numerical_validity"
+        ] == "applied_before_selection"
+        assert item["production_context"][
+            "waveform_numerical_validity_preregistration_hash"
+        ] == "7fca209de9f06e98da1c5a96ae0f4fc6daec5d2f0c2339a718e1f899bb915b69"
 
 
 def test_seed_and_count_drift_fail_closed() -> None:
@@ -103,6 +116,12 @@ def test_future_identity_and_materialization_gate_are_exact() -> None:
             "calibration_sbc_preregistration_hash": (
                 "033b996930c93e7e4a9881fc3de49bb85cf4be96fcbd890bf2543b46368c9d8e"
             ),
+            "waveform_numerical_validity_preregistration_hash": (
+                "7fca209de9f06e98da1c5a96ae0f4fc6daec5d2f0c2339a718e1f899bb915b69"
+            ),
+            "waveform_numerical_validity_commitment_sha256": (
+                "af87affbaf56695fe0a6c7f422a70fed154dd2df2255df819348ad204dd0ccd4"
+            ),
         },
         "entry_gate": {
             "training_size_locked": True,
@@ -132,6 +151,14 @@ def test_future_identity_and_materialization_gate_are_exact() -> None:
     changed = deepcopy(authorization)
     changed["authorization"]["sbc_statistics_authorized"] = True
     with pytest.raises(PermissionError, match="materialization-only"):
+        validate_future_materialization_authorization(
+            changed, config=config, generator_commit=commit
+        )
+    changed = deepcopy(authorization)
+    del changed["frozen_contract"][
+        "waveform_numerical_validity_commitment_sha256"
+    ]
+    with pytest.raises(ValueError, match="numerical-validity"):
         validate_future_materialization_authorization(
             changed, config=config, generator_commit=commit
         )

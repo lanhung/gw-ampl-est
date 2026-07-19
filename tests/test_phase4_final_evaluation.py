@@ -81,11 +81,31 @@ def test_namespace_expansion_is_exact_disjoint_and_generator_ready() -> None:
     waveform = next(item for item in first if item.truth_waveform is not None)
     waveform_config = build_final_evaluation_namespace_config(ROOT, config, waveform)
     assert waveform_config["gw"]["waveform"] == "SEOBNRv4PHM"
+    assert "source_polarization_numerical_validity" not in waveform_config["gw"]
+    assert waveform_config["production_context"][
+        "source_polarization_numerical_validity"
+    ] == "not_applicable_alternate_waveform"
+    assert waveform_config["production_context"][
+        "alternate_waveform_finite_array_validation_required"
+    ] is True
     psd = next(item for item in first if item.truth_psd_curves is not None)
     psd_config = build_final_evaluation_namespace_config(ROOT, config, psd)
     assert psd_config["gw"]["psd_curves"]["H1"]["file"] == (
         "aLIGO_ZERO_DET_high_P_psd.txt"
     )
+    for namespace in first:
+        if namespace.truth_waveform is not None:
+            continue
+        generated = build_final_evaluation_namespace_config(ROOT, config, namespace)
+        assert generated["gw"]["source_polarization_numerical_validity"] == {
+            "enabled": True,
+            "minimum_frequency_hz": 20.0,
+            "positive_amplitude_quantile": 0.999,
+            "maximum_peak_to_quantile_ratio": 10.0,
+        }
+        assert generated["production_context"][
+            "source_polarization_numerical_validity"
+        ] == "applied_before_selection"
 
 
 def test_real_alpha3_record_uses_typed_final_evaluation_health_path() -> None:
@@ -297,6 +317,26 @@ def test_finalized_commitment_matches_every_deterministic_namespace() -> None:
     assert commitment["attempt_stream_allocation"]["attempt_id_stride"] == 512
     assert commitment["accepted_rank_allocation_rule"]["namespace_scoped"] is True
     assert all(value is False for value in commitment["use_policy"].values())
+
+
+def test_numerical_validity_addendum_preserves_original_commitment() -> None:
+    commitment_path = ROOT / "results/phase4/final_evaluation_commitment.json"
+    addendum_path = ROOT / (
+        "results/phase4/final_evaluation_numerical_validity_addendum.json"
+    )
+    assert hashlib.sha256(commitment_path.read_bytes()).hexdigest() == (
+        "c13412eced163bac26abc4b22d054f3a6fa967e7e5a4dd7849ebf54f42df6083"
+    )
+    assert hashlib.sha256(addendum_path.read_bytes()).hexdigest() == (
+        "431c09f2c279e1c745bd118fb1b0c06643de7dc42f605af78a49ca99b5b0019b"
+    )
+    addendum = json.loads(addendum_path.read_text())
+    assert addendum["original_commitment_mutated"] is False
+    assert addendum["baseline_waveform_namespace_count"] == 14
+    assert addendum["alternate_waveform_namespace"]["namespace_id"] == (
+        "waveform_mismatch_test/seobnrv4phm_truth"
+    )
+    assert all(value is False for value in addendum["use_policy"].values())
 
 
 def test_published_reference_group_ids_are_streamed_and_duplicates_rejected(

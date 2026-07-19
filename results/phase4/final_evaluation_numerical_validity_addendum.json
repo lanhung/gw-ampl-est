@@ -1,0 +1,55 @@
+{
+  "alternate_waveform_namespace": {
+    "accepted_count": 2048,
+    "namespace_id": "waveform_mismatch_test/seobnrv4phm_truth",
+    "source_waveform": "SEOBNRv4PHM",
+    "validity_action": "frozen_imrphenomxphm_ratio_rule_not_applicable_require_existing_finite_array_and_boundary_validation"
+  },
+  "base_final_evaluation_commitment": {
+    "path": "results/phase4/final_evaluation_commitment.json",
+    "sha256": "c13412eced163bac26abc4b22d054f3a6fa967e7e5a4dd7849ebf54f42df6083"
+  },
+  "baseline_waveform_namespace_count": 14,
+  "baseline_waveform_namespaces": [
+    "balanced_tail_diagnostic/extreme_profile_or_environment",
+    "balanced_tail_diagnostic/extreme_relative_magnification",
+    "balanced_tail_diagnostic/high_absolute_magnification",
+    "balanced_tail_diagnostic/second_image_near_threshold",
+    "cross_family_misspecification_test/epl_truth_family_marginalized",
+    "cross_family_misspecification_test/epl_truth_sie_assumed",
+    "cross_family_misspecification_test/sie_truth_epl_assumed",
+    "cross_family_misspecification_test/sie_truth_family_marginalized",
+    "iid_test/iid",
+    "parameter_region_ood/extreme_external_convergence",
+    "parameter_region_ood/extreme_flattening",
+    "parameter_region_ood/high_external_shear",
+    "parameter_region_ood/slope_outside_training",
+    "psd_mismatch_test/zero_det_high_p_truth"
+  ],
+  "commitment_kind": "prospective_final_evaluation_waveform_numerical_validity_addendum",
+  "commitment_status": "finalized_before_materialization",
+  "finalized_utc": "2026-07-19T11:45:00Z",
+  "future_materialization_generator_commit": null,
+  "original_commitment_mutated": false,
+  "scientific_invariants": {
+    "accepted_counts_changed": false,
+    "attempt_or_seed_namespaces_changed": false,
+    "diagnostic_distributions_changed": false,
+    "estimand_changed": false,
+    "final_evaluation_sealing_changed": false,
+    "target_distribution_changed": false
+  },
+  "total_accepted_count": 20480,
+  "use_policy": {
+    "materialization_authorized": false,
+    "scientific_analysis_authorized": false,
+    "unsealing_authorized": false
+  },
+  "waveform_numerical_validity_preregistration": {
+    "applicable_source_waveform": "IMRPhenomXPHM",
+    "canonical_hash": "7fca209de9f06e98da1c5a96ae0f4fc6daec5d2f0c2339a718e1f899bb915b69",
+    "path": "configs/statistics/waveform_numerical_validity_preregistration.yaml",
+    "validity_action": "apply_frozen_rejection_before_lensing_and_selection",
+    "version": "1.1.1-rc.1"
+  }
+}

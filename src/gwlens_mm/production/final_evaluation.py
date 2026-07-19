@@ -19,11 +19,26 @@ from ..schema import SplitName, V2Record
 from .diagnostic_context import BalancedTailStratum, classify_balanced_tail
 from .run_control import AttemptRecord
 from .storage import tree_checksum, verify_complete_shard
+from .waveform_correction import (
+    CORRECTION_PREREGISTRATION_HASH,
+    apply_frozen_source_waveform_numerical_validity,
+    load_waveform_correction_contract,
+)
 
 FINAL_EVALUATION_CONFIG = "configs/data/phase4_final_evaluation.yaml"
 RC4_HASH = "5aeaac395463bd073c44ead4ff4c5c729b5a2d4b4f1840c0825a53b30ab1bc98"
 RC3_HASH = "6082475631539d3069edacc52f41b37fb8fe725ccd7c6bc9980cc3008795a927"
 RC5_HASH = "4dde279cf1bea78d1ddbd4fab99d88e88e334c80c180dc7850679736c5e53edb"
+FINAL_EVALUATION_COMMITMENT_PATH = "results/phase4/final_evaluation_commitment.json"
+FINAL_EVALUATION_COMMITMENT_HASH = (
+    "c13412eced163bac26abc4b22d054f3a6fa967e7e5a4dd7849ebf54f42df6083"
+)
+NUMERICAL_VALIDITY_ADDENDUM_PATH = (
+    "results/phase4/final_evaluation_numerical_validity_addendum.json"
+)
+NUMERICAL_VALIDITY_ADDENDUM_HASH = (
+    "431c09f2c279e1c745bd118fb1b0c06643de7dc42f605af78a49ca99b5b0019b"
+)
 
 
 @dataclass(frozen=True)
@@ -45,6 +60,57 @@ class FinalEvaluationNamespace:
     parameter_ood_stratum: str | None = None
     truth_waveform: str | None = None
     truth_psd_curves: Mapping[str, Mapping[str, str]] | None = None
+
+
+def _sha256(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def load_final_evaluation_numerical_validity_addendum(
+    root: Path, config: Mapping[str, Any]
+) -> Dict[str, Any]:
+    """Validate the prospective overlay while preserving the old commitment."""
+
+    base_path = root / FINAL_EVALUATION_COMMITMENT_PATH
+    addendum_path = root / NUMERICAL_VALIDITY_ADDENDUM_PATH
+    addendum_digest = _sha256(addendum_path)
+    recorded = addendum_path.with_suffix(".sha256").read_text(
+        encoding="utf-8"
+    ).split()[0]
+    if (
+        _sha256(base_path) != FINAL_EVALUATION_COMMITMENT_HASH
+        or addendum_digest != NUMERICAL_VALIDITY_ADDENDUM_HASH
+        or recorded != addendum_digest
+    ):
+        raise ValueError("final-evaluation numerical-validity addendum hash mismatch")
+    addendum = json.loads(addendum_path.read_text(encoding="utf-8"))
+    correction = load_waveform_correction_contract(root)
+    namespaces = final_evaluation_namespaces(config)
+    alternate = addendum.get("alternate_waveform_namespace", {})
+    baseline = set(addendum.get("baseline_waveform_namespaces", ()))
+    expected_all = {item.namespace_id for item in namespaces}
+    if (
+        addendum.get("commitment_status") != "finalized_before_materialization"
+        or addendum.get("future_materialization_generator_commit") is not None
+        or addendum.get("original_commitment_mutated") is not False
+        or addendum.get("base_final_evaluation_commitment", {}).get("sha256")
+        != FINAL_EVALUATION_COMMITMENT_HASH
+        or addendum.get("waveform_numerical_validity_preregistration", {}).get(
+            "canonical_hash"
+        )
+        != CORRECTION_PREREGISTRATION_HASH
+        or correction["preregistration"]["canonical_hash"]
+        != CORRECTION_PREREGISTRATION_HASH
+        or int(addendum.get("total_accepted_count", -1)) != 20480
+        or int(addendum.get("baseline_waveform_namespace_count", -1)) != 14
+        or baseline | {str(alternate.get("namespace_id"))} != expected_all
+        or str(alternate.get("namespace_id"))
+        != "waveform_mismatch_test/seobnrv4phm_truth"
+        or str(alternate.get("source_waveform")) != "SEOBNRv4PHM"
+        or any(value is not False for value in addendum.get("use_policy", {}).values())
+    ):
+        raise ValueError("final-evaluation numerical-validity addendum changed")
+    return addendum
 
 
 def _namespace_seed(root_seed: int, seed_domain: str, context: str) -> int:
@@ -107,6 +173,7 @@ def load_final_evaluation_contract(
             raise ValueError(f"{key} canonical hash mismatch")
     if config["totals"] != {"accepted_count": 20480, "shard_count": 160}:
         raise ValueError("final-evaluation total count contract changed")
+    load_final_evaluation_numerical_validity_addendum(root, config)
     return config, authorization
 
 
@@ -267,7 +334,11 @@ def build_final_evaluation_namespace_config(
         base["gw"] = {**base["gw"], "waveform": namespace.truth_waveform}
     if namespace.truth_psd_curves is not None:
         base["gw"] = {**base["gw"], "psd_curves": dict(namespace.truth_psd_curves)}
-    return base
+    return apply_frozen_source_waveform_numerical_validity(
+        root,
+        base,
+        allow_alternate_waveform=namespace.truth_waveform is not None,
+    )
 
 
 def validate_final_evaluation_record(
@@ -545,6 +616,13 @@ def dry_run_plan(root: Path) -> Mapping[str, Any]:
     return {
         "status": "implementation_ready_execution_blocked",
         "configuration_hash": configuration_hash(config),
+        "base_commitment_sha256": FINAL_EVALUATION_COMMITMENT_HASH,
+        "waveform_numerical_validity_preregistration_hash": (
+            CORRECTION_PREREGISTRATION_HASH
+        ),
+        "waveform_numerical_validity_addendum_sha256": (
+            NUMERICAL_VALIDITY_ADDENDUM_HASH
+        ),
         "accepted_count": sum(item.accepted_count for item in namespaces),
         "shard_count": sum(item.shard_count for item in namespaces),
         "namespace_count": len(namespaces),

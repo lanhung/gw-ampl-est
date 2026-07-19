@@ -20,6 +20,7 @@ CORRECTION_PREREGISTRATION_HASH = (
 )
 CORRECTION_COMPONENTS = ("stage_a_train", "stage_b_train")
 GROUP_KEYS = ("pair", "source", "lens", "system", "noise")
+FROZEN_NUMERICAL_VALIDITY_WAVEFORM = "IMRPhenomXPHM"
 
 
 @dataclass(frozen=True)
@@ -93,6 +94,60 @@ def load_waveform_correction_contract(
     return config
 
 
+def apply_frozen_source_waveform_numerical_validity(
+    root: Path,
+    generator_config: Mapping[str, Any],
+    *,
+    allow_alternate_waveform: bool = False,
+) -> Dict[str, Any]:
+    """Attach the frozen RC.1 source-polarization rejection contract.
+
+    The numerical incident was discovered after the original downstream
+    generator commitments were frozen.  This helper makes the correction an
+    explicit execution overlay without mutating those historical commitments.
+    The threshold is specific to the baseline IMRPhenomXPHM implementation;
+    an intentionally different mismatch waveform must be recorded as
+    non-applicable instead of silently inheriting an unreviewed threshold.
+    """
+
+    correction = load_waveform_correction_contract(root)
+    result = deepcopy(dict(generator_config))
+    result["gw"] = deepcopy(dict(result["gw"]))
+    waveform = str(result["gw"].get("waveform", ""))
+    context = deepcopy(dict(result.get("production_context", {})))
+    context["waveform_numerical_validity_preregistration_hash"] = (
+        CORRECTION_PREREGISTRATION_HASH
+    )
+    if waveform != FROZEN_NUMERICAL_VALIDITY_WAVEFORM:
+        if not allow_alternate_waveform:
+            raise ValueError(
+                "frozen source-waveform numerical validity is specific to "
+                f"{FROZEN_NUMERICAL_VALIDITY_WAVEFORM}, not {waveform or 'missing'}"
+            )
+        result["gw"].pop("source_polarization_numerical_validity", None)
+        context["source_polarization_numerical_validity"] = (
+            "not_applicable_alternate_waveform"
+        )
+        context["alternate_waveform_finite_array_validation_required"] = True
+        result["production_context"] = context
+        return result
+
+    numerical = correction["numerical_validity"]
+    result["gw"]["source_polarization_numerical_validity"] = {
+        "enabled": True,
+        "minimum_frequency_hz": float(numerical["minimum_frequency_hz"]),
+        "positive_amplitude_quantile": float(
+            numerical["positive_amplitude_quantile"]
+        ),
+        "maximum_peak_to_quantile_ratio": float(
+            numerical["maximum_peak_to_quantile_ratio"]
+        ),
+    }
+    context["source_polarization_numerical_validity"] = "applied_before_selection"
+    result["production_context"] = context
+    return result
+
+
 def build_replacement_namespace_config(
     root: Path, config: Mapping[str, Any], component: str
 ) -> Dict[str, Any]:
@@ -120,19 +175,7 @@ def build_replacement_namespace_config(
             },
         }
     )
-    base["gw"] = deepcopy(base["gw"])
-    base["gw"]["source_polarization_numerical_validity"] = {
-        "enabled": True,
-        "minimum_frequency_hz": float(
-            config["numerical_validity"]["minimum_frequency_hz"]
-        ),
-        "positive_amplitude_quantile": float(
-            config["numerical_validity"]["positive_amplitude_quantile"]
-        ),
-        "maximum_peak_to_quantile_ratio": float(
-            config["numerical_validity"]["maximum_peak_to_quantile_ratio"]
-        ),
-    }
+    base = apply_frozen_source_waveform_numerical_validity(root, base)
     base["execution"] = {
         **base["execution"],
         "qualification_worker_processes": 1,

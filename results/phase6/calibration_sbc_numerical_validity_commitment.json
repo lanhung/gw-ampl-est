@@ -1,0 +1,42 @@
+{
+  "base_generator_configuration": {
+    "canonical_hash": "c55dd46d1afefe60753e2b112363261015ea914d55e80c4a5108721cb0b6a17e",
+    "path": "configs/data/phase6_calibration_sbc_direct_target.yaml"
+  },
+  "commitment_kind": "prospective_downstream_waveform_numerical_validity_overlay",
+  "commitment_status": "finalized_before_materialization",
+  "counts_and_seed_namespaces_changed": false,
+  "finalized_utc": "2026-07-19T11:45:00Z",
+  "future_materialization_generator_commit": null,
+  "namespace_contract": {
+    "calibration_fit": {
+      "accepted_count": 4096,
+      "source_waveform": "IMRPhenomXPHM",
+      "validity_action": "apply_frozen_rejection_before_lensing_and_selection"
+    },
+    "sbc_diagnostic": {
+      "accepted_count": 2048,
+      "source_waveform": "IMRPhenomXPHM",
+      "validity_action": "apply_frozen_rejection_before_lensing_and_selection"
+    }
+  },
+  "scientific_invariants": {
+    "direct_target_q_equals_p_changed": false,
+    "estimand_changed": false,
+    "observation_or_selection_changed": false,
+    "split_counts_changed": false,
+    "target_distribution_changed": false,
+    "waveform_approximant_changed": false
+  },
+  "use_policy": {
+    "calibration_fit_authorized": false,
+    "materialization_authorized": false,
+    "model_checkpoint_access_authorized": false,
+    "sbc_execution_authorized": false
+  },
+  "waveform_numerical_validity_preregistration": {
+    "canonical_hash": "7fca209de9f06e98da1c5a96ae0f4fc6daec5d2f0c2339a718e1f899bb915b69",
+    "path": "configs/statistics/waveform_numerical_validity_preregistration.yaml",
+    "version": "1.1.1-rc.1"
+  }
+}

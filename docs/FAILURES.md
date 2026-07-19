@@ -615,3 +615,11 @@ architecture lock plus separate materialization and inference gates.
   process failures. Its independently replayed decision is
   `continue_to_train_65k`. This resolves the invalid learning-curve evidence but
   does not revive the failed pre-correction 65k run or authorize a 65k optimizer.
+- A prospective audit then found that the still-unmaterialized calibration/SBC
+  and final-evaluation builders did not yet inject the frozen source-waveform
+  rejection field. No downstream pair existed. Typed builders now apply the
+  exact rule to every future IMRPhenomXPHM namespace, with hash-bound addenda
+  preserving the original configurations and final commitment byte-for-byte.
+  The SEOBNRv4PHM mismatch namespace is explicitly excluded from the
+  approximant-specific ratio rule rather than silently applying an unreviewed
+  threshold.

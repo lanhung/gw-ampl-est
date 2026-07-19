@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import hashlib
+import json
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Dict, Mapping, Tuple
@@ -11,12 +12,23 @@ from ..config import load_yaml
 from ..provenance import canonical_json, configuration_hash, dataset_id
 from ..schema import SplitName, V2Record
 from .stage_a import DIRECT_TARGET_ID, validate_direct_target_record
+from .waveform_correction import (
+    CORRECTION_PREREGISTRATION_HASH,
+    apply_frozen_source_waveform_numerical_validity,
+    load_waveform_correction_contract,
+)
 
 CONFIG_PATH = "configs/data/phase6_calibration_sbc_direct_target.yaml"
 CALIBRATION_SBC_HASH = "033b996930c93e7e4a9881fc3de49bb85cf4be96fcbd890bf2543b46368c9d8e"
 RC4_HASH = "5aeaac395463bd073c44ead4ff4c5c729b5a2d4b4f1840c0825a53b30ab1bc98"
 RC3_HASH = "6082475631539d3069edacc52f41b37fb8fe725ccd7c6bc9980cc3008795a927"
 RC5_HASH = "4dde279cf1bea78d1ddbd4fab99d88e88e334c80c180dc7850679736c5e53edb"
+NUMERICAL_VALIDITY_COMMITMENT_PATH = (
+    "results/phase6/calibration_sbc_numerical_validity_commitment.json"
+)
+NUMERICAL_VALIDITY_COMMITMENT_HASH = (
+    "af87affbaf56695fe0a6c7f422a70fed154dd2df2255df819348ad204dd0ccd4"
+)
 
 
 @dataclass(frozen=True)
@@ -51,6 +63,42 @@ def _derived_seed(root_seed: int, seed_domain: str, context: str) -> int:
         {"root_seed": root_seed, "seed_domain": seed_domain, "context": context}
     ).encode()
     return int.from_bytes(hashlib.sha256(payload).digest()[:8], "big")
+
+
+def load_calibration_sbc_numerical_validity_commitment(
+    root: Path, config: Mapping[str, Any]
+) -> Dict[str, Any]:
+    """Validate the prospective RC.1 rejection overlay without opening data."""
+
+    path = root / NUMERICAL_VALIDITY_COMMITMENT_PATH
+    digest = hashlib.sha256(path.read_bytes()).hexdigest()
+    recorded = path.with_suffix(".sha256").read_text(encoding="utf-8").split()[0]
+    if digest != NUMERICAL_VALIDITY_COMMITMENT_HASH or recorded != digest:
+        raise ValueError("calibration/SBC numerical-validity commitment hash mismatch")
+    commitment = json.loads(path.read_text(encoding="utf-8"))
+    correction = load_waveform_correction_contract(root)
+    namespaces = commitment.get("namespace_contract", {})
+    if (
+        commitment.get("commitment_status") != "finalized_before_materialization"
+        or commitment.get("future_materialization_generator_commit") is not None
+        or commitment.get("counts_and_seed_namespaces_changed") is not False
+        or commitment.get("base_generator_configuration", {}).get("canonical_hash")
+        != configuration_hash(config)
+        or commitment.get("waveform_numerical_validity_preregistration", {}).get(
+            "canonical_hash"
+        )
+        != CORRECTION_PREREGISTRATION_HASH
+        or correction["preregistration"]["canonical_hash"]
+        != CORRECTION_PREREGISTRATION_HASH
+        or {
+            key: int(value.get("accepted_count", -1))
+            for key, value in namespaces.items()
+        }
+        != {"calibration_fit": 4096, "sbc_diagnostic": 2048}
+        or any(value is not False for value in commitment.get("use_policy", {}).values())
+    ):
+        raise ValueError("calibration/SBC numerical-validity commitment changed")
+    return commitment
 
 
 def load_calibration_sbc_contract(
@@ -141,6 +189,7 @@ def load_calibration_sbc_contract(
         sbc.expected_em_cell_count,
     ) != (4096, 32, 512, 2048, 16, 256):
         raise ValueError("calibration/SBC namespace count contract changed")
+    load_calibration_sbc_numerical_validity_commitment(root, config)
     return config, authorization
 
 
@@ -224,7 +273,7 @@ def build_calibration_sbc_namespace_config(
             config["execution"]["maximum_active_seconds_per_worker"]
         ),
     }
-    return base
+    return apply_frozen_source_waveform_numerical_validity(root, base)
 
 
 def derive_calibration_sbc_identities(
@@ -275,6 +324,13 @@ def validate_future_materialization_authorization(
         raise ValueError("calibration/SBC configuration hash mismatch")
     if frozen.get("calibration_sbc_preregistration_hash") != CALIBRATION_SBC_HASH:
         raise ValueError("calibration/SBC preregistration identity mismatch")
+    if (
+        frozen.get("waveform_numerical_validity_preregistration_hash")
+        != CORRECTION_PREREGISTRATION_HASH
+        or frozen.get("waveform_numerical_validity_commitment_sha256")
+        != NUMERICAL_VALIDITY_COMMITMENT_HASH
+    ):
+        raise ValueError("calibration/SBC numerical-validity identity mismatch")
     entry = authorization.get("entry_gate", {})
     if not (
         entry.get("training_size_locked") is True
@@ -336,6 +392,12 @@ def dry_run_plan(root: Path) -> Mapping[str, Any]:
     return {
         "status": "implementation_ready_execution_closed",
         "configuration_hash": configuration_hash(config),
+        "waveform_numerical_validity_preregistration_hash": (
+            CORRECTION_PREREGISTRATION_HASH
+        ),
+        "waveform_numerical_validity_commitment_sha256": (
+            NUMERICAL_VALIDITY_COMMITMENT_HASH
+        ),
         "accepted_pair_count": sum(item.accepted_count for item in namespaces),
         "shard_count": sum(item.shard_count for item in namespaces),
         "namespace_count": len(namespaces),

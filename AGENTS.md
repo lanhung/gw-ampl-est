@@ -722,6 +722,17 @@ later execution gate must bind a terminal `lock_train_65k` decision, all three
 corrected probe summaries, the correction publication, exact grid and CUDA
 environment before any new architecture optimizer starts.
 
+The same implementation-only downstream gates now carry the already frozen
+`1.1.1-rc.1` waveform numerical-validity rule prospectively into every future
+IMRPhenomXPHM calibration/SBC and final-evaluation generator namespace. The
+original Phase 6 configuration and finalized final-evaluation commitment remain
+byte-identical. Separate hashed addenda bind the correction without changing
+counts, seeds, diagnostic distributions or authorization flags. The deliberate
+SEOBNRv4PHM waveform-mismatch namespace does not inherit an IMRPhenomXPHM-
+specific ratio threshold; it remains subject to its frozen finite-array and
+waveform-boundary validation. No pair, checkpoint, calibration statistic or
+final case was opened by this prospective software hardening.
+
 ## Scientific integrity
 
 - Never fabricate results, citations, completed runs or calibration.
