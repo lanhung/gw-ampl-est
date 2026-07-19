@@ -17,6 +17,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     parser.add_argument("--root", type=Path, default=Path.cwd())
     parser.add_argument("--authorization", required=True, type=Path)
     parser.add_argument("--stage-a-publication", required=True, type=Path)
+    parser.add_argument("--stage-b-publication", required=True, type=Path)
+    parser.add_argument("--combined-base-publication", required=True, type=Path)
+    parser.add_argument("--correction-publication", required=True, type=Path)
     parser.add_argument("--environment-lock", required=True, type=Path)
     parser.add_argument("--psd-root", required=True, type=Path)
     parser.add_argument("--output-root", required=True, type=Path)
@@ -39,6 +42,12 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         str(arguments.authorization),
         "--stage-a-publication",
         str(arguments.stage_a_publication),
+        "--stage-b-publication",
+        str(arguments.stage_b_publication),
+        "--combined-base-publication",
+        str(arguments.combined_base_publication),
+        "--correction-publication",
+        str(arguments.correction_publication),
         "--environment-lock",
         str(arguments.environment_lock),
         "--psd-root",

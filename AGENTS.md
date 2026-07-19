@@ -659,6 +659,15 @@ remain superseded. A separate gate must bind the correction manifest, a
 corrected-view reader, recomputed 16k membership, immutable training wheel and
 CUDA environment before any corrected train array or optimizer may be opened.
 
+The corrected-view training implementation is complete on branch
+`phase4/corrected-probe-rerun`. It provides a metadata-only overlay resolver,
+lazy 32k/65k readers, fresh 16k membership resolution and fail-closed runners
+for the 16k/32k rerun and a conditional 65k rerun. This implementation status
+does not authorize reading scientific Parquet/Zarr, resolving membership,
+fitting standardizers, creating checkpoints or starting an optimizer. A later
+authorization must bind the implementation commit, exact wheel, correction
+view hashes and immutable CUDA environment.
+
 ## Scientific integrity
 
 - Never fabricate results, citations, completed runs or calibration.

@@ -18,6 +18,7 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument("--stage-a-publication", type=Path)
     parser.add_argument("--stage-b-publication", type=Path)
     parser.add_argument("--combined-publication", type=Path)
+    parser.add_argument("--correction-publication", type=Path)
     parser.add_argument("--environment-lock", type=Path)
     parser.add_argument("--psd-root", type=Path)
     parser.add_argument("--output-root", type=Path)
@@ -70,6 +71,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         stage_a_publication_root=arguments.stage_a_publication,
         stage_b_publication_root=arguments.stage_b_publication,
         combined_publication_root=arguments.combined_publication,
+        correction_publication_root=arguments.correction_publication,
         environment_lock_path=arguments.environment_lock,
         psd_root=arguments.psd_root,
         output_root=arguments.output_root,

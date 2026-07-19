@@ -11,6 +11,7 @@ from typing import Any, Mapping, Optional, Tuple
 from ..config import load_yaml
 from ..schema import SplitName
 from .contracts import (
+    WAVEFORM_CORRECTION_HASH,
     TrainingGateError,
     load_training_stack_contract,
     model_configuration_hash,
@@ -18,11 +19,14 @@ from .contracts import (
 from .data import (
     CombinedTrainingPublication,
     ConcatenatedPublishedStageADataset,
+    CorrectedTrainingPublication,
     DevelopmentStageADataset,
     PublishedStageADataset,
     StandardizedStageADataset,
+    corrected_65k_training_dataset,
     index_complete_shards,
     resolve_combined_training_publication,
+    resolve_corrected_training_publication,
 )
 from .engine import (
     TargetStandardizer,
@@ -171,6 +175,98 @@ def validate_65k_training_gate(
         != publication.stage_b_parent_manifest_sha256
     ):
         raise TrainingGateError("65k gate Stage B manifest hash mismatch")
+    return {
+        "authorization": authorization,
+        "publication": publication,
+        "final_evaluation_commitment_sha256": commitment_hash,
+    }
+
+
+def validate_corrected_65k_training_gate(
+    root: Path,
+    *,
+    authorization_path: Path,
+    stage_a_publication_root: Path,
+    stage_b_publication_root: Path,
+    combined_base_publication_root: Path,
+    correction_publication_root: Path,
+) -> Mapping[str, Any]:
+    """Bind a terminal rerun to the same immutable correction overlay."""
+
+    load_training_stack_contract(root)
+    authorization = load_yaml(authorization_path)
+    if authorization.get("authorization_status") != (
+        "authorized_corrected_train_65k_probe_only"
+    ):
+        raise TrainingGateError("corrected 65k authorization is absent")
+    flags = authorization.get("authorization", {})
+    for required in (
+        "corrected_stage_a_data_access_authorized",
+        "corrected_stage_b_data_access_authorized",
+        "replacement_data_access_authorized",
+        "scientific_65k_probe_training_authorized",
+        "probe_optimizer_execution_authorized",
+        "learning_curve_decision_authorized",
+    ):
+        if flags.get(required) is not True:
+            raise TrainingGateError(f"corrected 65k gate requires {required}=true")
+    for forbidden in (
+        "superseded_checkpoint_resume_authorized",
+        "model_tuning_authorized",
+        "architecture_selection_authorized",
+        "calibration_authorized",
+        "sbc_authorized",
+        "final_evaluation_authorized",
+        "extension_above_65536_authorized",
+        "gwosc_gwtc_access_authorized",
+    ):
+        if flags.get(forbidden) is not False:
+            raise TrainingGateError(f"corrected 65k gate must keep {forbidden}=false")
+    if authorization.get("authorized_training_rungs") != [65536]:
+        raise TrainingGateError("corrected 65k gate covers only the terminal rung")
+    if authorization.get("authorized_training_seeds") != [0, 1, 2]:
+        raise TrainingGateError("corrected 65k gate covers exactly seeds 0/1/2")
+    decision_path = root / str(authorization.get("prior_learning_curve_decision_path", ""))
+    decision = _load_json(decision_path)
+    if decision.get("decision") != "continue_to_train_65k" or hashlib.sha256(
+        decision_path.read_bytes()
+    ).hexdigest() != authorization.get("prior_learning_curve_decision_sha256"):
+        raise TrainingGateError("corrected 65k gate lacks its 32k continuation evidence")
+    commitment_path = root / "results/phase4/final_evaluation_commitment.json"
+    commitment = _load_json(commitment_path)
+    commitment_hash = hashlib.sha256(commitment_path.read_bytes()).hexdigest()
+    if (
+        commitment.get("commitment_status") != "finalized_before_training"
+        or authorization.get("final_evaluation_commitment_sha256") != commitment_hash
+    ):
+        raise TrainingGateError("corrected 65k gate lacks the frozen commitment")
+    correction = authorization.get("correction_publication", {})
+    closeout_path = root / str(correction.get("independent_closeout_path", ""))
+    if not closeout_path.is_file() or hashlib.sha256(closeout_path.read_bytes()).hexdigest() != (
+        correction.get("independent_closeout_sha256")
+    ):
+        raise TrainingGateError("corrected 65k closeout evidence hash mismatch")
+    publication = resolve_corrected_training_publication(
+        correction_publication_root,
+        stage_a_parent_root=stage_a_publication_root,
+        stage_b_parent_root=stage_b_publication_root,
+        combined_base_root=combined_base_publication_root,
+        expected_base_generator_commit=str(authorization.get("base_generator_commit", "")),
+        expected_base_preregistration_hash=str(
+            authorization.get("base_preregistration_hash", "")
+        ),
+        expected_correction_generator_commit=str(correction.get("generator_commit", "")),
+        expected_correction_preregistration_hash=WAVEFORM_CORRECTION_HASH,
+        expected_correction_manifest_sha256=str(correction.get("parent_manifest_sha256", "")),
+        expected_correction_tree_sha256=str(correction.get("publication_tree_sha256", "")),
+        expected_combined_base_manifest_sha256=str(
+            authorization.get("combined_base_manifest_sha256", "")
+        ),
+    )
+    if authorization.get("corrected_combined_train_manifest_sha256") != (
+        publication.corrected_combined_train_manifest_sha256
+    ):
+        raise TrainingGateError("corrected 65k training-view hash mismatch")
     return {
         "authorization": authorization,
         "publication": publication,
@@ -401,6 +497,7 @@ def run_authorized_65k_probe(
     stage_a_publication_root: Path,
     stage_b_publication_root: Path,
     combined_publication_root: Path,
+    correction_publication_root: Optional[Path] = None,
     environment_lock_path: Path,
     psd_root: Path,
     output_root: Path,
@@ -414,13 +511,29 @@ def run_authorized_65k_probe(
 
     if seed not in SEEDS:
         raise TrainingGateError("65k probe seed is outside 0/1/2")
-    gate = validate_65k_training_gate(
-        root,
-        authorization_path=authorization_path,
-        stage_a_publication_root=stage_a_publication_root,
-        stage_b_publication_root=stage_b_publication_root,
-        combined_publication_root=combined_publication_root,
+    authorization_preview = load_yaml(authorization_path)
+    corrected = authorization_preview.get("authorization_status") == (
+        "authorized_corrected_train_65k_probe_only"
     )
+    if corrected:
+        if correction_publication_root is None:
+            raise TrainingGateError("corrected 65k execution requires the correction parent")
+        gate = validate_corrected_65k_training_gate(
+            root,
+            authorization_path=authorization_path,
+            stage_a_publication_root=stage_a_publication_root,
+            stage_b_publication_root=stage_b_publication_root,
+            combined_base_publication_root=combined_publication_root,
+            correction_publication_root=correction_publication_root,
+        )
+    else:
+        gate = validate_65k_training_gate(
+            root,
+            authorization_path=authorization_path,
+            stage_a_publication_root=stage_a_publication_root,
+            stage_b_publication_root=stage_b_publication_root,
+            combined_publication_root=combined_publication_root,
+        )
     authorization = gate["authorization"]
     immutable = authorization.get("immutable_training", {})
     artifacts = validate_immutable_training_artifacts(
@@ -447,9 +560,25 @@ def run_authorized_65k_probe(
     load_input_policy(root)
     publication = gate["publication"]
     curves = _verified_curves(model, psd_root)
-    train_dataset = _training_dataset(publication, curves)
+    if corrected:
+        if not isinstance(publication, CorrectedTrainingPublication):
+            raise TrainingGateError("corrected 65k gate returned the wrong publication")
+        train_dataset = corrected_65k_training_dataset(publication, curves)
+        stage_a = publication.stage_a
+        combined_manifest_sha256 = publication.correction_manifest_sha256
+        train_manifest_sha256 = publication.corrected_combined_train_manifest_sha256
+        stage_b_parent_manifest_sha256 = (
+            publication.combined_base.stage_b_parent_manifest_sha256
+        )
+    else:
+        train_dataset = _training_dataset(publication, curves)
+        stage_a = publication.stage_a
+        combined_manifest_sha256 = publication.combined_manifest_sha256
+        train_manifest_sha256 = publication.train_manifest_sha256
+        stage_b_parent_manifest_sha256 = publication.stage_b_parent_manifest_sha256
+    validation_manifest_sha256 = stage_a.namespace_manifest_sha256["validation"]
     validation_dataset = PublishedStageADataset(
-        publication.stage_a.validation_root,
+        stage_a.validation_root,
         expected_split=SplitName.VALIDATION,
         detector_curves=curves,
         expected_total_pairs=VALIDATION_COUNT,
@@ -466,7 +595,7 @@ def run_authorized_65k_probe(
             preparation.get("status") == "ready_for_authorized_probe_fits"
             and tuple(preparation.get("member_ids", ())) == train_ids
             and preparation.get("combined_manifest_sha256")
-            == publication.combined_manifest_sha256
+            == combined_manifest_sha256
             and preparation.get("model_configuration_hash")
             == model_configuration_hash(model)
         ):
@@ -482,13 +611,12 @@ def run_authorized_65k_probe(
             "member_count": len(train_ids),
             "member_ids": list(train_ids),
             "member_ids_sha256": membership_hash(train_ids),
-            "combined_manifest_sha256": publication.combined_manifest_sha256,
-            "stage_a_parent_manifest_sha256": publication.stage_a.manifest_sha256,
-            "stage_b_parent_manifest_sha256": publication.stage_b_parent_manifest_sha256,
-            "train_manifest_sha256": publication.train_manifest_sha256,
-            "validation_manifest_sha256": publication.stage_a.namespace_manifest_sha256[
-                "validation"
-            ],
+            "combined_manifest_sha256": combined_manifest_sha256,
+            "stage_a_parent_manifest_sha256": stage_a.manifest_sha256,
+            "stage_b_parent_manifest_sha256": stage_b_parent_manifest_sha256,
+            "train_manifest_sha256": train_manifest_sha256,
+            "validation_manifest_sha256": validation_manifest_sha256,
+            "waveform_correction_applied": corrected,
             "final_evaluation_commitment_sha256": gate[
                 "final_evaluation_commitment_sha256"
             ],
@@ -509,10 +637,8 @@ def run_authorized_65k_probe(
         model_configuration_hash=model_configuration_hash(model),
         training_code_commit=training_commit,
         training_environment_sha256=expected_environment_hash,
-        train_manifest_sha256=publication.train_manifest_sha256,
-        validation_manifest_sha256=publication.stage_a.namespace_manifest_sha256[
-            "validation"
-        ],
+        train_manifest_sha256=train_manifest_sha256,
+        validation_manifest_sha256=validation_manifest_sha256,
         final_evaluation_commitment_sha256=str(
             gate["final_evaluation_commitment_sha256"]
         ),
@@ -529,7 +655,8 @@ def run_authorized_65k_probe(
     execution_evidence = {
         **authorized_probe_execution_evidence(identity),
         "combined_publication_validated": True,
-        "combined_manifest_sha256": publication.combined_manifest_sha256,
+        "combined_manifest_sha256": combined_manifest_sha256,
+        "waveform_correction_applied": corrected,
         "immutable_wheel_sha256": artifacts["wheel_sha256"],
         "member_count": len(train_ids),
         "member_ids_sha256": membership_hash(train_ids),

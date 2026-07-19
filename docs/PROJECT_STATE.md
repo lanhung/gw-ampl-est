@@ -57,6 +57,14 @@ failed training output remain immutable. Training is still closed until a new
 release binds the corrected views, recomputed membership, model, wheel and CUDA
 environment.
 
+The corrected probe stack is now implemented. It resolves the correction parent
+and all immutable base manifests metadata-only, filters exactly the five affected
+physical systems, lazily concatenates the five replacements, and derives new
+training-view hashes for both 32k and 65k. The existing 16k SHA-256 rank rule is
+applied only after the full corrected 32k membership exists. The runner supports
+a fresh 16k/32k rerun and a conditional fresh 65k rerun, but no corrected data
+access or optimizer is authorized yet.
+
 The post-lock architecture-selection software is implemented without
 scientific data access. It freezes the fixed 2x2 grid, reuses the locked-rung
 10-transform/width-256 probe and limits future work to nine new fits. No

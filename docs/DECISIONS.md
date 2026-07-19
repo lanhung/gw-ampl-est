@@ -905,3 +905,18 @@ versioned corrected views. The earlier 16k/32k metrics remain superseded.
 Training can reopen only through a new exact authorization that binds the
 correction manifest and a reader proven to include all five replacements and
 exclude all five affected systems.
+
+## D082 — Treat the correction as a typed training view, not a rewritten dataset
+
+Training resolves the correction parent beside the immutable Stage A and Stage B
+parents. The reader filters base entries by the five frozen physical-system IDs
+and lazily concatenates the corresponding replacement namespaces. It never
+copies, edits or reorders files inside a base publication. The derived
+training-view hash binds the base manifests, correction manifest, exclusions,
+replacement validations and replacement physical-system IDs.
+
+The 16k subset is recomputed by the existing order-invariant SHA-256 rank over
+the complete corrected 32k membership. The 65k view uses the same correction
+identity and can run only if the fresh 16k/32k comparison again requires it.
+Old checkpoints and metrics remain immutable superseded evidence and cannot be
+resumed into a corrected run.
