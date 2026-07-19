@@ -889,3 +889,19 @@ view removes exactly two plus three affected physical systems and adds exactly
 two plus three fresh direct-target, group-disjoint replacements. Validation and
 all counts remain fixed. The 16k membership is recomputed and all 16k/32k fits
 are rerun; 65k is rerun only if the unchanged stopping rule still requires it.
+
+## D081 — Accept the immutable five-system correction without reviving training
+
+The authorized correction published exactly two Stage A and three Stage B
+direct-target replacements under one atomic parent. Independent closeout
+reproduced the parent and tree hashes, every shard artifact, original parent
+hashes, exact array decomposition, unit weights, numerical-validity criterion
+and full grouped-ID disjointness. Corrected counts remain 32,768/32,768 train
+with 6,144 unchanged validation systems.
+
+This is an overlay, not an in-place rewrite: the five affected systems remain
+in their immutable historical publications and are excluded only by the
+versioned corrected views. The earlier 16k/32k metrics remain superseded.
+Training can reopen only through a new exact authorization that binds the
+correction manifest and a reader proven to include all five replacements and
+exclude all five affected systems.

@@ -18,12 +18,10 @@ It may run unit/integration and in-memory engineering smoke tests but cannot rea
 Stage A or start scientific training. The final-evaluation generation commitment
 is finalized at SHA-256
 `c13412eced163bac26abc4b22d054f3a6fa967e7e5a4dd7849ebf54f42df6083`.
-The separately authorized 16k/32k probe workflow has now completed. Its frozen
-paired decision is `continue_to_train_65k`: the mean NLP improvement was
-0.236314 nat per target dimension with 95% interval [0.223545, 0.248638].
-Calibration and final evaluation were not accessed. The resulting exact-count
-Stage B extension is now complete; the next gate is the identity-bound 65k
-three-seed probe authorization.
+The earlier authorized 16k/32k probe workflow completed, but its learning-curve
+result is now superseded because the numerical-waveform audit found affected
+systems in both rungs. Calibration and final evaluation were not accessed. The
+exact-count Stage B extension remains immutable and complete.
 
 Stage B passed and atomically published exactly 32,768 additional train
 systems in 256 shards under parent
@@ -47,9 +45,17 @@ Numerical-correction preregistration `1.1.1-rc.1`, hash
 `7fca209de9f06e98da1c5a96ae0f4fc6daec5d2f0c2339a718e1f899bb915b69`, is now
 frozen. It adds a source-polarization isolated-bin rejection before lensing and
 selection while preserving the target, q=p, physical selection, approximant,
-counts, model and stopping rule. Implementation is in progress. The original
-publications and failed training output remain immutable; replacement execution
-and all training are closed until the implementation and AutoDL regression pass.
+counts, model and stopping rule. The five-system correction has atomically
+published and passed independent closeout under parent
+`phase4-waveform-correction-499f86b3159a-1db109b08189`; manifest SHA-256 is
+`0fcfb117c620d58a2e0ccd8b19c0d3f3a371dd844fb637b50c8b565eee6864f2` and tree
+SHA-256 is
+`a57aa2691e256b34403392f595e964dceec1325cfc54a38ed4d2a0b714d38c12`.
+Corrected counts are 32,768 Stage A train, 32,768 Stage B train, 65,536 combined
+train and 6,144 unchanged validation systems. The original publications and
+failed training output remain immutable. Training is still closed until a new
+release binds the corrected views, recomputed membership, model, wheel and CUDA
+environment.
 
 The post-lock architecture-selection software is implemented without
 scientific data access. It freezes the fixed 2x2 grid, reuses the locked-rung

@@ -1,0 +1,116 @@
+{
+  "checks": {
+    "combined_base_manifest_immutable": true,
+    "corrected_counts": true,
+    "downstream_flags_closed": true,
+    "exact_exclusion_replacement_arithmetic": true,
+    "execution_passed": true,
+    "gwosc_gwtc_not_accessed": true,
+    "noisy_equals_clean_plus_noise_exact": true,
+    "parent_manifest_sha256": true,
+    "publication_bytes": true,
+    "publication_tree_sha256": true,
+    "replacement_arrays_finite_float32": true,
+    "replacement_group_disjoint_from_all_base": true,
+    "replacement_groups_unique": true,
+    "replacement_q_equals_p_unit_weights": true,
+    "replacement_source_spectra_valid": true,
+    "stage_a_base_manifest_immutable": true,
+    "stage_b_base_manifest_immutable": true,
+    "staging_absent": true
+  },
+  "configuration_hash": "1db109b0818932d2cea0652549937e39d75c6297cd3a81456eabbd2704f83296",
+  "corrected_counts": {
+    "combined_train": 65536,
+    "stage_a_train": 32768,
+    "stage_a_validation": 6144,
+    "stage_b_train": 32768
+  },
+  "excluded_physical_system_ids": {
+    "stage_a_train": [
+      "phase4-train-system-011864",
+      "phase4-train-system-019063"
+    ],
+    "stage_b_train": [
+      "phase4-stage-b-train-system-005392",
+      "phase4-stage-b-train-system-007589",
+      "phase4-stage-b-train-system-012017"
+    ]
+  },
+  "generator_commit": "499f86b3159af82612e38c134cd81003eedcc4e4",
+  "gwosc_gwtc_accessed": false,
+  "model_training_authorized": false,
+  "parent_manifest_sha256": "0fcfb117c620d58a2e0ccd8b19c0d3f3a371dd844fb637b50c8b565eee6864f2",
+  "parent_run_id": "phase4-waveform-correction-499f86b3159a-1db109b08189",
+  "preregistration_hash": "7fca209de9f06e98da1c5a96ae0f4fc6daec5d2f0c2339a718e1f899bb915b69",
+  "preregistration_version": "1.1.1-rc.1",
+  "publication_bytes": 5667197,
+  "publication_tree_sha256": "a57aa2691e256b34403392f595e964dceec1325cfc54a38ed4d2a0b714d38c12",
+  "remaining_free_bytes": 223748628480,
+  "replacement_records": [
+    {
+      "component": "stage_a_train",
+      "lens_id": "phase4-waveform-correction-stage-a-lens-000000",
+      "pair_id": "phase4-waveform-correction-stage-a-pair-000000",
+      "physical_system_id": "phase4-waveform-correction-stage-a-system-000000",
+      "source_id": "phase4-waveform-correction-stage-a-source-000000"
+    },
+    {
+      "component": "stage_a_train",
+      "lens_id": "phase4-waveform-correction-stage-a-lens-000001",
+      "pair_id": "phase4-waveform-correction-stage-a-pair-000001",
+      "physical_system_id": "phase4-waveform-correction-stage-a-system-000001",
+      "source_id": "phase4-waveform-correction-stage-a-source-000001"
+    },
+    {
+      "component": "stage_b_train",
+      "lens_id": "phase4-waveform-correction-stage-b-lens-000000",
+      "pair_id": "phase4-waveform-correction-stage-b-pair-000000",
+      "physical_system_id": "phase4-waveform-correction-stage-b-system-000000",
+      "source_id": "phase4-waveform-correction-stage-b-source-000000"
+    },
+    {
+      "component": "stage_b_train",
+      "lens_id": "phase4-waveform-correction-stage-b-lens-000001",
+      "pair_id": "phase4-waveform-correction-stage-b-pair-000001",
+      "physical_system_id": "phase4-waveform-correction-stage-b-system-000001",
+      "source_id": "phase4-waveform-correction-stage-b-source-000001"
+    },
+    {
+      "component": "stage_b_train",
+      "lens_id": "phase4-waveform-correction-stage-b-lens-000002",
+      "pair_id": "phase4-waveform-correction-stage-b-pair-000002",
+      "physical_system_id": "phase4-waveform-correction-stage-b-system-000002",
+      "source_id": "phase4-waveform-correction-stage-b-source-000002"
+    }
+  ],
+  "replacement_source_spectrum_ratios": [
+    {
+      "component": "stage_a_train",
+      "maximum_peak_to_quantile_ratio": 1.015521646589174,
+      "physical_system_id": "phase4-waveform-correction-stage-a-system-000000"
+    },
+    {
+      "component": "stage_a_train",
+      "maximum_peak_to_quantile_ratio": 1.000788143541561,
+      "physical_system_id": "phase4-waveform-correction-stage-a-system-000001"
+    },
+    {
+      "component": "stage_b_train",
+      "maximum_peak_to_quantile_ratio": 1.095684943180607,
+      "physical_system_id": "phase4-waveform-correction-stage-b-system-000000"
+    },
+    {
+      "component": "stage_b_train",
+      "maximum_peak_to_quantile_ratio": 1.0098577925594605,
+      "physical_system_id": "phase4-waveform-correction-stage-b-system-000001"
+    },
+    {
+      "component": "stage_b_train",
+      "maximum_peak_to_quantile_ratio": 1.0285431997383392,
+      "physical_system_id": "phase4-waveform-correction-stage-b-system-000002"
+    }
+  ],
+  "status": "passed_independent_waveform_correction_closeout",
+  "verified_at_utc": "2026-07-19T02:52:29Z"
+}

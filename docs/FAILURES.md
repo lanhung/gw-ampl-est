@@ -606,3 +606,8 @@ architecture lock plus separate materialization and inference gates.
   Clipping, row deletion and in-place replacement are forbidden. The versioned
   correction uses deterministic pre-selection rejection plus an exact-count,
   fresh-identity replacement overlay.
+- The authorized overlay subsequently completed and passed independent
+  closeout. Exactly five replacements restore the frozen counts; their source
+  spectral ratios are below 1.096, arrays satisfy exact decomposition, weights
+  are one and all grouped identities are disjoint. This repairs the data view,
+  not the superseded learning-curve result; no optimizer was authorized.

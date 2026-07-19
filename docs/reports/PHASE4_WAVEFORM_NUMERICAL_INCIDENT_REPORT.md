@@ -43,11 +43,38 @@ the largest retained ratio is 1.705, and the smallest rejected ratio is 12,983.
 The estimand, direct evaluation target, q=p unit weights, physical selection,
 waveform approximant, PSD, counts, model, and stopping rule are unchanged.
 
-The correction will publish an immutable overlay excluding two Stage A and
-three Stage B systems and adding exactly two plus three fresh, group-disjoint,
-direct-target replacements. Validation remains unchanged. Corrected views must
+The correction published an immutable overlay excluding two Stage A and three
+Stage B systems and adding exactly two plus three fresh, group-disjoint,
+direct-target replacements. Validation remains unchanged. The corrected views
 contain exactly 32,768 Stage A train, 32,768 Stage B extension, 65,536 combined
-train, and 6,144 validation systems before any training is reopened.
+train, and 6,144 validation systems.
+
+## Correction publication and independent closeout
+
+The authorized run completed under parent
+`phase4-waveform-correction-499f86b3159a-1db109b08189`. Its parent manifest
+SHA-256 is
+`0fcfb117c620d58a2e0ccd8b19c0d3f3a371dd844fb637b50c8b565eee6864f2`,
+and the publication-tree SHA-256 is
+`a57aa2691e256b34403392f595e964dceec1325cfc54a38ed4d2a0b714d38c12`.
+The two replacement shards required 338 and 890 attempted proposals and occupy
+5,667,197 bytes together.
+
+An independent read-only closeout recomputed the complete publication tree,
+every shard artifact and all three immutable base-manifest hashes. It reopened
+the five Parquet records and all three Zarr products, verified finite float32
+arrays and exact `noisy = clean + noise`, regenerated all five source
+polarizations, and rescanned grouped identities across the 71,680 base records.
+Replacement peak-to-99.9%-quantile ratios ranged from 1.0008 to 1.0957, below
+the frozen threshold of 10. Proposal and evaluation log probabilities are
+equal, every importance weight is exactly one, and no replacement group
+overlaps Stage A train, validation or Stage B train. The original publications
+were not modified and the staging parent is absent after atomic publication.
+
+This closeout resolves the data correction only. It does not revive the
+superseded learning-curve result or authorize an optimizer. The corrected 16k
+membership must be recomputed and all 16k/32k fits rerun under a separately
+bound training release.
 
 ## Boundaries
 

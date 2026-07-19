@@ -643,6 +643,22 @@ exact corrected counts of 32,768/32,768/65,536. Training, architecture selection
 calibration, SBC, final evaluation, extension above 65k, real noise and
 GWOSC/GWTC remain closed.
 
+The authorized correction completed and atomically published under parent
+`phase4-waveform-correction-499f86b3159a-1db109b08189`. It restored exact
+corrected counts of 32,768 Stage A train, 32,768 Stage B train, 65,536 combined
+train and 6,144 unchanged validation systems. The parent manifest SHA-256 is
+`0fcfb117c620d58a2e0ccd8b19c0d3f3a371dd844fb637b50c8b565eee6864f2`; the
+publication-tree SHA-256 is
+`a57aa2691e256b34403392f595e964dceec1325cfc54a38ed4d2a0b714d38c12`.
+Independent closeout passed source-spectrum, Zarr/Parquet, exact decomposition,
+unit-weight, original-hash and grouped-ID validation. The original
+publications were not modified.
+
+Passing the correction does not authorize training. The old 16k/32k metrics
+remain superseded. A separate gate must bind the correction manifest, a
+corrected-view reader, recomputed 16k membership, immutable training wheel and
+CUDA environment before any corrected train array or optimizer may be opened.
+
 ## Scientific integrity
 
 - Never fabricate results, citations, completed runs or calibration.
