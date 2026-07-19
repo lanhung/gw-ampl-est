@@ -415,3 +415,9 @@ post-incident generator revision without rewriting that commitment. They bind
 the supplemental hash, correction publication and corrected 65k logical
 reference, derive 15 collision-free namespace identities only after a ready
 gate, and remain fail-closed under the current implementation authorization.
+
+The future calibration/SBC release path is also correction-aware. It requires
+the immutable Stage A, Stage B, combined-base and correction publications and
+uses the same five-exclusion/five-replacement logical view as the active probe.
+No Phase 6 identity or pair has been created; materialization, checkpoint access,
+calibration fitting and SBC execution remain closed.

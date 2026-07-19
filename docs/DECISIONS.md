@@ -1009,3 +1009,18 @@ physical-system IDs, includes the five published replacements and verifies the
 resulting 65,536-system reference. Official final identities are derived only by
 a ready release certificate after training size, architecture and all reference
 pools are atomically locked.
+
+## D089 — Use the corrected logical view in every downstream leakage gate
+
+Calibration/SBC records must be group-disjoint from the data actually used for
+training and validation, not merely from the two historical base parents. After
+the numerical correction those sets differ by five physical systems. Ignoring
+the replacement parent could miss a collision with a replacement identity;
+counting the excluded base records would describe a superseded training view.
+
+The future Phase 6 release therefore binds all four immutable reference parents
+and resolves them through the same typed correction resolver used by training.
+Its streaming leakage check skips exactly the five frozen exclusions, includes
+the five replacement records, and requires 71,680 distinct reference systems:
+65,536 train plus 6,144 validation. The change affects only a future fail-closed
+gate and does not authorize materialization or statistics.

@@ -632,3 +632,9 @@ architecture lock plus separate materialization and inference gates.
   generator plus the addendum. The corrected train reference is also resolved
   as an overlay, preventing the five excluded base systems from re-entering
   leakage checks.
+- The corresponding Phase 6 audit found that its future calibration/SBC
+  leakage check still streamed only the original Stage A and Stage B parents.
+  This could omit the five replacement identities and describe the superseded
+  logical train set. No calibration/SBC identity or pair existed. The release
+  path now resolves the four-parent correction contract first and checks exact
+  65,536-train plus 6,144-validation corrected membership before execution.

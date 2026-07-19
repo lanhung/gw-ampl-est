@@ -128,6 +128,42 @@ def test_future_identity_and_materialization_gate_are_exact() -> None:
             "architecture_locked": True,
             "three_model_seeds_retained": True,
         },
+        "corrected_training_reference": {
+            "base_generator_commit": (
+                "2be777e727ef9d8e1a85f89c68966df5d37932b0"
+            ),
+            "base_preregistration_hash": (
+                "5aeaac395463bd073c44ead4ff4c5c729b5a2d4b4f1840c0825a53b30ab1bc98"
+            ),
+            "stage_a_parent_manifest_sha256": (
+                "4f3e6b3a7ca1a995d7a7643c48410e479fb812e4a01ff66537232b9d64bf3314"
+            ),
+            "stage_b_parent_manifest_sha256": (
+                "b4d7df6300d0919f148b98fd8ce658216bdfa64752026dc9477321874e31f0da"
+            ),
+            "combined_base_manifest_sha256": (
+                "753ace3d2fe475f1279b3bd8560005017f4e75a822fa951d94f9ada60eb3eca4"
+            ),
+            "correction_generator_commit": (
+                "499f86b3159af82612e38c134cd81003eedcc4e4"
+            ),
+            "correction_preregistration_hash": (
+                "7fca209de9f06e98da1c5a96ae0f4fc6daec5d2f0c2339a718e1f899bb915b69"
+            ),
+            "correction_parent_manifest_sha256": (
+                "0fcfb117c620d58a2e0ccd8b19c0d3f3a371dd844fb637b50c8b565eee6864f2"
+            ),
+            "correction_publication_tree_sha256": (
+                "a57aa2691e256b34403392f595e964dceec1325cfc54a38ed4d2a0b714d38c12"
+            ),
+            "corrected_combined_train_manifest_sha256": (
+                "da8aaa8d86afb4d93156191976b420bfc7bbc7dfe0fdc6c6f627515d804a7379"
+            ),
+            "excluded_base_system_count": 5,
+            "replacement_system_count": 5,
+            "logical_train_system_count": 65536,
+            "unchanged_validation_system_count": 6144,
+        },
         "materialization_contract": {
             "calibration_fit_accepted_count": 4096,
             "sbc_diagnostic_accepted_count": 2048,
@@ -159,6 +195,12 @@ def test_future_identity_and_materialization_gate_are_exact() -> None:
         "waveform_numerical_validity_commitment_sha256"
     ]
     with pytest.raises(ValueError, match="numerical-validity"):
+        validate_future_materialization_authorization(
+            changed, config=config, generator_commit=commit
+        )
+    changed = deepcopy(authorization)
+    changed["corrected_training_reference"]["replacement_system_count"] = 4
+    with pytest.raises(ValueError, match="corrected training reference"):
         validate_future_materialization_authorization(
             changed, config=config, generator_commit=commit
         )

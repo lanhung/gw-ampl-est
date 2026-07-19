@@ -743,6 +743,14 @@ excluded base systems and includes their five replacements when proving group
 disjointness. This resolves software executability only; final materialization
 and unsealing remain closed.
 
+The future calibration/SBC materialization gate likewise resolves the exact
+corrected training reference before deriving any official identity. It binds
+the Stage A, Stage B, combined-base and correction parents; excludes the two
+Stage A plus three Stage B pathological base systems; includes all five
+replacement systems; and requires exactly 65,536 logical train plus 6,144
+unchanged validation systems. This is implementation-only hardening. No
+calibration/SBC identity, pair, checkpoint statistic or execution gate exists.
+
 ## Scientific integrity
 
 - Never fabricate results, citations, completed runs or calibration.
