@@ -180,7 +180,14 @@ def evaluate_release_gate(
             blockers.append("waveform-correction path escaped the project root")
     if publication.exists() or staging.exists():
         blockers.append("waveform-correction identity already exists")
-    free = shutil.disk_usage(Path(str(config["paths"]["staging_root"])).parent).free
+    storage_root = Path(str(config["paths"]["staging_root"])).parent
+    if not storage_root.is_absolute() or not storage_root.is_relative_to(
+        APPROVED_REMOTE_ROOT
+    ):
+        blockers.append("waveform-correction storage root escaped the project root")
+    else:
+        storage_root.mkdir(parents=True, exist_ok=True)
+    free = shutil.disk_usage(storage_root).free
     checks["free_bytes"] = free
     if free < int(config["resource_gates"]["minimum_prelaunch_free_bytes"]):
         blockers.append("waveform-correction free-space gate failed")
