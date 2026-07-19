@@ -15,12 +15,18 @@ from typing import Any, Dict, Mapping
 
 from gwlens_mm.config import load_yaml
 from gwlens_mm.production.final_evaluation import (
+    FINAL_EVALUATION_COMMITMENT_HASH,
     FINAL_EVALUATION_CONFIG,
+    NUMERICAL_VALIDITY_ADDENDUM_HASH,
+    NUMERICAL_VALIDITY_ADDENDUM_PATH,
+    ORIGINAL_COMMITTED_GENERATOR,
     build_final_evaluation_namespace_config,
     collect_published_group_identifiers,
     final_evaluation_namespaces,
     load_final_evaluation_contract,
+    load_final_evaluation_numerical_validity_addendum,
     validate_final_evaluation_namespace,
+    validate_future_final_evaluation_authorization,
 )
 from gwlens_mm.production.qualification import generate_qualification_shard
 from gwlens_mm.production.stage_a import verify_generator_commit
@@ -34,9 +40,12 @@ _ALLOWED_POSTFREEZE_PATHS = (
     "docs/DECISIONS.md",
     "docs/PROJECT_STATE.md",
     "docs/reports/PHASE4_FINAL_EVALUATION_GENERATOR_IMPLEMENTATION_REPORT.md",
+    "docs/reports/PHASE7_FINAL_EVALUATION_MATERIALIZATION_REPORT.md",
     "results/experiment_registry.csv",
     "results/phase4/final_evaluation_commitment.json",
     "results/phase4/final_evaluation_commitment.sha256",
+    "results/phase4/final_evaluation_numerical_validity_addendum.json",
+    "results/phase4/final_evaluation_numerical_validity_addendum.sha256",
     "tests/test_phase4_direct_target.py",
     "tests/test_phase4_final_evaluation.py",
 )
@@ -59,43 +68,18 @@ def _future_authorization(
     config: Mapping[str, Any],
     generator_commit: str,
     commitment_sha256: str,
+    numerical_validity_addendum_sha256: str,
 ) -> Mapping[str, Any]:
     authorization = load_yaml(path)
-    if authorization.get("authorization_status") != (
-        "authorized_sealed_final_evaluation_materialization_only"
-    ):
-        raise PermissionError("sealed final-evaluation authorization is absent")
-    immutable = authorization.get("immutable_generator", {})
-    if immutable.get("git_commit") != generator_commit:
-        raise ValueError("final-evaluation authorization generator mismatch")
-    frozen = authorization.get("frozen_contract", {})
-    if frozen.get("configuration_hash") != configuration_hash(config):
-        raise ValueError("final-evaluation authorization config hash mismatch")
-    if frozen.get("commitment_sha256") != commitment_sha256:
-        raise ValueError("final-evaluation authorization commitment mismatch")
-    contract = authorization.get("materialization_contract", {})
-    if (
-        int(contract.get("accepted_pair_count", -1)),
-        int(contract.get("shard_count", -1)),
-        int(contract.get("namespace_count", -1)),
-    ) != (20480, 160, 15):
-        raise ValueError("final-evaluation authorization count mismatch")
-    flags = authorization.get("authorization", {})
-    if flags.get("sealed_materialization_authorized") is not True:
-        raise PermissionError("sealed final-evaluation materialization is closed")
-    for key in (
-        "unsealing_authorized",
-        "scientific_analysis_authorized",
-        "model_training_authorized",
-        "calibration_fit_authorized",
-        "learning_curve_use_authorized",
-        "architecture_selection_use_authorized",
-        "gwosc_gwtc_access_authorized",
-    ):
-        if flags.get(key) is not False:
-            raise PermissionError(f"future materialization requires {key}=false")
-    if contract.get("training_size_and_architecture_locked") is not True:
-        raise PermissionError("final pool cannot materialize before model design lock")
+    validate_future_final_evaluation_authorization(
+        authorization,
+        config=config,
+        generator_commit=generator_commit,
+        commitment_sha256=commitment_sha256,
+        numerical_validity_addendum_sha256=(
+            numerical_validity_addendum_sha256
+        ),
+    )
     return authorization
 
 
@@ -145,6 +129,7 @@ def main() -> None:
     parser.add_argument("--authorization", required=True, type=Path)
     parser.add_argument("--release-certificate", required=True, type=Path)
     parser.add_argument("--commitment", required=True, type=Path)
+    parser.add_argument("--numerical-validity-addendum", required=True, type=Path)
     parser.add_argument("--config", default=FINAL_EVALUATION_CONFIG)
     parser.add_argument("--output", required=True, type=Path)
     args = parser.parse_args()
@@ -155,13 +140,25 @@ def main() -> None:
     commitment_sha256 = _sha256(args.commitment)
     if commitment.get("commitment_status") != "finalized_before_training":
         raise PermissionError("final-evaluation generation commitment is not finalized")
-    if commitment.get("future_scientific_generator_commit") != args.generator_commit:
-        raise ValueError("commitment generator identity mismatch")
+    if (
+        commitment_sha256 != FINAL_EVALUATION_COMMITMENT_HASH
+        or commitment.get("future_scientific_generator_commit")
+        != ORIGINAL_COMMITTED_GENERATOR
+    ):
+        raise ValueError("original final-evaluation commitment identity mismatch")
+    canonical_addendum = ROOT / NUMERICAL_VALIDITY_ADDENDUM_PATH
+    if args.numerical_validity_addendum.resolve() != canonical_addendum.resolve():
+        raise ValueError("only the canonical numerical-validity addendum is supported")
+    addendum_sha256 = _sha256(args.numerical_validity_addendum)
+    if addendum_sha256 != NUMERICAL_VALIDITY_ADDENDUM_HASH:
+        raise ValueError("final-evaluation numerical-validity addendum mismatch")
+    load_final_evaluation_numerical_validity_addendum(ROOT, config)
     authorization = _future_authorization(
         args.authorization,
         config=config,
         generator_commit=args.generator_commit,
         commitment_sha256=commitment_sha256,
+        numerical_validity_addendum_sha256=addendum_sha256,
     )
     verify_generator_commit(
         ROOT,
@@ -177,6 +174,8 @@ def main() -> None:
         raise ValueError("release certificate configuration mismatch")
     if certificate.get("commitment_sha256") != commitment_sha256:
         raise ValueError("release certificate commitment mismatch")
+    if certificate.get("numerical_validity_addendum_sha256") != addendum_sha256:
+        raise ValueError("release certificate numerical-validity addendum mismatch")
     identities = certificate.get("official_identities")
     if not isinstance(identities, dict) or not isinstance(
         identities.get("namespace_dataset_ids"), dict
@@ -194,9 +193,40 @@ def main() -> None:
         required_reference_splits
     ):
         raise ValueError("release certificate lacks all published reference pools")
-    reference_roots = tuple(Path(str(reference_roots_value[key])) for key in sorted(
-        required_reference_splits
-    ))
+    expected_reference_counts = {
+        "train": 65536,
+        "validation": 6144,
+        "calibration_fit": 4096,
+        "sbc_diagnostic": 2048,
+    }
+    reference_contracts: Dict[str, tuple[tuple[Path, ...], tuple[str, ...]]] = {}
+    for role in sorted(required_reference_splits):
+        specification = reference_roots_value[role]
+        if not isinstance(specification, dict):
+            raise ValueError("final-evaluation reference role is not structured")
+        roots_value = specification.get("roots")
+        exclusions_value = specification.get("excluded_physical_system_ids", [])
+        if not isinstance(roots_value, list) or not isinstance(exclusions_value, list):
+            raise ValueError("final-evaluation reference roots or exclusions are invalid")
+        roots = tuple(Path(str(value)).resolve() for value in roots_value)
+        exclusions = tuple(str(value) for value in exclusions_value)
+        if role == "train":
+            if len(roots) != 4 or len(exclusions) != 5:
+                raise ValueError(
+                    "corrected train reference must bind four roots and five exclusions"
+                )
+            if not isinstance(
+                specification.get("corrected_combined_train_manifest_sha256"), str
+            ):
+                raise ValueError("corrected train reference lacks its view hash")
+        elif len(roots) != 1 or exclusions:
+            raise ValueError("non-train reference must bind one unmodified dataset root")
+        reference_contracts[role] = (roots, exclusions)
+    authorized_references = authorization["published_reference_contract"]
+    if reference_roots_value["train"].get(
+        "corrected_combined_train_manifest_sha256"
+    ) != authorized_references.get("corrected_combined_train_manifest_sha256"):
+        raise ValueError("release certificate corrected train view differs from authorization")
     parent_id = str(identities["parent_run_id"])
     if any(
         str(value).startswith(("qualification-", "phase3ca", "phase4-canary"))
@@ -211,15 +241,16 @@ def main() -> None:
         if not path.is_absolute() or not path.is_relative_to(approved):
             raise ValueError("final-evaluation path escaped the AutoDL project root")
         path.parent.mkdir(parents=True, exist_ok=True)
-    for path in reference_roots:
-        if (
-            not path.is_absolute()
-            or not path.is_relative_to(approved)
-            or "staging" in path.parts
-            or path.is_relative_to(staging_root)
-            or path.is_relative_to(publication_root)
-        ):
-            raise ValueError("final-evaluation reference is not a published external pool")
+    for roots, _ in reference_contracts.values():
+        for path in roots:
+            if (
+                not path.is_absolute()
+                or not path.is_relative_to(approved)
+                or "staging" in path.parts
+                or path.is_relative_to(staging_root)
+                or path.is_relative_to(publication_root)
+            ):
+                raise ValueError("final-evaluation reference is not a published external pool")
     free = shutil.disk_usage(staging_root.parent).free
     required = int(config["resource_gates"]["minimum_prelaunch_free_bytes"])
     if free < required:
@@ -237,6 +268,8 @@ def main() -> None:
             "generator_commit": args.generator_commit,
             "configuration_hash": configuration_hash(config),
             "commitment_sha256": commitment_sha256,
+            "numerical_validity_addendum_sha256": addendum_sha256,
+            "original_committed_generator": ORIGINAL_COMMITTED_GENERATOR,
             "authorization_identity": authorization.get("authorizing_commit"),
             "accepted_target": 20480,
             "unsealing_authorized": False,
@@ -306,7 +339,19 @@ def main() -> None:
             if global_ids[key] & identifiers[key]:
                 raise ValueError(f"cross-namespace final-evaluation {key} leakage")
             global_ids[key].update(identifiers[key])
-    reference_ids = collect_published_group_identifiers(reference_roots)
+    reference_ids: Dict[str, set[str]] = {key: set() for key in global_ids}
+    for role in sorted(reference_contracts):
+        roots, exclusions = reference_contracts[role]
+        role_ids = collect_published_group_identifiers(
+            roots,
+            excluded_physical_system_ids=exclusions,
+        )
+        if len(role_ids["system"]) != expected_reference_counts[role]:
+            raise ValueError(f"final-evaluation {role} reference count mismatch")
+        for key in reference_ids:
+            if reference_ids[key] & role_ids[key]:
+                raise ValueError(f"published reference pools overlap in {key}")
+            reference_ids[key].update(role_ids[key])
     for key in global_ids:
         if global_ids[key] & reference_ids[key]:
             raise ValueError(f"final evaluation leaks into a reference {key} group")
@@ -316,11 +361,18 @@ def main() -> None:
         "generator_commit": args.generator_commit,
         "configuration_hash": configuration_hash(config),
         "commitment_sha256": commitment_sha256,
+        "numerical_validity_addendum_sha256": addendum_sha256,
+        "original_committed_generator": ORIGINAL_COMMITTED_GENERATOR,
         "accepted_pair_count": 20480,
         "complete_shard_count": 160,
         "namespace_count": 15,
         "validations": validations,
         "all_namespaces_group_disjoint": True,
+        "published_reference_system_counts": expected_reference_counts,
+        "corrected_train_manifest_sha256": reference_roots_value["train"][
+            "corrected_combined_train_manifest_sha256"
+        ],
+        "all_reference_pools_group_disjoint": True,
         "sealed": True,
         "unsealing_authorized": False,
         "learning_curve_use_authorized": False,

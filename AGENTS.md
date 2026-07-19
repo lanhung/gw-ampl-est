@@ -733,6 +733,16 @@ specific ratio threshold; it remains subject to its frozen finite-array and
 waveform-boundary validation. No pair, checkpoint, calibration statistic or
 final case was opened by this prospective software hardening.
 
+The final-evaluation release path also treats the original planned generator
+commit as historical commitment evidence, not executable post-incident code. A
+future exact materialization gate must bind a new immutable generator commit,
+the unchanged original commitment, the numerical-validity addendum, correction
+publication and logical corrected 65k train reference. The release certificate
+derives official identities only after those checks pass. It filters the five
+excluded base systems and includes their five replacements when proving group
+disjointness. This resolves software executability only; final materialization
+and unsealing remain closed.
+
 ## Scientific integrity
 
 - Never fabricate results, citations, completed runs or calibration.
