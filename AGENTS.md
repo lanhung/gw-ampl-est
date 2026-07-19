@@ -698,6 +698,20 @@ wheel and CUDA environment before any corrected 65k array is opened. The old
 selection, calibration, SBC, final evaluation, extension above 65,536,
 real-noise work and GWOSC/GWTC remain closed.
 
+Delegated expert review accepts that exact entry evidence and authorizes only
+the fresh corrected 65k three-seed probe through:
+
+`configs/execution/phase4_corrected_65k_probe_training_authorization.yaml`
+
+The gate binds corrected combined-view SHA-256
+`da8aaa8d86afb4d93156191976b420bfc7bbc7dfe0fdc6c6f627515d804a7379`,
+decision SHA-256 `fe2890e025f5574a4ea45942b698e0b24db3801650125cd5f128126e435633cf`,
+code `adcb1a79e1534e4d742238aa99869c57da95dd96`, exact wheel and the unchanged
+CUDA environment. It permits seeds 0, 1 and 2 from scratch and the terminal
+32k-to-65k development comparison only. Architecture selection, calibration,
+SBC, final evaluation, extension above 65,536, real noise and GWOSC/GWTC remain
+closed.
+
 ## Scientific integrity
 
 - Never fabricate results, citations, completed runs or calibration.

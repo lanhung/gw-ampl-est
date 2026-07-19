@@ -947,3 +947,15 @@ The three 65k seeds start from scratch. The pre-correction failed 65k root and
 the superseded 16k/32k checkpoints are never resumed. No extension above 65k is
 permitted: the terminal result either locks 65k or stops for a new scientific
 contract.
+
+## D085 — Bind the terminal probe to the correction overlay
+
+Delegated review authorizes the corrected 65k probe only after binding the
+exact 32k continuation decision, corrected combined-view hash, immutable
+training wheel and CUDA environment. The three seeds use a new output identity
+and start from scratch; the failed pre-correction 65k root is immutable.
+
+The terminal comparison uses the same 6,144 development systems and frozen
+10,000-replicate rule. It may lock 65k for later architecture review or stop as
+data-limited for a new preregistration. It cannot authorize another training
+rung, calibration, final evaluation or external-data access.

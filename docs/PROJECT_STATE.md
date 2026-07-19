@@ -385,12 +385,12 @@ published. The corrected 16k and 32k probe fits are complete and the only valid
 development decision is `continue_to_train_65k`. The exact decision SHA-256 is
 `fe2890e025f5574a4ea45942b698e0b24db3801650125cd5f128126e435633cf`.
 
-The immediate next gate is a fresh corrected 65k three-seed authorization. It
-must bind the corrected combined-view hash `da8aaa8d...`, the completed
+Delegated review has now authorized a fresh corrected 65k three-seed execution.
+The gate binds corrected combined-view hash `da8aaa8d...`, the completed
 16k-to-32k decision, code `adcb1a7...`, the exact wheel and the immutable CUDA
-environment. It must start all three seeds from scratch and stop after the
-terminal 32k-to-65k development comparison. The failed pre-correction 65k root
-cannot be resumed or reused.
+environment. It starts all three seeds from scratch and stops after the terminal
+32k-to-65k development comparison. The failed pre-correction 65k root cannot be
+resumed or reused.
 
 Architecture selection remains closed until the terminal size decision locks
 65k. The existing architecture implementation must first be hardened to use the
