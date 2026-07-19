@@ -920,3 +920,14 @@ the complete corrected 32k membership. The 65k view uses the same correction
 identity and can run only if the fresh 16k/32k comparison again requires it.
 Old checkpoints and metrics remain immutable superseded evidence and cannot be
 resumed into a corrected run.
+
+## D083 — Reopen only the corrected 16k/32k probe under a new release
+
+Expert review binds the real corrected-view resolution, implementation commit
+`adcb1a79e1534e4d742238aa99869c57da95dd96`, exact wheel, unchanged model and
+CUDA lock before data access. The rerun recomputes 16k membership from the full
+corrected 32k population and fits all six seed/rung combinations from scratch.
+
+The frozen 16k-to-32k paired decision is the only output that may open a later
+65k review. The previous learning curve and failed 65k output remain immutable
+negative/superseded evidence and are never resumed.

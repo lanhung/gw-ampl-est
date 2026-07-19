@@ -65,6 +65,13 @@ applied only after the full corrected 32k membership exists. The runner supports
 a fresh 16k/32k rerun and a conditional fresh 65k rerun, but no corrected data
 access or optimizer is authorized yet.
 
+Delegated review has now bound the corrected 32k view, implementation commit,
+wheel, model, CUDA environment and final-evaluation commitment in
+`phase4_corrected_probe_training_authorization.yaml`. A fresh 16k/32k
+three-seed rerun is authorized from scratch; all earlier probe checkpoints and
+metrics remain superseded. Corrected 65k training and every downstream
+scientific phase remain separately gated.
+
 The post-lock architecture-selection software is implemented without
 scientific data access. It freezes the fixed 2x2 grid, reuses the locked-rung
 10-transform/width-256 probe and limits future work to nine new fits. No

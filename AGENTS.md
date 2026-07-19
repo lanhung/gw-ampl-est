@@ -668,6 +668,22 @@ fitting standardizers, creating checkpoints or starting an optimizer. A later
 authorization must bind the implementation commit, exact wheel, correction
 view hashes and immutable CUDA environment.
 
+Delegated expert review now authorizes only the fresh corrected 16k/32k
+three-seed probe workflow through:
+
+`configs/execution/phase4_corrected_probe_training_authorization.yaml`
+
+The frozen training implementation is
+`adcb1a79e1534e4d742238aa99869c57da95dd96`, wheel SHA-256
+`44208c61577b71488872c75eced03dbca3384cf5d03baaecc9f3447bdaeef24a`.
+The corrected Stage A training-view SHA-256 is
+`b9390a7faad4bb8097abb09041f1f229e13c6419677926f05642ac611dc6ced2`.
+This gate permits recomputing the 16k SHA-ranked membership and fitting the
+unchanged 16k/32k probe for seeds 0, 1 and 2 from scratch. Superseded
+checkpoints and metrics may not be resumed or reused. Architecture selection,
+calibration, SBC, final evaluation, corrected 65k training, extension above
+65k, real noise and GWOSC/GWTC remain closed.
+
 ## Scientific integrity
 
 - Never fabricate results, citations, completed runs or calibration.
