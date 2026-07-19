@@ -1024,3 +1024,20 @@ Its streaming leakage check skips exactly the five frozen exclusions, includes
 the five replacement records, and requires 71,680 distinct reference systems:
 65,536 train plus 6,144 validation. The change affects only a future fail-closed
 gate and does not authorize materialization or statistics.
+
+## D090 — Carry exact EM-cell identity through the metadata-only reference path
+
+The RC.7 reference is stratified by exact adopted lens family and exact EM
+availability cell. The prepared model-input signature is insufficient for this
+bookkeeping because distinct frozen cells can share the same available
+modalities. Every metadata-only published-record read must therefore attach the
+exact Parquet `em_cell` label beside the allowlisted arrays, while keeping it out
+of the deployable tensor collator.
+
+The reference bank is built once as a deterministic vectorized index over the
+selected training-rung standardizer. Bank identity hashes are order invariant;
+queries must be group-disjoint; ties are resolved by physical-system ID. The
+future score artifact contains only per-case metrics and identities, never the
+4,096 posterior draws. This is an implementation decision under frozen RC.7:
+it does not open a bank/query gate or change the distance, 256-neighbor rule,
+KDE, metrics or scientific claims.

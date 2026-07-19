@@ -802,12 +802,24 @@ class PublishedStageADataset:
             self._cached_noisy = noisy
         return self._cached_noisy
 
+    def _partition_em_cell(self, entry: ShardIndexEntry) -> str:
+        """Return the exact Parquet partition label without opening strain."""
+
+        records = self._open_records(entry.path)
+        value = records.iloc[entry.row_index]["em_cell"]
+        if not isinstance(value, str) or not value.strip():
+            raise TrainingGateError("published record has no EM-cell partition label")
+        return value
+
     def metadata_example(self, index: int) -> PreparedExample:
         """Read one record for standardizer fitting without opening strain arrays."""
 
         entry = self.entries[index]
         record = self._record(entry)
-        return prepare_metadata_example(record)
+        return replace(
+            prepare_metadata_example(record),
+            em_cell=self._partition_em_cell(entry),
+        )
 
     def development_case(self, index: int) -> DevelopmentCase:
         """Read validation-only labels that are never passed into the model."""
@@ -849,11 +861,7 @@ class PublishedStageADataset:
                 "calibration/SBC labels require a dedicated development split"
             )
         entry = self.entries[index]
-        records = self._open_records(entry.path)
-        row = records.iloc[entry.row_index]
-        cell = str(row["em_cell"])
-        if not cell:
-            raise TrainingGateError("calibration/SBC record has no EM-cell label")
+        cell = self._partition_em_cell(entry)
         return CalibrationSBCCase(example=self[index], em_cell=cell)
 
     def __getitem__(self, index: int) -> PreparedExample:
@@ -873,10 +881,10 @@ class PublishedStageADataset:
             minimum_frequency_hz=self.minimum_frequency_hz,
             maximum_frequency_hz=self.maximum_frequency_hz,
         )
-        cell = str(records.iloc[entry.row_index]["em_cell"])
-        if not cell:
-            raise TrainingGateError("published record has no EM-cell partition label")
-        return replace(prepare_example(record, whitened), em_cell=cell)
+        return replace(
+            prepare_example(record, whitened),
+            em_cell=self._partition_em_cell(entry),
+        )
 
     def physical_system_ids(self) -> Tuple[str, ...]:
         return tuple(entry.physical_system_id for entry in self.entries)

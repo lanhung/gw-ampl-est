@@ -421,3 +421,12 @@ the immutable Stage A, Stage B, combined-base and correction publications and
 uses the same five-exclusion/five-replacement logical view as the active probe.
 No Phase 6 identity or pair has been created; materialization, checkpoint access,
 calibration fitting and SBC execution remain closed.
+
+The future RC.7 non-neural reference core is now execution-ready at the pure
+software layer. A reader drift was corrected so metadata-only examples retain
+their exact Parquet EM-cell partition label without opening Zarr. A deterministic
+in-memory index groups the standardized corrected training rung by exact lens
+family and EM cell, selects 256 neighbors by `(distance, physical_system_id)`,
+and emits small per-case CRPS, KDE NLP, central-coverage and interval-width
+scores without persisting 4,096-draw arrays. All tests use synthetic fixtures;
+no scientific bank, validation query or final case was opened.
