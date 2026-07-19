@@ -1,0 +1,97 @@
+phase: "4-probe-65k"
+authorization_status: authorized_train_65k_probe_only
+authorized_by: codex_as_delegated_scientific_and_engineering_reviewer
+authorization_date: "2026-07-19"
+
+authorization_basis:
+  owner_delegation: continue_without_routine_human_intervention
+  stage_a_status: passed_and_atomically_published
+  stage_b_status: passed_and_atomically_published
+  combined_train_status: exactly_65536_group_disjoint_systems_published
+  prior_learning_curve_decision: continue_to_train_65k
+  expert_review_result: passed
+
+authorization:
+  stage_a_data_access_authorized: true
+  stage_b_data_access_authorized: true
+  scientific_65k_probe_training_authorized: true
+  probe_optimizer_execution_authorized: true
+  learning_curve_decision_authorized: true
+
+  model_tuning_authorized: false
+  architecture_selection_authorized: false
+  calibration_authorized: false
+  sbc_authorized: false
+  final_evaluation_authorized: false
+  extension_above_65536_authorized: false
+  real_noise_authorized: false
+  gwosc_gwtc_access_authorized: false
+
+authorized_training_rungs: [65536]
+authorized_training_seeds: [0, 1, 2]
+maximum_concurrent_fits: 3
+data_loader_worker_processes: 4
+
+generator_commit: "2be777e727ef9d8e1a85f89c68966df5d37932b0"
+preregistration_hash: "5aeaac395463bd073c44ead4ff4c5c729b5a2d4b4f1840c0825a53b30ab1bc98"
+prior_learning_curve_decision_sha256: "09dd9a3fb6a36c501d5d76412fe063f1612458ade444ff0c3e12eacd66c4f49e"
+final_evaluation_commitment_sha256: "c13412eced163bac26abc4b22d054f3a6fa967e7e5a4dd7849ebf54f42df6083"
+
+combined_train:
+  combined_train_id: phase4-train-65k-2be777e727ef-6a4f106f9640
+  combined_manifest_sha256: "753ace3d2fe475f1279b3bd8560005017f4e75a822fa951d94f9ada60eb3eca4"
+  stage_a_parent_manifest_sha256: "4f3e6b3a7ca1a995d7a7643c48410e479fb812e4a01ff66537232b9d64bf3314"
+  stage_b_parent_manifest_sha256: "b4d7df6300d0919f148b98fd8ce658216bdfa64752026dc9477321874e31f0da"
+  train_accepted_count: 65536
+  validation_accepted_count: 6144
+  proposal_equals_evaluation: true
+  all_importance_weights_one: true
+
+immutable_training:
+  git_commit: "a514e101e6a09c513f03ce4c4633459498e77457"
+  wheel_path: /root/autodl-tmp/lensing-4/artifacts/phase4/train65/a514e101e6a09c513f03ce4c4633459498e77457/gwlens_mm-0.1.0-py3-none-any.whl
+  wheel_filename: gwlens_mm-0.1.0-py3-none-any.whl
+  wheel_sha256: "cde98326596b8d2a49287a51ff141ce37c0c9c7cf022798b459fa7c53b816bdc"
+  environment_lock_path: configs/environment/phase4-training-freeze.txt
+  environment_lock_sha256: "2e45000a8cea6712ae307c87782c593245ad56607a772f27a0cc5af726e37b95"
+  model_configuration_path: configs/models/phase4_probe_nsf.yaml
+  model_configuration_hash: "8d0919c211b6aa057712a402f689f06d9ea916ba3c0c11cc32d0561aeb8d3087"
+  editable_install_authorized: false
+  cuda_required: true
+  gpu_model: NVIDIA RTX 5000 Ada Generation
+  minimum_gpu_count: 3
+
+publication_roots:
+  stage_a: /root/autodl-tmp/lensing-4/data_v2/scientific/stage_a/published/phase4-stage-a-2be777e727ef-d3a60034bbd6
+  stage_b: /root/autodl-tmp/lensing-4/data_v2/scientific/stage_b/published/phase4-stage-b-2be777e727ef-6a4f106f9640
+  combined_train: /root/autodl-tmp/lensing-4/data_v2/scientific/train_65k/published/phase4-train-65k-2be777e727ef-6a4f106f9640
+
+probe_32k_output_root: /root/autodl-tmp/lensing-4/training/phase4/probe-microbatch-v1
+training_output_root: /root/autodl-tmp/lensing-4/training/phase4/probe-65k-a514e101
+learning_curve_output_path: /root/autodl-tmp/lensing-4/training/phase4/probe-65k-a514e101/learning_curve_32k_to_65k_decision.json
+
+execution_contract:
+  training_rung: 65536
+  train_from_scratch: true
+  seeds: [0, 1, 2]
+  same_validation_systems_as_16k_32k: 6144
+  calibration_during_scale_selection_forbidden: true
+  final_evaluation_access_forbidden: true
+  best_seed_selection_forbidden: true
+  checkpoint_resume_authorized: true
+  paired_bootstrap_replicates: 10000
+  frozen_effective_batch_size: 256
+  physical_microbatch_size: 64
+  gradient_accumulation_steps: 4
+  effective_batch_semantics: exact_ordered_gradient_accumulation
+
+resource_gates:
+  minimum_prelaunch_free_bytes: 100000000000
+  maximum_training_output_bytes: 50000000000
+  maximum_concurrent_fits: 3
+
+terminal_decision_states:
+  - lock_train_65k
+  - stop_data_limited_and_new_preregistration
+
+stop_after_terminal_learning_curve_decision: true

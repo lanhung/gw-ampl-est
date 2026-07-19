@@ -489,6 +489,29 @@ bind these manifests, the training release, model configuration, finalized
 evaluation commitment and immutable CUDA environment before any Stage B array
 or 65k membership may be opened for training.
 
+Delegated expert review accepts the atomic Stage B and combined 65k
+publications and authorizes only the frozen 65k three-seed probe workflow
+through:
+
+`configs/execution/phase4_probe_65k_training_authorization.yaml`
+
+The frozen training-code commit is
+`a514e101e6a09c513f03ce4c4633459498e77457`, the exact wheel SHA-256 is
+`cde98326596b8d2a49287a51ff141ce37c0c9c7cf022798b459fa7c53b816bdc`, the
+model configuration hash remains
+`8d0919c211b6aa057712a402f689f06d9ea916ba3c0c11cc32d0561aeb8d3087`, and
+the immutable CUDA environment SHA-256 remains
+`2e45000a8cea6712ae307c87782c593245ad56607a772f27a0cc5af726e37b95`.
+
+This gate permits reading only the atomic Stage A, Stage B and combined 65k
+publications, fitting the frozen 65k probe from scratch for seeds 0, 1 and 2,
+and applying the terminal preregistered 32k-to-65k comparison. It does not
+authorize model tuning, architecture selection, calibration, SBC, final
+evaluation, any extension above 65,536 systems, real noise or GWOSC/GWTC. A
+`lock_train_65k` decision is evidence for a later architecture-selection gate;
+a `stop_data_limited_and_new_preregistration` decision requires stopping for a
+new scientific contract.
+
 The implementation-only training-stack gate completed the fail-closed
 combined-publication reader, 65k three-seed launcher and terminal 32k-to-65k
 comparison using synthetic fixtures only. This completion does not permit
