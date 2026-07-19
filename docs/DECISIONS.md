@@ -931,3 +931,19 @@ corrected 32k population and fits all six seed/rung combinations from scratch.
 The frozen 16k-to-32k paired decision is the only output that may open a later
 65k review. The previous learning curve and failed 65k output remain immutable
 negative/superseded evidence and are never resumed.
+
+## D084 — Continue only to a fresh corrected 65k probe
+
+All six corrected-view 16k/32k fits completed from scratch with identical code,
+model, environment and 6,144-case validation identity. The independently
+replayed 10,000-replicate paired bootstrap measured an NLP improvement of
+0.211849 nat per target dimension with 95% interval [0.200116, 0.223464]. This
+is incompatible with the frozen 32k saturation rule, so the decision is
+`continue_to_train_65k`.
+
+The decision opens review, not execution. A new authorization must bind the
+corrected combined 65k view, exact decision hash and immutable training release.
+The three 65k seeds start from scratch. The pre-correction failed 65k root and
+the superseded 16k/32k checkpoints are never resumed. No extension above 65k is
+permitted: the terminal result either locks 65k or stops for a new scientific
+contract.

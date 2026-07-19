@@ -684,6 +684,20 @@ checkpoints and metrics may not be resumed or reused. Architecture selection,
 calibration, SBC, final evaluation, corrected 65k training, extension above
 65k, real noise and GWOSC/GWTC remain closed.
 
+All six fresh corrected 16k/32k fits completed under training commit
+`adcb1a79e1534e4d742238aa99869c57da95dd96`. The independently reproduced
+10,000-replicate paired bootstrap measured a development NLP improvement of
+0.211849 nat per target dimension with 95% interval [0.200116, 0.223464]. The
+frozen decision is `continue_to_train_65k`; its exact JSON SHA-256 is
+`fe2890e025f5574a4ea45942b698e0b24db3801650125cd5f128126e435633cf`.
+
+This decision does not authorize the corrected 65k optimizer. A separate gate
+must bind the decision hash, corrected combined-view hash, immutable training
+wheel and CUDA environment before any corrected 65k array is opened. The old
+65k output and all superseded checkpoints remain excluded. Architecture
+selection, calibration, SBC, final evaluation, extension above 65,536,
+real-noise work and GWOSC/GWTC remain closed.
+
 ## Scientific integrity
 
 - Never fabricate results, citations, completed runs or calibration.
