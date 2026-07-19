@@ -712,6 +712,16 @@ CUDA environment. It permits seeds 0, 1 and 2 from scratch and the terminal
 SBC, final evaluation, extension above 65,536, real noise and GWOSC/GWTC remain
 closed.
 
+While that terminal probe runs, the existing Phase 5 implementation-only gate
+also permits the architecture stack to support the same immutable correction
+overlay. The corrected implementation is frozen at
+`d7e87a84ffc69a0e7825eb448c8cfdabe4e7fd4d`; its wheel SHA-256 is
+`fcc766a43a61ffdda3e0fca83fbefff4a010c5d35d39ab27b637fb34dbf5490a`.
+This checkpoint has not opened a scientific array or fit an architecture. A
+later execution gate must bind a terminal `lock_train_65k` decision, all three
+corrected probe summaries, the correction publication, exact grid and CUDA
+environment before any new architecture optimizer starts.
+
 ## Scientific integrity
 
 - Never fabricate results, citations, completed runs or calibration.
