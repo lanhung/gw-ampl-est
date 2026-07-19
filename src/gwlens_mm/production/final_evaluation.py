@@ -14,7 +14,7 @@ import numpy as np
 
 from ..arrays import validate_strain_array_semantics
 from ..config import load_yaml
-from ..provenance import canonical_json, configuration_hash
+from ..provenance import canonical_json, configuration_hash, dataset_id
 from ..schema import SplitName, V2Record
 from .diagnostic_context import BalancedTailStratum, classify_balanced_tail
 from .run_control import AttemptRecord
@@ -39,6 +39,7 @@ NUMERICAL_VALIDITY_ADDENDUM_PATH = (
 NUMERICAL_VALIDITY_ADDENDUM_HASH = (
     "431c09f2c279e1c745bd118fb1b0c06643de7dc42f605af78a49ca99b5b0019b"
 )
+ORIGINAL_COMMITTED_GENERATOR = "bc02054c1f95e7f6cd143fb9dc796ae48f0a15ac"
 
 
 @dataclass(frozen=True)
@@ -60,6 +61,12 @@ class FinalEvaluationNamespace:
     parameter_ood_stratum: str | None = None
     truth_waveform: str | None = None
     truth_psd_curves: Mapping[str, Mapping[str, str]] | None = None
+
+
+@dataclass(frozen=True)
+class FinalEvaluationIdentities:
+    parent_run_id: str
+    namespace_dataset_ids: Mapping[str, str]
 
 
 def _sha256(path: Path) -> str:
@@ -111,6 +118,86 @@ def load_final_evaluation_numerical_validity_addendum(
     ):
         raise ValueError("final-evaluation numerical-validity addendum changed")
     return addendum
+
+
+def validate_future_final_evaluation_authorization(
+    authorization: Mapping[str, Any],
+    *,
+    config: Mapping[str, Any],
+    generator_commit: str,
+    commitment_sha256: str,
+    numerical_validity_addendum_sha256: str,
+) -> None:
+    """Validate the future sealed-data gate, including the code-only revision."""
+
+    if authorization.get("authorization_status") != (
+        "authorized_sealed_final_evaluation_materialization_only"
+    ):
+        raise PermissionError("sealed final-evaluation authorization is absent")
+    if authorization.get("immutable_generator", {}).get("git_commit") != (
+        generator_commit
+    ):
+        raise ValueError("final-evaluation authorization generator mismatch")
+    frozen = authorization.get("frozen_contract", {})
+    if (
+        frozen.get("configuration_hash") != configuration_hash(config)
+        or frozen.get("commitment_sha256") != commitment_sha256
+        or frozen.get("numerical_validity_addendum_sha256")
+        != numerical_validity_addendum_sha256
+        or frozen.get("waveform_numerical_validity_preregistration_hash")
+        != CORRECTION_PREREGISTRATION_HASH
+    ):
+        raise ValueError("final-evaluation frozen execution identity mismatch")
+    revision = authorization.get("prospective_generator_revision", {})
+    if (
+        revision.get("original_committed_generator")
+        != ORIGINAL_COMMITTED_GENERATOR
+        or revision.get("scope")
+        != "waveform_numerical_validity_implementation_only"
+        or revision.get("counts_seeds_distributions_changed") is not False
+        or revision.get("original_commitment_mutated") is not False
+    ):
+        raise ValueError("final-evaluation generator revision is not narrowly bound")
+    contract = authorization.get("materialization_contract", {})
+    if (
+        int(contract.get("accepted_pair_count", -1)),
+        int(contract.get("shard_count", -1)),
+        int(contract.get("namespace_count", -1)),
+    ) != (20480, 160, 15):
+        raise ValueError("final-evaluation authorization count mismatch")
+    if contract.get("training_size_and_architecture_locked") is not True:
+        raise PermissionError("final pool cannot materialize before model design lock")
+    references = authorization.get("published_reference_contract", {})
+    if (
+        references.get("corrected_combined_train_manifest_sha256") is None
+        or len(str(references.get("corrected_combined_train_manifest_sha256"))) != 64
+        or references.get("correction_parent_manifest_sha256")
+        != "0fcfb117c620d58a2e0ccd8b19c0d3f3a371dd844fb637b50c8b565eee6864f2"
+        or references.get("correction_publication_tree_sha256")
+        != "a57aa2691e256b34403392f595e964dceec1325cfc54a38ed4d2a0b714d38c12"
+        or references.get("logical_system_counts")
+        != {
+            "train": 65536,
+            "validation": 6144,
+            "calibration_fit": 4096,
+            "sbc_diagnostic": 2048,
+        }
+    ):
+        raise ValueError("final-evaluation published-reference contract is incomplete")
+    flags = authorization.get("authorization", {})
+    if flags.get("sealed_materialization_authorized") is not True:
+        raise PermissionError("sealed final-evaluation materialization is closed")
+    for key in (
+        "unsealing_authorized",
+        "scientific_analysis_authorized",
+        "model_training_authorized",
+        "calibration_fit_authorized",
+        "learning_curve_use_authorized",
+        "architecture_selection_use_authorized",
+        "gwosc_gwtc_access_authorized",
+    ):
+        if flags.get(key) is not False:
+            raise PermissionError(f"future materialization requires {key}=false")
 
 
 def _namespace_seed(root_seed: int, seed_domain: str, context: str) -> int:
@@ -341,6 +428,37 @@ def build_final_evaluation_namespace_config(
     )
 
 
+def derive_final_evaluation_identities(
+    root: Path,
+    config: Mapping[str, Any],
+    generator_commit: str,
+) -> FinalEvaluationIdentities:
+    """Derive official identities only after a future release gate opens."""
+
+    if len(generator_commit) != 40 or any(
+        value not in "0123456789abcdef" for value in generator_commit.lower()
+    ):
+        raise ValueError("final-evaluation generator commit must be a full Git SHA")
+    config_hash = configuration_hash(config)
+    parent = f"phase7-final-evaluation-{generator_commit[:12]}-{config_hash[:12]}"
+    identities = {
+        namespace.namespace_id: dataset_id(
+            "2.0.0-alpha.3",
+            generator_commit,
+            configuration_hash(
+                build_final_evaluation_namespace_config(root, config, namespace)
+            ),
+            namespace.root_seed,
+        )
+        + "-"
+        + namespace.namespace_id.replace("/", "-").replace("_", "-")
+        for namespace in final_evaluation_namespaces(config)
+    }
+    if len(identities) != 15 or len(set(identities.values())) != 15:
+        raise ValueError("final-evaluation official identities collide")
+    return FinalEvaluationIdentities(parent, identities)
+
+
 def validate_final_evaluation_record(
     record: V2Record,
     namespace: FinalEvaluationNamespace,
@@ -566,10 +684,16 @@ def validate_final_evaluation_namespace(
 
 def collect_published_group_identifiers(
     roots: Tuple[Path, ...],
+    *,
+    excluded_physical_system_ids: Tuple[str, ...] = (),
 ) -> Dict[str, Set[str]]:
-    """Stream group IDs from already published scientific reference datasets."""
+    """Stream group IDs from published references, honoring a frozen overlay."""
 
     pandas = importlib.import_module("pandas")
+    excluded = set(excluded_physical_system_ids)
+    if len(excluded) != len(excluded_physical_system_ids):
+        raise ValueError("published-reference exclusion IDs contain duplicates")
+    observed_excluded: set[str] = set()
     identifiers: Dict[str, Set[str]] = {
         "pair": set(),
         "source": set(),
@@ -588,6 +712,9 @@ def collect_published_group_identifiers(
             frame = pandas.read_parquet(path, columns=["record_json"])
             for value in frame["record_json"]:
                 record = V2Record.from_json(str(value))
+                if record.pair.physical_system_id in excluded:
+                    observed_excluded.add(record.pair.physical_system_id)
+                    continue
                 values = {
                     "pair": record.pair.pair_id,
                     "source": record.pair.source_id,
@@ -607,6 +734,8 @@ def collect_published_group_identifiers(
                     if noise_id in identifiers["noise"]:
                         raise ValueError("published references duplicate noise ID")
                     identifiers["noise"].add(noise_id)
+    if observed_excluded != excluded:
+        raise ValueError("published-reference exclusions do not match their base data")
     return identifiers
 
 

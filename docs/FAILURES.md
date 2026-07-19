@@ -623,3 +623,12 @@ architecture lock plus separate materialization and inference gates.
   The SEOBNRv4PHM mismatch namespace is explicitly excluded from the
   approximant-specific ratio rule rather than silently applying an unreviewed
   threshold.
+- A second prospective audit found that the historical final commitment bound
+  generator commit `bc02054c...`, while the new rejection helper necessarily
+  lives in later code. The old runner required those identities to be equal,
+  making compliant materialization impossible. No final identity or pair
+  existed. The runner now preserves the old commitment as evidence and requires
+  a future authorization/release certificate to bind a narrowly revised
+  generator plus the addendum. The corrected train reference is also resolved
+  as an overlay, preventing the five excluded base systems from re-entering
+  leakage checks.

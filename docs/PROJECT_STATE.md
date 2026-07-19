@@ -409,3 +409,9 @@ final-evaluation supplemental commitment SHA-256 is
 `431c09f2c279e1c745bd118fb1b0c06643de7dc42f605af78a49ca99b5b0019b`.
 The original final-evaluation commitment remains exactly `c13412ec...` and all
 downstream execution flags remain false.
+
+The future sealed materialization runner and release gate now support the narrow
+post-incident generator revision without rewriting that commitment. They bind
+the supplemental hash, correction publication and corrected 65k logical
+reference, derive 15 collision-free namespace identities only after a ready
+gate, and remain fail-closed under the current implementation authorization.

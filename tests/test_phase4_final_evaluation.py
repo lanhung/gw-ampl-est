@@ -3,6 +3,9 @@ from __future__ import annotations
 import hashlib
 import json
 import math
+import os
+import subprocess
+import sys
 from copy import deepcopy
 from dataclasses import dataclass, replace
 from pathlib import Path
@@ -18,12 +21,17 @@ from gwlens_mm.production.diagnostic_context import (
     classify_balanced_tail,
 )
 from gwlens_mm.production.final_evaluation import (
+    FINAL_EVALUATION_COMMITMENT_HASH,
+    NUMERICAL_VALIDITY_ADDENDUM_HASH,
+    ORIGINAL_COMMITTED_GENERATOR,
     build_final_evaluation_namespace_config,
     collect_published_group_identifiers,
+    derive_final_evaluation_identities,
     dry_run_plan,
     final_evaluation_namespaces,
     load_final_evaluation_contract,
     validate_final_evaluation_record,
+    validate_future_final_evaluation_authorization,
 )
 from gwlens_mm.production.gw import psd_file_keyword
 from gwlens_mm.production.proposal_adapter import sample_production_proposal
@@ -319,6 +327,14 @@ def test_finalized_commitment_matches_every_deterministic_namespace() -> None:
     assert all(value is False for value in commitment["use_policy"].values())
 
 
+def test_future_official_identities_are_namespace_specific() -> None:
+    config, _ = load_final_evaluation_contract(ROOT)
+    identities = derive_final_evaluation_identities(ROOT, config, "a" * 40)
+    assert identities.parent_run_id.startswith("phase7-final-evaluation-")
+    assert len(identities.namespace_dataset_ids) == 15
+    assert len(set(identities.namespace_dataset_ids.values())) == 15
+
+
 def test_numerical_validity_addendum_preserves_original_commitment() -> None:
     commitment_path = ROOT / "results/phase4/final_evaluation_commitment.json"
     addendum_path = ROOT / (
@@ -337,6 +353,127 @@ def test_numerical_validity_addendum_preserves_original_commitment() -> None:
         "waveform_mismatch_test/seobnrv4phm_truth"
     )
     assert all(value is False for value in addendum["use_policy"].values())
+
+
+def test_future_materialization_binds_narrow_generator_revision() -> None:
+    config, _ = load_final_evaluation_contract(ROOT)
+    generator_commit = "a" * 40
+    authorization = {
+        "authorization_status": (
+            "authorized_sealed_final_evaluation_materialization_only"
+        ),
+        "immutable_generator": {"git_commit": generator_commit},
+        "frozen_contract": {
+            "configuration_hash": configuration_hash(config),
+            "commitment_sha256": FINAL_EVALUATION_COMMITMENT_HASH,
+            "numerical_validity_addendum_sha256": (
+                NUMERICAL_VALIDITY_ADDENDUM_HASH
+            ),
+            "waveform_numerical_validity_preregistration_hash": (
+                "7fca209de9f06e98da1c5a96ae0f4fc6daec5d2f0c2339a718e1f899bb915b69"
+            ),
+        },
+        "prospective_generator_revision": {
+            "original_committed_generator": ORIGINAL_COMMITTED_GENERATOR,
+            "scope": "waveform_numerical_validity_implementation_only",
+            "counts_seeds_distributions_changed": False,
+            "original_commitment_mutated": False,
+        },
+        "materialization_contract": {
+            "accepted_pair_count": 20480,
+            "shard_count": 160,
+            "namespace_count": 15,
+            "training_size_and_architecture_locked": True,
+        },
+        "published_reference_contract": {
+            "corrected_combined_train_manifest_sha256": "b" * 64,
+            "correction_parent_manifest_sha256": (
+                "0fcfb117c620d58a2e0ccd8b19c0d3f3a371dd844fb637b50c8b565eee6864f2"
+            ),
+            "correction_publication_tree_sha256": (
+                "a57aa2691e256b34403392f595e964dceec1325cfc54a38ed4d2a0b714d38c12"
+            ),
+            "logical_system_counts": {
+                "train": 65536,
+                "validation": 6144,
+                "calibration_fit": 4096,
+                "sbc_diagnostic": 2048,
+            },
+        },
+        "authorization": {
+            "sealed_materialization_authorized": True,
+            "unsealing_authorized": False,
+            "scientific_analysis_authorized": False,
+            "model_training_authorized": False,
+            "calibration_fit_authorized": False,
+            "learning_curve_use_authorized": False,
+            "architecture_selection_use_authorized": False,
+            "gwosc_gwtc_access_authorized": False,
+        },
+    }
+    validate_future_final_evaluation_authorization(
+        authorization,
+        config=config,
+        generator_commit=generator_commit,
+        commitment_sha256=FINAL_EVALUATION_COMMITMENT_HASH,
+        numerical_validity_addendum_sha256=NUMERICAL_VALIDITY_ADDENDUM_HASH,
+    )
+    changed = deepcopy(authorization)
+    changed["prospective_generator_revision"][
+        "counts_seeds_distributions_changed"
+    ] = True
+    with pytest.raises(ValueError, match="narrowly bound"):
+        validate_future_final_evaluation_authorization(
+            changed,
+            config=config,
+            generator_commit=generator_commit,
+            commitment_sha256=FINAL_EVALUATION_COMMITMENT_HASH,
+            numerical_validity_addendum_sha256=NUMERICAL_VALIDITY_ADDENDUM_HASH,
+        )
+
+
+def test_real_final_release_gate_stays_blocked_without_exact_authorization(
+    tmp_path: Path,
+) -> None:
+    output = tmp_path / "blocked.json"
+    environment = dict(os.environ)
+    environment["PYTHONPATH"] = str(ROOT / "src")
+    result = subprocess.run(
+        [
+            sys.executable,
+            str(ROOT / "scripts/phase4/prepare_final_evaluation.py"),
+            "--root",
+            str(ROOT),
+            "--execute",
+            "--authorization",
+            str(
+                ROOT
+                / (
+                    "configs/execution/"
+                    "phase4_final_evaluation_generator_implementation_authorization.yaml"
+                )
+            ),
+            "--generator-commit",
+            "a" * 40,
+            "--commitment",
+            str(ROOT / "results/phase4/final_evaluation_commitment.json"),
+            "--numerical-validity-addendum",
+            str(
+                ROOT
+                / "results/phase4/final_evaluation_numerical_validity_addendum.json"
+            ),
+            "--output",
+            str(output),
+        ],
+        check=False,
+        capture_output=True,
+        text=True,
+        env=environment,
+    )
+    assert result.returncode != 0
+    blocked = json.loads(output.read_text())
+    assert blocked["status"] == "blocked_preexecution"
+    assert blocked["official_identities"] is None
 
 
 def test_published_reference_group_ids_are_streamed_and_duplicates_rejected(
@@ -371,3 +508,12 @@ def test_published_reference_group_ids_are_streamed_and_duplicates_rejected(
     )
     with pytest.raises(ValueError, match="duplicate pair"):
         collect_published_group_identifiers((first, second))
+    system_id = data["pair"]["physical_system_id"]
+    excluded = collect_published_group_identifiers(
+        (first,), excluded_physical_system_ids=(system_id,)
+    )
+    assert all(not values for values in excluded.values())
+    with pytest.raises(ValueError, match="exclusions"):
+        collect_published_group_identifiers(
+            (first,), excluded_physical_system_ids=("not-present",)
+        )

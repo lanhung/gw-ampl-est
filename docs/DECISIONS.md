@@ -989,3 +989,23 @@ distributions and diagnostic contexts do not change. The intentionally distinct
 SEOBNRv4PHM mismatch namespace is explicitly marked non-applicable to this
 IMRPhenomXPHM-specific ratio rule and retains its independent finite-array and
 boundary checks. This closes a software consistency gap; it authorizes no data.
+
+## D088 — Revise the future generator identity, not the sealed test design
+
+The original final-evaluation commitment named generator commit `bc02054c...`
+before the waveform numerical incident. Requiring that historical code at
+materialization would omit the now-frozen rejection rule; mutating the original
+commitment would erase the pre-training audit trail.
+
+The release path therefore preserves the original commitment byte-for-byte and
+requires a future exact authorization to bind both it and the supplemental
+numerical-validity addendum to one new immutable generator release. The only
+permitted revision scope is implementation of the frozen numerical rejection;
+counts, seeds, attempt streams and diagnostic distributions must be unchanged.
+
+Final group-leakage validation uses the logical corrected training view: it
+streams the Stage A/Stage B base data, excludes exactly the five frozen bad
+physical-system IDs, includes the five published replacements and verifies the
+resulting 65,536-system reference. Official final identities are derived only by
+a ready release certificate after training size, architecture and all reference
+pools are atomically locked.
