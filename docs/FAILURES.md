@@ -638,3 +638,18 @@ architecture lock plus separate materialization and inference gates.
   logical train set. No calibration/SBC identity or pair existed. The release
   path now resolves the four-parent correction contract first and checks exact
   65,536-train plus 6,144-validation corrected membership before execution.
+
+## Phase 7 report and metadata reader drifted on the EM-cell field
+
+- The original RC.7 stack report stated that metadata-only examples retained
+  the exact Parquet `em_cell`, but the current reader still returned
+  `em_cell=None` from `metadata_example()`.
+- No scientific reference bank or validation/final query had been opened, so
+  no neighbor, metric or result was affected.
+- The typed published reader now uses one partition-label accessor for
+  metadata, calibration/SBC and full-strain paths. A non-optional regression
+  exercises the metadata path without Zarr, and the reference index rejects a
+  missing cell, duplicate bank/query IDs, split overlap and sparse strata.
+- The correction changes only offline stratification metadata. It does not
+  alter model inputs, the selected standardizer, frozen RC.7 distance, KDE or
+  scientific execution gate.

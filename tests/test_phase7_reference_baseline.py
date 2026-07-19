@@ -12,16 +12,19 @@ import pytest
 
 from gwlens_mm.config import load_yaml
 from gwlens_mm.provenance import configuration_hash
-from gwlens_mm.training.features import PreparedExample
+from gwlens_mm.training.features import InputStandardizer, PreparedExample
 from gwlens_mm.training.reference_baseline import (
     NEIGHBOR_COUNT,
     POSTERIOR_DRAW_COUNT,
     REFERENCE_CONFIG_HASH,
+    ReferenceBankIndex,
     ReferenceBaselineGateError,
     build_reference_posterior,
+    build_standardized_reference_bank,
     dry_run_plan,
     load_reference_baseline_contract,
     reference_feature_vector,
+    score_standardized_reference_queries,
 )
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -110,6 +113,87 @@ def test_reference_posterior_uses_exact_stable_256_neighbor_contract() -> None:
     assert repeated.neighbor_physical_system_ids == posterior.neighbor_physical_system_ids
     assert np.array_equal(repeated.normalized_weights, posterior.normalized_weights)
     assert np.array_equal(repeated.kernel_covariance, posterior.kernel_covariance)
+
+
+def test_reference_bank_index_is_order_stable_and_group_disjoint() -> None:
+    bank = _bank()
+    first = ReferenceBankIndex.build(bank)
+    second = ReferenceBankIndex.build(tuple(reversed(bank)))
+    assert first.identity_sha256 == second.identity_sha256
+    assert first.feature_dimension == len(reference_feature_vector(bank[0]))
+    group = next(iter(first.groups.values()))
+    assert group.features.flags.writeable is False
+    with pytest.raises(TypeError):
+        first.groups[("extra", "extra")] = group  # type: ignore[index]
+    query = _example(1000)
+    posterior = first.posterior(query)
+    repeated = second.posterior(query)
+    assert posterior.neighbor_physical_system_ids == repeated.neighbor_physical_system_ids
+    assert np.array_equal(posterior.normalized_weights, repeated.normalized_weights)
+    with pytest.raises(ReferenceBaselineGateError, match="overlaps"):
+        first.posterior(bank[0])
+    permitted_self_exclusion = first.posterior(
+        bank[0], require_group_disjoint=False
+    )
+    assert bank[0].physical_system_id not in (
+        permitted_self_exclusion.neighbor_physical_system_ids
+    )
+
+
+def test_reference_bank_index_rejects_missing_cell_duplicate_and_sparse_stratum() -> None:
+    missing_cell = replace(_example(0), em_cell=None)
+    with pytest.raises(ReferenceBaselineGateError, match="EM-cell"):
+        ReferenceBankIndex.build([missing_cell])
+    with pytest.raises(ReferenceBaselineGateError, match="duplicated"):
+        ReferenceBankIndex.build([_example(0), _example(0)])
+    sparse = ReferenceBankIndex.build(_bank()[:255])
+    with pytest.raises(ReferenceBaselineGateError, match="fewer than 256"):
+        sparse.posterior(_example(1000))
+
+
+def test_reference_index_scores_all_frozen_metrics_without_persisting_draws() -> None:
+    index = ReferenceBankIndex.build(_bank())
+    score = index.score(_example(1000))
+    value = score.as_mapping()
+    assert value["physical_system_id"] == "system-01000"
+    assert np.isfinite(value["log_probability"])
+    assert np.isfinite(value["negative_log_probability_per_target_dimension"])
+    assert len(value["crps"]) == 2
+    assert set(value["marginal_coverage"]) == {"0.50", "0.80", "0.90", "0.95"}
+    assert set(value["joint_central_coverage"]) == set(value["marginal_coverage"])
+    assert set(value["interval_width"]) == set(value["marginal_coverage"])
+    assert value["posterior_draws_persisted"] is False
+    assert value["reference_is_exact_likelihood_or_gold"] is False
+    assert len(value["neighbor_identity_sha256"]) == 64
+    assert index.score(_example(1000)).as_mapping() == value
+    with pytest.raises(ReferenceBaselineGateError, match="duplicated"):
+        index.score_queries((_example(1000), _example(1000)))
+
+
+def test_reference_execution_surface_is_metadata_only_and_uses_frozen_scales() -> None:
+    class Dataset:
+        def __init__(self, examples: list[PreparedExample]) -> None:
+            self.examples = examples
+            self.metadata_calls = 0
+
+        def __len__(self) -> int:
+            return len(self.examples)
+
+        def metadata_example(self, index: int) -> PreparedExample:
+            self.metadata_calls += 1
+            return replace(self.examples[index], gw_strain=np.empty((0,), dtype=np.float32))
+
+    training = Dataset(_bank())
+    standardizer = InputStandardizer.fit(
+        [replace(item, gw_strain=np.empty((0,), dtype=np.float32)) for item in _bank()]
+    )
+    index = build_standardized_reference_bank(training, standardizer)
+    assert training.metadata_calls == len(training)
+    queries = Dataset([_example(1000), _example(1001)])
+    scores = score_standardized_reference_queries(index, queries, standardizer)
+    assert len(scores) == 2
+    assert queries.metadata_calls == 2
+    assert all(score.physical_system_id.startswith("system-") for score in scores)
 
 
 def test_query_truth_and_gw_cannot_change_neighbors_weights_or_draws() -> None:

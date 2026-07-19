@@ -24,6 +24,7 @@ from gwlens_mm.training.contracts import (
 )
 from gwlens_mm.training.data import (
     PublishedStageADataset,
+    ShardIndexEntry,
     index_complete_shards,
     resolve_stage_a_publication,
 )
@@ -435,10 +436,49 @@ def test_published_reader_traverses_parent_parquet_zarr_path(tmp_path: Path) -> 
     )
     metadata = dataset.metadata_example(0)
     assert metadata.gw_strain.size == 0
+    assert metadata.em_cell == "full_precise_spectroscopic"
     example = dataset[0]
     assert example.gw_strain.shape == (2, 3, 4096)
     assert example.physical_system_id == "reader-system-0"
+    assert example.em_cell == "full_precise_spectroscopic"
     assert np.all(np.isfinite(example.gw_strain))
+
+
+def test_metadata_reader_retains_partition_cell_without_opening_zarr(tmp_path: Path) -> None:
+    class Rows:
+        def __init__(self, values: list[dict[str, str]]) -> None:
+            self.values = values
+            self.iloc = self
+
+        def __getitem__(self, index: int) -> dict[str, str]:
+            return self.values[index]
+
+        def __len__(self) -> int:
+            return len(self.values)
+
+    record = _example_record()
+    entry = ShardIndexEntry(tmp_path, 0, record.pair.physical_system_id)
+    dataset = object.__new__(PublishedStageADataset)
+    dataset.entries = (entry,)
+    dataset.expected_split = SplitName.TRAIN
+    dataset._cached_path = tmp_path
+    dataset._cached_records = Rows(
+        [
+            {
+                "record_json": record.to_json(),
+                "em_cell": "full_precise_spectroscopic",
+            }
+        ]
+    )
+    dataset._cached_noisy = None
+    metadata = dataset.metadata_example(0)
+    assert metadata.gw_strain.size == 0
+    assert metadata.em_cell == "full_precise_spectroscopic"
+    dataset._cached_records = Rows(
+        [{"record_json": record.to_json(), "em_cell": ""}]
+    )
+    with pytest.raises(TrainingGateError, match="EM-cell partition"):
+        dataset.metadata_example(0)
 
 
 def test_metrics_and_target_standardization_are_finite() -> None:

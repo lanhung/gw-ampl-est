@@ -751,6 +751,17 @@ replacement systems; and requires exactly 65,536 logical train plus 6,144
 unchanged validation systems. This is implementation-only hardening. No
 calibration/SBC identity, pair, checkpoint statistic or execution gate exists.
 
+The Phase 7 non-neural reference implementation is now hardened for future
+execution without opening a scientific record. The typed published reader
+retains the exact Parquet EM-cell label on metadata-only examples, and the
+reference core builds a deterministic vectorized index by exact lens family and
+EM cell using the selected training-rung standardizer. It scores CRPS, KDE NLP,
+central marginal/joint coverage and interval width one query at a time without
+persisting posterior draws. Scientific reference-bank access, validation/final
+query access and reference execution remain closed until a later exact gate
+binds the locked training rung, selected preprocessing artifact and query
+publication.
+
 ## Scientific integrity
 
 - Never fabricate results, citations, completed runs or calibration.

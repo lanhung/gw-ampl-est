@@ -13,13 +13,15 @@ import json
 import math
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, Mapping, Sequence, Tuple
+from types import MappingProxyType
+from typing import Any, Dict, Mapping, Protocol, Sequence, Tuple
 
 import numpy as np
 
 from ..config import load_yaml
 from ..provenance import configuration_hash
-from .features import PreparedExample
+from .features import InputStandardizer, PreparedExample
+from .metrics import empirical_crps
 
 REFERENCE_CONFIG = "configs/statistics/reference_baseline_preregistration.yaml"
 REFERENCE_AUTHORIZATION = "configs/execution/phase7_reference_baseline_stack_authorization.yaml"
@@ -29,10 +31,19 @@ NEIGHBOR_COUNT = 256
 POSTERIOR_DRAW_COUNT = 4096
 VARIANCE_FLOOR = 1.0e-6
 SEED_DOMAIN = "non_neural_reference_posterior_sampling_v1"
+REFERENCE_LEVELS = (0.50, 0.80, 0.90, 0.95)
 
 
 class ReferenceBaselineGateError(ValueError):
     """Raised when the reference baseline would violate the frozen contract."""
+
+
+class MetadataOnlyDataset(Protocol):
+    """Reader surface required by the reference without any strain access."""
+
+    def __len__(self) -> int: ...
+
+    def metadata_example(self, index: int) -> PreparedExample: ...
 
 
 @dataclass(frozen=True)
@@ -128,6 +139,258 @@ class ReferencePosterior:
         return result
 
 
+@dataclass(frozen=True)
+class ReferenceCaseScore:
+    """Small per-case score product; no posterior draws are persisted."""
+
+    physical_system_id: str
+    lens_family: str
+    em_cell: str
+    target_log_abs_mu: Tuple[float, float]
+    log_probability: float
+    crps: Tuple[float, float]
+    marginal_coverage: Mapping[str, Tuple[bool, bool]]
+    joint_central_coverage: Mapping[str, bool]
+    interval_width: Mapping[str, Tuple[float, float]]
+    effective_neighbor_count: float
+    neighbor_identity_sha256: str
+
+    def as_mapping(self) -> Mapping[str, Any]:
+        return {
+            "physical_system_id": self.physical_system_id,
+            "lens_family": self.lens_family,
+            "em_cell": self.em_cell,
+            "target_log_abs_mu": list(self.target_log_abs_mu),
+            "log_probability": self.log_probability,
+            "negative_log_probability_per_target_dimension": (
+                -self.log_probability / 2.0
+            ),
+            "crps": list(self.crps),
+            "marginal_coverage": {
+                level: list(value) for level, value in self.marginal_coverage.items()
+            },
+            "joint_central_coverage": dict(self.joint_central_coverage),
+            "interval_width": {
+                level: list(value) for level, value in self.interval_width.items()
+            },
+            "effective_neighbor_count": self.effective_neighbor_count,
+            "neighbor_identity_sha256": self.neighbor_identity_sha256,
+            "posterior_draws_persisted": False,
+            "reference_is_exact_likelihood_or_gold": False,
+        }
+
+
+@dataclass(frozen=True)
+class _ReferenceGroup:
+    physical_system_ids: np.ndarray
+    features: np.ndarray
+    targets: np.ndarray
+
+    def __post_init__(self) -> None:
+        identifiers = np.asarray(self.physical_system_ids)
+        features = np.asarray(self.features, dtype=np.float64)
+        targets = np.asarray(self.targets, dtype=np.float64)
+        if (
+            identifiers.ndim != 1
+            or features.ndim != 2
+            or targets.shape != (len(identifiers), 2)
+            or len(identifiers) != len(features)
+            or len(set(str(value) for value in identifiers)) != len(identifiers)
+            or not np.all(np.isfinite(features))
+            or not np.all(np.isfinite(targets))
+        ):
+            raise ReferenceBaselineGateError("reference-bank group is invalid")
+        for array in (identifiers, features, targets):
+            array.setflags(write=False)
+
+
+@dataclass(frozen=True)
+class ReferenceBankIndex:
+    """Immutable vectorized index for the frozen family/cell reference bank."""
+
+    groups: Mapping[Tuple[str, str], _ReferenceGroup]
+    physical_system_ids: frozenset[str]
+    feature_dimension: int
+    identity_sha256: str
+
+    @classmethod
+    def build(cls, examples: Sequence[PreparedExample]) -> "ReferenceBankIndex":
+        """Build a deterministic index from standardized training metadata only."""
+
+        ordered = sorted(examples, key=lambda item: item.physical_system_id)
+        if not ordered:
+            raise ReferenceBaselineGateError("reference bank is empty")
+        identifiers = [item.physical_system_id for item in ordered]
+        if any(not value for value in identifiers) or len(set(identifiers)) != len(
+            identifiers
+        ):
+            raise ReferenceBaselineGateError("reference-bank IDs are empty or duplicated")
+        grouped: Dict[Tuple[str, str], list[Tuple[str, np.ndarray, np.ndarray]]] = {}
+        dimension = -1
+        digest = hashlib.sha256()
+        digest.update(b"selected_prior_em_timing_knn_kde_v1\0")
+        for example in ordered:
+            if not example.lens_family or not example.em_cell:
+                raise ReferenceBaselineGateError(
+                    "reference bank requires exact lens-family and EM-cell labels"
+                )
+            feature = reference_feature_vector(example)
+            target = np.asarray(example.target, dtype=np.float64)
+            if target.shape != (2,) or not np.all(np.isfinite(target)):
+                raise ReferenceBaselineGateError("reference target is invalid")
+            if dimension < 0:
+                dimension = len(feature)
+            elif len(feature) != dimension:
+                raise ReferenceBaselineGateError(
+                    "reference-bank feature dimensions are inconsistent"
+                )
+            key = (example.lens_family, example.em_cell)
+            grouped.setdefault(key, []).append(
+                (example.physical_system_id, feature, target)
+            )
+            for value in (example.physical_system_id, *key):
+                digest.update(value.encode("utf-8"))
+                digest.update(b"\0")
+            digest.update(np.asarray(feature, dtype="<f8").tobytes())
+            digest.update(np.asarray(target, dtype="<f8").tobytes())
+        groups = {
+            key: _ReferenceGroup(
+                physical_system_ids=np.asarray(
+                    [value[0] for value in values], dtype=np.str_
+                ),
+                features=np.stack([value[1] for value in values]),
+                targets=np.stack([value[2] for value in values]),
+            )
+            for key, values in grouped.items()
+        }
+        return cls(
+            groups=MappingProxyType(groups),
+            physical_system_ids=frozenset(identifiers),
+            feature_dimension=dimension,
+            identity_sha256=digest.hexdigest(),
+        )
+
+    def posterior(
+        self,
+        query: PreparedExample,
+        *,
+        require_group_disjoint: bool = True,
+    ) -> ReferencePosterior:
+        """Resolve one exact-family/cell posterior without scanning other strata."""
+
+        if require_group_disjoint and query.physical_system_id in self.physical_system_ids:
+            raise ReferenceBaselineGateError("reference bank overlaps the query split")
+        if not query.em_cell:
+            raise ReferenceBaselineGateError("reference query has no exact EM-cell label")
+        group = self.groups.get((query.lens_family, query.em_cell))
+        if group is None:
+            raise ReferenceBaselineGateError("reference query stratum is absent")
+        feature = reference_feature_vector(query)
+        if len(feature) != self.feature_dimension:
+            raise ReferenceBaselineGateError("reference and query feature dimensions differ")
+        keep = group.physical_system_ids != query.physical_system_id
+        identifiers = group.physical_system_ids[keep]
+        features = group.features[keep]
+        targets = group.targets[keep]
+        if len(identifiers) < NEIGHBOR_COUNT:
+            raise ReferenceBaselineGateError("fewer than 256 exact-family/cell references")
+        distances = np.einsum(
+            "ni,ni->n",
+            features - feature[None, :],
+            features - feature[None, :],
+        )
+        order = np.lexsort((identifiers, distances))[:NEIGHBOR_COUNT]
+        return _reference_posterior_from_neighbors(
+            query.physical_system_id,
+            identifiers[order],
+            targets[order],
+            distances[order],
+        )
+
+    def score(self, query: PreparedExample) -> ReferenceCaseScore:
+        """Score one disjoint query using the frozen deterministic draw contract."""
+
+        posterior = self.posterior(query, require_group_disjoint=True)
+        target = np.asarray(query.target, dtype=np.float64)
+        if target.shape != (2,) or not np.all(np.isfinite(target)):
+            raise ReferenceBaselineGateError("reference query target is invalid")
+        draws = posterior.sample()
+        crps = empirical_crps(draws[None, :, :], target[None, :])[0]
+        marginal: Dict[str, Tuple[bool, bool]] = {}
+        joint: Dict[str, bool] = {}
+        width: Dict[str, Tuple[float, float]] = {}
+        for level in REFERENCE_LEVELS:
+            label = f"{level:.2f}"
+            alpha = (1.0 - level) / 2.0
+            lower = np.quantile(draws, alpha, axis=0)
+            upper = np.quantile(draws, 1.0 - alpha, axis=0)
+            contained = (target >= lower) & (target <= upper)
+            marginal[label] = (bool(contained[0]), bool(contained[1]))
+            joint[label] = bool(np.all(contained))
+            widths = upper - lower
+            width[label] = (float(widths[0]), float(widths[1]))
+        neighbor_digest = hashlib.sha256()
+        for identifier in posterior.neighbor_physical_system_ids:
+            neighbor_digest.update(identifier.encode("utf-8"))
+            neighbor_digest.update(b"\0")
+        return ReferenceCaseScore(
+            physical_system_id=query.physical_system_id,
+            lens_family=query.lens_family,
+            em_cell=str(query.em_cell),
+            target_log_abs_mu=(float(target[0]), float(target[1])),
+            log_probability=float(posterior.log_probability(target)),
+            crps=(float(crps[0]), float(crps[1])),
+            marginal_coverage=marginal,
+            joint_central_coverage=joint,
+            interval_width=width,
+            effective_neighbor_count=posterior.effective_neighbor_count,
+            neighbor_identity_sha256=neighbor_digest.hexdigest(),
+        )
+
+    def score_queries(
+        self, queries: Sequence[PreparedExample]
+    ) -> Tuple[ReferenceCaseScore, ...]:
+        """Score a bounded query sequence and reject duplicate query identities."""
+
+        identifiers = tuple(query.physical_system_id for query in queries)
+        if len(set(identifiers)) != len(identifiers) or any(not value for value in identifiers):
+            raise ReferenceBaselineGateError("reference query IDs are empty or duplicated")
+        return tuple(self.score(query) for query in queries)
+
+
+def build_standardized_reference_bank(
+    dataset: MetadataOnlyDataset,
+    standardizer: InputStandardizer,
+) -> ReferenceBankIndex:
+    """Build the locked-rung bank through the metadata-only reader surface."""
+
+    if len(dataset) < NEIGHBOR_COUNT:
+        raise ReferenceBaselineGateError("reference dataset has fewer than 256 systems")
+    examples = tuple(
+        standardizer.transform(dataset.metadata_example(index))
+        for index in range(len(dataset))
+    )
+    if any(example.gw_strain.size for example in examples):
+        raise ReferenceBaselineGateError("reference-bank construction opened GW strain")
+    return ReferenceBankIndex.build(examples)
+
+
+def score_standardized_reference_queries(
+    index: ReferenceBankIndex,
+    dataset: MetadataOnlyDataset,
+    standardizer: InputStandardizer,
+) -> Tuple[ReferenceCaseScore, ...]:
+    """Score a query publication through metadata only and training-rung scales."""
+
+    queries = tuple(
+        standardizer.transform(dataset.metadata_example(position))
+        for position in range(len(dataset))
+    )
+    if any(query.gw_strain.size for query in queries):
+        raise ReferenceBaselineGateError("reference query scoring opened GW strain")
+    return index.score_queries(queries)
+
+
 def load_reference_baseline_contract(root: Path) -> Tuple[Dict[str, Any], Dict[str, Any]]:
     """Validate the prospective RC.7 contract while keeping execution closed."""
 
@@ -214,40 +477,33 @@ def reference_feature_vector(example: PreparedExample) -> np.ndarray:
     return result
 
 
-def build_reference_posterior(
-    query: PreparedExample,
-    reference_bank: Sequence[PreparedExample],
+def _reference_posterior_from_neighbors(
+    query_physical_system_id: str,
+    identifiers: Sequence[str],
+    targets: np.ndarray,
+    distances: np.ndarray,
 ) -> ReferencePosterior:
-    """Construct the frozen 256-neighbor selected-prior simulation reference."""
+    """Apply the frozen weighting and KDE rule to exactly 256 ordered neighbors."""
 
-    query_feature = reference_feature_vector(query)
-    candidates = []
-    for reference in reference_bank:
-        if reference.physical_system_id == query.physical_system_id:
-            continue
-        if reference.lens_family != query.lens_family:
-            continue
-        if not query.em_cell or reference.em_cell != query.em_cell:
-            continue
-        feature = reference_feature_vector(reference)
-        if feature.shape != query_feature.shape:
-            raise ReferenceBaselineGateError("reference and query feature dimensions differ")
-        distance_squared = float(np.sum((feature - query_feature) ** 2))
-        target = np.asarray(reference.target, dtype=np.float64)
-        if target.shape != (2,) or not np.all(np.isfinite(target)):
-            raise ReferenceBaselineGateError("reference target is invalid")
-        candidates.append((distance_squared, reference.physical_system_id, target))
-    if len(candidates) < NEIGHBOR_COUNT:
-        raise ReferenceBaselineGateError("fewer than 256 exact-family/cell references")
-    candidates.sort(key=lambda item: (item[0], item[1]))
-    selected = candidates[:NEIGHBOR_COUNT]
-    distances = np.asarray([item[0] for item in selected], dtype=np.float64)
-    bandwidth_squared = max(float(distances[-1]), float(np.finfo(np.float64).eps))
-    raw_weights = np.exp(-0.5 * distances / bandwidth_squared)
+    neighbor_ids = tuple(str(value) for value in identifiers)
+    target_values = np.asarray(targets, dtype=np.float64)
+    distance_values = np.asarray(distances, dtype=np.float64)
+    if (
+        len(neighbor_ids) != NEIGHBOR_COUNT
+        or target_values.shape != (NEIGHBOR_COUNT, 2)
+        or distance_values.shape != (NEIGHBOR_COUNT,)
+        or not np.all(np.isfinite(target_values))
+        or not np.all(np.isfinite(distance_values))
+        or np.any(distance_values < 0.0)
+    ):
+        raise ReferenceBaselineGateError("selected reference neighbors are invalid")
+    bandwidth_squared = max(
+        float(distance_values[-1]), float(np.finfo(np.float64).eps)
+    )
+    raw_weights = np.exp(-0.5 * distance_values / bandwidth_squared)
     weights = raw_weights / np.sum(raw_weights)
-    targets = np.stack([item[2] for item in selected])
-    mean = np.sum(weights[:, None] * targets, axis=0)
-    centered = targets - mean
+    mean = np.sum(weights[:, None] * target_values, axis=0)
+    centered = target_values - mean
     effective_count = float(1.0 / np.sum(weights**2))
     denominator = 1.0 - float(np.sum(weights**2))
     if denominator <= 0.0:
@@ -256,13 +512,25 @@ def build_reference_posterior(
     scott = effective_count ** (-1.0 / 6.0)
     kernel_covariance = scott**2 * covariance + VARIANCE_FLOOR * np.eye(2)
     return ReferencePosterior(
-        query.physical_system_id,
-        tuple(item[1] for item in selected),
-        targets,
+        query_physical_system_id,
+        neighbor_ids,
+        target_values,
         weights,
         kernel_covariance,
         effective_count,
         bandwidth_squared,
+    )
+
+
+def build_reference_posterior(
+    query: PreparedExample,
+    reference_bank: Sequence[PreparedExample],
+) -> ReferencePosterior:
+    """Construct the frozen 256-neighbor selected-prior simulation reference."""
+
+    return ReferenceBankIndex.build(reference_bank).posterior(
+        query,
+        require_group_disjoint=False,
     )
 
 
