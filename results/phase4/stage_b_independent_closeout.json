@@ -1,0 +1,20 @@
+{
+  "accepted_pair_count": 32768,
+  "all_importance_weights_one": true,
+  "calibration_authorized": false,
+  "combined_manifest_sha256": "753ace3d2fe475f1279b3bd8560005017f4e75a822fa951d94f9ada60eb3eca4",
+  "combined_train_id": "phase4-train-65k-2be777e727ef-6a4f106f9640",
+  "complete_shard_count": 256,
+  "cumulative_train_accepted_pair_count": 65536,
+  "final_evaluation_authorized": false,
+  "gwosc_gwtc_accessed": false,
+  "parent_run_id": "phase4-stage-b-2be777e727ef-6a4f106f9640",
+  "proposal_equals_evaluation": true,
+  "remaining_free_bytes": 223772577792,
+  "sbc_authorized": false,
+  "stage_b_dataset_id": "gwlens-v2-2.0.0-alpha.3-d19597390506b6f8-train-extension",
+  "stage_b_parent_manifest_sha256": "b4d7df6300d0919f148b98fd8ce658216bdfa64752026dc9477321874e31f0da",
+  "stage_b_publication_tree_sha256": "373590aa01001a20e0631e672245dba050447cef0e03d45f185645476d735ee1",
+  "status": "passed_independent_stage_b_closeout",
+  "train_65k_optimizer_authorized": false
+}

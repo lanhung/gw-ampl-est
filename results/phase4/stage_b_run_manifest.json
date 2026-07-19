@@ -1,0 +1,23 @@
+{
+  "accepted_target": 32768,
+  "authorization_basis_commit": "d639d9377d07e4e58eb2a71ceb5d842f0742f7b3",
+  "calibration_authorized": false,
+  "configuration_hash": "6a4f106f9640bd480730976be91c94d6f87296f7d301a339bd8bb00e86cf4282",
+  "cumulative_train_target": 65536,
+  "dataset_id": "gwlens-v2-2.0.0-alpha.3-d19597390506b6f8-train-extension",
+  "execution_segments": [
+    {
+      "started_at": "2026-07-17T10:10:29.148537+00:00",
+      "status": "running"
+    }
+  ],
+  "final_evaluation_authorized": false,
+  "generator_commit": "2be777e727ef9d8e1a85f89c68966df5d37932b0",
+  "gwosc_gwtc_access_authorized": false,
+  "namespace_configuration_hash": "445790ce71a4e51ec3d487471ce8803e0c5603b560050cafcae8289e09fabbb7",
+  "orchestration_commit": "a198b90cc3ebd695a5b6c277e0843e0e19919b18",
+  "parent_run_id": "phase4-stage-b-2be777e727ef-6a4f106f9640",
+  "resume_strategy": "verify and preserve every complete atomic shard",
+  "status": "validated_ready_for_atomic_publication",
+  "train_65k_optimizer_authorized": false
+}
