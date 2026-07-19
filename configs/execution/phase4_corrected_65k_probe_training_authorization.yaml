@@ -1,0 +1,127 @@
+phase: "4-corrected-probe-65k"
+authorization_status: authorized_corrected_train_65k_probe_only
+authorized_by: codex_as_delegated_scientific_and_engineering_reviewer
+authorization_date: "2026-07-19"
+
+authorization_basis:
+  owner_delegation: continue_without_routine_human_intervention
+  corrected_stage_a_status: passed_and_atomically_resolved
+  corrected_stage_b_status: passed_and_atomically_resolved
+  corrected_combined_train_status: exactly_65536_group_disjoint_systems
+  corrected_16k_32k_fit_status: all_six_completed
+  prior_learning_curve_decision: continue_to_train_65k
+  independent_decision_replay: byte_identical
+  expert_review_result: passed
+
+authorization:
+  corrected_stage_a_data_access_authorized: true
+  corrected_stage_b_data_access_authorized: true
+  replacement_data_access_authorized: true
+  scientific_65k_probe_training_authorized: true
+  probe_optimizer_execution_authorized: true
+  learning_curve_decision_authorized: true
+
+  superseded_checkpoint_resume_authorized: false
+  model_tuning_authorized: false
+  architecture_selection_authorized: false
+  calibration_authorized: false
+  sbc_authorized: false
+  final_evaluation_authorized: false
+  extension_above_65536_authorized: false
+  real_noise_authorized: false
+  gwosc_gwtc_access_authorized: false
+
+authorized_training_rungs: [65536]
+authorized_training_seeds: [0, 1, 2]
+maximum_concurrent_fits: 3
+data_loader_worker_processes: 4
+
+base_generator_commit: "2be777e727ef9d8e1a85f89c68966df5d37932b0"
+base_preregistration_hash: "5aeaac395463bd073c44ead4ff4c5c729b5a2d4b4f1840c0825a53b30ab1bc98"
+preregistration_hash: "7fca209de9f06e98da1c5a96ae0f4fc6daec5d2f0c2339a718e1f899bb915b69"
+combined_base_manifest_sha256: "753ace3d2fe475f1279b3bd8560005017f4e75a822fa951d94f9ada60eb3eca4"
+corrected_combined_train_manifest_sha256: "da8aaa8d86afb4d93156191976b420bfc7bbc7dfe0fdc6c6f627515d804a7379"
+
+prior_learning_curve_decision_path: results/phase4/corrected_probe/learning_curve_decision.json
+prior_learning_curve_decision_sha256: "fe2890e025f5574a4ea45942b698e0b24db3801650125cd5f128126e435633cf"
+final_evaluation_commitment_sha256: "c13412eced163bac26abc4b22d054f3a6fa967e7e5a4dd7849ebf54f42df6083"
+
+publication_roots:
+  stage_a: /root/autodl-tmp/lensing-4/data_v2/scientific/stage_a/published/phase4-stage-a-2be777e727ef-d3a60034bbd6
+  stage_b: /root/autodl-tmp/lensing-4/data_v2/scientific/stage_b/published/phase4-stage-b-2be777e727ef-6a4f106f9640
+  combined_base: /root/autodl-tmp/lensing-4/data_v2/scientific/train_65k/published/phase4-train-65k-2be777e727ef-6a4f106f9640
+  correction: /root/autodl-tmp/lensing-4/data_v2/scientific/waveform_correction/published/phase4-waveform-correction-499f86b3159a-1db109b08189
+
+correction_publication:
+  parent_run_id: phase4-waveform-correction-499f86b3159a-1db109b08189
+  generator_commit: "499f86b3159af82612e38c134cd81003eedcc4e4"
+  parent_manifest_sha256: "0fcfb117c620d58a2e0ccd8b19c0d3f3a371dd844fb637b50c8b565eee6864f2"
+  publication_tree_sha256: "a57aa2691e256b34403392f595e964dceec1325cfc54a38ed4d2a0b714d38c12"
+  independent_closeout_path: results/phase4/waveform_correction_independent_closeout.json
+  independent_closeout_sha256: "e188c4a125d95c331534f88f460c1f4adb1e716d3881f83a6e1670f7e6af849b"
+
+immutable_training:
+  git_commit: "adcb1a79e1534e4d742238aa99869c57da95dd96"
+  wheel_path: /root/autodl-tmp/lensing-4/artifacts/phase4/corrected-probe/adcb1a79e1534e4d742238aa99869c57da95dd96/gwlens_mm-0.1.0-py3-none-any.whl
+  wheel_filename: gwlens_mm-0.1.0-py3-none-any.whl
+  wheel_sha256: "44208c61577b71488872c75eced03dbca3384cf5d03baaecc9f3447bdaeef24a"
+  model_configuration_path: configs/models/phase4_probe_nsf.yaml
+  model_configuration_hash: "8d0919c211b6aa057712a402f689f06d9ea916ba3c0c11cc32d0561aeb8d3087"
+  environment_lock_path: configs/environment/phase4-training-freeze.txt
+  environment_lock_sha256: "2e45000a8cea6712ae307c87782c593245ad56607a772f27a0cc5af726e37b95"
+  editable_install_authorized: false
+  cuda_required: true
+  gpu_model: NVIDIA RTX 5000 Ada Generation
+  minimum_gpu_count: 3
+
+probe_32k_output_root: /root/autodl-tmp/lensing-4/training/phase4/corrected-probe-adcb1a7
+training_output_root: /root/autodl-tmp/lensing-4/training/phase4/corrected-probe-65k-adcb1a7
+learning_curve_output_path: /root/autodl-tmp/lensing-4/training/phase4/corrected-probe-65k-adcb1a7/learning_curve_32k_to_65k_decision.json
+
+execution_contract:
+  training_rung: 65536
+  train_from_scratch: true
+  seeds: [0, 1, 2]
+  same_validation_systems_as_corrected_16k_32k: 6144
+  calibration_during_scale_selection_forbidden: true
+  final_evaluation_access_forbidden: true
+  best_seed_selection_forbidden: true
+  checkpoint_resume_authorized: true
+  paired_bootstrap_replicates: 10000
+  frozen_effective_batch_size: 256
+  physical_microbatch_size: 64
+  gradient_accumulation_steps: 4
+  effective_batch_semantics: exact_ordered_gradient_accumulation
+
+superseded_outputs:
+  original_probe_root: /root/autodl-tmp/lensing-4/training/phase4/probe-microbatch-v1
+  failed_65k_root: /root/autodl-tmp/lensing-4/training/phase4/probe-65k-a514e101
+  reuse_or_resume_authorized: false
+
+resource_gates:
+  observed_prelaunch_free_bytes: 222270361600
+  minimum_prelaunch_free_bytes: 100000000000
+  maximum_training_output_bytes: 50000000000
+  maximum_concurrent_fits: 3
+
+post_freeze_allowed_paths:
+  - configs/execution/phase4_corrected_probe_training_authorization.yaml
+  - configs/execution/phase4_corrected_65k_probe_training_authorization.yaml
+  - docs/DECISIONS.md
+  - docs/FAILURES.md
+  - docs/PROJECT_STATE.md
+  - docs/reports/PHASE4_CORRECTED_PROBE_RERUN_IMPLEMENTATION_REPORT.md
+  - docs/reports/PHASE4_CORRECTED_PROBE_RERUN_AUTHORIZATION_REPORT.md
+  - docs/reports/PHASE4_CORRECTED_PROBE_LEARNING_CURVE_REPORT.md
+  - docs/reports/PHASE4_CORRECTED_65K_PROBE_AUTHORIZATION_REPORT.md
+  - results/experiment_registry.csv
+  - results/phase4/corrected_probe_training_view_resolution.json
+  - results/phase4/corrected_probe/closeout_summary.json
+  - results/phase4/corrected_probe/evidence.sha256
+  - results/phase4/corrected_probe/learning_curve_decision.json
+
+terminal_decision_states:
+  - lock_train_65k
+  - stop_data_limited_and_new_preregistration
+
+stop_after_terminal_learning_curve_decision: true
