@@ -15,7 +15,16 @@ from typing import Any, Dict, Mapping, Set
 
 from gwlens_mm.config import load_yaml
 from gwlens_mm.production.calibration_sbc import (
+    BASE_GENERATOR_COMMIT,
+    COMBINED_BASE_MANIFEST_HASH,
     CONFIG_PATH,
+    CORRECTED_COMBINED_TRAIN_MANIFEST_HASH,
+    CORRECTION_GENERATOR_COMMIT,
+    CORRECTION_PARENT_MANIFEST_HASH,
+    CORRECTION_PUBLICATION_TREE_HASH,
+    RC4_HASH,
+    STAGE_A_PARENT_MANIFEST_HASH,
+    STAGE_B_PARENT_MANIFEST_HASH,
     CalibrationSBCNamespace,
     build_calibration_sbc_namespace_config,
     calibration_sbc_namespaces,
@@ -23,17 +32,26 @@ from gwlens_mm.production.calibration_sbc import (
     load_calibration_sbc_contract,
     validate_future_materialization_authorization,
 )
+from gwlens_mm.production.final_evaluation import collect_published_group_identifiers
 from gwlens_mm.production.qualification import generate_qualification_shard
 from gwlens_mm.production.run_control import verify_psd_files
 from gwlens_mm.production.stage_a import validate_stage_a_namespace
 from gwlens_mm.production.storage import tree_checksum, verify_complete_shard
 from gwlens_mm.provenance import configuration_hash
-from gwlens_mm.schema import V2Record
-from gwlens_mm.training.data import resolve_stage_a_publication
+from gwlens_mm.training.data import (
+    CorrectedTrainingPublication,
+    resolve_corrected_training_publication,
+)
 
 ROOT = Path(__file__).resolve().parents[2]
 APPROVED_REMOTE_ROOT = Path("/root/autodl-tmp/lensing-4")
 GROUP_KEYS = ("pair", "source", "lens", "system", "noise")
+REFERENCE_ROLES = {
+    "stage_a_train_and_validation",
+    "stage_b_train_extension",
+    "combined_65k_base_reference",
+    "waveform_correction_overlay",
+}
 
 
 def _sha256(path: Path) -> str:
@@ -66,11 +84,11 @@ def _future_authorization(path: Path, config: Mapping[str, Any]) -> Dict[str, An
     if not isinstance(implementation_commit, str) or len(implementation_commit) != 40:
         raise ValueError("calibration/SBC implementation commit is unresolved")
     references = authorization.get("published_reference_datasets")
-    if not isinstance(references, list) or len(references) != 2:
-        raise ValueError("calibration/SBC gate requires Stage A and Stage B references")
+    if not isinstance(references, list) or len(references) != 4:
+        raise ValueError("calibration/SBC gate requires the complete corrected view")
     roles = {item.get("role") for item in references if isinstance(item, dict)}
-    if roles != {"stage_a_train_and_validation", "stage_b_train_extension"}:
-        raise ValueError("calibration/SBC published reference roles are incomplete")
+    if roles != REFERENCE_ROLES:
+        raise ValueError("calibration/SBC corrected reference roles are incomplete")
     for evidence_name in ("training_size_decision", "architecture_decision"):
         evidence = authorization.get(evidence_name, {})
         evidence_path = Path(str(evidence.get("path", "")))
@@ -79,9 +97,7 @@ def _future_authorization(path: Path, config: Mapping[str, Any]) -> Dict[str, An
     return authorization
 
 
-def _validate_reference_parent(
-    reference: Mapping[str, Any], *, expected_generator_commit: str
-) -> Path:
+def _bound_reference_root(reference: Mapping[str, Any]) -> Path:
     root = Path(str(reference["root"])).resolve()
     manifest = Path(str(reference["manifest_path"])).resolve()
     if (
@@ -92,55 +108,55 @@ def _validate_reference_parent(
         or _sha256(manifest) != reference["manifest_sha256"]
     ):
         raise ValueError("reference is not the authorization-bound atomic parent")
-    role = str(reference["role"])
-    if role == "stage_a_train_and_validation":
-        resolved = resolve_stage_a_publication(
-            root,
-            expected_generator_commit=expected_generator_commit,
-            expected_preregistration_hash=(
-                "5aeaac395463bd073c44ead4ff4c5c729b5a2d4b4f1840c0825a53b30ab1bc98"
-            ),
-        )
-        if resolved.parent_root != root:
-            raise ValueError("Stage A reference resolver changed the parent identity")
-        return root
-    if role != "stage_b_train_extension":
-        raise ValueError("unknown calibration/SBC published-reference role")
-    value = json.loads(manifest.read_text(encoding="utf-8"))
-    validation = value.get("validation", {})
-    cross = value.get("cross_component_validation", {})
-    if (
-        value.get("status"),
-        value.get("generator_commit"),
-        value.get("preregistration_hash"),
-        int(value.get("accepted_pair_count", -1)),
-        int(value.get("complete_shard_count", -1)),
-        value.get("proposal_equals_evaluation"),
-        value.get("all_importance_weights_one"),
-        validation.get("status"),
-        validation.get("split"),
-        int(validation.get("accepted_pair_count", -1)),
-        cross.get("stage_a_stage_b_group_disjoint"),
-        cross.get("stage_b_validation_group_disjoint"),
-    ) != (
-        "passed",
-        expected_generator_commit,
-        "5aeaac395463bd073c44ead4ff4c5c729b5a2d4b4f1840c0825a53b30ab1bc98",
-        32768,
-        256,
-        True,
-        True,
-        "passed",
-        "train",
-        32768,
-        True,
-        True,
-    ):
-        raise ValueError("Stage B reference manifest violates the frozen contract")
-    dataset_id = str(validation.get("dataset_id", ""))
-    if not dataset_id or not (root / dataset_id).is_dir():
-        raise ValueError("Stage B reference dataset is absent")
     return root
+
+
+def _validate_corrected_training_reference(
+    authorization: Mapping[str, Any],
+) -> CorrectedTrainingPublication:
+    references = {
+        str(item["role"]): item
+        for item in authorization["published_reference_datasets"]
+    }
+    if set(references) != REFERENCE_ROLES:
+        raise ValueError("calibration/SBC corrected reference set changed")
+    roots = {role: _bound_reference_root(value) for role, value in references.items()}
+    expected_manifest_hashes = {
+        "stage_a_train_and_validation": STAGE_A_PARENT_MANIFEST_HASH,
+        "stage_b_train_extension": STAGE_B_PARENT_MANIFEST_HASH,
+        "combined_65k_base_reference": COMBINED_BASE_MANIFEST_HASH,
+        "waveform_correction_overlay": CORRECTION_PARENT_MANIFEST_HASH,
+    }
+    if any(
+        references[role].get("manifest_sha256") != digest
+        for role, digest in expected_manifest_hashes.items()
+    ):
+        raise ValueError("calibration/SBC corrected reference manifest changed")
+    publication = resolve_corrected_training_publication(
+        roots["waveform_correction_overlay"],
+        stage_a_parent_root=roots["stage_a_train_and_validation"],
+        stage_b_parent_root=roots["stage_b_train_extension"],
+        combined_base_root=roots["combined_65k_base_reference"],
+        expected_base_generator_commit=BASE_GENERATOR_COMMIT,
+        expected_base_preregistration_hash=RC4_HASH,
+        expected_correction_generator_commit=CORRECTION_GENERATOR_COMMIT,
+        expected_correction_preregistration_hash=(
+            "7fca209de9f06e98da1c5a96ae0f4fc6daec5d2f0c2339a718e1f899bb915b69"
+        ),
+        expected_correction_manifest_sha256=CORRECTION_PARENT_MANIFEST_HASH,
+        expected_correction_tree_sha256=CORRECTION_PUBLICATION_TREE_HASH,
+        expected_combined_base_manifest_sha256=COMBINED_BASE_MANIFEST_HASH,
+    )
+    if (
+        publication.corrected_combined_train_manifest_sha256
+        != CORRECTED_COMBINED_TRAIN_MANIFEST_HASH
+        or len(publication.stage_a_excluded_ids) != 2
+        or len(publication.stage_b_excluded_ids) != 3
+        or len(publication.stage_a_replacement_ids) != 2
+        or len(publication.stage_b_replacement_ids) != 3
+    ):
+        raise ValueError("calibration/SBC corrected logical view changed")
+    return publication
 
 
 def _verify_checkout(
@@ -248,17 +264,22 @@ def evaluate_release_gate(
         checks["psd_files"] = verify_psd_files(base["gw"]["psd_curves"])
     except Exception as error:
         blockers.append(f"calibration/SBC PSD verification failed: {error}")
-    reference_roots = []
-    for reference in authorization["published_reference_datasets"]:
-        try:
-            reference_roots.append(
-                _validate_reference_parent(
-                    reference,
-                    expected_generator_commit=generator_commit,
-                )
-            )
-        except Exception as error:
-            blockers.append(f"calibration/SBC reference {reference.get('role')} failed: {error}")
+    corrected_reference = None
+    try:
+        corrected_reference = _validate_corrected_training_reference(authorization)
+        checks["corrected_combined_train_manifest_sha256"] = (
+            corrected_reference.corrected_combined_train_manifest_sha256
+        )
+        checks["excluded_base_system_count"] = len(
+            corrected_reference.stage_a_excluded_ids
+            + corrected_reference.stage_b_excluded_ids
+        )
+        checks["replacement_system_count"] = len(
+            corrected_reference.stage_a_replacement_ids
+            + corrected_reference.stage_b_replacement_ids
+        )
+    except Exception as error:
+        blockers.append(f"calibration/SBC corrected training reference failed: {error}")
     staging = Path(str(config["paths"]["staging_root"]))
     publication = Path(str(config["paths"]["publication_root"]))
     staging.parent.mkdir(parents=True, exist_ok=True)
@@ -270,7 +291,16 @@ def evaluate_release_gate(
     identities = derive_calibration_sbc_identities(config, generator_commit)
     if (publication / identities.parent_run_id).exists():
         blockers.append("calibration/SBC official parent identity already exists")
-    checks["published_reference_roots"] = [str(value) for value in reference_roots]
+    checks["published_reference_roots"] = (
+        {
+            "stage_a": str(corrected_reference.stage_a.parent_root),
+            "stage_b": str(corrected_reference.combined_base.stage_b_parent_root),
+            "combined_base": str(corrected_reference.combined_base.combined_root),
+            "correction": str(corrected_reference.correction_root),
+        }
+        if corrected_reference is not None
+        else None
+    )
     status = "ready_for_official_execution" if not blockers else "blocked_preexecution"
     return {
         "status": status,
@@ -345,33 +375,6 @@ def _dataset_id_for_namespace(
     return str(identities[key])
 
 
-def _published_reference_ids(roots: tuple[Path, ...]) -> Dict[str, Set[str]]:
-    """Stream group IDs from the two authorization-bound atomic parents."""
-
-    pandas = __import__("pandas")
-    identifiers: Dict[str, Set[str]] = {key: set() for key in GROUP_KEYS}
-    for root in roots:
-        records = tuple(sorted(root.rglob("records.parquet")))
-        if not records:
-            raise ValueError("published calibration/SBC reference has no records")
-        for path in records:
-            frame = pandas.read_parquet(path, columns=["record_json"])
-            for raw in frame["record_json"]:
-                record = V2Record.from_json(str(raw))
-                values = {
-                    "pair": (record.pair.pair_id,),
-                    "source": (record.pair.source_id,),
-                    "lens": (record.pair.lens_id,),
-                    "system": (record.pair.physical_system_id,),
-                    "noise": tuple(record.provenance.used_noise_segment_ids),
-                }
-                for key, group in values.items():
-                    if identifiers[key].intersection(group):
-                        raise ValueError(f"published references duplicate {key} ID")
-                    identifiers[key].update(group)
-    return identifiers
-
-
 def execute(
     *,
     authorization_path: Path,
@@ -406,6 +409,7 @@ def execute(
             raise ValueError(f"calibration/SBC release certificate {key} mismatch")
     identities = certificate["official_identities"]
     generator_commit = str(certificate["generator_commit"])
+    corrected_reference = _validate_corrected_training_reference(authorization)
     parent_stage = Path(str(config["paths"]["staging_root"])) / str(
         identities["parent_run_id"]
     )
@@ -472,10 +476,21 @@ def execute(
             if all_ids[key] & identifiers[key]:
                 raise ValueError(f"cross-namespace calibration/SBC {key} leakage")
             all_ids[key].update(identifiers[key])
-    reference_roots = tuple(
-        Path(str(value["root"])) for value in authorization["published_reference_datasets"]
+    reference_roots = (
+        corrected_reference.stage_a.parent_root,
+        corrected_reference.combined_base.stage_b_parent_root,
+        corrected_reference.correction_root,
     )
-    reference_ids = _published_reference_ids(reference_roots)
+    excluded_ids = (
+        corrected_reference.stage_a_excluded_ids
+        + corrected_reference.stage_b_excluded_ids
+    )
+    reference_ids = collect_published_group_identifiers(
+        reference_roots,
+        excluded_physical_system_ids=excluded_ids,
+    )
+    if len(reference_ids["system"]) != 71680:
+        raise ValueError("corrected train plus validation reference is not exactly 71,680")
     for key in GROUP_KEYS:
         if all_ids[key] & reference_ids[key]:
             raise ValueError(f"calibration/SBC {key} leaks into train or validation")
@@ -494,6 +509,15 @@ def execute(
         "complete_shard_count": 48,
         "validations": validations,
         "group_disjoint_from_train_validation_and_each_other": True,
+        "corrected_combined_train_manifest_sha256": (
+            corrected_reference.corrected_combined_train_manifest_sha256
+        ),
+        "excluded_base_system_count": len(excluded_ids),
+        "replacement_system_count": len(
+            corrected_reference.stage_a_replacement_ids
+            + corrected_reference.stage_b_replacement_ids
+        ),
+        "referenced_train_validation_system_count": len(reference_ids["system"]),
         "proposal_equals_evaluation": True,
         "all_importance_weights_one": True,
         "calibration_fit_statistics_authorized": False,
