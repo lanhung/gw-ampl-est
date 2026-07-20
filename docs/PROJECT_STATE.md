@@ -69,17 +69,20 @@ That implementation gate subsequently opened under exact identities. All six
 fresh corrected 16k/32k fits completed and the frozen comparison measured a
 development NLP improvement of 0.211849 nat per target dimension, with 95%
 interval [0.200116, 0.223464]. The resulting decision is
-`continue_to_train_65k`. The three corrected 65k probe seeds are now running
-from scratch under commit `adcb1a79e1534e4d742238aa99869c57da95dd96`;
-no seed summary or terminal size decision exists yet. The supervisor will run
-the frozen 32k-to-65k comparison only after all three summaries complete.
+`continue_to_train_65k`. The three corrected 65k probe seeds then completed
+from scratch under commit `adcb1a79e1534e4d742238aa99869c57da95dd96`.
+Their terminal 32k-to-65k comparison measured an NLP improvement of 0.201437
+nat per target dimension, with 95% interval [0.191498, 0.211788]. The frozen
+decision is `stop_data_limited_and_new_preregistration`; independent replay was
+byte-identical and decision SHA-256 is `90c238a0...`. No calibration or final
+case was opened.
 
-Delegated review has now bound the corrected 32k view, implementation commit,
-wheel, model, CUDA environment and final-evaluation commitment in
-`phase4_corrected_probe_training_authorization.yaml`. A fresh 16k/32k
-three-seed rerun is authorized from scratch; all earlier probe checkpoints and
-metrics remain superseded. Corrected 65k training and every downstream
-scientific phase remain separately gated.
+The corrected-probe gates bound the corrected views, implementation commit,
+wheel, model, CUDA environment and final-evaluation commitment. The authorized
+16k/32k and terminal 65k runs are now complete; all earlier pre-correction
+probe checkpoints and metrics remain superseded. Every downstream scientific
+phase remains separately gated, and the terminal data-limited decision prevents
+the existing post-lock architecture gate from opening.
 
 The post-lock architecture-selection software is implemented without
 scientific data access. It freezes the fixed 2x2 grid, reuses the locked-rung
@@ -402,7 +405,8 @@ assets remain immutable and no official reproduction result has been written.
 ## Not started or not yet complete by design
 
 - further proposal engineering qualification (permanently closed);
-- terminal 65k probe training and post-lock architecture selection;
+- post-size-lock architecture selection (blocked because 65k did not lock);
+- any training rung above 65,536 (requires a new preregistration);
 - calibration, SBC or final scientific evaluation;
 - GWOSC/GWTC download;
 - real-noise injection or catalog scan;
@@ -411,25 +415,20 @@ assets remain immutable and no official reproduction result has been written.
 ## Current execution and next gate
 
 Stage A, Stage B and the five-system correction overlay are atomically
-published. The corrected 16k and 32k probe fits are complete and the only valid
-development decision is `continue_to_train_65k`. The exact decision SHA-256 is
-`fe2890e025f5574a4ea45942b698e0b24db3801650125cd5f128126e435633cf`.
+published. Corrected 16k, 32k and 65k probe fits are complete. The terminal
+development decision is `stop_data_limited_and_new_preregistration`, exact JSON
+SHA-256 `90c238a0d85d941c9e90a68e8a215a8d9025f57ffe7757ff89dd14c267f6d72f`.
+The 32k-to-65k improvement remains decisively above the saturation threshold;
+development EM-cell and tail conditions also did not all pass.
 
-Delegated review has now authorized a fresh corrected 65k three-seed execution.
-The gate binds corrected combined-view hash `da8aaa8d...`, the completed
-16k-to-32k decision, code `adcb1a7...`, the exact wheel and the immutable CUDA
-environment. It starts all three seeds from scratch and stops after the terminal
-32k-to-65k development comparison. The failed pre-correction 65k root cannot be
-resumed or reused.
+The required next gate is a new scientific preregistration. RC.4 does not
+authorize an extension above 65,536, and the architecture runner cannot execute
+because it requires `lock_train_65k`. Architecture selection, calibration/SBC
+materialization, final evaluation, real noise and GWOSC/GWTC are closed. The
+completed 65k checkpoints and development evidence remain immutable.
 
-Architecture selection remains closed until the terminal size decision locks
-65k. The existing architecture implementation must first be hardened to use the
-corrected overlay rather than the immutable base 65k reader. Calibration/SBC
-materialization, final evaluation, real noise and GWOSC/GWTC all remain closed
-behind their separate downstream gates.
-
-That architecture implementation is now correction-aware and merged. In
-parallel with the active corrected 65k three-seed probe, the future Phase 6 and
+That architecture implementation is correction-aware and merged, but cannot be
+executed under the terminal data-limited decision. The future Phase 6 and
 Phase 7 generator builders were hardened to inherit numerical-validity
 preregistration `1.1.1-rc.1`. The Phase 6 supplemental commitment SHA-256 is
 `af87affbaf56695fe0a6c7f422a70fed154dd2df2255df819348ad204dd0ccd4`; the

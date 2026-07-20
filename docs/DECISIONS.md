@@ -1099,3 +1099,26 @@ test evidence. Legacy inode/size/mtime identity must remain unchanged, and any
 new result is written only under `/root/autodl-tmp/lensing-4`. This completes a
 historical stress control without calling it calibrated, posterior-valued,
 matched or scientifically comparable to the primary final evaluation.
+
+## D094 — Stop after the corrected 65k probe and require a new scientific contract
+
+All three corrected 65,536-system probe fits completed successfully under the
+frozen training code, data view, model and CUDA environment. The paired
+32k-to-65k development comparison measured an NLP improvement of 0.201437 nat
+per target dimension with 95% interval [0.191498, 0.211788]. Even the lower
+bound is more than nineteen times the 0.01 saturation threshold. All three
+seeds also improved median CRPS, while no seed passed every EM-cell tolerance
+and the extreme-relative-magnification development view remained below its
+minimum case requirement.
+
+The preregistered result is therefore
+`stop_data_limited_and_new_preregistration`, not `lock_train_65k`. It is a
+successful terminal measurement, not an optimizer failure. The exact decision
+SHA-256 is `90c238a0d85d941c9e90a68e8a215a8d9025f57ffe7757ff89dd14c267f6d72f`
+and an independent replay is byte-identical.
+
+No larger rung may be generated automatically. The existing architecture grid
+also remains non-executable because its gate requires a locked training size.
+A new versioned scientific preregistration must decide the next data scale or a
+narrower scientific scope without consulting final evaluation. Calibration,
+SBC, final evaluation, real noise and GWOSC/GWTC remain closed.
