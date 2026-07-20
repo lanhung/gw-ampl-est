@@ -1309,3 +1309,19 @@ root for `scripts/` imports. CUDA availability and the frozen RTX 5000 Ada GPU
 inventory are recorded in the same atomic result. This remains a software
 release check: it reads no scientific publication and cannot authorize or
 execute training.
+
+## D106 — Bind terminal training outputs to the separately reviewed release packet
+
+An exact wheel-test JSON is insufficient if a later authorization can omit or
+replace the release packet that consumed it. Every future terminal-probe
+authorization must therefore carry one absolute packet path, its SHA-256 and
+an explicit delegated-review acceptance state. The runtime gate independently
+loads that packet before resolving any scientific publication.
+
+The packet's publication manifests, counts, training commit, wheel, model,
+environment, CUDA inventory, final-evaluation commitment and closed downstream
+flags must agree with the execution authorization. The packet itself remains
+non-authorizing. Its hash is then persisted in shared rung preprocessing, all
+new 131k probe evidence and retained-65k development-tail summaries. This
+prevents the optimizer outputs from becoming detached from their exact release
+and review evidence.

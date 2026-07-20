@@ -1029,6 +1029,14 @@ and full tests with the repository pytest configuration disabled so its
 only as post-publication software evidence; it opens no scientific data and
 cannot authorize or start an optimizer.
 
+The future terminal-probe execution gate must additionally bind the SHA-256
+of that separately reviewed release packet. The typed training gate rejects
+packet, publication, wheel, environment, model, GPU, commitment or safety-flag
+drift before resolving a scientific dataset. The accepted packet hash is
+carried into shared preprocessing, every 131k run identity summary and the
+retained-65k development-tail evaluation. No terminal-probe authorization or
+optimizer exists yet.
+
 ## Scientific integrity
 
 - Never fabricate results, citations, completed runs or calibration.

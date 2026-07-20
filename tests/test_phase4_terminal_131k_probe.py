@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 from pathlib import Path
 
@@ -8,8 +9,10 @@ import pytest
 from gwlens_mm.training.contracts import TrainingGateError
 from gwlens_mm.training.engine import TrainingRunIdentity
 from gwlens_mm.training.terminal131 import (
+    EXPECTED_TERMINAL_GPU_MODEL,
     TAIL_STRATA,
     validate_terminal_131k_training_gate,
+    validate_terminal_probe_release_binding,
 )
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -70,3 +73,104 @@ def test_terminal_runner_dry_plan_is_execution_disabled(tmp_path: Path) -> None:
     assert result["planned_rung"] == 131072
     assert result["architecture_selection_authorized"] is False
     assert result["extension_above_131072_authorized"] is False
+
+
+def _release_packet() -> dict[str, object]:
+    return {
+        "status": "ready_for_delegated_terminal_probe_authorization_review",
+        "authorization_created": False,
+        "optimizer_execution_authorized": False,
+        "authorized_training_rungs_preview": [131072],
+        "authorized_training_seeds_preview": [0, 1, 2],
+        "architecture_selection_authorized": False,
+        "calibration_authorized": False,
+        "sbc_authorized": False,
+        "final_evaluation_authorized": False,
+        "extension_above_131072_authorized": False,
+        "gwosc_gwtc_access_authorized": False,
+        "publication": {
+            "combined_manifest_sha256": "1" * 64,
+            "train_parent_manifest_sha256": "2" * 64,
+            "development_tail_manifest_sha256": "3" * 64,
+            "logical_train_accepted_count": 131072,
+            "development_tail_accepted_count": 512,
+        },
+        "immutable_training": {
+            "git_commit": "4" * 40,
+            "wheel_path": "/root/autodl-tmp/lensing-4/artifacts/terminal.whl",
+            "wheel_filename": "terminal.whl",
+            "wheel_sha256": "5" * 64,
+            "model_configuration_path": "configs/models/phase4_probe_nsf.yaml",
+            "model_configuration_hash": "6" * 64,
+            "environment_lock_path": "configs/environment/phase4-training-freeze.txt",
+            "environment_lock_sha256": "7" * 64,
+            "editable_install_authorized": False,
+            "cuda_required": True,
+            "observed_gpu_names": [EXPECTED_TERMINAL_GPU_MODEL] * 4,
+            "exact_wheel_test_result_path": "/root/autodl-tmp/test.json",
+            "exact_wheel_test_result_sha256": "8" * 64,
+        },
+        "final_evaluation_commitment_sha256": "9" * 64,
+    }
+
+
+def _release_authorization(
+    tmp_path: Path, packet: dict[str, object]
+) -> dict[str, object]:
+    packet_path = tmp_path / "terminal-probe-release.json"
+    packet_path.write_text(json.dumps(packet, sort_keys=True) + "\n", encoding="utf-8")
+    training = packet["immutable_training"]
+    publication = packet["publication"]
+    assert isinstance(training, dict)
+    assert isinstance(publication, dict)
+    return {
+        "terminal_probe_release_review": {
+            "path": str(packet_path),
+            "sha256": hashlib.sha256(packet_path.read_bytes()).hexdigest(),
+            "delegated_review_status": (
+                "accepted_for_exact_terminal_probe_authorization"
+            ),
+        },
+        "terminal_publication": dict(publication),
+        "immutable_training": dict(training),
+        "final_evaluation_commitment_sha256": "9" * 64,
+    }
+
+
+def test_terminal_probe_release_packet_is_hash_and_identity_bound(
+    tmp_path: Path,
+) -> None:
+    packet = _release_packet()
+    authorization = _release_authorization(tmp_path, packet)
+    assert validate_terminal_probe_release_binding(authorization)["status"] == (
+        "ready_for_delegated_terminal_probe_authorization_review"
+    )
+
+
+@pytest.mark.parametrize(
+    "drift",
+    ("packet_hash", "publication", "wheel", "gpu", "optimizer", "review"),
+)
+def test_terminal_probe_release_binding_fails_closed(
+    tmp_path: Path, drift: str
+) -> None:
+    packet = _release_packet()
+    authorization = _release_authorization(tmp_path, packet)
+    if drift == "packet_hash":
+        authorization["terminal_probe_release_review"]["sha256"] = "0" * 64
+    elif drift == "publication":
+        authorization["terminal_publication"]["combined_manifest_sha256"] = "a" * 64
+    elif drift == "wheel":
+        authorization["immutable_training"]["wheel_sha256"] = "b" * 64
+    elif drift == "gpu":
+        packet["immutable_training"]["observed_gpu_names"] = ["other"] * 4
+        authorization = _release_authorization(tmp_path, packet)
+    elif drift == "optimizer":
+        packet["optimizer_execution_authorized"] = True
+        authorization = _release_authorization(tmp_path, packet)
+    else:
+        authorization["terminal_probe_release_review"][
+            "delegated_review_status"
+        ] = "pending"
+    with pytest.raises(TrainingGateError, match="release|packet|CUDA"):
+        validate_terminal_probe_release_binding(authorization)
