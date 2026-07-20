@@ -878,6 +878,26 @@ architecture selection, calibration, SBC, final evaluation, extension above
 131,072, real noise or GWOSC/GWTC. Official identities may be derived only by
 a fresh ready release certificate, and publication must stop for review.
 
+The first official terminal-materialization segment started with the frozen
+configuration's 16-worker process pool. At `2026-07-20T01:21:24Z` it was
+stopped before any atomic shard completed in order to apply the owner's
+engineering-only concurrency request. Exactly 16 partial shards totaling
+631,856,490 bytes were moved by same-filesystem rename into immutable
+interruption evidence; they may not be reused, deleted or counted.
+
+Delegated engineering review authorizes a scheduler-only restart at exactly 32
+workers through:
+
+`configs/execution/phase4_terminal_131k_worker32_authorization.yaml`
+
+The orchestration implementation is frozen at
+`8977ca55f13963441afdda831afb190a3872517c`. The scientific generator commit,
+wheel, configuration hash, preregistration, root seeds, counts and official
+identities remain unchanged. A fresh release certificate must bind the 32-
+worker scheduler before execution. Sixty-four workers are explicitly not
+authorized. Training, architecture selection, calibration, SBC, final
+evaluation, extension above 131,072, real noise and GWOSC/GWTC remain closed.
+
 ## Scientific integrity
 
 - Never fabricate results, citations, completed runs or calibration.

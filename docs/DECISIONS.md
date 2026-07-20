@@ -1166,3 +1166,22 @@ The second-image development-tail condition is executed as the already frozen
 half-open interval `[10,12)`. The change from the old inclusive endpoint is a
 contract-alignment bug fix made before any development-tail data or identity
 existed. It does not alter training, selection or final-evaluation counts.
+
+## D097 — Separate terminal scheduling concurrency from scientific identity
+
+The initial terminal run used the frozen 16-worker configuration and was
+stopped before its first complete shard when the owner requested greater CPU
+use. The 16 partial shards are immutable interruption evidence and are not
+reused. Because scheduler concurrency does not enter proposal sampling, shard
+seeds, accepted-rank allocation or record identity, changing only the external
+process-pool width does not require a new scientific preregistration or dataset
+identity.
+
+An independently frozen orchestration layer permits exactly 32 workers while
+passing the original namespace configuration to every shard worker. It binds
+the unchanged generator, wheel, configuration hash, root seed and official
+identities, and records its own commit in release/run evidence. Requests for 64
+workers fail before execution: the host has 64 logical CPUs, and consuming all
+of them would leave no headroom for the parent, storage, checksums or operating
+system. Thirty-two workers approximately doubles the CPU-parallel portion while
+retaining a conservative resource margin.

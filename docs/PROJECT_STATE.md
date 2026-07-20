@@ -482,3 +482,17 @@ immutable wheel/environment and one exact query publication. It streams one
 query at a time into atomic JSONL and summary products with raw coverage counts
 and Wilson intervals; current authorization still rejects every scientific
 execution attempt.
+
+## Terminal 131k materialization concurrency update
+
+The exact terminal release is active under the unchanged scientific generator
+and official identities. Its first 16-worker segment was stopped before any
+complete shard, and all 16 partial shards (631,856,490 bytes) were sealed as
+immutable interruption evidence. No completed or published output was lost.
+
+The scheduler-only implementation at
+`8977ca55f13963441afdda831afb190a3872517c` passed 370 local tests, Ruff,
+mypy and build. Exactly 32 workers are authorized for the fresh staging
+restart; 64 workers are rejected. The release must pass a new exact preflight
+and first-complete-shard resource observation before unattended continuation.
+All downstream scientific gates remain unchanged and closed.
