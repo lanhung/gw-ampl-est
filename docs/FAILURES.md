@@ -653,3 +653,20 @@ architecture lock plus separate materialization and inference gates.
 - The correction changes only offline stratification metadata. It does not
   alter model inputs, the selected standardizer, frozen RC.7 distance, KDE or
   scientific execution gate.
+
+## The corrected 65k probe remained decisively data limited
+
+- This is a preregistered scientific stopping result, not an execution failure:
+  all three launchers returned zero and produced valid checkpoints, summaries
+  and development metrics.
+- The 32k-to-65k NLP improvement was 0.201437 nat per target dimension, with
+  paired-bootstrap 95% interval [0.191498, 0.211788]. The saturation upper-bound
+  requirement was below 0.01.
+- No seed passed every development EM-cell tolerance. The frozen extreme-
+  relative-magnification internal view also contained only 40 cases versus the
+  required 128.
+- The exact decision is `stop_data_limited_and_new_preregistration`; replay was
+  byte-identical. No calibration or final-evaluation case was accessed.
+- RC.4 forbids automatic extension above 65,536 and the architecture execution
+  gate requires `lock_train_65k`. Both paths are closed until a new scientific
+  contract receives explicit human review.

@@ -712,15 +712,34 @@ CUDA environment. It permits seeds 0, 1 and 2 from scratch and the terminal
 SBC, final evaluation, extension above 65,536, real noise and GWOSC/GWTC remain
 closed.
 
-While that terminal probe runs, the existing Phase 5 implementation-only gate
-also permits the architecture stack to support the same immutable correction
-overlay. The corrected implementation is frozen at
+All three corrected 65k fits completed with zero launcher failures. The frozen
+10,000-replicate paired comparison measured an NLP improvement of 0.201437 nat
+per target dimension with 95% interval [0.191498, 0.211788]. The terminal
+decision is:
+
+`stop_data_limited_and_new_preregistration`
+
+Its exact JSON SHA-256 is
+`90c238a0d85d941c9e90a68e8a215a8d9025f57ffe7757ff89dd14c267f6d72f`;
+an independent replay was byte-identical. Calibration and final evaluation
+were not accessed.
+
+This is a successful execution with a major scientific stopping result, not a
+training failure. RC.4 forbids automatic extension above 65,536. Architecture
+selection cannot start because its gate requires `lock_train_65k`. Do not
+reinterpret the completed 65k rung as locked, change the saturation rule after
+seeing the data, generate a larger rung, fit an architecture, open calibration,
+SBC or final evaluation, or access GWOSC/GWTC. A new versioned scientific
+preregistration and explicit human review are required before any of those
+actions.
+
+The existing Phase 5 implementation-only gate supports the same immutable
+correction overlay. The corrected implementation is frozen at
 `d7e87a84ffc69a0e7825eb448c8cfdabe4e7fd4d`; its wheel SHA-256 is
 `fcc766a43a61ffdda3e0fca83fbefff4a010c5d35d39ab27b637fb34dbf5490a`.
 This checkpoint has not opened a scientific array or fit an architecture. A
-later execution gate must bind a terminal `lock_train_65k` decision, all three
-corrected probe summaries, the correction publication, exact grid and CUDA
-environment before any new architecture optimizer starts.
+future scientific contract may reuse this software, but the present terminal
+decision cannot satisfy its `lock_train_65k` execution precondition.
 
 The same implementation-only downstream gates now carry the already frozen
 `1.1.1-rc.1` waveform numerical-validity rule prospectively into every future
