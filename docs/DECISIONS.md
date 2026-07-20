@@ -1358,3 +1358,18 @@ supplied repository root, followed by the existing SHA-256 check. The wheel
 itself remains an absolute immutable AutoDL artifact because it is an external
 binary input rather than committed evidence. This is a release-engineering
 correction only; it changes no publication, model, seed or scientific gate.
+
+## D109 — Permit a clean evidence-only descendant to assemble the release packet
+
+Independent closeout cannot exist in the same Git commit that froze the
+training software: it is produced only after the terminal publication
+finishes. Requiring packet assembly at the exact training `HEAD` would either
+make the closeout unavailable or require an uncommitted evidence file. Both
+outcomes are incompatible with the release contract.
+
+The packet script therefore requires the frozen training commit to be an
+ancestor of its clean review checkout. Every path changed since that commit
+must belong to an exact closeout-evidence allowlist; any software, model,
+configuration or unregistered path fails closed. The packet records both the
+immutable training commit and the evidence-review checkout commit. Training
+still imports only the exact wheel built from the former.

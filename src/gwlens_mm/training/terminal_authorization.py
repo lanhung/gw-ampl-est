@@ -120,6 +120,7 @@ def build_terminal_probe_authorization(
         or packet.get("optimizer_execution_authorized") is not False
         or packet.get("authorized_training_rungs_preview") != [TRAIN_131K_COUNT]
         or packet.get("authorized_training_seeds_preview") != list(SEEDS)
+        or len(str(packet.get("release_review_checkout_commit", ""))) != 40
     ):
         raise TrainingGateError("terminal release packet is not review-ready")
     try:

@@ -615,3 +615,12 @@ cases and the full suite passed 429 with seven optional dependency skips; Ruff
 and mypy passed. The candidate wheel built before this correction is
 superseded and was never installed or authorized. A new exact wheel must be
 built from the merged portability commit after terminal publication.
+
+The release checkout now also supports the unavoidable two-commit handoff:
+the immutable training software is frozen first, while independently replayed
+closeout evidence is committed only after publication. Packet assembly accepts
+a clean descendant only when the complete Git diff is contained in its exact
+closeout-evidence allowlist and records the descendant commit in the packet.
+Thirty focused and 432 full tests pass with seven optional dependency skips;
+Ruff and mypy pass. No scientific data or checkpoint was opened by this
+checkout-control change.
