@@ -22,6 +22,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     parser.add_argument("--stage-b-publication", type=Path)
     parser.add_argument("--combined-publication", type=Path)
     parser.add_argument("--correction-publication", type=Path)
+    parser.add_argument("--terminal-train-parent", type=Path)
+    parser.add_argument("--terminal-combined-publication", type=Path)
+    parser.add_argument("--terminal-development-tail-parent", type=Path)
     parser.add_argument("--terminal-size-decision", type=Path)
     parser.add_argument("--selected-architecture-decision", type=Path)
     parser.add_argument("--primary-rung-preparation", type=Path)
@@ -79,6 +82,13 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             psd_root=arguments.psd_root,
             output_root=arguments.output_root,
             execution_commit=arguments.execution_commit,
+            terminal_train_parent_root=arguments.terminal_train_parent,
+            terminal_combined_publication_root=(
+                arguments.terminal_combined_publication
+            ),
+            terminal_development_tail_parent_root=(
+                arguments.terminal_development_tail_parent
+            ),
         )
     if arguments.result is not None:
         arguments.result.parent.mkdir(parents=True, exist_ok=True)

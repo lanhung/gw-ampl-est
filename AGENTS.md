@@ -980,6 +980,18 @@ The terminal materialization-adapter implementation checkpoint is
 `bc5d3cd2fd6f898b08590be7f348dc4970edb7fe5f23f4422ffc29185336f4cd`.
 It is not an execution identity.
 
+The implementation-only terminal analysis adapters are authorized through:
+
+`configs/execution/phase7_terminal_analysis_adapter_authorization.yaml`
+
+They allow future ablation and RC.7 reference runners to use the logical
+131,072-system training view only after an exact gate. The two ablations retain
+the selected architecture and seeds 0/1/2; the reference bank retains exact
+lens-family/EM-cell grouping and 256-neighbor semantics. The 512 development-
+tail cases enter neither training nor the reference bank. No scientific array,
+checkpoint, optimizer, query, final record, real noise or GWOSC/GWTC access is
+authorized by this implementation gate.
+
 ## Scientific integrity
 
 - Never fabricate results, citations, completed runs or calibration.

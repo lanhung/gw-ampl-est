@@ -1253,3 +1253,17 @@ streams the same 131,072 train groups plus its separately published validation,
 calibration and SBC references. No final case is unsealed by these checks. A
 reference mode cannot be inferred from a checkpoint; it must be explicit and
 hash-bound to the terminal size and architecture decisions.
+
+## D102 — Use the locked 131k rung consistently in ablations and references
+
+Once the terminal size and architecture are locked, input ablations must use
+the same complete training membership, preprocessing, optimization budget and
+three seeds as the selected primary architecture. Continuing to train ablations
+on the historical 65k view would confound input removal with sample size and is
+therefore forbidden.
+
+The RC.7 non-neural bank likewise uses the selected complete training rung. It
+does not use the 512-case development-tail pool, calibration, SBC or final data.
+This preserves its role as a selected-prior simulation reference while keeping
+the independent tail pool available only for the preregistered 65k-to-131k
+development comparison.

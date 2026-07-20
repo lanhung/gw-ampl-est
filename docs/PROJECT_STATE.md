@@ -546,3 +546,11 @@ the full suite passed 388 with seven optional skips, and Ruff, mypy, script
 compilation and build passed. No scientific record or identity was created.
 The frozen implementation commit is `45d05287fbd9a8b7f9bc1999b749be5c521d7931`
 and its exact wheel SHA-256 is `bc5d3cd2fd6f898b08590be7f348dc4970edb7fe5f23f4422ffc29185336f4cd`.
+
+Terminal adapters for the two RC.6 input ablations and the RC.7 non-neural
+reference are implemented. Both support the logical 131k publication while
+preserving historical 65k replay. The ablations share the locked membership,
+architecture, optimizer and seeds; the reference bank uses all 131,072 train
+systems but never the 512 development-tail cases. Seventeen focused and 392
+full tests passed with seven optional skips; Ruff and mypy passed. Execution,
+checkpoint and query access remain closed.

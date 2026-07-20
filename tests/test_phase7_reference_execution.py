@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import subprocess
 import sys
@@ -9,12 +10,15 @@ import numpy as np
 import pytest
 
 from gwlens_mm.training import reference_execution as execution_module
+from gwlens_mm.training.architecture import selected_model_configuration
+from gwlens_mm.training.contracts import model_configuration_hash
 from gwlens_mm.training.features import InputStandardizer, PreparedExample
 from gwlens_mm.training.reference_baseline import (
     ReferenceBaselineGateError,
     ReferenceCaseScore,
 )
 from gwlens_mm.training.reference_execution import (
+    _validate_terminal_and_architecture,
     score_reference_query_to_artifacts,
     validate_reference_execution_stack_contract,
     validate_reference_query_execution_gate,
@@ -211,6 +215,65 @@ def test_implementation_authorization_cannot_index_a_scientific_bank(
             query_parent_manifest_path=tmp_path / "parent.json",
         )
     assert not any(tmp_path.iterdir())
+
+
+@pytest.mark.parametrize(
+    "label",
+    [
+        "lock_train_131k_saturated",
+        "lock_train_131k_resource_capped_data_limited",
+    ],
+)
+def test_reference_gate_accepts_both_exact_terminal_131k_labels(
+    tmp_path: Path, label: str
+) -> None:
+    terminal = {
+        "status": "terminal_learning_curve_decision_complete",
+        "comparison": "corrected_train_65k_to_train_131k_terminal",
+        "decision": label,
+        "selected_training_count": 131072,
+        "architecture_selection_review_allowed": True,
+        "extension_above_131072_authorized": False,
+        "all_three_probe_seeds_retained": True,
+        "best_seed_selected": False,
+        "calibration_accessed": False,
+        "final_evaluation_accessed": False,
+    }
+    selected = {
+        "status": "architecture_locked_on_development_validation",
+        "selected_architecture_id": "nsf-t10-w256",
+        "total_result_count": 12,
+        "best_seed_selected": False,
+        "calibration_accessed": False,
+        "sbc_accessed": False,
+        "final_evaluation_accessed": False,
+    }
+    terminal_path = tmp_path / "terminal.json"
+    selected_path = tmp_path / "selected.json"
+    terminal_path.write_text(json.dumps(terminal) + "\n")
+    selected_path.write_text(json.dumps(selected) + "\n")
+    model = selected_model_configuration(ROOT, "nsf-t10-w256")
+    authorization = {
+        "locked_training_rung": 131072,
+        "terminal_size_decision_path": str(terminal_path),
+        "terminal_size_decision_sha256": hashlib.sha256(
+            terminal_path.read_bytes()
+        ).hexdigest(),
+        "selected_architecture_decision_path": str(selected_path),
+        "selected_architecture_decision_sha256": hashlib.sha256(
+            selected_path.read_bytes()
+        ).hexdigest(),
+        "selected_primary_model_configuration_hash": model_configuration_hash(model),
+    }
+    architecture_id, observed_model, rung = _validate_terminal_and_architecture(
+        ROOT,
+        authorization,
+        terminal_decision_path=terminal_path,
+        selected_architecture_decision_path=selected_path,
+    )
+    assert architecture_id == "nsf-t10-w256"
+    assert model_configuration_hash(observed_model) == model_configuration_hash(model)
+    assert rung == 131072
 
 
 def test_runner_defaults_to_execution_blocked() -> None:

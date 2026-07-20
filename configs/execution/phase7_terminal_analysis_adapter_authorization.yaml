@@ -1,0 +1,40 @@
+phase: "7-terminal-analysis-adapter"
+authorization_status: authorized_implementation_only
+authorized_by: codex_as_delegated_scientific_and_engineering_reviewer
+authorization_date: "2026-07-20"
+
+authorization_basis:
+  owner_delegation: continue_without_routine_human_intervention
+  implementation_may_overlap_terminal_materialization: true
+  scientific_bank_checkpoint_query_or_final_case_accessed: false
+
+frozen_contracts:
+  terminal_preregistration_version: "1.2.0-rc.1"
+  terminal_preregistration_hash: "77ff5b6b45b886657e90023c50ae002afffb077db594c80665166d537fd2346a"
+  final_analysis_preregistration_hash: "7e0e252f0a972e0b0ad2fe8f93f74f1f0172639a6fb258fc7a953be5fb7973e1"
+  reference_baseline_preregistration_hash: "1df98c89fc418eddfd9ec766cb04311e0f3d9f40836a0d9ba1dd691d6bc1724e"
+
+implementation_scope:
+  terminal_ablation_training_view_authorized: true
+  terminal_reference_bank_view_authorized: true
+  terminal_runner_argument_adapter_authorized: true
+  historical_corrected_65k_replay_preservation_required: true
+  synthetic_fixture_tests_authorized: true
+
+authorization:
+  scientific_data_access_authorized: false
+  scientific_checkpoint_access_authorized: false
+  ablation_fit_execution_authorized: false
+  reference_bank_access_authorized: false
+  reference_query_execution_authorized: false
+  calibration_or_sbc_access_authorized: false
+  final_evaluation_materialization_authorized: false
+  final_evaluation_unsealing_authorized: false
+  final_inference_authorized: false
+  model_training_or_tuning_authorized: false
+  architecture_or_size_selection_authorized: false
+  extension_above_131072_authorized: false
+  real_noise_authorized: false
+  gwosc_gwtc_access_authorized: false
+
+stop_after_implementation: true

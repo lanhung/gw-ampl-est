@@ -22,6 +22,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     parser.add_argument("--stage-b-publication", required=True, type=Path)
     parser.add_argument("--combined-publication", required=True, type=Path)
     parser.add_argument("--correction-publication", required=True, type=Path)
+    parser.add_argument("--terminal-train-parent", type=Path)
+    parser.add_argument("--terminal-combined-publication", type=Path)
+    parser.add_argument("--terminal-development-tail-parent", type=Path)
     parser.add_argument("--terminal-size-decision", required=True, type=Path)
     parser.add_argument("--selected-architecture-decision", required=True, type=Path)
     parser.add_argument("--primary-rung-preparation", required=True, type=Path)
@@ -70,6 +73,24 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         "cuda:0",
         "--execute",
     ]
+    terminal_roots = (
+        arguments.terminal_train_parent,
+        arguments.terminal_combined_publication,
+        arguments.terminal_development_tail_parent,
+    )
+    if any(value is not None for value in terminal_roots):
+        if any(value is None for value in terminal_roots):
+            raise ValueError("terminal ablation launcher requires all three roots")
+        common.extend(
+            [
+                "--terminal-train-parent",
+                str(arguments.terminal_train_parent),
+                "--terminal-combined-publication",
+                str(arguments.terminal_combined_publication),
+                "--terminal-development-tail-parent",
+                str(arguments.terminal_development_tail_parent),
+            ]
+        )
     log_root = arguments.output_root / "logs"
     result_root = arguments.output_root / "launcher-results"
     all_results = {}
