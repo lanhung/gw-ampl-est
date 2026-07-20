@@ -8,10 +8,11 @@ workers; downstream terminal-probe and architecture software are already
 implemented and execution-disabled so publication can hand off without a new
 software build delay.
 
-At the snapshot time, the active parent had 23 of 512 train shards complete:
-2,944 of 65,536 new train systems (4.49%). Thirty-two additional shards were in
-progress. All 32 worker children were alive, no result/error artifact existed,
-approximately 50.6 GiB memory and 215.89 GB disk remained available.
+At the `2026-07-20T04:22:29Z` snapshot, the active parent had 32 of 512 train
+shards complete: 4,096 of 65,536 new train systems (6.25%). Thirty-two
+additional shards were in progress. All 32 worker children were alive, no
+result/error artifact existed, approximately 48.6 GiB memory and 214.89 GB disk
+remained available.
 
 ## Completed work
 
@@ -27,13 +28,13 @@ approximately 50.6 GiB memory and 215.89 GB disk remained available.
 | Terminal materialization software | 100% | Exact generator, atomic publisher, 32-worker scheduler and resource gates frozen |
 | Terminal 131k probe software | 100% | Bounded reader, retained-tail evaluation, three-seed launcher and terminal comparison pushed |
 | Terminal architecture software | 100% | Three probe reuses + at most nine new fits and validation-only selection pushed |
-| Calibration/SBC/final software foundations | approximately 90% | Core materialization, metrics, calibration, inference, reference and ablation stacks exist; terminal-lock binding remains |
+| Terminal calibration/SBC/final/analysis adapters | 100% software, 0% execution | Terminal materialization, checkpoint, final, ablation and reference bindings are pushed and fail closed pending exact future gates |
 
 ## Active and pending work
 
 | Task | Current completion | Exit condition | Conservative remaining time |
 | --- | ---: | --- | ---: |
-| Terminal train increment | 4.49% (23/512 shards) | 65,536 systems in 512 atomic shards | about 30–36 active hours |
+| Terminal train increment | 6.25% (32/512 shards) | 65,536 systems in 512 atomic shards | about 40–45 active hours at the current stair-step wave rate |
 | Development-tail materialization | 0% | four disjoint namespaces ×128 systems | about 1–24 hours; rare-stratum cap dominates uncertainty |
 | Logical 131k closeout | 0% | combined manifest, q=p/unit weights, group disjointness, hashes and disk gates pass | 1–3 hours after data generation |
 | 131k probe fits | software 100%, execution 0% | seeds 0/1/2 complete from scratch on identical validation; retained/new tail scores complete | roughly 1–3 days on three GPUs |
@@ -47,10 +48,10 @@ approximately 50.6 GiB memory and 215.89 GB disk remained available.
 
 Percentages below distinguish software readiness from scientific execution.
 
-- Terminal 131k materialization: **4.46%** by accepted systems
-  (2,944 / 66,048 including the future 512-case tail pool).
-- Full terminal development-data inventory: **54.18%** materialized
-  (existing corrected 65,536 train + 6,144 validation + 2,944 new train,
+- Terminal 131k materialization: **6.20%** by accepted systems
+  (4,096 / 66,048 including the future 512-case tail pool).
+- Full terminal development-data inventory: **55.02%** materialized
+  (existing corrected 65,536 train + 6,144 validation + 4,096 new train,
   divided by 131,072 train + 6,144 validation + 512 tail).
 - Terminal probe workflow: **75% by completed seed fits** across the retained
   16k/32k/65k/131k ladder (9 historical corrected fits complete, 3 terminal
@@ -79,7 +80,7 @@ data arrive.
 
 If the current host stays available and no hard resource gate fails:
 
-- terminal atomic publication: approximately **1.5–2.5 days**;
+- terminal atomic publication: approximately **2–3 days**;
 - terminal probe result and size lock: approximately **3–6 days** from now;
 - architecture lock: approximately **6–11 days** from now;
 - calibrated/SBC and final scientific results: approximately **12–23 days**;
