@@ -1,0 +1,131 @@
+phase: "4"
+stage: terminal_131k_direct_target_extension
+status: implementation_frozen_execution_disabled
+
+base_data_config: configs/data/phase3a_qualification.yaml
+future_execution_authorization_path: configs/execution/phase4_terminal_131k_execution_authorization.yaml
+
+preregistration:
+  path: configs/statistics/terminal_131k_preregistration.yaml
+  version: "1.2.0-rc.1"
+  canonical_hash: "77ff5b6b45b886657e90023c50ae002afffb077db594c80665166d537fd2346a"
+
+parent_scientific_preregistration:
+  path: configs/statistics/phase2_preregistration.yaml
+  version: "1.0.0-rc.5"
+  canonical_hash: "4dde279cf1bea78d1ddbd4fab99d88e88e334c80c180dc7850679736c5e53edb"
+
+direct_target_density_implementation:
+  path: configs/proposals/proposal_v3_target_anchored_mixture.yaml
+  evaluation_target_id: balanced_literature_informed_benchmark_v1
+  mode: evaluation_target_direct
+  proposal_equals_evaluation: true
+  log_importance_weight: 0.0
+  importance_weight: 1.0
+
+triggering_evidence:
+  path: results/phase4/corrected_probe_65k/learning_curve_decision.json
+  sha256: "90c238a0d85d941c9e90a68e8a215a8d9025f57ffe7757ff89dd14c267f6d72f"
+  required_decision: stop_data_limited_and_new_preregistration
+
+corrected_65k_reference:
+  base_generator_commit: "2be777e727ef9d8e1a85f89c68966df5d37932b0"
+  base_preregistration_hash: "5aeaac395463bd073c44ead4ff4c5c729b5a2d4b4f1840c0825a53b30ab1bc98"
+  correction_generator_commit: "499f86b3159af82612e38c134cd81003eedcc4e4"
+  correction_preregistration_hash: "7fca209de9f06e98da1c5a96ae0f4fc6daec5d2f0c2339a718e1f899bb915b69"
+  correction_parent_manifest_sha256: "0fcfb117c620d58a2e0ccd8b19c0d3f3a371dd844fb637b50c8b565eee6864f2"
+  correction_publication_tree_sha256: "a57aa2691e256b34403392f595e964dceec1325cfc54a38ed4d2a0b714d38c12"
+  combined_base_manifest_sha256: "753ace3d2fe475f1279b3bd8560005017f4e75a822fa951d94f9ada60eb3eca4"
+  corrected_combined_train_manifest_sha256: "da8aaa8d86afb4d93156191976b420bfc7bbc7dfe0fdc6c6f627515d804a7379"
+  accepted_train_count: 65536
+  validation_count: 6144
+  publication_roots:
+    stage_a: /root/autodl-tmp/lensing-4/data_v2/scientific/stage_a/published/phase4-stage-a-2be777e727ef-d3a60034bbd6
+    stage_b: /root/autodl-tmp/lensing-4/data_v2/scientific/stage_b/published/phase4-stage-b-2be777e727ef-6a4f106f9640
+    combined_base: /root/autodl-tmp/lensing-4/data_v2/scientific/train_65k/published/phase4-train-65k-2be777e727ef-6a4f106f9640
+    correction: /root/autodl-tmp/lensing-4/data_v2/scientific/waveform_correction/published/phase4-waveform-correction-499f86b3159a-1db109b08189
+
+train_increment:
+  dataset_purpose: terminal_131k_direct_target_train_increment
+  split: train
+  root_seed: 2026071404
+  attempt_stream_namespace: phase4-terminal-131k-train-direct-target-v1
+  id_prefix: phase4-terminal-131k-train
+  accepted_pair_count: 65536
+  shard_count: 512
+  pairs_per_shard: 128
+  attempt_id_stride: 1024
+
+development_tail:
+  dataset_purpose: terminal_131k_development_tail_diagnostic
+  split: balanced_tail_diagnostic
+  master_root_seed: 2026071405
+  seed_domain: phase4_terminal_131k_development_tail_v1
+  attempt_stream_namespace: phase4-terminal-131k-development-tail-attempts-v1
+  id_prefix: phase4-terminal-131k-development-tail
+  proposal_distribution_id: balanced_tail_development_diagnostic_rc5_v1
+  evaluation_distribution_id: balanced_tail_development_diagnostic_rc5_v1
+  accepted_pair_count: 512
+  namespace_count: 4
+  accepted_pairs_per_namespace: 128
+  shards_per_namespace: 1
+  pairs_per_shard: 128
+  attempt_id_stride: 1024
+  strata:
+    - high_absolute_magnification
+    - extreme_relative_magnification
+    - second_image_near_threshold
+    - extreme_profile_or_environment
+
+terminal_reference:
+  accepted_train_count: 131072
+  validation_count: 6144
+  component_count: 2
+  strict_nested_membership: true
+  extension_above_131072_authorized: false
+
+paths:
+  train_staging_root: /root/autodl-tmp/lensing-4/data_v2/scientific/terminal_131k/train_increment/staging
+  train_publication_root: /root/autodl-tmp/lensing-4/data_v2/scientific/terminal_131k/train_increment/published
+  tail_staging_root: /root/autodl-tmp/lensing-4/data_v2/scientific/terminal_131k/development_tail/staging
+  tail_publication_root: /root/autodl-tmp/lensing-4/data_v2/scientific/terminal_131k/development_tail/published
+  combined_staging_root: /root/autodl-tmp/lensing-4/data_v2/scientific/train_131k/staging
+  combined_publication_root: /root/autodl-tmp/lensing-4/data_v2/scientific/train_131k/published
+  manifest_root: /root/autodl-tmp/lensing-4/manifests/phase4/terminal_131k
+  log_root: /root/autodl-tmp/lensing-4/logs/phase4/terminal_131k
+
+resource_gates:
+  measured_free_bytes_at_design: 221613719552
+  projected_train_publication_bytes: 78883597768
+  projected_development_tail_publication_bytes: 616278108
+  projected_peak_bytes: 100980232376
+  maximum_new_publication_bytes: 85000000000
+  minimum_post_peak_free_bytes: 100000000000
+  minimum_prelaunch_free_bytes: 201596510484
+  maximum_train_active_hours: 96.0
+  maximum_tail_active_hours: 24.0
+  exact_prelaunch_remeasurement_required: true
+
+environment:
+  dependency_lock_path: configs/environment/phase4-autodl-requirements.lock.txt
+
+execution:
+  enabled: false
+  worker_processes: 16
+  maximum_attempts_per_worker: 1000000
+  maximum_active_seconds_per_worker: 43200
+  atomic_shards: true
+  atomic_parent_publication: true
+  resume_completed_shards_without_rewrite: true
+
+authorization_boundaries:
+  train_increment_materialization_authorized: false
+  development_tail_materialization_authorized: false
+  train_131k_probe_authorized: false
+  architecture_selection_authorized: false
+  calibration_authorized: false
+  sbc_authorized: false
+  final_evaluation_authorized: false
+  extension_above_131072_authorized: false
+  real_noise_authorized: false
+  gwosc_gwtc_access_authorized: false

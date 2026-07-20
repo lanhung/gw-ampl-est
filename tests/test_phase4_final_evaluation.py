@@ -228,6 +228,12 @@ def test_balanced_tail_priority_is_frozen() -> None:
         external_convergence=0.2,
         density_slope=2.0,
     ) is BalancedTailStratum.EXTREME_PROFILE_OR_ENVIRONMENT
+    assert classify_balanced_tail(
+        (_Image(9.0), _Image(1.0)),
+        secondary_network_snr=12.0,
+        external_convergence=0.0,
+        density_slope=2.0,
+    ) is None
 
 
 def test_psd_constructor_semantics_and_commitment_are_fail_closed() -> None:

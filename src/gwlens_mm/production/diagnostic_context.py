@@ -34,7 +34,7 @@ def classify_balanced_tail(
         return BalancedTailStratum.HIGH_ABSOLUTE_MAGNIFICATION
     if min(magnifications) / max(magnifications) <= 0.10:
         return BalancedTailStratum.EXTREME_RELATIVE_MAGNIFICATION
-    if 10.0 <= secondary_network_snr <= 12.0:
+    if 10.0 <= secondary_network_snr < 12.0:
         return BalancedTailStratum.SECOND_IMAGE_NEAR_THRESHOLD
     if abs(external_convergence) >= 0.10 or not 1.75 <= density_slope <= 2.40:
         return BalancedTailStratum.EXTREME_PROFILE_OR_ENVIRONMENT
