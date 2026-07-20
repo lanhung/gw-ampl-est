@@ -77,6 +77,7 @@ def _load_json(path: Path) -> Mapping[str, Any]:
 
 
 def validate_terminal_probe_release_binding(
+    root: Path,
     authorization: Mapping[str, Any],
 ) -> Mapping[str, Any]:
     """Bind one separately reviewed packet to the future execution gate."""
@@ -85,7 +86,21 @@ def validate_terminal_probe_release_binding(
     if not isinstance(review, Mapping):
         raise TrainingGateError("terminal probe gate lacks release review metadata")
     path_value = str(review.get("path", ""))
-    packet_path = Path(path_value)
+    packet_relative = Path(path_value)
+    if (
+        packet_relative.is_absolute()
+        or ".." in packet_relative.parts
+        or packet_relative.parts[:2] != ("results", "phase4")
+    ):
+        raise TrainingGateError(
+            "terminal probe release-review packet path must be repository-relative"
+        )
+    root_resolved = root.resolve()
+    packet_path = (root_resolved / packet_relative).resolve()
+    if not packet_path.is_relative_to(root_resolved):
+        raise TrainingGateError(
+            "terminal probe release-review packet escaped repository root"
+        )
     expected_hash = str(review.get("sha256", ""))
     if (
         not packet_path.is_absolute()
@@ -527,7 +542,7 @@ def validate_terminal_131k_training_gate(
         or authorization.get("final_evaluation_commitment_sha256") != commitment_hash
     ):
         raise TrainingGateError("terminal gate lacks the finalized evaluation commitment")
-    release_packet = validate_terminal_probe_release_binding(authorization)
+    release_packet = validate_terminal_probe_release_binding(root, authorization)
     publication = resolve_terminal_131k_training_publication(
         authorization,
         stage_a_publication_root=stage_a_publication_root,

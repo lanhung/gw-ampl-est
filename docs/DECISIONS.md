@@ -1314,9 +1314,9 @@ execute training.
 
 An exact wheel-test JSON is insufficient if a later authorization can omit or
 replace the release packet that consumed it. Every future terminal-probe
-authorization must therefore carry one absolute packet path, its SHA-256 and
-an explicit delegated-review acceptance state. The runtime gate independently
-loads that packet before resolving any scientific publication.
+authorization must therefore carry one repository-relative packet path, its
+SHA-256 and an explicit delegated-review acceptance state. The runtime gate
+independently loads that packet before resolving any scientific publication.
 
 The packet's publication manifests, counts, training commit, wheel, model,
 environment, CUDA inventory, final-evaluation commitment and closed downstream
@@ -1342,3 +1342,19 @@ independent closeout, constructs the YAML and passes it through the same
 release-binding validator used at runtime before an atomic write. This reduces
 manual transcription without allowing the software to infer scientific
 approval.
+
+## D108 — Keep terminal release evidence portable across Vultr and AutoDL
+
+The terminal closeout and release packet are produced in a disposable AutoDL
+checkout, reviewed and committed in the authoritative Vultr repository, then
+consumed again by the AutoDL training checkout. Host-absolute evidence paths
+cannot identify the same committed file on both machines and are therefore
+forbidden.
+
+Closeout, packet and delegated-review evidence must live below
+`results/phase4/` and be referenced by repository-relative paths without
+parent traversal. Runtime resolution is always relative to the explicitly
+supplied repository root, followed by the existing SHA-256 check. The wheel
+itself remains an absolute immutable AutoDL artifact because it is an external
+binary input rather than committed evidence. This is a release-engineering
+correction only; it changes no publication, model, seed or scientific gate.

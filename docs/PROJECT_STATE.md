@@ -606,3 +606,12 @@ closed downstream boundaries. It derives publication roots from independent
 closeout identities and self-validates the resulting YAML using the runtime
 release-binding validator before atomic write. This software has only used
 synthetic packet/closeout/review fixtures.
+
+The release-evidence path contract is now portable across the two hosts.
+Closeout, packet and delegated-review JSON files must be committed below
+`results/phase4/` and are referenced relative to the explicit repository root;
+absolute packet paths and `..` traversal are rejected. Focused tests passed 27
+cases and the full suite passed 429 with seven optional dependency skips; Ruff
+and mypy passed. The candidate wheel built before this correction is
+superseded and was never installed or authorized. A new exact wheel must be
+built from the merged portability commit after terminal publication.

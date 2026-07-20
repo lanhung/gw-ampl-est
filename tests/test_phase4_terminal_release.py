@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import shutil
 from pathlib import Path
 
 import pytest
@@ -44,8 +45,21 @@ def _closeout() -> dict[str, object]:
     }
 
 
+def _fixture_root(tmp_path: Path) -> Path:
+    for relative in (
+        "configs/statistics/terminal_131k_preregistration.yaml",
+        "configs/models/phase4_probe_nsf.yaml",
+        "results/phase4/final_evaluation_commitment.json",
+    ):
+        destination = tmp_path / relative
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(ROOT / relative, destination)
+    return tmp_path
+
+
 def _packet(tmp_path: Path) -> dict[str, object]:
-    closeout_path = tmp_path / "closeout.json"
+    root = _fixture_root(tmp_path)
+    closeout_path = root / "results/phase4/terminal_probe_closeout.json"
     wheel_path = tmp_path / "gwlens_mm.whl"
     wheel_test_path = tmp_path / "wheel-test.json"
     _write_json(closeout_path, _closeout())
@@ -71,7 +85,7 @@ def _packet(tmp_path: Path) -> dict[str, object]:
     )
     return dict(
         prepare_terminal_probe_review_packet(
-            ROOT,
+            root,
             closeout_result_path=closeout_path,
             training_commit="1" * 40,
             wheel_path=wheel_path,
@@ -95,6 +109,9 @@ def test_terminal_probe_release_packet_is_exact_but_non_authorizing(
     assert immutable["environment_lock_sha256"] == ENVIRONMENT_LOCK_HASH
     assert packet["authorized_training_rungs_preview"] == [131072]
     assert packet["authorized_training_seeds_preview"] == [0, 1, 2]
+    assert packet["closeout_result_path"] == (
+        "results/phase4/terminal_probe_closeout.json"
+    )
 
 
 @pytest.mark.parametrize(
@@ -111,7 +128,8 @@ def test_terminal_probe_release_packet_rejects_closeout_drift(
 ) -> None:
     closeout = _closeout()
     closeout[field] = invalid
-    closeout_path = tmp_path / "closeout.json"
+    root = _fixture_root(tmp_path)
+    closeout_path = root / "results/phase4/terminal_probe_closeout.json"
     wheel_path = tmp_path / "fixture.whl"
     wheel_test_path = tmp_path / "wheel-test.json"
     _write_json(closeout_path, closeout)
@@ -119,7 +137,7 @@ def test_terminal_probe_release_packet_rejects_closeout_drift(
     _write_json(wheel_test_path, {})
     with pytest.raises(TrainingGateError, match="tree replay|closeout contract"):
         prepare_terminal_probe_review_packet(
-            ROOT,
+            root,
             closeout_result_path=closeout_path,
             training_commit="1" * 40,
             wheel_path=wheel_path,
@@ -133,7 +151,8 @@ def test_terminal_probe_release_packet_rejects_closeout_drift(
 def test_terminal_probe_release_packet_rejects_gpu_or_wheel_test_drift(
     tmp_path: Path,
 ) -> None:
-    closeout_path = tmp_path / "closeout.json"
+    root = _fixture_root(tmp_path)
+    closeout_path = root / "results/phase4/terminal_probe_closeout.json"
     wheel_path = tmp_path / "fixture.whl"
     wheel_test_path = tmp_path / "wheel-test.json"
     _write_json(closeout_path, _closeout())
@@ -157,7 +176,7 @@ def test_terminal_probe_release_packet_rejects_gpu_or_wheel_test_drift(
     )
     with pytest.raises(TrainingGateError, match="GPU identity"):
         prepare_terminal_probe_review_packet(
-            ROOT,
+            root,
             closeout_result_path=closeout_path,
             training_commit="1" * 40,
             wheel_path=wheel_path,
@@ -165,4 +184,27 @@ def test_terminal_probe_release_packet_rejects_gpu_or_wheel_test_drift(
             / "configs/environment/phase4-training-freeze.txt",
             wheel_test_result_path=wheel_test_path,
             gpu_names=[EXPECTED_GPU_MODEL] * 2,
+        )
+
+
+def test_terminal_probe_release_packet_rejects_closeout_outside_repository(
+    tmp_path: Path,
+) -> None:
+    root = _fixture_root(tmp_path / "repository")
+    closeout_path = tmp_path / "outside-closeout.json"
+    wheel_path = tmp_path / "fixture.whl"
+    wheel_test_path = tmp_path / "wheel-test.json"
+    _write_json(closeout_path, _closeout())
+    wheel_path.write_bytes(b"wheel")
+    _write_json(wheel_test_path, {})
+    with pytest.raises(TrainingGateError, match="inside repository"):
+        prepare_terminal_probe_review_packet(
+            root,
+            closeout_result_path=closeout_path,
+            training_commit="1" * 40,
+            wheel_path=wheel_path,
+            environment_lock_path=ROOT
+            / "configs/environment/phase4-training-freeze.txt",
+            wheel_test_result_path=wheel_test_path,
+            gpu_names=[EXPECTED_GPU_MODEL] * 3,
         )

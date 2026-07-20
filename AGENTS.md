@@ -1045,6 +1045,13 @@ boundary set all match. The generated YAML is revalidated through the actual
 runtime packet-binding function before atomic write. The builder has not been
 executed on scientific evidence and no terminal-probe authorization exists.
 
+Terminal closeout, release-packet and delegated-review evidence use
+repository-relative paths below `results/phase4/`. Host-absolute packet paths
+and parent traversal fail closed, so the same committed evidence is resolved
+under the authoritative Vultr root and disposable AutoDL root without editing
+the authorization. This software portability fix authorizes no publication
+access, membership resolution or optimizer.
+
 ## Scientific integrity
 
 - Never fabricate results, citations, completed runs or calibration.
