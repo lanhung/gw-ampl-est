@@ -1325,3 +1325,20 @@ non-authorizing. Its hash is then persisted in shared rung preprocessing, all
 new 131k probe evidence and retained-65k development-tail summaries. This
 prevents the optimizer outputs from becoming detached from their exact release
 and review evidence.
+
+## D107 — Require a second review object before constructing terminal authorization
+
+The non-authorizing release packet must never create its own execution gate.
+Authorization assembly therefore requires a separate machine-readable
+delegated-review decision whose SHA-bound scope is exact: one 131,072-system
+rung, seeds 0/1/2, retained-65k input root, fresh terminal output root,
+publication access, optimizer execution and terminal comparison only.
+
+The closed-boundary mapping must contain exactly the registered model-tuning,
+architecture, calibration, SBC, final-evaluation, extension, real-noise and
+GWOSC/GWTC keys, all false. Missing or extra keys fail rather than being
+ignored. The builder derives atomic publication identities from the packet's
+independent closeout, constructs the YAML and passes it through the same
+release-binding validator used at runtime before an atomic write. This reduces
+manual transcription without allowing the software to infer scientific
+approval.
