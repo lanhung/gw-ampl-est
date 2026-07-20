@@ -41,6 +41,10 @@ pool, exact manifest hashes, direct-target equality and the no-extension cap.
 - mypy: passed for 65 source files;
 - sdist and wheel build: passed.
 
+The frozen implementation commit is
+`cfb3e92f6600975c81e7dfdc58237ebf82acce7c`; the exact wheel SHA-256 is
+`35909951c13cffbe695fe4af631d282fd58634e4f80156057a8cd107609c2b4a`.
+
 All tests used configuration files, decision fixtures and synthetic identities.
 No active staging path, scientific publication, model checkpoint, calibration
 case, SBC case or final case was opened.

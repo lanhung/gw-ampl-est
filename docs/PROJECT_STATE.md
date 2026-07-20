@@ -533,3 +533,5 @@ old 32k/65k score authorization. Focused tests passed 25 cases with one optional
 Torch skip; the full suite passed 387 tests with seven optional dependency
 skips, and Ruff, mypy and package build passed. No staging path, scientific
 publication, checkpoint, calibration/SBC record or final case was opened.
+The frozen implementation commit is `cfb3e92f6600975c81e7dfdc58237ebf82acce7c`
+and its exact wheel SHA-256 is `35909951c13cffbe695fe4af631d282fd58634e4f80156057a8cd107609c2b4a`.

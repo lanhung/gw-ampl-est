@@ -956,6 +956,12 @@ manifest identities. It does not open active staging, scientific data,
 checkpoints, calibration/SBC, final evaluation, ablation/reference execution,
 real noise or GWOSC/GWTC.
 
+The terminal downstream implementation checkpoint is
+`cfb3e92f6600975c81e7dfdc58237ebf82acce7c`; its exact wheel SHA-256 is
+`35909951c13cffbe695fe4af631d282fd58634e4f80156057a8cd107609c2b4a`.
+These are implementation identities only and do not activate a future exact
+scientific gate.
+
 ## Scientific integrity
 
 - Never fabricate results, citations, completed runs or calibration.
