@@ -1145,3 +1145,24 @@ split-conformal and independent SBC stages. If saturation fails, the project
 must report `lock_train_131k_resource_capped_data_limited` rather than pretend
 convergence. Either honest terminal label permits later architecture review,
 but neither permits another data rung.
+
+## D096 — Freeze one atomic release for the terminal train and development-tail data
+
+The terminal runner reuses the qualified direct-target generator and applies
+the frozen numerical-waveform rejection to every new IMRPhenomXPHM attempt. It
+publishes the 65,536-system increment and the four tail namespaces separately,
+then creates a small logical 131k reference only after streaming validation
+proves all group identifiers are disjoint from the corrected 65k view and the
+unchanged validation set.
+
+The release is frozen at `a4e6bac014ccd521d510c97593cb1368e826d5eb` and exact
+wheel SHA-256 `c7bc8ecadb373ed5d7307ee9c96b131cc68cc9ad8ea10ae2100c54aed2a8958f`.
+Its prelaunch free-space threshold is 201,596,510,484 bytes; 221,613,056,000
+bytes were observed at review. This roughly 20 GB margin is sufficient under
+the conservative measured projection but not large enough to waive the launch
+remeasurement or the 100 GB post-peak floor.
+
+The second-image development-tail condition is executed as the already frozen
+half-open interval `[10,12)`. The change from the old inclusive endpoint is a
+contract-alignment bug fix made before any development-tail data or identity
+existed. It does not alter training, selection or final-evaluation counts.

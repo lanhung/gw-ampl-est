@@ -87,6 +87,15 @@ stratum. The terminal outcome is labeled either saturated or resource-capped
 data limited; both stop at 131k and require a later architecture execution
 gate. No new pair or optimizer is authorized by the design freeze.
 
+The terminal materialization software is now frozen at commit
+`a4e6bac014ccd521d510c97593cb1368e826d5eb`, with exact wheel SHA-256
+`c7bc8ecadb373ed5d7307ee9c96b131cc68cc9ad8ea10ae2100c54aed2a8958f`.
+Full local and AutoDL regression passed. The exact-count execution gate permits
+only 65,536 new direct-target train systems plus the four-by-128 development-
+tail pool. At review, AutoDL had 221.613 GB free versus a conservative 201.597
+GB launch threshold. No official identity or new pair exists until the release
+gate repeats that measurement and returns ready.
+
 The corrected-probe gates bound the corrected views, implementation commit,
 wheel, model, CUDA environment and final-evaluation commitment. The authorized
 16k/32k and terminal 65k runs are now complete; all earlier pre-correction

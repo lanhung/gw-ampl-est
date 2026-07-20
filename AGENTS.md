@@ -858,6 +858,26 @@ architecture fit, calibration, SBC, final evaluation, real noise or
 GWOSC/GWTC access. A separate exact release and resource gate is required
 before any new identity or output may be created.
 
+The terminal materialization implementation is frozen at
+`a4e6bac014ccd521d510c97593cb1368e826d5eb`, exact wheel SHA-256
+`c7bc8ecadb373ed5d7307ee9c96b131cc68cc9ad8ea10ae2100c54aed2a8958f`.
+Local verification passed 368 tests with seven optional skips; the exact wheel
+passed 378 AutoDL tests with one optional Torch skip. The measured AutoDL free
+space was 221,613,056,000 bytes, above the conservative 201,596,510,484-byte
+prelaunch gate.
+
+Delegated expert review now authorizes exact materialization only through:
+
+`configs/execution/phase4_terminal_131k_execution_authorization.yaml`
+
+This gate permits exactly 65,536 new direct-target train systems in 512 atomic
+shards and exactly 512 development-tail systems, 128 in each of four priority
+strata. It permits a logical atomic 131,072-system training reference after
+group-disjoint validation. It does not authorize the 131k optimizer,
+architecture selection, calibration, SBC, final evaluation, extension above
+131,072, real noise or GWOSC/GWTC. Official identities may be derived only by
+a fresh ready release certificate, and publication must stop for review.
+
 ## Scientific integrity
 
 - Never fabricate results, citations, completed runs or calibration.
