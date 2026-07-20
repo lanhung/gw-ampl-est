@@ -558,3 +558,11 @@ checkpoint and query access remain closed.
 The frozen terminal analysis-adapter implementation is
 `c5cd67d0537dad81797d2a77913a5f3bbd142f00`; its exact wheel SHA-256 is
 `0ae3da4bbb96312b1347babe03ed95cfa45950966c12959e921e78abf7981fd7`.
+
+The terminal runner was audited end to end: after the 512 train shards it
+automatically executes all four tail namespaces, cross-component validation,
+tree checksums, resource gates and atomic combined publication. An independent
+closeout command now validates the exact result through a second read-only
+path and recomputes both publication trees by default. Seventeen focused and
+399 full tests passed with seven optional skips; Ruff, mypy and build passed.
+No active staging directory or scientific checkpoint was opened locally.

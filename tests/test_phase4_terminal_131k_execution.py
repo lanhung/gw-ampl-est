@@ -17,6 +17,7 @@ from gwlens_mm.production.terminal131 import (
     terminal_namespaces,
 )
 from gwlens_mm.provenance import configuration_hash
+from scripts.phase4.closeout_terminal_131k import validate_terminal_execution_result
 from scripts.phase4.run_terminal_131k import (
     _validate_scheduler_authorization,
     evaluate_release_gate,
@@ -124,6 +125,81 @@ def test_terminal_config_hash_is_stable() -> None:
     assert configuration_hash(load_yaml(CONFIG_PATH)) == configuration_hash(
         load_yaml(CONFIG_PATH)
     )
+
+
+def _terminal_result_fixture() -> dict[str, object]:
+    config = load_terminal_131k_contract(ROOT)
+    authorization = load_yaml(
+        ROOT / str(config["future_execution_authorization_path"])
+    )
+    generator = str(authorization["implementation_commit"])
+    identities = derive_terminal_identities(ROOT, config, generator)
+    orchestration = "2" * 40
+    return {
+        "status": "passed",
+        "parent_run_id": identities.parent_run_id,
+        "train_dataset_id": identities.train_dataset_id,
+        "development_tail_parent_id": identities.development_tail_parent_id,
+        "development_tail_dataset_ids": dict(
+            identities.development_tail_dataset_ids
+        ),
+        "combined_train_id": identities.combined_train_id,
+        "configuration_hash": identities.configuration_hash,
+        "generator_commit": generator,
+        "orchestration_commit": orchestration,
+        "scheduler": {
+            "configured_worker_processes": 16,
+            "scheduler_worker_processes": 32,
+            "orchestration_commit": orchestration,
+            "worker_64_authorized": False,
+        },
+        "new_train_accepted_count": 65536,
+        "new_train_shard_count": 512,
+        "development_tail_accepted_count": 512,
+        "development_tail_namespace_count": 4,
+        "terminal_train_accepted_count": 131072,
+        "proposal_equals_evaluation": True,
+        "all_importance_weights_one": True,
+        "remaining_free_bytes": 100000000000,
+        "train_131k_probe_authorized": False,
+        "architecture_selection_authorized": False,
+        "calibration_authorized": False,
+        "sbc_authorized": False,
+        "final_evaluation_authorized": False,
+        "extension_above_131072_authorized": False,
+        "gwosc_gwtc_accessed": False,
+    }
+
+
+def test_terminal_closeout_accepts_only_exact_worker32_result() -> None:
+    config = load_terminal_131k_contract(ROOT)
+    result = _terminal_result_fixture()
+    observed = validate_terminal_execution_result(ROOT, config, result)
+    assert observed["configuration_hash"] == configuration_hash(config)
+    assert observed["development_tail_dataset_ids"] == result[
+        "development_tail_dataset_ids"
+    ]
+
+
+@pytest.mark.parametrize(
+    ("field", "invalid"),
+    [
+        ("new_train_accepted_count", 65535),
+        ("development_tail_accepted_count", 511),
+        ("terminal_train_accepted_count", 131071),
+        ("all_importance_weights_one", False),
+        ("train_131k_probe_authorized", True),
+        ("extension_above_131072_authorized", True),
+    ],
+)
+def test_terminal_closeout_rejects_count_or_safety_drift(
+    field: str, invalid: object
+) -> None:
+    config = load_terminal_131k_contract(ROOT)
+    result = _terminal_result_fixture()
+    result[field] = invalid
+    with pytest.raises(ValueError, match="count or safety contract"):
+        validate_terminal_execution_result(ROOT, config, result)
 
 
 def test_worker32_scheduler_is_engineering_only_and_preserves_identity(
