@@ -597,3 +597,12 @@ commitment and every closed downstream flag before publication resolution.
 The packet SHA propagates into terminal preprocessing, three-seed run evidence
 and retained-65k tail summaries. These checks use synthetic fixtures only;
 no terminal authorization, data access or optimizer execution occurred.
+
+The post-publication authorization assembly is also implemented as a separate
+two-evidence operation. It accepts only a review-ready packet plus an explicit
+delegated-review JSON bound to that packet SHA, the 131,072 rung, seeds 0/1/2,
+the retained 65k input root, one fresh terminal output root and an exact set of
+closed downstream boundaries. It derives publication roots from independent
+closeout identities and self-validates the resulting YAML using the runtime
+release-binding validator before atomic write. This software has only used
+synthetic packet/closeout/review fixtures.

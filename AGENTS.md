@@ -1037,6 +1037,14 @@ carried into shared preprocessing, every 131k run identity summary and the
 retained-65k development-tail evaluation. No terminal-probe authorization or
 optimizer exists yet.
 
+A separate authorization builder is implemented at
+`scripts/phase4/authorize_terminal_probe.py`. It cannot promote a release
+packet by itself: it requires a second JSON review decision whose packet hash,
+131k rung, seeds, retained-65k input, new output identity and exact closed
+boundary set all match. The generated YAML is revalidated through the actual
+runtime packet-binding function before atomic write. The builder has not been
+executed on scientific evidence and no terminal-probe authorization exists.
+
 ## Scientific integrity
 
 - Never fabricate results, citations, completed runs or calibration.
