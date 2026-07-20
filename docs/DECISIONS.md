@@ -1207,3 +1207,19 @@ Implementation readiness is not data or optimizer authorization. A later gate
 must bind the completed atomic train/tail/combined manifests, the exact code and
 wheel, the frozen model configuration and CUDA environment before the resolver
 may open even one scientific record.
+
+## D099 — Adapt architecture selection to the terminal lock without rewriting 65k history
+
+The existing correction-aware architecture runner is preserved for audit
+replay. A separate terminal adapter accepts either
+`lock_train_131k_saturated` or
+`lock_train_131k_resource_capped_data_limited`, requires the exact logical
+131k manifest and reuses the three `10 transforms × width 256` probe fits.
+
+Only the remaining three architectures by three seeds may be fitted. All use
+the same 131,072 systems, 6,144 validation cases, standardizers, optimizer,
+budget and finalized evaluation commitment. Selection remains mean validation
+NLP across three seeds with parameter-count tie-break; selecting a best seed,
+consulting the 512 tail pool for architecture choice or opening final data is
+forbidden. This is software readiness only until an exact post-lock gate binds
+the scientific artifacts and environment.

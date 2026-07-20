@@ -482,6 +482,13 @@ tail pool, and the RC.1 terminal decision. Scientific data/checkpoint access and
 optimizer execution remain closed until the materialization completes and a new
 exact training release is frozen.
 
+The post-lock architecture software now also supports the terminal rung without
+changing the historical 65k code path. It validates either legitimate 131k
+terminal label, reuses all three terminal probe fits, executes at most nine new
+fits and selects from exactly twelve development-only results. The implementation
+gate remains synthetic-only; no architecture checkpoint or scientific record was
+opened.
+
 The future RC.7 non-neural reference core is now execution-ready at the pure
 software layer. A reader drift was corrected so metadata-only examples retain
 their exact Parquet EM-cell partition label without opening Zarr. A deterministic

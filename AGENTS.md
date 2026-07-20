@@ -926,6 +926,17 @@ The implementation checkpoint is
 This identity is implementation evidence only and does not activate the future
 scientific gate.
 
+The same synthetic-only boundary permits the terminal post-lock architecture
+adapter through:
+
+`configs/execution/phase5_terminal_131k_architecture_stack_authorization.yaml`
+
+It may accept either frozen 131k lock label, validate reuse of the three 131k
+probe fits and implement the nine remaining grid fits plus validation-only
+selection. It may not open scientific data/checkpoints, start a fit, select an
+architecture, calibrate, unseal final evaluation or access GWOSC/GWTC. The
+historical 65k architecture path remains unchanged.
+
 ## Scientific integrity
 
 - Never fabricate results, citations, completed runs or calibration.

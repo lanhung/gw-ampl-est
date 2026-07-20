@@ -30,6 +30,9 @@ from gwlens_mm.training.data import (
     StageAPublication,
 )
 from gwlens_mm.training.engine import TrainingRunIdentity, _validate_execution_evidence
+from gwlens_mm.training.terminal_architecture import (
+    validate_terminal_architecture_execution_gate,
+)
 
 ROOT = Path(__file__).resolve().parents[1]
 GRID_HASH = "abb3ef575e0f37a8f0150169391efb350b1c53893508bf8ba2505f9219075355"
@@ -186,6 +189,45 @@ def test_implementation_gate_cannot_execute_architecture_selection(tmp_path: Pat
             terminal_decision_path=tmp_path / "decision.json",
             probe_output_root=tmp_path / "probe",
         )
+
+
+def test_terminal_architecture_implementation_gate_cannot_open_data(
+    tmp_path: Path,
+) -> None:
+    authorization_path = (
+        ROOT
+        / "configs/execution/phase5_terminal_131k_architecture_stack_authorization.yaml"
+    )
+    authorization = load_yaml(authorization_path)
+    assert authorization["authorization_status"] == "authorized_implementation_only"
+    assert all(value is False for value in authorization["authorization"].values())
+    with pytest.raises(TrainingGateError, match="execution authorization is absent"):
+        validate_terminal_architecture_execution_gate(
+            ROOT,
+            authorization_path=authorization_path,
+            stage_a_publication_root=tmp_path / "stage-a",
+            stage_b_publication_root=tmp_path / "stage-b",
+            combined_base_publication_root=tmp_path / "combined-base",
+            correction_publication_root=tmp_path / "correction",
+            train_parent_root=tmp_path / "train-increment",
+            combined_131k_publication_root=tmp_path / "combined-131k",
+            development_tail_parent_root=tmp_path / "tail",
+            terminal_decision_path=tmp_path / "decision.json",
+            probe_output_root=tmp_path / "probe",
+        )
+
+
+def test_terminal_architecture_runner_defaults_to_blocked(tmp_path: Path) -> None:
+    from scripts.phase5.run_terminal_architecture_fit import main
+
+    result_path = tmp_path / "result.json"
+    assert main(["--result", str(result_path)]) == 0
+    result = json.loads(result_path.read_text(encoding="utf-8"))
+    assert result["locked_rung"] == 131072
+    assert result["new_fit_count"] == 9
+    assert result["reused_probe_fit_count"] == 3
+    assert result["architecture_selection_executed"] is False
+    assert result["extension_above_131072_authorized"] is False
 
 
 def _publication_identities(tmp_path: Path) -> tuple[
