@@ -920,6 +920,12 @@ final evaluation or access GWOSC/GWTC. A later exact gate must bind the complete
 publication manifests, training commit/wheel, model configuration and CUDA
 environment before any terminal scientific array may be opened.
 
+The implementation checkpoint is
+`77257c3d4871937883eebd330fb8496246a85ff4`; its exact wheel SHA-256 is
+`dea53afc08609789ea6c1ac066ed411bf1aad135434cf33f86b5e46e3f92e0ad`.
+This identity is implementation evidence only and does not activate the future
+scientific gate.
+
 ## Scientific integrity
 
 - Never fabricate results, citations, completed runs or calibration.

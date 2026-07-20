@@ -6,6 +6,10 @@ The future terminal probe software is implementation-complete and remains
 execution-closed. No active Stage A/B/terminal array or scientific checkpoint
 was opened, and no optimizer or learning-curve decision ran.
 
+The frozen implementation checkpoint is
+`77257c3d4871937883eebd330fb8496246a85ff4`; the built wheel SHA-256 is
+`dea53afc08609789ea6c1ac066ed411bf1aad135434cf33f86b5e46e3f92e0ad`.
+
 ## Implemented contracts
 
 - fail-closed resolution of the atomic corrected-65k, terminal increment,
