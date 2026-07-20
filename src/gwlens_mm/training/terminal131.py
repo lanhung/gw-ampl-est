@@ -112,6 +112,7 @@ def validate_terminal_probe_release_binding(
     ):
         raise TrainingGateError("terminal probe release-review packet is not accepted")
     packet = _load_json(packet_path)
+    review_checkout_commit = str(packet.get("release_review_checkout_commit", ""))
     if (
         packet.get("status") != TERMINAL_RELEASE_REVIEW_STATUS
         or packet.get("authorization_created") is not False
@@ -124,6 +125,8 @@ def validate_terminal_probe_release_binding(
         or packet.get("final_evaluation_authorized") is not False
         or packet.get("extension_above_131072_authorized") is not False
         or packet.get("gwosc_gwtc_access_authorized") is not False
+        or len(review_checkout_commit) != 40
+        or any(char not in "0123456789abcdef" for char in review_checkout_commit)
     ):
         raise TrainingGateError("terminal probe release-review packet contract failed")
 

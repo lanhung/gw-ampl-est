@@ -31,6 +31,18 @@ FINAL_COMMITMENT_HASH = (
 )
 EXPECTED_GPU_MODEL = "NVIDIA RTX 5000 Ada Generation"
 MINIMUM_GPU_COUNT = 3
+RELEASE_POST_FREEZE_ALLOWED_PATHS = frozenset(
+    {
+        "AGENTS.md",
+        "docs/DECISIONS.md",
+        "docs/FAILURES.md",
+        "docs/PROJECT_STATE.md",
+        "docs/reports/PHASE4_TERMINAL_131K_CLOSEOUT_REPORT.md",
+        "results/experiment_registry.csv",
+        "results/phase4/terminal_131k_execution_result.json",
+        "results/phase4/terminal_probe_closeout.json",
+    }
+)
 
 
 def _sha256(path: Path) -> str:
@@ -93,11 +105,24 @@ def _validate_closeout(closeout: Mapping[str, Any]) -> Mapping[str, Any]:
     return closeout
 
 
+def validate_terminal_release_checkout_paths(changed_paths: Sequence[str]) -> None:
+    """Allow post-freeze publication evidence but reject every software drift."""
+
+    normalized = tuple(str(Path(value)) for value in changed_paths)
+    unexpected = sorted(set(normalized) - RELEASE_POST_FREEZE_ALLOWED_PATHS)
+    if unexpected:
+        raise TrainingGateError(
+            "terminal release checkout changed frozen software: "
+            + ", ".join(unexpected)
+        )
+
+
 def prepare_terminal_probe_review_packet(
     root: Path,
     *,
     closeout_result_path: Path,
     training_commit: str,
+    review_checkout_commit: str,
     wheel_path: Path,
     environment_lock_path: Path,
     wheel_test_result_path: Path,
@@ -118,8 +143,10 @@ def prepare_terminal_probe_review_packet(
             "terminal closeout evidence must remain under results/phase4"
         )
     closeout = _validate_closeout(_load_json(closeout_path))
-    if len(training_commit) != 40 or any(
-        char not in "0123456789abcdef" for char in training_commit
+    if any(
+        len(commit) != 40
+        or any(char not in "0123456789abcdef" for char in commit)
+        for commit in (training_commit, review_checkout_commit)
     ):
         raise TrainingGateError("terminal probe review training commit is invalid")
     if not wheel_path.is_file() or wheel_path.suffix != ".whl":
@@ -169,6 +196,7 @@ def prepare_terminal_probe_review_packet(
         "status": "ready_for_delegated_terminal_probe_authorization_review",
         "authorization_created": False,
         "optimizer_execution_authorized": False,
+        "release_review_checkout_commit": review_checkout_commit,
         "closeout_result_path": str(closeout_relative),
         "closeout_result_sha256": _sha256(closeout_path),
         "terminal_preregistration": {

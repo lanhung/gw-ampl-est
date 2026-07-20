@@ -55,6 +55,7 @@ def _packet_and_review(tmp_path: Path) -> tuple[Path, Path, Path]:
         "status": "ready_for_delegated_terminal_probe_authorization_review",
         "authorization_created": False,
         "optimizer_execution_authorized": False,
+        "release_review_checkout_commit": "a" * 40,
         "authorized_training_rungs_preview": [131072],
         "authorized_training_seeds_preview": [0, 1, 2],
         "architecture_selection_authorized": False,

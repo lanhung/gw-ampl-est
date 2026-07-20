@@ -1052,6 +1052,13 @@ under the authoritative Vultr root and disposable AutoDL root without editing
 the authorization. This software portability fix authorizes no publication
 access, membership resolution or optimizer.
 
+Release-packet assembly may run from a clean descendant of the frozen training
+commit only when every intervening path is an exact registered closeout or
+project-state evidence file. The packet records that review-checkout commit;
+any post-freeze source, model, configuration or unregistered-file change fails
+closed. This resolves the necessary publish-then-review ordering without
+changing the exact wheel used for training.
+
 ## Scientific integrity
 
 - Never fabricate results, citations, completed runs or calibration.

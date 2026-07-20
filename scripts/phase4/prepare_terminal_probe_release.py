@@ -9,7 +9,10 @@ import subprocess
 from pathlib import Path
 from typing import Sequence
 
-from gwlens_mm.training.terminal_release import prepare_terminal_probe_review_packet
+from gwlens_mm.training.terminal_release import (
+    prepare_terminal_probe_review_packet,
+    validate_terminal_release_checkout_paths,
+)
 
 
 def _git_output(root: Path, *arguments: str) -> str:
@@ -32,6 +35,22 @@ def _gpu_names() -> tuple[str, ...]:
     return tuple(line.strip() for line in completed.stdout.splitlines() if line.strip())
 
 
+def _verify_release_checkout(root: Path, training_commit: str) -> str:
+    head = _git_output(root, "rev-parse", "HEAD")
+    if head != training_commit:
+        subprocess.run(
+            ["git", "-C", str(root), "merge-base", "--is-ancestor", training_commit, head],
+            check=True,
+        )
+        changed = _git_output(
+            root, "diff", "--name-only", f"{training_commit}..{head}"
+        ).splitlines()
+        validate_terminal_release_checkout_paths(changed)
+    if _git_output(root, "status", "--porcelain"):
+        raise RuntimeError("terminal probe review requires a clean checkout")
+    return head
+
+
 def _atomic_json(path: Path, value: object) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     partial = path.with_name(path.name + ".partial")
@@ -52,14 +71,14 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--wheel-test-result", required=True, type=Path)
     parser.add_argument("--output", required=True, type=Path)
     args = parser.parse_args(argv)
-    if _git_output(args.root, "rev-parse", "HEAD") != args.training_commit:
-        raise RuntimeError("terminal probe review checkout differs from training commit")
-    if _git_output(args.root, "status", "--porcelain"):
-        raise RuntimeError("terminal probe review requires a clean checkout")
+    review_checkout_commit = _verify_release_checkout(
+        args.root.resolve(), args.training_commit
+    )
     packet = prepare_terminal_probe_review_packet(
         args.root,
         closeout_result_path=args.closeout_result,
         training_commit=args.training_commit,
+        review_checkout_commit=review_checkout_commit,
         wheel_path=args.wheel,
         environment_lock_path=args.environment_lock,
         wheel_test_result_path=args.wheel_test_result,

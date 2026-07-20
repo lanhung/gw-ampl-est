@@ -3,6 +3,7 @@ from __future__ import annotations
 import hashlib
 import json
 import shutil
+import subprocess
 from pathlib import Path
 
 import pytest
@@ -12,7 +13,9 @@ from gwlens_mm.training.terminal_release import (
     ENVIRONMENT_LOCK_HASH,
     EXPECTED_GPU_MODEL,
     prepare_terminal_probe_review_packet,
+    validate_terminal_release_checkout_paths,
 )
+from scripts.phase4.prepare_terminal_probe_release import _verify_release_checkout
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -88,6 +91,7 @@ def _packet(tmp_path: Path) -> dict[str, object]:
             root,
             closeout_result_path=closeout_path,
             training_commit="1" * 40,
+            review_checkout_commit="2" * 40,
             wheel_path=wheel_path,
             environment_lock_path=ROOT
             / "configs/environment/phase4-training-freeze.txt",
@@ -109,6 +113,7 @@ def test_terminal_probe_release_packet_is_exact_but_non_authorizing(
     assert immutable["environment_lock_sha256"] == ENVIRONMENT_LOCK_HASH
     assert packet["authorized_training_rungs_preview"] == [131072]
     assert packet["authorized_training_seeds_preview"] == [0, 1, 2]
+    assert packet["release_review_checkout_commit"] == "2" * 40
     assert packet["closeout_result_path"] == (
         "results/phase4/terminal_probe_closeout.json"
     )
@@ -140,6 +145,7 @@ def test_terminal_probe_release_packet_rejects_closeout_drift(
             root,
             closeout_result_path=closeout_path,
             training_commit="1" * 40,
+            review_checkout_commit="2" * 40,
             wheel_path=wheel_path,
             environment_lock_path=ROOT
             / "configs/environment/phase4-training-freeze.txt",
@@ -179,6 +185,7 @@ def test_terminal_probe_release_packet_rejects_gpu_or_wheel_test_drift(
             root,
             closeout_result_path=closeout_path,
             training_commit="1" * 40,
+            review_checkout_commit="2" * 40,
             wheel_path=wheel_path,
             environment_lock_path=ROOT
             / "configs/environment/phase4-training-freeze.txt",
@@ -202,9 +209,75 @@ def test_terminal_probe_release_packet_rejects_closeout_outside_repository(
             root,
             closeout_result_path=closeout_path,
             training_commit="1" * 40,
+            review_checkout_commit="2" * 40,
             wheel_path=wheel_path,
             environment_lock_path=ROOT
             / "configs/environment/phase4-training-freeze.txt",
             wheel_test_result_path=wheel_test_path,
             gpu_names=[EXPECTED_GPU_MODEL] * 3,
         )
+
+
+def test_terminal_release_checkout_allows_only_exact_closeout_evidence() -> None:
+    validate_terminal_release_checkout_paths(
+        [
+            "AGENTS.md",
+            "docs/PROJECT_STATE.md",
+            "docs/reports/PHASE4_TERMINAL_131K_CLOSEOUT_REPORT.md",
+            "results/experiment_registry.csv",
+            "results/phase4/terminal_131k_execution_result.json",
+            "results/phase4/terminal_probe_closeout.json",
+        ]
+    )
+    with pytest.raises(TrainingGateError, match="changed frozen software"):
+        validate_terminal_release_checkout_paths(
+            ["src/gwlens_mm/training/model.py"]
+        )
+
+
+def _git(root: Path, *arguments: str) -> str:
+    completed = subprocess.run(
+        ["git", "-C", str(root), *arguments],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    return completed.stdout.strip()
+
+
+def test_release_script_accepts_clean_evidence_only_descendant(tmp_path: Path) -> None:
+    _git(tmp_path, "init")
+    _git(tmp_path, "config", "user.email", "test@example.invalid")
+    _git(tmp_path, "config", "user.name", "Test")
+    source = tmp_path / "src/gwlens_mm/training/model.py"
+    source.parent.mkdir(parents=True)
+    source.write_text("frozen = True\n", encoding="utf-8")
+    _git(tmp_path, "add", ".")
+    _git(tmp_path, "commit", "-m", "freeze training")
+    training_commit = _git(tmp_path, "rev-parse", "HEAD")
+
+    closeout = tmp_path / "results/phase4/terminal_probe_closeout.json"
+    closeout.parent.mkdir(parents=True)
+    closeout.write_text("{}\n", encoding="utf-8")
+    _git(tmp_path, "add", ".")
+    _git(tmp_path, "commit", "-m", "record closeout")
+    assert _verify_release_checkout(tmp_path, training_commit) == _git(
+        tmp_path, "rev-parse", "HEAD"
+    )
+
+
+def test_release_script_rejects_descendant_software_change(tmp_path: Path) -> None:
+    _git(tmp_path, "init")
+    _git(tmp_path, "config", "user.email", "test@example.invalid")
+    _git(tmp_path, "config", "user.name", "Test")
+    source = tmp_path / "src/gwlens_mm/training/model.py"
+    source.parent.mkdir(parents=True)
+    source.write_text("frozen = True\n", encoding="utf-8")
+    _git(tmp_path, "add", ".")
+    _git(tmp_path, "commit", "-m", "freeze training")
+    training_commit = _git(tmp_path, "rev-parse", "HEAD")
+    source.write_text("frozen = False\n", encoding="utf-8")
+    _git(tmp_path, "add", ".")
+    _git(tmp_path, "commit", "-m", "change training")
+    with pytest.raises(TrainingGateError, match="changed frozen software"):
+        _verify_release_checkout(tmp_path, training_commit)
