@@ -670,3 +670,7 @@ architecture lock plus separate materialization and inference gates.
 - RC.4 forbids automatic extension above 65,536 and the architecture execution
   gate requires `lock_train_65k`. Both paths are closed until a new scientific
   contract receives explicit human review.
+- Human review subsequently froze `1.2.0-rc.1` prospectively. It retains this
+  failure unchanged, adds one terminal 131k resource-capped rung and fixes the
+  independent development-tail count before any new data exist. It does not
+  reinterpret 65k as saturated or open execution by itself.

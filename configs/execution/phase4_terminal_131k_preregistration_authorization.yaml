@@ -1,0 +1,53 @@
+phase: "4-terminal-131k-preregistration"
+authorization_status: authorized_scientific_design_only
+authorized_by: human_project_owner
+authorization_date: "2026-07-20"
+
+base_main_commit: "3dc8edd84a313b9982a7b0e2f2c09df9ea9abb4a"
+
+triggering_evidence:
+  corrected_65k_decision: stop_data_limited_and_new_preregistration
+  decision_sha256: "90c238a0d85d941c9e90a68e8a215a8d9025f57ffe7757ff89dd14c267f6d72f"
+  paired_nlp_improvement_nat_per_target_dimension: 0.20143701225040583
+  paired_nlp_lower_95: 0.19149779212277482
+  paired_nlp_upper_95: 0.21178807538101158
+  final_evaluation_accessed: false
+  calibration_accessed: false
+
+authorized_scientific_contract:
+  preregistration_version: "1.2.0-rc.1"
+  existing_train_systems: 65536
+  additional_direct_target_train_systems: 65536
+  terminal_cumulative_train_systems: 131072
+  existing_65k_is_strict_subset: true
+
+  development_tail_pool_systems: 512
+  development_tail_strata: 4
+  systems_per_tail_stratum: 128
+  group_disjoint_from_all_other_splits: true
+  final_evaluation_reuse_forbidden: true
+
+  terminal_outcomes:
+    - lock_train_131k_saturated
+    - lock_train_131k_resource_capped_data_limited
+  automatic_extension_above_131072: false
+  architecture_selection_allowed_after_either_terminal_outcome: true
+
+  uncalibrated_coverage_role: required_report_nonblocking_for_size_lock
+  calibrated_coverage_remains_governed_by_frozen_calibration_and_sbc_gates: true
+
+authorization:
+  preregistration_design_authorized: true
+  documentation_and_machine_safety_tests_authorized: true
+
+  additional_pair_generation_authorized: false
+  development_tail_materialization_authorized: false
+  train_131k_probe_execution_authorized: false
+  architecture_selection_authorized: false
+  calibration_authorized: false
+  sbc_authorized: false
+  final_evaluation_authorized: false
+  real_noise_authorized: false
+  gwosc_gwtc_access_authorized: false
+
+stop_after_preregistration_review: true

@@ -77,6 +77,16 @@ decision is `stop_data_limited_and_new_preregistration`; independent replay was
 byte-identical and decision SHA-256 is `90c238a0...`. No calibration or final
 case was opened.
 
+Human review has now accepted the prospective terminal-scale preregistration
+`1.2.0-rc.1`, canonical hash
+`77ff5b6b45b886657e90023c50ae002afffb077db594c80665166d537fd2346a`.
+It retains the corrected 65k publication as a strict subset, proposes exactly
+65,536 additional direct-target systems for a terminal count of 131,072 and
+adds an independent 512-system development-tail pool with 128 cases per frozen
+stratum. The terminal outcome is labeled either saturated or resource-capped
+data limited; both stop at 131k and require a later architecture execution
+gate. No new pair or optimizer is authorized by the design freeze.
+
 The corrected-probe gates bound the corrected views, implementation commit,
 wheel, model, CUDA environment and final-evaluation commitment. The authorized
 16k/32k and terminal 65k runs are now complete; all earlier pre-correction
