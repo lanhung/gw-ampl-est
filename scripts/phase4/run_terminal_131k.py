@@ -8,6 +8,7 @@ import hashlib
 import json
 import os
 import shutil
+import subprocess
 import time
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from datetime import datetime, timezone
@@ -39,11 +40,27 @@ GROUP_KEYS = ("pair", "source", "lens", "system", "noise")
 _POSTFREEZE_PATHS = (
     "AGENTS.md",
     "configs/execution/phase4_terminal_131k_execution_authorization.yaml",
+    "configs/execution/phase4_terminal_131k_worker32_authorization.yaml",
     "docs/DECISIONS.md",
     "docs/FAILURES.md",
     "docs/PROJECT_STATE.md",
     "docs/reports/PHASE4_TERMINAL_131K_EXECUTION_REPORT.md",
+    "docs/reports/PHASE4_TERMINAL_131K_WORKER32_REPORT.md",
     "results/experiment_registry.csv",
+    "scripts/phase4/run_terminal_131k.py",
+    "tests/test_phase4_terminal_131k_execution.py",
+)
+_ORCHESTRATION_POSTFREEZE_PATHS = (
+    "AGENTS.md",
+    "configs/execution/phase4_terminal_131k_worker32_authorization.yaml",
+    "docs/DECISIONS.md",
+    "docs/FAILURES.md",
+    "docs/PROJECT_STATE.md",
+    "docs/reports/PHASE4_TERMINAL_131K_WORKER32_REPORT.md",
+    "results/experiment_registry.csv",
+)
+_WORKER32_AUTHORIZATION = (
+    "configs/execution/phase4_terminal_131k_worker32_authorization.yaml"
 )
 
 
@@ -119,6 +136,160 @@ def _authorization(config: Mapping[str, Any]) -> Dict[str, Any]:
     return authorization
 
 
+def _verify_orchestration_commit(root: Path, orchestration_commit: str) -> None:
+    """Verify the exact scheduler implementation independently of the generator."""
+
+    if len(orchestration_commit) != 40:
+        raise ValueError("orchestration commit must be a full Git SHA")
+    if (root / ".git").exists():
+        head = subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            cwd=root,
+            check=True,
+            capture_output=True,
+            text=True,
+        ).stdout.strip()
+        if head == orchestration_commit:
+            return
+        ancestry = subprocess.run(
+            ["git", "merge-base", "--is-ancestor", orchestration_commit, head],
+            cwd=root,
+            check=False,
+        )
+        if ancestry.returncode != 0:
+            raise ValueError("orchestration commit is not an ancestor of checkout HEAD")
+        changed = subprocess.run(
+            ["git", "diff", "--name-only", f"{orchestration_commit}..{head}"],
+            cwd=root,
+            check=True,
+            capture_output=True,
+            text=True,
+        ).stdout.splitlines()
+        unexpected = sorted(set(changed) - set(_ORCHESTRATION_POSTFREEZE_PATHS))
+        if unexpected:
+            raise ValueError(
+                "post-orchestration-freeze checkout changes protected paths: "
+                + ", ".join(unexpected)
+            )
+        return
+    marker = root / "SYNCED_ORCHESTRATION_COMMIT"
+    if not marker.is_file() or marker.read_text().strip() != orchestration_commit:
+        raise ValueError("disposable checkout lacks exact orchestration commit marker")
+
+
+def _validate_scheduler_authorization(
+    *,
+    authorization: Mapping[str, Any],
+    config: Mapping[str, Any],
+    generator_commit: str,
+    orchestration_commit: str,
+    identities: Mapping[str, Any],
+    requested_workers: int,
+) -> Dict[str, Any]:
+    """Validate the engineering-only 16-to-32 worker transition."""
+
+    if authorization.get("authorization_status") != (
+        "authorized_worker32_orchestration_restart_only"
+    ):
+        raise PermissionError("worker-32 orchestration authorization is absent")
+    frozen = authorization.get("frozen_execution", {})
+    if (
+        frozen.get("generator_commit") != generator_commit
+        or frozen.get("orchestration_commit") != orchestration_commit
+        or frozen.get("configuration_hash") != configuration_hash(config)
+        or frozen.get("preregistration_hash")
+        != config["preregistration"]["canonical_hash"]
+        or frozen.get("parent_run_id") != identities["parent_run_id"]
+        or frozen.get("train_dataset_id") != identities["train_dataset_id"]
+    ):
+        raise ValueError("worker-32 frozen execution identity mismatch")
+    scheduler = authorization.get("scheduler_contract", {})
+    if (
+        int(scheduler.get("configured_worker_processes", -1)),
+        int(scheduler.get("authorized_scheduler_workers", -1)),
+        int(scheduler.get("maximum_scheduler_workers", -1)),
+        requested_workers,
+    ) != (16, 32, 32, 32):
+        raise ValueError("worker-32 scheduler contract mismatch")
+    interrupted = authorization.get("interrupted_worker16_evidence", {})
+    if (
+        int(interrupted.get("complete_shard_count", -1)),
+        int(interrupted.get("partial_shard_count", -1)),
+        interrupted.get("partial_evidence_reuse_authorized"),
+    ) != (0, 16, False):
+        raise ValueError("worker-16 interruption evidence contract mismatch")
+    evidence_root = Path(str(interrupted.get("path", "")))
+    if (
+        not evidence_root.is_absolute()
+        or not evidence_root.is_relative_to(APPROVED_REMOTE_ROOT)
+        or not evidence_root.is_dir()
+    ):
+        raise ValueError("worker-16 interruption evidence is unavailable")
+    boundaries = authorization.get("authorization_boundaries", {})
+    for key in (
+        "scientific_contract_change_authorized",
+        "new_dataset_identity_authorized",
+        "worker_64_authorized",
+        "training_authorized",
+        "calibration_authorized",
+        "final_evaluation_authorized",
+        "gwosc_gwtc_access_authorized",
+    ):
+        if boundaries.get(key) is not False:
+            raise PermissionError(f"worker-32 transition requires {key}=false")
+    return {
+        "source": "authorized_orchestration_override",
+        "configured_worker_processes": 16,
+        "scheduler_worker_processes": 32,
+        "orchestration_commit": orchestration_commit,
+        "authorization_path": _WORKER32_AUTHORIZATION,
+        "worker_64_authorized": False,
+    }
+
+
+def _resolve_scheduler(
+    *,
+    config: Mapping[str, Any],
+    generator_commit: str,
+    identities: Mapping[str, Any],
+    requested_workers: int | None,
+    orchestration_commit: str | None,
+    scheduler_authorization_path: str | None,
+) -> Dict[str, Any]:
+    configured = int(config["execution"]["worker_processes"])
+    workers = configured if requested_workers is None else int(requested_workers)
+    if workers == configured:
+        if orchestration_commit is not None or scheduler_authorization_path is not None:
+            raise ValueError("configured scheduler does not accept override metadata")
+        return {
+            "source": "frozen_configuration",
+            "configured_worker_processes": configured,
+            "scheduler_worker_processes": configured,
+            "orchestration_commit": generator_commit,
+            "authorization_path": None,
+            "worker_64_authorized": False,
+        }
+    if workers != 32:
+        raise PermissionError("only the reviewed 32-worker scheduler is authorized")
+    if orchestration_commit is None:
+        raise PermissionError("worker-32 scheduler requires an orchestration commit")
+    path_value = scheduler_authorization_path or _WORKER32_AUTHORIZATION
+    path = Path(path_value)
+    if path.is_absolute() or ".." in path.parts:
+        raise ValueError("scheduler authorization path must remain repository-relative")
+    authorization = load_yaml(ROOT / path)
+    selection = _validate_scheduler_authorization(
+        authorization=authorization,
+        config=config,
+        generator_commit=generator_commit,
+        orchestration_commit=orchestration_commit,
+        identities=identities,
+        requested_workers=workers,
+    )
+    _verify_orchestration_commit(ROOT, orchestration_commit)
+    return selection
+
+
 def _validate_paths(config: Mapping[str, Any]) -> None:
     for value in config["paths"].values():
         path = Path(str(value))
@@ -173,7 +344,12 @@ def _identity_mapping(identities: TerminalIdentities) -> Dict[str, Any]:
 
 
 def evaluate_release_gate(
-    *, config_path: str, generator_commit: str
+    *,
+    config_path: str,
+    generator_commit: str,
+    scheduler_workers: int | None = None,
+    orchestration_commit: str | None = None,
+    scheduler_authorization_path: str | None = None,
 ) -> Dict[str, Any]:
     """Return identities only after every exact immutable/resource check passes."""
 
@@ -227,6 +403,18 @@ def evaluate_release_gate(
     if free < int(config["resource_gates"]["minimum_prelaunch_free_bytes"]):
         blockers.append("terminal 131k free-space gate failed")
     identities = derive_terminal_identities(ROOT, config, generator_commit)
+    try:
+        scheduler = _resolve_scheduler(
+            config=config,
+            generator_commit=generator_commit,
+            identities=_identity_mapping(identities),
+            requested_workers=scheduler_workers,
+            orchestration_commit=orchestration_commit,
+            scheduler_authorization_path=scheduler_authorization_path,
+        )
+        checks["scheduler"] = scheduler
+    except Exception as error:
+        blockers.append(f"terminal 131k scheduler gate failed: {error}")
     collisions = (
         Path(str(config["paths"]["train_publication_root"]))
         / identities.parent_run_id,
@@ -247,6 +435,7 @@ def evaluate_release_gate(
         "checks": checks,
         "blockers": blockers,
         "official_identities": _identity_mapping(identities) if not blockers else None,
+        "scheduler": scheduler if not blockers else None,
         "new_train_accepted_target": 65536,
         "development_tail_accepted_target": 512,
         "terminal_train_target": 131072,
@@ -265,6 +454,7 @@ def _generate_pending(
     proposal: Mapping[str, Any],
     generator_commit: str,
     dataset_identity: str,
+    scheduler_workers: int,
 ) -> None:
     pending: list[int] = []
     pairs = int(namespace_config["pairs_per_shard"])
@@ -276,10 +466,9 @@ def _generate_pending(
             pending.append(shard_index)
     if not pending:
         return
-    workers = min(
-        int(namespace_config["execution"]["qualification_worker_processes"]),
-        len(pending),
-    )
+    if scheduler_workers not in (16, 32):
+        raise PermissionError("terminal scheduler worker count is not authorized")
+    workers = min(scheduler_workers, len(pending))
     with ProcessPoolExecutor(max_workers=workers) as executor:
         futures = {
             executor.submit(
@@ -414,6 +603,7 @@ def _publish_namespace(
     generator_commit: str,
     preregistration: Mapping[str, Any],
     proposal: Mapping[str, Any],
+    scheduler_workers: int,
 ) -> Tuple[Dict[str, Any], Dict[str, Set[str]]]:
     namespace_config = build_terminal_namespace_config(ROOT, config, namespace)
     dataset_stage = parent_stage / dataset_identity
@@ -429,6 +619,7 @@ def _publish_namespace(
             proposal=proposal,
             generator_commit=generator_commit,
             dataset_identity=dataset_identity,
+            scheduler_workers=scheduler_workers,
         )
     validation, identifiers = validate_stage_a_namespace(
         work_root,
@@ -443,7 +634,14 @@ def _publish_namespace(
 
 
 def execute(
-    *, config_path: str, generator_commit: str, certificate_path: Path, output: Path
+    *,
+    config_path: str,
+    generator_commit: str,
+    certificate_path: Path,
+    output: Path,
+    scheduler_workers: int | None = None,
+    orchestration_commit: str | None = None,
+    scheduler_authorization_path: str | None = None,
 ) -> Dict[str, Any]:
     """Generate, validate, and atomically publish the exact terminal release."""
 
@@ -463,6 +661,16 @@ def execute(
     expected = _identity_mapping(derive_terminal_identities(ROOT, config, generator_commit))
     if identities_value != expected:
         raise ValueError("terminal 131k release identities mismatch")
+    scheduler = _resolve_scheduler(
+        config=config,
+        generator_commit=generator_commit,
+        identities=expected,
+        requested_workers=scheduler_workers,
+        orchestration_commit=orchestration_commit,
+        scheduler_authorization_path=scheduler_authorization_path,
+    )
+    if certificate.get("scheduler") != scheduler:
+        raise ValueError("terminal 131k release scheduler mismatch")
     corrected = _resolve_corrected(config)
     preregistration = load_yaml(
         ROOT / str(config["parent_scientific_preregistration"]["path"])
@@ -490,6 +698,8 @@ def execute(
             "status": "generating_or_resuming",
             "parent_run_id": expected["parent_run_id"],
             "generator_commit": generator_commit,
+            "orchestration_commit": scheduler["orchestration_commit"],
+            "scheduler": scheduler,
             "configuration_hash": configuration_hash(config),
             "accepted_target": 65536,
             "terminal_train_target": 131072,
@@ -500,7 +710,13 @@ def execute(
             "gwosc_gwtc_access_authorized": False,
             "execution_segments": [],
         }
+    if run_manifest.get("scheduler") != scheduler:
+        raise ValueError("terminal 131k run manifest scheduler mismatch")
     segment = _append_segment(run_manifest)
+    segment["scheduler_worker_processes"] = scheduler[
+        "scheduler_worker_processes"
+    ]
+    segment["orchestration_commit"] = scheduler["orchestration_commit"]
     _atomic_json(run_manifest_path, run_manifest)
     started = time.monotonic()
     train_validation, train_ids = _publish_namespace(
@@ -512,6 +728,7 @@ def execute(
         generator_commit=generator_commit,
         preregistration=preregistration,
         proposal=proposal,
+        scheduler_workers=int(scheduler["scheduler_worker_processes"]),
     )
     if not train_publication.exists():
         train_manifest = {
@@ -566,6 +783,7 @@ def execute(
             generator_commit=generator_commit,
             preregistration=preregistration,
             proposal=proposal,
+            scheduler_workers=int(scheduler["scheduler_worker_processes"]),
         )
         tail_validations[stratum] = validation
         tail_identifiers[stratum] = identifiers
@@ -665,6 +883,8 @@ def execute(
         "status": "passed",
         **expected,
         "generator_commit": generator_commit,
+        "orchestration_commit": scheduler["orchestration_commit"],
+        "scheduler": scheduler,
         "new_train_accepted_count": 65536,
         "new_train_shard_count": 512,
         "development_tail_accepted_count": 512,
@@ -700,6 +920,9 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument("--generator-commit", required=True)
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--release-certificate", type=Path)
+    parser.add_argument("--scheduler-workers", type=int)
+    parser.add_argument("--orchestration-commit")
+    parser.add_argument("--scheduler-authorization")
     return parser
 
 
@@ -708,7 +931,11 @@ def main() -> int:
     try:
         if args.mode == "preflight":
             result = evaluate_release_gate(
-                config_path=args.config, generator_commit=args.generator_commit
+                config_path=args.config,
+                generator_commit=args.generator_commit,
+                scheduler_workers=args.scheduler_workers,
+                orchestration_commit=args.orchestration_commit,
+                scheduler_authorization_path=args.scheduler_authorization,
             )
             _atomic_json(args.output, result)
             print(json.dumps(result, indent=2, sort_keys=True))
@@ -720,6 +947,9 @@ def main() -> int:
             generator_commit=args.generator_commit,
             certificate_path=args.release_certificate,
             output=args.output,
+            scheduler_workers=args.scheduler_workers,
+            orchestration_commit=args.orchestration_commit,
+            scheduler_authorization_path=args.scheduler_authorization,
         )
         print(json.dumps(result, indent=2, sort_keys=True))
         return 0

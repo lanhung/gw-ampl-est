@@ -17,7 +17,11 @@ from gwlens_mm.production.terminal131 import (
     terminal_namespaces,
 )
 from gwlens_mm.provenance import configuration_hash
-from scripts.phase4.run_terminal_131k import evaluate_release_gate, execute
+from scripts.phase4.run_terminal_131k import (
+    _validate_scheduler_authorization,
+    evaluate_release_gate,
+    execute,
+)
 
 ROOT = Path(__file__).resolve().parents[1]
 CONFIG_PATH = ROOT / "configs/data/phase4_terminal_131k.yaml"
@@ -113,13 +117,91 @@ def test_terminal_release_gate_fails_closed_without_future_authorization() -> No
     )
     assert result["status"] == "blocked_preexecution"
     assert result["official_identities"] is None
-    assert "authorization" in result["blockers"][0]
+    assert "generator commit mismatch" in result["blockers"][0]
 
 
 def test_terminal_config_hash_is_stable() -> None:
     assert configuration_hash(load_yaml(CONFIG_PATH)) == configuration_hash(
         load_yaml(CONFIG_PATH)
     )
+
+
+def test_worker32_scheduler_is_engineering_only_and_preserves_identity(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    config = load_terminal_131k_contract(ROOT)
+    generator = "1" * 40
+    orchestration = "2" * 40
+    identities = derive_terminal_identities(ROOT, config, generator)
+    identity_mapping = {
+        "parent_run_id": identities.parent_run_id,
+        "train_dataset_id": identities.train_dataset_id,
+    }
+    evidence = tmp_path / "interrupted"
+    evidence.mkdir()
+    monkeypatch.setattr(
+        "scripts.phase4.run_terminal_131k.APPROVED_REMOTE_ROOT", tmp_path
+    )
+    authorization = {
+        "authorization_status": "authorized_worker32_orchestration_restart_only",
+        "frozen_execution": {
+            "generator_commit": generator,
+            "orchestration_commit": orchestration,
+            "configuration_hash": configuration_hash(config),
+            "preregistration_hash": config["preregistration"]["canonical_hash"],
+            **identity_mapping,
+        },
+        "scheduler_contract": {
+            "configured_worker_processes": 16,
+            "authorized_scheduler_workers": 32,
+            "maximum_scheduler_workers": 32,
+        },
+        "interrupted_worker16_evidence": {
+            "path": str(evidence),
+            "complete_shard_count": 0,
+            "partial_shard_count": 16,
+            "partial_evidence_reuse_authorized": False,
+        },
+        "authorization_boundaries": {
+            "scientific_contract_change_authorized": False,
+            "new_dataset_identity_authorized": False,
+            "worker_64_authorized": False,
+            "training_authorized": False,
+            "calibration_authorized": False,
+            "final_evaluation_authorized": False,
+            "gwosc_gwtc_access_authorized": False,
+        },
+    }
+    selection = _validate_scheduler_authorization(
+        authorization=authorization,
+        config=config,
+        generator_commit=generator,
+        orchestration_commit=orchestration,
+        identities=identity_mapping,
+        requested_workers=32,
+    )
+    assert selection["scheduler_worker_processes"] == 32
+    assert selection["worker_64_authorized"] is False
+    assert configuration_hash(config) == identities.configuration_hash
+
+
+def test_worker64_scheduler_is_rejected_before_authorization_lookup() -> None:
+    from scripts.phase4.run_terminal_131k import _resolve_scheduler
+
+    config = load_terminal_131k_contract(ROOT)
+    identities = derive_terminal_identities(ROOT, config, "1" * 40)
+    with pytest.raises(PermissionError, match="only the reviewed 32-worker"):
+        _resolve_scheduler(
+            config=config,
+            generator_commit="1" * 40,
+            identities={
+                "parent_run_id": identities.parent_run_id,
+                "train_dataset_id": identities.train_dataset_id,
+            },
+            requested_workers=64,
+            orchestration_commit="2" * 40,
+            scheduler_authorization_path=None,
+        )
 
 
 def test_terminal_execute_atomically_publishes_both_pools_and_reference(
@@ -152,6 +234,14 @@ def test_terminal_execute_atomically_publishes_both_pools_and_reference(
         "generator_commit": "1" * 40,
         "configuration_hash": configuration_hash(config),
         "official_identities": identity_mapping,
+        "scheduler": {
+            "source": "frozen_configuration",
+            "configured_worker_processes": 16,
+            "scheduler_worker_processes": 16,
+            "orchestration_commit": "1" * 40,
+            "authorization_path": None,
+            "worker_64_authorized": False,
+        },
     }
     certificate_path = tmp_path / "release.json"
     certificate_path.write_text(json.dumps(certificate), encoding="utf-8")
