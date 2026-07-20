@@ -126,6 +126,11 @@ def prepare_terminal_probe_review_packet(
         and int(wheel_test.get("full_test_exit_code", -1)) == 0
         and wheel_test.get("torch_cuda_available") is True
         and wheel_test.get("editable_install_used") is False
+        and wheel_test.get("wheel_import_verified") is True
+        and wheel_test.get("installed_distribution_name") == "gwlens-mm"
+        and wheel_test.get("installed_module_from_repository_source") is False
+        and wheel_test.get("repository_root_pythonpath_used") is True
+        and wheel_test.get("repository_src_pythonpath_used") is False
     ):
         raise TrainingGateError("terminal probe review exact-wheel test failed")
     observed_gpu_names = tuple(str(name) for name in gpu_names)

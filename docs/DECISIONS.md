@@ -1294,3 +1294,18 @@ The packet deliberately cannot authorize execution. It reports readiness for
 delegated review only. A later exact authorization must bind its hash, the
 training output identity and every publication root before the resolver may
 index one scientific record or start one optimizer step.
+
+## D105 — Prove exact-wheel imports without trusting repository pytest paths
+
+The terminal review packet accepts an AutoDL test summary only when a dedicated
+verifier proves that `gwlens_mm` came from the installed wheel. A normal pytest
+invocation is insufficient evidence because a repository configuration can add
+`src` to the import path and silently test checkout code instead.
+
+The verifier therefore binds the installed PEP 610 archive hash to the exact
+wheel, rejects editable installs and any module below the repository `src`
+tree, and launches pytest with `-c /dev/null`. It exposes only the repository
+root for `scripts/` imports. CUDA availability and the frozen RTX 5000 Ada GPU
+inventory are recorded in the same atomic result. This remains a software
+release check: it reads no scientific publication and cannot authorize or
+execute training.
