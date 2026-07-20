@@ -588,3 +588,12 @@ repository root is available only for `scripts/` imports; `src/` is never
 added to `PYTHONPATH`. The current local suite passes 412 tests with seven
 optional dependency skips. The verifier has not yet run on the future final
 post-publication wheel and does not create a training authorization.
+
+The future execution gate is now also machine-bound to the resulting release
+packet rather than trusting an authorization narrative. It checks the packet
+hash, non-authorizing status, atomic publication identities and counts, exact
+wheel/model/environment fields, GPU inventory, finalized evaluation
+commitment and every closed downstream flag before publication resolution.
+The packet SHA propagates into terminal preprocessing, three-seed run evidence
+and retained-65k tail summaries. These checks use synthetic fixtures only;
+no terminal authorization, data access or optimizer execution occurred.

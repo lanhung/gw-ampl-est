@@ -60,6 +60,13 @@ SEEDS = (0, 1, 2)
 TERMINAL_PREREGISTRATION_PATH = (
     "configs/statistics/terminal_131k_preregistration.yaml"
 )
+TERMINAL_RELEASE_REVIEW_STATUS = (
+    "ready_for_delegated_terminal_probe_authorization_review"
+)
+TERMINAL_RELEASE_REVIEW_ACCEPTANCE = (
+    "accepted_for_exact_terminal_probe_authorization"
+)
+EXPECTED_TERMINAL_GPU_MODEL = "NVIDIA RTX 5000 Ada Generation"
 
 
 def _load_json(path: Path) -> Mapping[str, Any]:
@@ -67,6 +74,103 @@ def _load_json(path: Path) -> Mapping[str, Any]:
     if not isinstance(value, dict):
         raise TrainingGateError(f"expected a JSON mapping: {path}")
     return value
+
+
+def validate_terminal_probe_release_binding(
+    authorization: Mapping[str, Any],
+) -> Mapping[str, Any]:
+    """Bind one separately reviewed packet to the future execution gate."""
+
+    review = authorization.get("terminal_probe_release_review", {})
+    if not isinstance(review, Mapping):
+        raise TrainingGateError("terminal probe gate lacks release review metadata")
+    path_value = str(review.get("path", ""))
+    packet_path = Path(path_value)
+    expected_hash = str(review.get("sha256", ""))
+    if (
+        not packet_path.is_absolute()
+        or not packet_path.is_file()
+        or len(expected_hash) != 64
+        or _sha256_file(packet_path) != expected_hash
+        or review.get("delegated_review_status")
+        != TERMINAL_RELEASE_REVIEW_ACCEPTANCE
+    ):
+        raise TrainingGateError("terminal probe release-review packet is not accepted")
+    packet = _load_json(packet_path)
+    if (
+        packet.get("status") != TERMINAL_RELEASE_REVIEW_STATUS
+        or packet.get("authorization_created") is not False
+        or packet.get("optimizer_execution_authorized") is not False
+        or packet.get("authorized_training_rungs_preview") != [TRAIN_131K_COUNT]
+        or packet.get("authorized_training_seeds_preview") != list(SEEDS)
+        or packet.get("architecture_selection_authorized") is not False
+        or packet.get("calibration_authorized") is not False
+        or packet.get("sbc_authorized") is not False
+        or packet.get("final_evaluation_authorized") is not False
+        or packet.get("extension_above_131072_authorized") is not False
+        or packet.get("gwosc_gwtc_access_authorized") is not False
+    ):
+        raise TrainingGateError("terminal probe release-review packet contract failed")
+
+    packet_publication = packet.get("publication", {})
+    authorized_publication = authorization.get("terminal_publication", {})
+    if not isinstance(packet_publication, Mapping) or not isinstance(
+        authorized_publication, Mapping
+    ):
+        raise TrainingGateError("terminal release packet lacks publication identities")
+    for field in (
+        "combined_manifest_sha256",
+        "train_parent_manifest_sha256",
+        "development_tail_manifest_sha256",
+    ):
+        if packet_publication.get(field) != authorized_publication.get(field):
+            raise TrainingGateError("terminal release packet publication identity drifted")
+    if (
+        int(packet_publication.get("logical_train_accepted_count", -1))
+        != TRAIN_131K_COUNT
+        or int(packet_publication.get("development_tail_accepted_count", -1))
+        != TAIL_COUNT
+    ):
+        raise TrainingGateError("terminal release packet publication counts changed")
+
+    packet_training = packet.get("immutable_training", {})
+    authorized_training = authorization.get("immutable_training", {})
+    if not isinstance(packet_training, Mapping) or not isinstance(
+        authorized_training, Mapping
+    ):
+        raise TrainingGateError("terminal release packet lacks training identities")
+    for field in (
+        "git_commit",
+        "wheel_path",
+        "wheel_filename",
+        "wheel_sha256",
+        "model_configuration_path",
+        "model_configuration_hash",
+        "environment_lock_path",
+        "environment_lock_sha256",
+    ):
+        if packet_training.get(field) != authorized_training.get(field):
+            raise TrainingGateError("terminal release packet training identity drifted")
+    gpu_names = packet_training.get("observed_gpu_names")
+    if not isinstance(gpu_names, list) or not (
+        len(gpu_names) >= 3
+        and all(str(name) == EXPECTED_TERMINAL_GPU_MODEL for name in gpu_names)
+        and packet_training.get("editable_install_authorized") is False
+        and packet_training.get("cuda_required") is True
+    ):
+        raise TrainingGateError("terminal release packet CUDA identity drifted")
+    for evidence_field in (
+        "exact_wheel_test_result_sha256",
+        "exact_wheel_test_result_path",
+    ):
+        if not packet_training.get(evidence_field):
+            raise TrainingGateError("terminal release packet lacks exact-wheel evidence")
+    if (
+        packet.get("final_evaluation_commitment_sha256")
+        != authorization.get("final_evaluation_commitment_sha256")
+    ):
+        raise TrainingGateError("terminal release packet commitment identity drifted")
+    return packet
 
 
 @dataclass(frozen=True)
@@ -423,6 +527,7 @@ def validate_terminal_131k_training_gate(
         or authorization.get("final_evaluation_commitment_sha256") != commitment_hash
     ):
         raise TrainingGateError("terminal gate lacks the finalized evaluation commitment")
+    release_packet = validate_terminal_probe_release_binding(authorization)
     publication = resolve_terminal_131k_training_publication(
         authorization,
         stage_a_publication_root=stage_a_publication_root,
@@ -438,6 +543,10 @@ def validate_terminal_131k_training_gate(
         "publication": publication,
         "final_evaluation_commitment_sha256": commitment_hash,
         "terminal_preregistration_hash": frozen["canonical_hash"],
+        "terminal_probe_release_packet": release_packet,
+        "terminal_probe_release_packet_sha256": authorization[
+            "terminal_probe_release_review"
+        ]["sha256"],
     }
 
 
@@ -549,6 +658,8 @@ def run_authorized_131k_probe(
             == publication.combined_manifest_sha256
             and preparation.get("model_configuration_hash")
             == model_configuration_hash(model)
+            and preparation.get("terminal_probe_release_packet_sha256")
+            == gate["terminal_probe_release_packet_sha256"]
         ):
             raise TrainingGateError("terminal rung preparation identity mismatch")
         input_standardizer, target_standardizer = _load_standardizers(preparation)
@@ -575,6 +686,9 @@ def run_authorized_131k_probe(
             ),
             "final_evaluation_commitment_sha256": gate[
                 "final_evaluation_commitment_sha256"
+            ],
+            "terminal_probe_release_packet_sha256": gate[
+                "terminal_probe_release_packet_sha256"
             ],
             "model_configuration_hash": model_configuration_hash(model),
             "input_standardizer": asdict(input_standardizer),
@@ -614,6 +728,9 @@ def run_authorized_131k_probe(
         "terminal_publication_validated": True,
         "combined_manifest_sha256": publication.combined_manifest_sha256,
         "immutable_wheel_sha256": artifacts["wheel_sha256"],
+        "terminal_probe_release_packet_sha256": gate[
+            "terminal_probe_release_packet_sha256"
+        ],
         "member_count": len(train_ids),
         "member_ids_sha256": membership_hash(train_ids),
         "member_ids": list(train_ids),
@@ -718,6 +835,9 @@ def run_authorized_131k_probe(
         "training": training_summary,
         "development": core_summary,
         "development_tail": tail_summary,
+        "terminal_probe_release_packet_sha256": gate[
+            "terminal_probe_release_packet_sha256"
+        ],
         "architecture_selection_authorized": False,
         "calibration_accessed": False,
         "final_evaluation_accessed": False,
@@ -843,6 +963,9 @@ def evaluate_retained_65k_on_terminal_tail(
         "seed": seed,
         "checkpoint_sha256": _sha256_file(checkpoint_path),
         "checkpoint_identity": identity,
+        "terminal_probe_release_packet_sha256": gate[
+            "terminal_probe_release_packet_sha256"
+        ],
         "development_tail": summary,
         "checkpoint_retrained": False,
         "architecture_selection_authorized": False,
