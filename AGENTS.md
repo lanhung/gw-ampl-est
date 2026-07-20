@@ -975,6 +975,11 @@ the separately nontraining 512-case development-tail pool. The final pool stays
 sealed and unchanged at 20,480 cases. This software authorizes no materialization,
 unsealing, checkpoint access, statistic, fit, real noise or GWOSC/GWTC access.
 
+The terminal materialization-adapter implementation checkpoint is
+`45d05287fbd9a8b7f9bc1999b749be5c521d7931`; its exact wheel SHA-256 is
+`bc5d3cd2fd6f898b08590be7f348dc4970edb7fe5f23f4422ffc29185336f4cd`.
+It is not an execution identity.
+
 ## Scientific integrity
 
 - Never fabricate results, citations, completed runs or calibration.

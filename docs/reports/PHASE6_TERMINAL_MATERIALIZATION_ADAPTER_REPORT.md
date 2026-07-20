@@ -39,6 +39,10 @@ remain separate published references, and the final 20,480 cases remain sealed.
 - Python script compilation: passed;
 - sdist and wheel build: passed.
 
+The frozen implementation commit is
+`45d05287fbd9a8b7f9bc1999b749be5c521d7931`; the exact wheel SHA-256 is
+`bc5d3cd2fd6f898b08590be7f348dc4970edb7fe5f23f4422ffc29185336f4cd`.
+
 No official Phase 6/7 identity was created. No active staging path, publication,
 checkpoint, calibration/SBC system or final case was opened.
 

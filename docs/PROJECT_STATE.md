@@ -544,3 +544,5 @@ decision hashes. Calibration/SBC will prove disjointness against exactly
 unchanged 20,480 sealed cases. Materialization-focused tests passed 27 cases;
 the full suite passed 388 with seven optional skips, and Ruff, mypy, script
 compilation and build passed. No scientific record or identity was created.
+The frozen implementation commit is `45d05287fbd9a8b7f9bc1999b749be5c521d7931`
+and its exact wheel SHA-256 is `bc5d3cd2fd6f898b08590be7f348dc4970edb7fe5f23f4422ffc29185336f4cd`.
