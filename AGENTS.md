@@ -821,6 +821,43 @@ must never deserialize or write the legacy checkpoint, open v2 final data, or
 be called a posterior, calibrated result, independent test or matched H1/L1/V1
 competitor. Current authorization permits synthetic fixtures only.
 
+Human review accepted the corrected 65k data-limited result and explicitly
+approved the prospective terminal-scale preregistration `1.2.0-rc.1` at:
+
+`configs/statistics/terminal_131k_preregistration.yaml`
+
+Its canonical hash is:
+
+`77ff5b6b45b886657e90023c50ae002afffb077db594c80665166d537fd2346a`
+
+The contract retains the corrected 65,536-system publication as an immutable
+strict subset, freezes exactly 65,536 additional direct-target training
+systems and caps the terminal training rung at 131,072. It also freezes a
+separate 512-system development-only tail pool with exactly 128 systems in
+each of the four inherited priority strata. That pool must be group-disjoint
+from all train, validation, calibration, SBC, final and engineering artifacts
+and may never be used for training, architecture selection, calibration or a
+final claim.
+
+The future 65k-to-131k comparison uses the unchanged 6,144 core validation
+systems for its paired NLP decision. Raw coverage and EM-cell coverage remain
+mandatory development reports but are nonblocking for the terminal resource-
+cap lock; calibrated claims remain owned by the separately frozen calibration
+and SBC gates. The exact terminal outcome must be either
+`lock_train_131k_saturated` or
+`lock_train_131k_resource_capped_data_limited`. Both stop at 131,072 and may
+only support a later separately authorized architecture review. No extension
+above 131,072 is authorized.
+
+The current authorization is design-only through:
+
+`configs/execution/phase4_terminal_131k_preregistration_authorization.yaml`
+
+It authorizes no pair generation, tail materialization, optimizer,
+architecture fit, calibration, SBC, final evaluation, real noise or
+GWOSC/GWTC access. A separate exact release and resource gate is required
+before any new identity or output may be created.
+
 ## Scientific integrity
 
 - Never fabricate results, citations, completed runs or calibration.

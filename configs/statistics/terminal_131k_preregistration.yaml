@@ -1,0 +1,218 @@
+preregistration_version: "1.2.0-rc.1"
+status: design_frozen_execution_disabled
+scope: terminal_training_scale_extension_and_development_tail_only
+
+human_authorization:
+  path: configs/execution/phase4_terminal_131k_preregistration_authorization.yaml
+  base_main_commit: "3dc8edd84a313b9982a7b0e2f2c09df9ea9abb4a"
+
+parent_contracts:
+  adaptive_scientific_production:
+    version: "1.1.0-rc.3"
+    path: configs/statistics/adaptive_scientific_production_preregistration.yaml
+    canonical_hash: "6082475631539d3069edacc52f41b37fb8fe725ccd7c6bc9980cc3008795a927"
+  direct_target_stage_a:
+    version: "1.1.0-rc.4"
+    path: configs/statistics/direct_target_stage_a_preregistration.yaml
+    canonical_hash: "5aeaac395463bd073c44ead4ff4c5c729b5a2d4b4f1840c0825a53b30ab1bc98"
+  waveform_numerical_validity:
+    version: "1.1.1-rc.1"
+    path: configs/statistics/waveform_numerical_validity_preregistration.yaml
+    canonical_hash: "7fca209de9f06e98da1c5a96ae0f4fc6daec5d2f0c2339a718e1f899bb915b69"
+
+triggering_terminal_evidence:
+  report: docs/reports/PHASE4_CORRECTED_65K_PROBE_CLOSEOUT_REPORT.md
+  decision_path: results/phase4/corrected_probe_65k/learning_curve_decision.json
+  decision_sha256: "90c238a0d85d941c9e90a68e8a215a8d9025f57ffe7757ff89dd14c267f6d72f"
+  decision: stop_data_limited_and_new_preregistration
+  paired_nlp_improvement_nat_per_target_dimension: 0.20143701225040583
+  paired_nlp_95_interval: [0.19149779212277482, 0.21178807538101158]
+  final_evaluation_accessed: false
+  calibration_accessed: false
+
+scientific_invariants:
+  estimand: inherit_rc4
+  evaluation_target: balanced_literature_informed_benchmark_v1
+  train_proposal: direct_evaluation_generative_distribution_v1
+  proposal_equals_evaluation: true
+  log_importance_weight: 0.0
+  importance_weight: 1.0
+  selected_population_conditioning: inherit_rc4
+  waveform_and_psd_contract: inherit_rc4_and_waveform_numerical_validity_rc1
+  observation_and_em_cell_contract: inherit_rc4
+  model_family_and_training_objective: unchanged_mask_aware_conditional_nsf
+  core_validation_publication: unchanged_6144_system_stage_a_validation
+  calibration_sbc_and_final_contracts: unchanged_and_separately_gated
+
+terminal_training_ladder:
+  independent_sample_unit: accepted_physical_system
+  corrected_train_65k:
+    accepted_count: 65536
+    manifest_sha256: "da8aaa8d86afb4d93156191976b420bfc7bbc7dfe0fdc6c6f627515d804a7379"
+    status: immutable_existing_strict_subset
+  train_131k_increment:
+    split: train
+    root_seed: 2026071404
+    attempt_stream_namespace: phase4-terminal-131k-train-direct-target-v1
+    id_prefix: phase4-terminal-131k-train
+    accepted_count: 65536
+    shard_count: 512
+    accepted_pairs_per_shard: 128
+    proposal_mode: evaluation_target_direct
+    waveform_numerical_validity_filter: inherit_1.1.1-rc.1
+  train_131k_terminal:
+    accepted_count: 131072
+    composition: corrected_train_65k_plus_train_131k_increment
+    strict_nested_membership_required: true
+    all_group_ids_unique_across_components: true
+    corrected_train_65k_membership_must_not_change: true
+  extension_above_131072:
+    authorized: false
+    automatic: false
+    action: prohibited_without_new_human_preregistration
+
+development_tail_pool:
+  role: development_only_tail_diagnostic_for_terminal_scale_review
+  accepted_count: 512
+  shard_count: 4
+  accepted_pairs_per_shard: 128
+  root_seed: 2026071405
+  seed_domain: phase4_terminal_131k_development_tail_v1
+  attempt_stream_namespace: phase4-terminal-131k-development-tail-attempts-v1
+  id_prefix: phase4-terminal-131k-development-tail
+  proposal_mode: evaluation_target_direct_then_priority_tail_condition
+  proposal_distribution_id: balanced_tail_development_diagnostic_rc5_v1
+  evaluation_distribution_id: balanced_tail_development_diagnostic_rc5_v1
+  proposal_equals_evaluation_within_declared_conditional_stratum: true
+  log_importance_weight: 0.0
+  importance_weight: 1.0
+  priority_assignment: first_matching_stratum
+  strata:
+    - id: high_absolute_magnification
+      accepted_count: 128
+      condition: max_selected_abs_mu_greater_equal_20
+    - id: extreme_relative_magnification
+      accepted_count: 128
+      condition: not_prior_and_min_over_max_selected_abs_mu_less_equal_0.10
+    - id: second_image_near_threshold
+      accepted_count: 128
+      condition: not_prior_and_secondary_network_snr_in_half_open_interval_[10,12)
+    - id: extreme_profile_or_environment
+      accepted_count: 128
+      condition: not_prior_and_abs_kappa_ext_greater_equal_0.10_or_slope_outside_1.75_to_2.40
+  group_disjoint_from:
+    - all_training_rungs
+    - core_validation
+    - calibration_fit
+    - sbc_diagnostic
+    - every_final_evaluation_split
+    - phase3a_qualification
+    - proposal_ab_engineering_artifacts
+  final_evaluation_ids_or_seeds_reused: false
+  training_use_authorized: false
+  calibration_use_authorized: false
+  architecture_selection_use_authorized: false
+  allowed_uses:
+    - terminal_learning_curve_tail_diagnostics
+    - claim_scope_planning_before_final_unsealing
+
+terminal_probe:
+  rungs: [corrected_train_65k, train_131k_terminal]
+  model: inherit_frozen_10_transform_width_256_probe
+  seeds: [0, 1, 2]
+  train_from_scratch_at_131k: true
+  optimizer_epoch_early_stopping_and_effective_batch: unchanged
+  core_validation_cases: 6144
+  same_core_validation_cases_for_both_rungs: true
+  evaluate_retained_65k_and_new_131k_checkpoints_on_same_development_tail_pool: true
+  posthoc_calibration_during_scale_selection: false
+  best_seed_selection_forbidden: true
+
+terminal_comparison:
+  comparison: corrected_train_65k_to_train_131k_terminal
+  paired_bootstrap:
+    resampling_unit: core_validation_physical_system_id
+    replicates: 10000
+    confidence_level: 0.95
+    statistic: mean_nlp_improvement_nat_per_target_dimension
+    deterministic_seed_domain: adaptive_terminal_65k_to_131k_nlp_bootstrap_v1
+  saturation_criteria:
+    nlp_improvement_ci_upper_max_nat_per_target_dimension: 0.01
+    median_crps_relative_improvement_max: 0.01
+    all_three_seed_nlp_and_crps_point_improvements_below_threshold: true
+    require_all: true
+  required_nonblocking_diagnostics:
+    - raw_marginal_and_joint_coverage
+    - all_em_cell_raw_coverage
+    - em_cell_coverage_degradation
+    - all_four_development_tail_stratum_nlp_and_crps
+    - interval_width
+  raw_uncalibrated_coverage_may_block_terminal_size_lock: false
+  rationale_for_nonblocking_raw_coverage: frozen_post_lock_split_conformal_and_independent_sbc_own_coverage_claims
+  development_tail_minimum_cases_per_stratum: 128
+  development_tail_completion_required_before_decision: true
+  final_evaluation_may_affect_decision: false
+  calibration_or_sbc_may_affect_decision: false
+
+terminal_outcomes:
+  saturation_passes:
+    decision: lock_train_131k_saturated
+    architecture_selection_review_allowed: true
+  saturation_does_not_pass:
+    decision: lock_train_131k_resource_capped_data_limited
+    architecture_selection_review_allowed: true
+    mandatory_reporting_label: terminal_training_scale_remains_data_limited
+    automatic_data_extension: false
+  both_outcomes:
+    selected_training_count: 131072
+    extension_above_131072_authorized: false
+    all_three_probe_seeds_retained: true
+    no_best_seed_selection: true
+
+post_lock_architecture_contract:
+  inherit_existing_grid: true
+  flow_transforms: [6, 10]
+  conditioner_widths: [128, 256]
+  seeds: [0, 1, 2]
+  maximum_architecture_results: 12
+  reuse_131k_probe_fits_for_10_transform_width_256: true
+  maximum_additional_fits_after_terminal_lock: 9
+  separate_execution_authorization_required: true
+
+resource_projection:
+  basis: measured_stage_b_linear_projection_and_65k_closeout_free_space
+  measured_stage_b_accepted_count: 32768
+  measured_stage_b_publication_bytes: 39441798884
+  measured_stage_b_elapsed_hours: 32.725
+  free_bytes_at_65k_closeout: 221613719552
+  projected_train_increment_publication_bytes: 78883597768
+  projected_train_increment_elapsed_hours: 65.45
+  inherited_active_staging_and_reserve_bytes: 22096634608
+  projected_train_increment_peak_bytes: 100980232376
+  projected_post_peak_free_bytes_before_tail: 120633487176
+  projected_development_tail_publication_bytes: 616278108
+  minimum_post_peak_free_bytes: 100000000000
+  exact_prelaunch_remeasurement_required: true
+  projection_is_not_execution_evidence: true
+
+execution:
+  train_increment_materialization_enabled: false
+  development_tail_materialization_enabled: false
+  train_131k_probe_enabled: false
+  architecture_selection_enabled: false
+  calibration_enabled: false
+  sbc_enabled: false
+  final_evaluation_enabled: false
+  real_noise_enabled: false
+  gwosc_gwtc_access_enabled: false
+
+hard_prohibitions:
+  - reinterpret_65k_as_saturated
+  - modify_or_delete_existing_65k_evidence
+  - train_on_development_tail
+  - reuse_final_evaluation_ids_or_seeds
+  - use_raw_uncalibrated_coverage_as_a_post_result_65k_lock
+  - automatic_extension_above_131072
+  - select_best_seed
+  - open_calibration_sbc_or_final_data_for_scale_selection
+  - access_gwosc_or_gwtc_without_separate_authorization

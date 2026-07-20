@@ -1122,3 +1122,26 @@ also remains non-executable because its gate requires a locked training size.
 A new versioned scientific preregistration must decide the next data scale or a
 narrower scientific scope without consulting final evaluation. Calibration,
 SBC, final evaluation, real noise and GWOSC/GWTC remain closed.
+
+## D095 — Use one terminal 131k resource cap and an independent development-tail pool
+
+Human review accepted a prospective `1.2.0-rc.1` response to the successful
+65k data-limited stop. The corrected 65,536 systems remain an immutable strict
+subset and a future exact gate may add 65,536 direct-target systems. The new
+terminal size is 131,072; automatic extension above it is prohibited.
+
+The fixed 6,144 validation cases contain only 40 extreme-relative-
+magnification examples, so more training data alone cannot satisfy the
+inherited 128-case development-tail minimum. A new group-disjoint 512-system
+development-only pool therefore contains exactly 128 systems in each frozen
+priority tail stratum. It cannot reuse final-evaluation identities or be used
+for training, architecture selection, calibration or final claims.
+
+The prospective 65k-to-131k saturation label remains based on paired core-
+validation NLP, CRPS and three-seed agreement. Raw coverage and EM-cell
+coverage remain mandatory diagnostics but no longer block a terminal
+resource-cap lock; calibrated claims remain owned by the already frozen
+split-conformal and independent SBC stages. If saturation fails, the project
+must report `lock_train_131k_resource_capped_data_limited` rather than pretend
+convergence. Either honest terminal label permits later architecture review,
+but neither permits another data rung.
