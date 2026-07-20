@@ -31,7 +31,11 @@ environment.
 - full local suite: 405 passed, seven optional dependency skips;
 - maintained-scope Ruff: passed;
 - mypy: passed for 66 source files;
-- package build and script compilation: passed.
+- package build and script compilation: passed;
+- implementation commit:
+  `099c5762be9c72f7ded420c64f456db885ec37e5`;
+- candidate exact wheel SHA-256:
+  `93b541c30e5df571bbbc5b07bef423665814e510a13d0d0595e2a3de2d0e83d7`.
 
 ## Remaining gate
 

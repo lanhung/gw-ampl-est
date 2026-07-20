@@ -1014,6 +1014,12 @@ model configuration and final-evaluation commitment. Its only successful
 status is readiness for delegated authorization review; it may not create the
 authorization or open a publication.
 
+The terminal probe release-packet implementation checkpoint is
+`099c5762be9c72f7ded420c64f456db885ec37e5`; its exact wheel SHA-256 is
+`93b541c30e5df571bbbc5b07bef423665814e510a13d0d0595e2a3de2d0e83d7`.
+This is candidate software evidence only until the exact wheel passes the
+post-publication AutoDL test contract.
+
 ## Scientific integrity
 
 - Never fabricate results, citations, completed runs or calibration.
