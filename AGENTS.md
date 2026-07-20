@@ -997,6 +997,15 @@ The terminal analysis-adapter implementation checkpoint is
 `0ae3da4bbb96312b1347babe03ed95cfa45950966c12959e921e78abf7981fd7`.
 It is implementation evidence only and does not authorize execution.
 
+The active terminal runner already continues automatically from the 512-shard
+train increment through all four development-tail namespaces, cross-component
+validation and atomic combined publication. A separate read-only closeout
+command is implemented at `scripts/phase4/closeout_terminal_131k.py`. It binds
+the exact worker-32 result and, by default, independently recomputes both large
+publication-tree hashes and the post-publication free-space gate. Its software
+implementation does not authorize the terminal optimizer or any downstream
+scientific execution.
+
 ## Scientific integrity
 
 - Never fabricate results, citations, completed runs or calibration.

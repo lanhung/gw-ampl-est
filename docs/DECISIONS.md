@@ -1267,3 +1267,17 @@ does not use the 512-case development-tail pool, calibration, SBC or final data.
 This preserves its role as a selected-prior simulation reference while keeping
 the independent tail pool available only for the preregistered 65k-to-131k
 development comparison.
+
+## D103 — Independently close out the terminal atomic publication
+
+The official terminal runner validates every namespace before publication and
+writes the final execution result only after train, tail and combined parents
+are atomic. Acceptance still requires a second read-only closeout path. That
+path must bind the generator, worker-32 scheduler, configuration, identities,
+counts, unit weights and closed downstream flags through the typed publication
+resolver. It must also recompute the train and development-tail tree hashes and
+byte counts rather than copying the runner's values.
+
+The large checksum replay is intentionally deferred until the atomic parents
+exist. A synthetic-only skip option may test control flow but cannot support
+publication acceptance or a later probe-training authorization.
