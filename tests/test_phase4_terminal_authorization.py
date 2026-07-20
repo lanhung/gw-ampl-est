@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import shutil
 from pathlib import Path
 
 import pytest
@@ -19,8 +20,21 @@ def _write_json(path: Path, value: object) -> None:
     path.write_text(json.dumps(value, sort_keys=True) + "\n", encoding="utf-8")
 
 
-def _packet_and_review(tmp_path: Path) -> tuple[Path, Path]:
-    closeout_path = tmp_path / "closeout.json"
+def _fixture_root(tmp_path: Path) -> Path:
+    for relative in (
+        "configs/data/phase4_terminal_131k.yaml",
+        "configs/statistics/terminal_131k_preregistration.yaml",
+        "results/phase4/final_evaluation_commitment.json",
+    ):
+        destination = tmp_path / relative
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(ROOT / relative, destination)
+    return tmp_path
+
+
+def _packet_and_review(tmp_path: Path) -> tuple[Path, Path, Path]:
+    root = _fixture_root(tmp_path)
+    closeout_path = root / "results/phase4/terminal_probe_closeout.json"
     closeout = {
         "status": "terminal_131k_independent_closeout_passed",
         "new_train_accepted_count": 65536,
@@ -36,7 +50,7 @@ def _packet_and_review(tmp_path: Path) -> tuple[Path, Path]:
         "tree_evidence": {"recomputed": True},
     }
     _write_json(closeout_path, closeout)
-    packet_path = tmp_path / "packet.json"
+    packet_path = root / "results/phase4/terminal_probe_release_packet.json"
     packet = {
         "status": "ready_for_delegated_terminal_probe_authorization_review",
         "authorization_created": False,
@@ -49,7 +63,7 @@ def _packet_and_review(tmp_path: Path) -> tuple[Path, Path]:
         "final_evaluation_authorized": False,
         "extension_above_131072_authorized": False,
         "gwosc_gwtc_access_authorized": False,
-        "closeout_result_path": str(closeout_path),
+        "closeout_result_path": "results/phase4/terminal_probe_closeout.json",
         "closeout_result_sha256": hashlib.sha256(
             closeout_path.read_bytes()
         ).hexdigest(),
@@ -84,7 +98,7 @@ def _packet_and_review(tmp_path: Path) -> tuple[Path, Path]:
         "final_evaluation_commitment_sha256": "9" * 64,
     }
     _write_json(packet_path, packet)
-    review_path = tmp_path / "review.json"
+    review_path = root / "results/phase4/terminal_probe_delegated_review.json"
     review = {
         "status": "delegated_terminal_probe_authorization_approved",
         "reviewed_by": "codex_as_delegated_scientific_and_engineering_reviewer",
@@ -117,18 +131,18 @@ def _packet_and_review(tmp_path: Path) -> tuple[Path, Path]:
         },
     }
     _write_json(review_path, review)
-    return packet_path, review_path
+    return root, packet_path, review_path
 
 
 def _build(tmp_path: Path) -> dict[str, object]:
-    packet, review = _packet_and_review(tmp_path)
+    root, packet, review = _packet_and_review(tmp_path)
     return dict(
         build_terminal_probe_authorization(
-            ROOT,
+            root,
             release_packet_path=packet,
             delegated_review_path=review,
             authorization_output_path=(
-                ROOT / "configs/execution/future_terminal_probe_fixture.yaml"
+                root / "configs/execution/future_terminal_probe_fixture.yaml"
             ),
             retained_65k_output_root=Path(
                 "/root/autodl-tmp/lensing-4/training/retained-65k"
@@ -161,7 +175,7 @@ def test_builder_requires_separate_review_and_closes_downstream(tmp_path: Path) 
 def test_builder_fails_closed_on_review_or_evidence_drift(
     tmp_path: Path, drift: str
 ) -> None:
-    packet_path, review_path = _packet_and_review(tmp_path)
+    root, packet_path, review_path = _packet_and_review(tmp_path)
     review = json.loads(review_path.read_text(encoding="utf-8"))
     if drift == "packet":
         review["reviewed_release_packet_sha256"] = "0" * 64
@@ -178,7 +192,7 @@ def test_builder_fails_closed_on_review_or_evidence_drift(
     elif drift == "extra":
         review["closed_boundaries"]["unregistered_future_phase_authorized"] = False
     else:
-        closeout_path = tmp_path / "closeout.json"
+        closeout_path = root / "results/phase4/terminal_probe_closeout.json"
         closeout = json.loads(closeout_path.read_text(encoding="utf-8"))
         closeout["logical_train_accepted_count"] = 131071
         _write_json(closeout_path, closeout)
@@ -193,11 +207,11 @@ def test_builder_fails_closed_on_review_or_evidence_drift(
     _write_json(review_path, review)
     with pytest.raises(TrainingGateError):
         build_terminal_probe_authorization(
-            ROOT,
+            root,
             release_packet_path=packet_path,
             delegated_review_path=review_path,
             authorization_output_path=(
-                ROOT / "configs/execution/future_terminal_probe_fixture.yaml"
+                root / "configs/execution/future_terminal_probe_fixture.yaml"
             ),
             retained_65k_output_root=Path(
                 "/root/autodl-tmp/lensing-4/training/retained-65k"

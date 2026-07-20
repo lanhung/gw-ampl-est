@@ -117,7 +117,8 @@ def _release_packet() -> dict[str, object]:
 def _release_authorization(
     tmp_path: Path, packet: dict[str, object]
 ) -> dict[str, object]:
-    packet_path = tmp_path / "terminal-probe-release.json"
+    packet_path = tmp_path / "results/phase4/terminal-probe-release.json"
+    packet_path.parent.mkdir(parents=True, exist_ok=True)
     packet_path.write_text(json.dumps(packet, sort_keys=True) + "\n", encoding="utf-8")
     training = packet["immutable_training"]
     publication = packet["publication"]
@@ -125,7 +126,7 @@ def _release_authorization(
     assert isinstance(publication, dict)
     return {
         "terminal_probe_release_review": {
-            "path": str(packet_path),
+            "path": "results/phase4/terminal-probe-release.json",
             "sha256": hashlib.sha256(packet_path.read_bytes()).hexdigest(),
             "delegated_review_status": (
                 "accepted_for_exact_terminal_probe_authorization"
@@ -142,7 +143,7 @@ def test_terminal_probe_release_packet_is_hash_and_identity_bound(
 ) -> None:
     packet = _release_packet()
     authorization = _release_authorization(tmp_path, packet)
-    assert validate_terminal_probe_release_binding(authorization)["status"] == (
+    assert validate_terminal_probe_release_binding(tmp_path, authorization)["status"] == (
         "ready_for_delegated_terminal_probe_authorization_review"
     )
 
@@ -173,4 +174,16 @@ def test_terminal_probe_release_binding_fails_closed(
             "delegated_review_status"
         ] = "pending"
     with pytest.raises(TrainingGateError, match="release|packet|CUDA"):
-        validate_terminal_probe_release_binding(authorization)
+        validate_terminal_probe_release_binding(tmp_path, authorization)
+
+
+def test_terminal_probe_release_binding_rejects_host_absolute_packet_path(
+    tmp_path: Path,
+) -> None:
+    packet = _release_packet()
+    authorization = _release_authorization(tmp_path, packet)
+    authorization["terminal_probe_release_review"]["path"] = str(
+        tmp_path / "results/phase4/terminal-probe-release.json"
+    )
+    with pytest.raises(TrainingGateError, match="repository-relative"):
+        validate_terminal_probe_release_binding(tmp_path, authorization)

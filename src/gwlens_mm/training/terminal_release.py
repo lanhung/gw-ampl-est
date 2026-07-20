@@ -105,7 +105,19 @@ def prepare_terminal_probe_review_packet(
 ) -> Mapping[str, Any]:
     """Bind every exact pre-authorization identity without opening data."""
 
-    closeout = _validate_closeout(_load_json(closeout_result_path))
+    root_resolved = root.resolve()
+    closeout_path = closeout_result_path.resolve()
+    try:
+        closeout_relative = closeout_path.relative_to(root_resolved)
+    except ValueError as error:
+        raise TrainingGateError(
+            "terminal closeout evidence must remain inside repository"
+        ) from error
+    if closeout_relative.parts[:2] != ("results", "phase4"):
+        raise TrainingGateError(
+            "terminal closeout evidence must remain under results/phase4"
+        )
+    closeout = _validate_closeout(_load_json(closeout_path))
     if len(training_commit) != 40 or any(
         char not in "0123456789abcdef" for char in training_commit
     ):
@@ -157,8 +169,8 @@ def prepare_terminal_probe_review_packet(
         "status": "ready_for_delegated_terminal_probe_authorization_review",
         "authorization_created": False,
         "optimizer_execution_authorized": False,
-        "closeout_result_path": str(closeout_result_path),
-        "closeout_result_sha256": _sha256(closeout_result_path),
+        "closeout_result_path": str(closeout_relative),
+        "closeout_result_sha256": _sha256(closeout_path),
         "terminal_preregistration": {
             "path": TERMINAL_PREREGISTRATION_PATH,
             "canonical_hash": TERMINAL_PREREGISTRATION_HASH,

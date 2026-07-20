@@ -93,9 +93,24 @@ def build_terminal_probe_authorization(
 ) -> Mapping[str, Any]:
     """Create exact authorization content; never infer delegated approval."""
 
+    root_resolved = root.resolve()
     packet_path = release_packet_path.resolve()
     review_path = delegated_review_path.resolve()
     output_path = authorization_output_path.resolve()
+    try:
+        packet_relative = packet_path.relative_to(root_resolved)
+        review_relative = review_path.relative_to(root_resolved)
+    except ValueError as error:
+        raise TrainingGateError(
+            "terminal release packet and review must remain inside repository"
+        ) from error
+    if (
+        packet_relative.parts[:2] != ("results", "phase4")
+        or review_relative.parts[:2] != ("results", "phase4")
+    ):
+        raise TrainingGateError(
+            "terminal release packet and review must remain under results/phase4"
+        )
     packet_hash = _sha256(packet_path)
     packet = _load_json(packet_path)
     review = _validate_review(_load_json(review_path), packet_sha256=packet_hash)
@@ -133,7 +148,18 @@ def build_terminal_probe_authorization(
     ):
         raise TrainingGateError("terminal delegated review output identities changed")
 
-    closeout_path = Path(str(packet.get("closeout_result_path", ""))).resolve()
+    closeout_relative = Path(str(packet.get("closeout_result_path", "")))
+    if (
+        closeout_relative.is_absolute()
+        or ".." in closeout_relative.parts
+        or closeout_relative.parts[:2] != ("results", "phase4")
+    ):
+        raise TrainingGateError(
+            "terminal packet closeout evidence path must be repository-relative"
+        )
+    closeout_path = (root_resolved / closeout_relative).resolve()
+    if not closeout_path.is_relative_to(root_resolved):
+        raise TrainingGateError("terminal packet closeout evidence escaped repository")
     if (
         not closeout_path.is_file()
         or _sha256(closeout_path) != packet.get("closeout_result_sha256")
@@ -191,13 +217,13 @@ def build_terminal_probe_authorization(
         "authorized_by": str(review["reviewed_by"]),
         "authorization_date": str(review.get("review_date", "")),
         "authorization_basis": {
-            "delegated_review_path": str(review_path),
+            "delegated_review_path": str(review_relative),
             "delegated_review_sha256": _sha256(review_path),
             "release_packet_status": TERMINAL_RELEASE_REVIEW_STATUS,
             "independent_closeout_status": closeout["status"],
         },
         "terminal_probe_release_review": {
-            "path": str(packet_path),
+            "path": str(packet_relative),
             "sha256": packet_hash,
             "delegated_review_status": TERMINAL_RELEASE_REVIEW_ACCEPTANCE,
         },
@@ -292,5 +318,5 @@ def build_terminal_probe_authorization(
         ],
         "stop_after_terminal_learning_curve_decision": True,
     }
-    validate_terminal_probe_release_binding(authorization)
+    validate_terminal_probe_release_binding(root, authorization)
     return authorization
