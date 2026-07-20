@@ -554,3 +554,7 @@ architecture, optimizer and seeds; the reference bank uses all 131,072 train
 systems but never the 512 development-tail cases. Seventeen focused and 392
 full tests passed with seven optional skips; Ruff and mypy passed. Execution,
 checkpoint and query access remain closed.
+
+The frozen terminal analysis-adapter implementation is
+`c5cd67d0537dad81797d2a77913a5f3bbd142f00`; its exact wheel SHA-256 is
+`0ae3da4bbb96312b1347babe03ed95cfa45950966c12959e921e78abf7981fd7`.

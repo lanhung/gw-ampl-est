@@ -992,6 +992,11 @@ tail cases enter neither training nor the reference bank. No scientific array,
 checkpoint, optimizer, query, final record, real noise or GWOSC/GWTC access is
 authorized by this implementation gate.
 
+The terminal analysis-adapter implementation checkpoint is
+`c5cd67d0537dad81797d2a77913a5f3bbd142f00`; its exact wheel SHA-256 is
+`0ae3da4bbb96312b1347babe03ed95cfa45950966c12959e921e78abf7981fd7`.
+It is implementation evidence only and does not authorize execution.
+
 ## Scientific integrity
 
 - Never fabricate results, citations, completed runs or calibration.

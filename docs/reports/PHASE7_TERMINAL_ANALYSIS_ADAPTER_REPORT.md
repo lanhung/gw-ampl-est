@@ -27,7 +27,12 @@ diagnostic.
 - terminal ablation/reference focused tests: 17 passed;
 - full local suite: 392 passed, seven optional dependency skips;
 - maintained-scope Ruff: passed;
-- mypy: passed for 65 source files.
+- mypy: passed for 65 source files;
+- package build: passed;
+- implementation commit:
+  `c5cd67d0537dad81797d2a77913a5f3bbd142f00`;
+- exact wheel SHA-256:
+  `0ae3da4bbb96312b1347babe03ed95cfa45950966c12959e921e78abf7981fd7`.
 
 The tests exercised both legitimate 131k terminal labels and the historical
 blocked execution paths. No scientific dataset, checkpoint, query or final case
