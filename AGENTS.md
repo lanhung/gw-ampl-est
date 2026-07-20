@@ -962,6 +962,19 @@ The terminal downstream implementation checkpoint is
 These are implementation identities only and do not activate a future exact
 scientific gate.
 
+The implementation-only boundary also includes terminal reference adapters for
+future calibration/SBC and sealed final materialization through:
+
+`configs/execution/phase6_terminal_materialization_adapter_authorization.yaml`
+
+The adapters preserve historical corrected-65k replay while requiring terminal
+mode to bind exact combined/increment/validation/development-tail hashes, a
+131,072-system lock and the twelve-result architecture decision. The future
+calibration/SBC leakage reference must include terminal train, validation and
+the separately nontraining 512-case development-tail pool. The final pool stays
+sealed and unchanged at 20,480 cases. This software authorizes no materialization,
+unsealing, checkpoint access, statistic, fit, real noise or GWOSC/GWTC access.
+
 ## Scientific integrity
 
 - Never fabricate results, citations, completed runs or calibration.

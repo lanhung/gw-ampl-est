@@ -10,8 +10,9 @@ import os
 import shutil
 import subprocess
 from concurrent.futures import ProcessPoolExecutor, as_completed
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, Mapping, Set
+from typing import Any, Dict, Mapping, Optional, Set, Tuple
 
 from gwlens_mm.config import load_yaml
 from gwlens_mm.production.calibration_sbc import (
@@ -42,16 +43,36 @@ from gwlens_mm.training.data import (
     CorrectedTrainingPublication,
     resolve_corrected_training_publication,
 )
+from gwlens_mm.training.terminal131 import (
+    Terminal131TrainingPublication,
+    resolve_terminal_131k_training_publication,
+)
 
 ROOT = Path(__file__).resolve().parents[2]
 APPROVED_REMOTE_ROOT = Path("/root/autodl-tmp/lensing-4")
 GROUP_KEYS = ("pair", "source", "lens", "system", "noise")
-REFERENCE_ROLES = {
+CORRECTED_REFERENCE_ROLES = {
     "stage_a_train_and_validation",
     "stage_b_train_extension",
     "combined_65k_base_reference",
     "waveform_correction_overlay",
 }
+TERMINAL_REFERENCE_ROLES = CORRECTED_REFERENCE_ROLES | {
+    "terminal_train_increment",
+    "terminal_131k_combined_reference",
+    "terminal_development_tail",
+}
+
+
+@dataclass(frozen=True)
+class _ResolvedTrainingReference:
+    corrected: CorrectedTrainingPublication
+    terminal: Optional[Terminal131TrainingPublication]
+    group_roots: Tuple[Path, ...]
+    excluded_ids: Tuple[str, ...]
+    locked_train_manifest_sha256: str
+    referenced_system_count: int
+    mode: str
 
 
 def _sha256(path: Path) -> str:
@@ -83,12 +104,18 @@ def _future_authorization(path: Path, config: Mapping[str, Any]) -> Dict[str, An
     implementation_commit = authorization.get("implementation_commit")
     if not isinstance(implementation_commit, str) or len(implementation_commit) != 40:
         raise ValueError("calibration/SBC implementation commit is unresolved")
+    mode = str(authorization.get("training_reference_mode", "corrected_65k"))
+    expected_roles = (
+        TERMINAL_REFERENCE_ROLES
+        if mode == "terminal_131k"
+        else CORRECTED_REFERENCE_ROLES
+    )
     references = authorization.get("published_reference_datasets")
-    if not isinstance(references, list) or len(references) != 4:
-        raise ValueError("calibration/SBC gate requires the complete corrected view")
+    if not isinstance(references, list) or len(references) != len(expected_roles):
+        raise ValueError("calibration/SBC gate requires the complete training view")
     roles = {item.get("role") for item in references if isinstance(item, dict)}
-    if roles != REFERENCE_ROLES:
-        raise ValueError("calibration/SBC corrected reference roles are incomplete")
+    if roles != expected_roles:
+        raise ValueError("calibration/SBC training reference roles are incomplete")
     for evidence_name in ("training_size_decision", "architecture_decision"):
         evidence = authorization.get(evidence_name, {})
         evidence_path = Path(str(evidence.get("path", "")))
@@ -111,15 +138,21 @@ def _bound_reference_root(reference: Mapping[str, Any]) -> Path:
     return root
 
 
-def _validate_corrected_training_reference(
+def _validate_training_reference(
     authorization: Mapping[str, Any],
-) -> CorrectedTrainingPublication:
+) -> _ResolvedTrainingReference:
     references = {
         str(item["role"]): item
         for item in authorization["published_reference_datasets"]
     }
-    if set(references) != REFERENCE_ROLES:
-        raise ValueError("calibration/SBC corrected reference set changed")
+    mode = str(authorization.get("training_reference_mode", "corrected_65k"))
+    expected_roles = (
+        TERMINAL_REFERENCE_ROLES
+        if mode == "terminal_131k"
+        else CORRECTED_REFERENCE_ROLES
+    )
+    if set(references) != expected_roles:
+        raise ValueError("calibration/SBC training reference set changed")
     roots = {role: _bound_reference_root(value) for role, value in references.items()}
     expected_manifest_hashes = {
         "stage_a_train_and_validation": STAGE_A_PARENT_MANIFEST_HASH,
@@ -156,7 +189,75 @@ def _validate_corrected_training_reference(
         or len(publication.stage_b_replacement_ids) != 3
     ):
         raise ValueError("calibration/SBC corrected logical view changed")
-    return publication
+    excluded_ids = (
+        publication.stage_a_excluded_ids + publication.stage_b_excluded_ids
+    )
+    if mode == "corrected_65k":
+        return _ResolvedTrainingReference(
+            corrected=publication,
+            terminal=None,
+            group_roots=(
+                publication.stage_a.parent_root,
+                publication.combined_base.stage_b_parent_root,
+                publication.correction_root,
+            ),
+            excluded_ids=excluded_ids,
+            locked_train_manifest_sha256=(
+                publication.corrected_combined_train_manifest_sha256
+            ),
+            referenced_system_count=71680,
+            mode=mode,
+        )
+    terminal_reference = authorization["terminal_training_reference"]
+    terminal_authorization = {
+        "corrected_65k_publication": {
+            "base_generator_commit": BASE_GENERATOR_COMMIT,
+            "base_preregistration_hash": RC4_HASH,
+            "correction_generator_commit": CORRECTION_GENERATOR_COMMIT,
+            "correction_preregistration_hash": (
+                "7fca209de9f06e98da1c5a96ae0f4fc6daec5d2f0c2339a718e1f899bb915b69"
+            ),
+            "correction_parent_manifest_sha256": CORRECTION_PARENT_MANIFEST_HASH,
+            "correction_publication_tree_sha256": CORRECTION_PUBLICATION_TREE_HASH,
+            "combined_base_manifest_sha256": COMBINED_BASE_MANIFEST_HASH,
+        },
+        "terminal_publication": {
+            "combined_manifest_sha256": terminal_reference[
+                "terminal_combined_manifest_sha256"
+            ],
+            "train_parent_manifest_sha256": terminal_reference[
+                "terminal_train_increment_parent_manifest_sha256"
+            ],
+            "development_tail_manifest_sha256": terminal_reference[
+                "development_tail_manifest_sha256"
+            ],
+        },
+    }
+    terminal = resolve_terminal_131k_training_publication(
+        terminal_authorization,
+        stage_a_publication_root=roots["stage_a_train_and_validation"],
+        stage_b_publication_root=roots["stage_b_train_extension"],
+        combined_base_publication_root=roots["combined_65k_base_reference"],
+        correction_publication_root=roots["waveform_correction_overlay"],
+        train_parent_root=roots["terminal_train_increment"],
+        combined_131k_publication_root=roots["terminal_131k_combined_reference"],
+        development_tail_parent_root=roots["terminal_development_tail"],
+    )
+    return _ResolvedTrainingReference(
+        corrected=publication,
+        terminal=terminal,
+        group_roots=(
+            publication.stage_a.parent_root,
+            publication.combined_base.stage_b_parent_root,
+            publication.correction_root,
+            terminal.train_parent_root,
+            terminal.development_tail_parent_root,
+        ),
+        excluded_ids=excluded_ids,
+        locked_train_manifest_sha256=terminal.combined_manifest_sha256,
+        referenced_system_count=137728,
+        mode=mode,
+    )
 
 
 def _verify_checkout(
@@ -264,11 +365,13 @@ def evaluate_release_gate(
         checks["psd_files"] = verify_psd_files(base["gw"]["psd_curves"])
     except Exception as error:
         blockers.append(f"calibration/SBC PSD verification failed: {error}")
-    corrected_reference = None
+    training_reference = None
     try:
-        corrected_reference = _validate_corrected_training_reference(authorization)
-        checks["corrected_combined_train_manifest_sha256"] = (
-            corrected_reference.corrected_combined_train_manifest_sha256
+        training_reference = _validate_training_reference(authorization)
+        corrected_reference = training_reference.corrected
+        checks["training_reference_mode"] = training_reference.mode
+        checks["locked_train_manifest_sha256"] = (
+            training_reference.locked_train_manifest_sha256
         )
         checks["excluded_base_system_count"] = len(
             corrected_reference.stage_a_excluded_ids
@@ -293,12 +396,31 @@ def evaluate_release_gate(
         blockers.append("calibration/SBC official parent identity already exists")
     checks["published_reference_roots"] = (
         {
-            "stage_a": str(corrected_reference.stage_a.parent_root),
-            "stage_b": str(corrected_reference.combined_base.stage_b_parent_root),
-            "combined_base": str(corrected_reference.combined_base.combined_root),
-            "correction": str(corrected_reference.correction_root),
+            "stage_a": str(training_reference.corrected.stage_a.parent_root),
+            "stage_b": str(
+                training_reference.corrected.combined_base.stage_b_parent_root
+            ),
+            "combined_base": str(
+                training_reference.corrected.combined_base.combined_root
+            ),
+            "correction": str(training_reference.corrected.correction_root),
+            "terminal_train_increment": (
+                str(training_reference.terminal.train_parent_root)
+                if training_reference.terminal is not None
+                else None
+            ),
+            "terminal_combined": (
+                str(training_reference.terminal.combined_root)
+                if training_reference.terminal is not None
+                else None
+            ),
+            "development_tail": (
+                str(training_reference.terminal.development_tail_parent_root)
+                if training_reference.terminal is not None
+                else None
+            ),
         }
-        if corrected_reference is not None
+        if training_reference is not None
         else None
     )
     status = "ready_for_official_execution" if not blockers else "blocked_preexecution"
@@ -409,7 +531,8 @@ def execute(
             raise ValueError(f"calibration/SBC release certificate {key} mismatch")
     identities = certificate["official_identities"]
     generator_commit = str(certificate["generator_commit"])
-    corrected_reference = _validate_corrected_training_reference(authorization)
+    training_reference = _validate_training_reference(authorization)
+    corrected_reference = training_reference.corrected
     parent_stage = Path(str(config["paths"]["staging_root"])) / str(
         identities["parent_run_id"]
     )
@@ -476,21 +599,14 @@ def execute(
             if all_ids[key] & identifiers[key]:
                 raise ValueError(f"cross-namespace calibration/SBC {key} leakage")
             all_ids[key].update(identifiers[key])
-    reference_roots = (
-        corrected_reference.stage_a.parent_root,
-        corrected_reference.combined_base.stage_b_parent_root,
-        corrected_reference.correction_root,
-    )
-    excluded_ids = (
-        corrected_reference.stage_a_excluded_ids
-        + corrected_reference.stage_b_excluded_ids
-    )
+    reference_roots = training_reference.group_roots
+    excluded_ids = training_reference.excluded_ids
     reference_ids = collect_published_group_identifiers(
         reference_roots,
         excluded_physical_system_ids=excluded_ids,
     )
-    if len(reference_ids["system"]) != 71680:
-        raise ValueError("corrected train plus validation reference is not exactly 71,680")
+    if len(reference_ids["system"]) != training_reference.referenced_system_count:
+        raise ValueError("training, validation and development reference count changed")
     for key in GROUP_KEYS:
         if all_ids[key] & reference_ids[key]:
             raise ValueError(f"calibration/SBC {key} leaks into train or validation")
@@ -509,8 +625,9 @@ def execute(
         "complete_shard_count": 48,
         "validations": validations,
         "group_disjoint_from_train_validation_and_each_other": True,
-        "corrected_combined_train_manifest_sha256": (
-            corrected_reference.corrected_combined_train_manifest_sha256
+        "training_reference_mode": training_reference.mode,
+        "locked_train_manifest_sha256": (
+            training_reference.locked_train_manifest_sha256
         ),
         "excluded_base_system_count": len(excluded_ids),
         "replacement_system_count": len(

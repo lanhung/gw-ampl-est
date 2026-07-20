@@ -535,3 +535,12 @@ skips, and Ruff, mypy and package build passed. No staging path, scientific
 publication, checkpoint, calibration/SBC record or final case was opened.
 The frozen implementation commit is `cfb3e92f6600975c81e7dfdc58237ebf82acce7c`
 and its exact wheel SHA-256 is `35909951c13cffbe695fe4af631d282fd58634e4f80156057a8cd107609c2b4a`.
+
+The future calibration/SBC and sealed final materialization runners now have an
+implementation-only terminal reference mode. It preserves the historical 65k
+parser, but terminal execution requires exact 131k combined/increment/tail and
+decision hashes. Calibration/SBC will prove disjointness against exactly
+137,728 train+validation+development-tail systems; final generation retains its
+unchanged 20,480 sealed cases. Materialization-focused tests passed 27 cases;
+the full suite passed 388 with seven optional skips, and Ruff, mypy, script
+compilation and build passed. No scientific record or identity was created.

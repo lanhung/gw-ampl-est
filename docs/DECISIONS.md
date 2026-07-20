@@ -1238,3 +1238,18 @@ architecture-selection contract and compact publication reference. The adapter
 does not execute a decision or open data. It exists so calibration/SBC, final
 inference, ablations and non-neural references can share one fail-closed size
 identity rather than drifting independently after the terminal lock.
+
+## D101 — Extend downstream leakage references, not frozen evaluation counts
+
+The terminal rung changes which scientific training groups must be excluded
+from later calibration/SBC and final pools; it does not change those pools'
+counts, seeds or distributions. Future release certificates therefore gain a
+`terminal_131k` reference mode while the historical corrected-65k mode remains
+available only for audit replay.
+
+Calibration/SBC leakage checks stream 131,072 train, 6,144 validation and all
+512 development-tail identifiers before publication. Final materialization
+streams the same 131,072 train groups plus its separately published validation,
+calibration and SBC references. No final case is unsealed by these checks. A
+reference mode cannot be inferred from a checkpoint; it must be explicit and
+hash-bound to the terminal size and architecture decisions.
