@@ -1006,6 +1006,14 @@ publication-tree hashes and the post-publication free-space gate. Its software
 implementation does not authorize the terminal optimizer or any downstream
 scientific execution.
 
+The post-publication handoff also has a non-authorizing release-review packet
+at `scripts/phase4/prepare_terminal_probe_release.py`. It requires the
+independent closeout, exact training commit/wheel and AutoDL wheel-test result,
+the normalized CUDA environment, at least three frozen-model GPUs, the probe
+model configuration and final-evaluation commitment. Its only successful
+status is readiness for delegated authorization review; it may not create the
+authorization or open a publication.
+
 ## Scientific integrity
 
 - Never fabricate results, citations, completed runs or calibration.

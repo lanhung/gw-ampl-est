@@ -566,3 +566,10 @@ closeout command now validates the exact result through a second read-only
 path and recomputes both publication trees by default. Seventeen focused and
 399 full tests passed with seven optional skips; Ruff, mypy and build passed.
 No active staging directory or scientific checkpoint was opened locally.
+
+A terminal probe release-review packet is also implemented. It binds the
+future closeout to an exact wheel tested non-editably on AutoDL, the normalized
+CUDA environment, three frozen-model GPUs, model configuration and finalized
+evaluation commitment. Six focused and 405 full tests passed with seven
+optional skips; Ruff, mypy and build passed. The packet cannot authorize or
+execute training.

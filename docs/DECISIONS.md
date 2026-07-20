@@ -1281,3 +1281,16 @@ byte counts rather than copying the runner's values.
 The large checksum replay is intentionally deferred until the atomic parents
 exist. A synthetic-only skip option may test control flow but cannot support
 publication acceptance or a later probe-training authorization.
+
+## D104 — Separate terminal probe review readiness from execution permission
+
+Atomic publication and independent closeout are necessary but not sufficient
+to start the terminal optimizer. A machine-readable review packet must also
+bind the exact Git commit and wheel, a non-editable AutoDL installation test,
+the normalized CUDA environment, observed three-GPU inventory, frozen probe
+model and final-evaluation commitment.
+
+The packet deliberately cannot authorize execution. It reports readiness for
+delegated review only. A later exact authorization must bind its hash, the
+training output identity and every publication root before the resolver may
+index one scientific record or start one optimizer step.
