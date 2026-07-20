@@ -937,6 +937,11 @@ selection. It may not open scientific data/checkpoints, start a fit, select an
 architecture, calibrate, unseal final evaluation or access GWOSC/GWTC. The
 historical 65k architecture path remains unchanged.
 
+The terminal architecture implementation checkpoint is
+`2689119d0526c82f8145c0424741e56a048e96df`; its exact wheel SHA-256 is
+`fc10efa29ba129f19ab3874d88a6cab4c0840045fa1ef8b5b102ca91f8c9231f`.
+It remains implementation evidence, not an execution identity.
+
 ## Scientific integrity
 
 - Never fabricate results, citations, completed runs or calibration.

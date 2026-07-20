@@ -7,6 +7,10 @@ at the future terminal 131k lock while every scientific execution flag remains
 false. The historical corrected-65k architecture implementation was not
 rewritten.
 
+The implementation checkpoint is
+`2689119d0526c82f8145c0424741e56a048e96df`; the exact built wheel SHA-256 is
+`fc10efa29ba129f19ab3874d88a6cab4c0840045fa1ef8b5b102ca91f8c9231f`.
+
 ## Terminal adapter
 
 The adapter requires one of the two preregistered terminal decisions, exact
