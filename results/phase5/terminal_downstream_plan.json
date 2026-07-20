@@ -1,0 +1,17 @@
+{
+  "ablation_training_authorized": false,
+  "allowed_terminal_decisions": [
+    "lock_train_131k_resource_capped_data_limited",
+    "lock_train_131k_saturated"
+  ],
+  "architecture_result_count": 12,
+  "calibration_sbc_materialization_authorized": false,
+  "checkpoint_inference_authorized": false,
+  "final_evaluation_materialization_authorized": false,
+  "final_evaluation_unsealing_authorized": false,
+  "gwosc_gwtc_access_authorized": false,
+  "locked_training_rung": 131072,
+  "reference_execution_authorized": false,
+  "retained_model_seed_count": 3,
+  "status": "implementation_ready_terminal_downstream_execution_closed"
+}

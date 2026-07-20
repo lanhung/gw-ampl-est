@@ -1223,3 +1223,18 @@ NLP across three seeds with parameter-count tie-break; selecting a best seed,
 consulting the 512 tail pool for architecture choice or opening final data is
 forbidden. This is software readiness only until an exact post-lock gate binds
 the scientific artifacts and environment.
+
+## D100 — Require an explicit terminal-rung binding in every downstream gate
+
+Historical Phase 6/7 score software accepted checkpoints from the originally
+reachable 32k/65k locks. Merely broadening that implicit list to 131k would let
+an old authorization accept a new scientific identity without recording the
+terminal decision. Instead, legacy authorizations remain limited to their old
+rungs, and a 131k checkpoint is valid only when the exact later authorization
+contains `selected_architecture.locked_training_rung: 131072`.
+
+A common terminal adapter owns the two valid terminal labels, twelve-result
+architecture-selection contract and compact publication reference. The adapter
+does not execute a decision or open data. It exists so calibration/SBC, final
+inference, ablations and non-neural references can share one fail-closed size
+identity rather than drifting independently after the terminal lock.

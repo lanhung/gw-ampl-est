@@ -524,3 +524,12 @@ That worker-32 preflight has now passed with no blockers and
 were observed, initial child RSS was approximately 10.1 GiB, about 51 GiB
 memory remained available and no execution-result error artifact existed.
 Atomic publication is still pending.
+
+The shared terminal downstream binding stack is also implemented under a
+synthetic-only gate. It rejects 65k labels in the terminal path, accepts only
+the two frozen 131k resource-cap outcomes, requires the exact twelve-result
+development architecture lock and prevents a 131k checkpoint from entering an
+old 32k/65k score authorization. Focused tests passed 25 cases with one optional
+Torch skip; the full suite passed 387 tests with seven optional dependency
+skips, and Ruff, mypy and package build passed. No staging path, scientific
+publication, checkpoint, calibration/SBC record or final case was opened.

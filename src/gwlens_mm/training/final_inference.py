@@ -43,6 +43,7 @@ from .runner import (
     _verified_curves,
     _verify_training_checkout,
 )
+from .terminal_downstream import checkpoint_training_rung_is_authorized
 
 STACK_AUTHORIZATION = (
     "configs/execution/phase7_final_inference_stack_authorization.yaml"
@@ -923,7 +924,7 @@ def run_authorized_final_inference(
     identity = state.get("identity", {})
     if (
         int(identity.get("seed", -1)) != seed
-        or int(identity.get("training_rung_count", -1)) not in (32768, 65536)
+        or not checkpoint_training_rung_is_authorized(identity, authorization)
         or identity.get("model_configuration_hash")
         != model_configuration_hash(model_config)
     ):

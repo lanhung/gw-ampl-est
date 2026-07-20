@@ -942,6 +942,20 @@ The terminal architecture implementation checkpoint is
 `fc10efa29ba129f19ab3874d88a6cab4c0840045fa1ef8b5b102ca91f8c9231f`.
 It remains implementation evidence, not an execution identity.
 
+The synthetic-only implementation boundary now also includes the shared
+terminal downstream binding stack through:
+
+`configs/execution/phase5_terminal_downstream_stack_authorization.yaml`
+
+It accepts only the two frozen 131k terminal labels and the exact twelve-result
+development-only architecture lock. Historical score-inference gates without
+an explicit locked-rung field remain limited to 32k/65k checkpoints; a 131k
+checkpoint requires a later authorization that explicitly binds
+`locked_training_rung: 131072`. The stack validates only small decision and
+manifest identities. It does not open active staging, scientific data,
+checkpoints, calibration/SBC, final evaluation, ablation/reference execution,
+real noise or GWOSC/GWTC.
+
 ## Scientific integrity
 
 - Never fabricate results, citations, completed runs or calibration.
