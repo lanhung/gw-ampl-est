@@ -306,6 +306,181 @@ def compare_32k_to_65k(
     return result
 
 
+def _terminal_tail_rows(
+    root: Path, *, rung: int, seed: int
+) -> Tuple[Mapping[str, str], ...]:
+    path = root / f"rung-{rung}" / f"seed-{seed}" / "development_cases.csv"
+    rows = _load_cases(path)
+    expected_groups = {
+        "high_absolute_magnification",
+        "extreme_relative_magnification",
+        "second_image_near_threshold",
+        "extreme_profile_or_environment",
+    }
+    counts = {
+        group: sum(row["tail_view"] == group for row in rows)
+        for group in expected_groups
+    }
+    if len(rows) != 512 or counts != {group: 128 for group in expected_groups}:
+        raise TrainingGateError(
+            "terminal development-tail evaluation requires exactly 128 cases "
+            "in each frozen stratum"
+        )
+    return rows
+
+
+def compare_65k_to_131k(
+    retained_65k_root: Path,
+    terminal_131k_root: Path,
+    retained_65k_tail_root: Path,
+    terminal_131k_tail_root: Path,
+    *,
+    bootstrap_replicates: int = 10000,
+    bootstrap_seed_domain: str = (
+        "adaptive_terminal_65k_to_131k_nlp_bootstrap_v1"
+    ),
+) -> Mapping[str, Any]:
+    """Apply the RC.1 terminal resource-cap decision without opening final data.
+
+    Raw coverage remains mandatory evidence but cannot veto the terminal 131k
+    lock.  The only saturation endpoints are the paired core-validation NLP and
+    CRPS improvements frozen before the terminal data were materialized.
+    """
+
+    nlp_improvements = []
+    seed_summaries: Dict[str, Any] = {}
+    all_identifiers: Optional[Tuple[str, ...]] = None
+    tail_identifiers: Optional[Tuple[str, ...]] = None
+    core_coverage: Dict[str, Any] = {}
+    tail_summaries: Dict[str, Any] = {}
+    point_conditions: list[bool] = []
+    for seed in SEEDS:
+        smaller = _load_cases(
+            retained_65k_root
+            / "rung-65536"
+            / f"seed-{seed}"
+            / "development_cases.csv"
+        )
+        larger = _load_cases(
+            terminal_131k_root
+            / "rung-131072"
+            / f"seed-{seed}"
+            / "development_cases.csv"
+        )
+        if len(smaller) != VALIDATION_CASE_COUNT or len(larger) != VALIDATION_CASE_COUNT:
+            raise TrainingGateError(
+                "terminal comparison requires exactly 6,144 core validation cases"
+            )
+        aligned = _aligned(smaller, larger)
+        identifiers = tuple(pair[0]["physical_system_id"] for pair in aligned)
+        if all_identifiers is None:
+            all_identifiers = identifiers
+        elif identifiers != all_identifiers:
+            raise TrainingGateError("terminal probe seeds used different core cases")
+        nlp_delta = np.asarray(
+            [
+                float(pair[0]["nlp_nat_per_target_dimension"])
+                - float(pair[1]["nlp_nat_per_target_dimension"])
+                for pair in aligned
+            ],
+            dtype=np.float64,
+        )
+        nlp_improvements.append(nlp_delta)
+        smaller_crps = float(np.median([float(pair[0]["crps_mean"]) for pair in aligned]))
+        larger_crps = float(np.median([float(pair[1]["crps_mean"]) for pair in aligned]))
+        if smaller_crps <= 0.0:
+            raise TrainingGateError("terminal comparison received nonpositive CRPS")
+        crps_relative = (smaller_crps - larger_crps) / smaller_crps
+        seed_summaries[str(seed)] = {
+            "mean_nlp_improvement": float(np.mean(nlp_delta)),
+            "median_crps_relative_improvement": float(crps_relative),
+            "retained_65k_coverage_errors": _coverage_errors(smaller),
+            "terminal_131k_coverage_errors": _coverage_errors(larger),
+            "retained_65k_em_cell_coverage": _em_cell_errors(smaller),
+            "terminal_131k_em_cell_coverage": _em_cell_errors(larger),
+        }
+        point_conditions.extend((float(np.mean(nlp_delta)) < 0.01, crps_relative < 0.01))
+        core_coverage[str(seed)] = {
+            "retained_65k": _coverage_errors(smaller),
+            "terminal_131k": _coverage_errors(larger),
+        }
+
+        smaller_tail = _terminal_tail_rows(
+            retained_65k_tail_root, rung=65536, seed=seed
+        )
+        larger_tail = _terminal_tail_rows(
+            terminal_131k_tail_root, rung=131072, seed=seed
+        )
+        tail_aligned = _aligned(smaller_tail, larger_tail)
+        observed_tail_ids = tuple(pair[0]["physical_system_id"] for pair in tail_aligned)
+        if tail_identifiers is None:
+            tail_identifiers = observed_tail_ids
+        elif observed_tail_ids != tail_identifiers:
+            raise TrainingGateError("terminal probe seeds used different tail cases")
+        per_stratum: Dict[str, Any] = {}
+        for stratum in sorted({row["tail_view"] for row in smaller_tail}):
+            selected = [
+                pair for pair in tail_aligned if pair[0]["tail_view"] == stratum
+            ]
+            per_stratum[stratum] = {
+                "case_count": len(selected),
+                "retained_65k_median_nlp": float(
+                    np.median(
+                        [float(pair[0]["nlp_nat_per_target_dimension"]) for pair in selected]
+                    )
+                ),
+                "terminal_131k_median_nlp": float(
+                    np.median(
+                        [float(pair[1]["nlp_nat_per_target_dimension"]) for pair in selected]
+                    )
+                ),
+                "retained_65k_median_crps": float(
+                    np.median([float(pair[0]["crps_mean"]) for pair in selected])
+                ),
+                "terminal_131k_median_crps": float(
+                    np.median([float(pair[1]["crps_mean"]) for pair in selected])
+                ),
+            }
+        tail_summaries[str(seed)] = per_stratum
+
+    assert all_identifiers is not None
+    assert tail_identifiers is not None
+    improvements = np.stack(nlp_improvements, axis=1)
+    identifier_hash = hashlib.sha256("\n".join(all_identifiers).encode()).hexdigest()
+    seed_payload = (bootstrap_seed_domain + "\0" + identifier_hash).encode()
+    bootstrap_seed = int.from_bytes(hashlib.sha256(seed_payload).digest()[:8], "big")
+    bootstrap = _paired_bootstrap(
+        improvements, replicates=bootstrap_replicates, seed=bootstrap_seed
+    )
+    saturated = bool(bootstrap["upper_95"] < 0.01 and all(point_conditions))
+    decision = (
+        "lock_train_131k_saturated"
+        if saturated
+        else "lock_train_131k_resource_capped_data_limited"
+    )
+    return {
+        "status": "terminal_learning_curve_decision_complete",
+        "comparison": "corrected_train_65k_to_train_131k_terminal",
+        "core_validation_case_count": len(all_identifiers),
+        "development_tail_case_count": len(tail_identifiers),
+        "seed_summaries": seed_summaries,
+        "paired_nlp_bootstrap": bootstrap,
+        "bootstrap_seed": bootstrap_seed,
+        "development_tail_summaries": tail_summaries,
+        "raw_coverage_diagnostics": core_coverage,
+        "raw_coverage_is_nonblocking": True,
+        "all_saturation_conditions_passed": saturated,
+        "decision": decision,
+        "selected_training_count": 131072,
+        "architecture_selection_review_allowed": True,
+        "extension_above_131072_authorized": False,
+        "all_three_probe_seeds_retained": True,
+        "best_seed_selected": False,
+        "calibration_accessed": False,
+        "final_evaluation_accessed": False,
+    }
+
+
 def write_learning_curve_decision(output_root: Path, path: Path) -> Mapping[str, Any]:
     result = compare_16k_to_32k(output_root)
     path.parent.mkdir(parents=True, exist_ok=True)

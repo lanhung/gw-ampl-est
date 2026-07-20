@@ -199,7 +199,7 @@ def _data_loader(
 
 
 def _development_loader(
-    dataset: DevelopmentStageADataset,
+    dataset: Any,
     *,
     batch_size: int,
     seed: int,

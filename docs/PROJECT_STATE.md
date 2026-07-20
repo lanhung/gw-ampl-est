@@ -468,6 +468,20 @@ uses the same five-exclusion/five-replacement logical view as the active probe.
 No Phase 6 identity or pair has been created; materialization, checkpoint access,
 calibration fitting and SBC execution remain closed.
 
+The terminal 131k materialization is active under its exact 32-worker scheduler.
+The first complete atomic shard has now appeared while all 32 workers remain
+alive; no execution-result or failure artifact exists. At that observation,
+about 50.9 GiB memory and 216.7 GB disk remained available. This proves forward
+atomic progress but is not publication evidence.
+
+In parallel, the terminal probe execution stack is implemented under a
+synthetic-only gate. It supports the logical corrected-65k plus 65,536-system
+increment reader, exact 131,072-member identity, the three frozen probe seeds,
+evaluation of both retained 65k and new 131k checkpoints on the same four-by-128
+tail pool, and the RC.1 terminal decision. Scientific data/checkpoint access and
+optimizer execution remain closed until the materialization completes and a new
+exact training release is frozen.
+
 The future RC.7 non-neural reference core is now execution-ready at the pure
 software layer. A reader drift was corrected so metadata-only examples retain
 their exact Parquet EM-cell partition label without opening Zarr. A deterministic

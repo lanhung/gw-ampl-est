@@ -904,6 +904,22 @@ The worker-32 release certificate passed with no blockers and
 worker children and the unchanged official identities. This is active staging,
 not a completed or published result.
 
+While that immutable materialization runs, delegated engineering review
+authorizes only a synthetic-fixture implementation of the terminal probe stack
+through:
+
+`configs/execution/phase4_terminal_131k_probe_stack_authorization.yaml`
+
+The software may validate the future atomic 131k publication, build a bounded-
+memory corrected-65k-plus-increment reader, evaluate the three retained 65k
+checkpoints on the new 512-case development-tail pool, launch the frozen 131k
+probe for seeds 0/1/2 and apply the preregistered terminal comparison. It may not
+open any active staging or scientific publication, access a checkpoint, start an
+optimizer, execute a scientific decision, fit an architecture, calibrate, unseal
+final evaluation or access GWOSC/GWTC. A later exact gate must bind the completed
+publication manifests, training commit/wheel, model configuration and CUDA
+environment before any terminal scientific array may be opened.
+
 ## Scientific integrity
 
 - Never fabricate results, citations, completed runs or calibration.

@@ -1185,3 +1185,25 @@ workers fail before execution: the host has 64 logical CPUs, and consuming all
 of them would leave no headroom for the parent, storage, checksums or operating
 system. Thirty-two workers approximately doubles the CPU-parallel portion while
 retaining a conservative resource margin.
+
+## D098 — Build the terminal probe path while materialization remains immutable
+
+The terminal train extension is CPU-bound and runs independently from the GPU
+training software. To remove a later serial delay without opening active
+staging, the project implements the 131k publication resolver, bounded-memory
+reader, retained-65k tail evaluator, three-seed launcher and terminal comparison
+using synthetic fixtures only.
+
+The 65k-to-131k decision differs deliberately from the inherited 32k-to-65k
+helper. The same 6,144 core validation IDs own the paired NLP/CRPS saturation
+test. Raw marginal/joint and EM-cell coverage and all four 128-case tail strata
+are mandatory reports, but they are nonblocking because split-conformal
+calibration and independent SBC own later calibrated claims. The result must be
+either `lock_train_131k_saturated` or
+`lock_train_131k_resource_capped_data_limited`; both lock 131,072, retain all
+three seeds and forbid automatic extension.
+
+Implementation readiness is not data or optimizer authorization. A later gate
+must bind the completed atomic train/tail/combined manifests, the exact code and
+wheel, the frozen model configuration and CUDA environment before the resolver
+may open even one scientific record.
