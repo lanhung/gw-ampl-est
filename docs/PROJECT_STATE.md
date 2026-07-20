@@ -578,3 +578,13 @@ The frozen release-packet implementation is
 `099c5762be9c72f7ded420c64f456db885ec37e5`; its candidate exact wheel
 SHA-256 is
 `93b541c30e5df571bbbc5b07bef423665814e510a13d0d0595e2a3de2d0e83d7`.
+
+The corresponding exact-wheel verifier is implemented locally without
+touching the active AutoDL checkout. It probes the requested runtime in a
+separate interpreter, binds PEP 610 archive evidence to the wheel SHA-256,
+rejects editable or repository-`src` imports, verifies CUDA/GPU identity and
+runs focused plus full tests under `/dev/null` pytest configuration. The
+repository root is available only for `scripts/` imports; `src/` is never
+added to `PYTHONPATH`. The current local suite passes 412 tests with seven
+optional dependency skips. The verifier has not yet run on the future final
+post-publication wheel and does not create a training authorization.

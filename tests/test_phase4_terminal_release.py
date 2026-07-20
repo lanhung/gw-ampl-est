@@ -61,6 +61,11 @@ def _packet(tmp_path: Path) -> dict[str, object]:
             "full_test_exit_code": 0,
             "torch_cuda_available": True,
             "editable_install_used": False,
+            "wheel_import_verified": True,
+            "installed_distribution_name": "gwlens-mm",
+            "installed_module_from_repository_source": False,
+            "repository_root_pythonpath_used": True,
+            "repository_src_pythonpath_used": False,
             "gpu_names": gpu_names,
         },
     )
@@ -142,6 +147,11 @@ def test_terminal_probe_release_packet_rejects_gpu_or_wheel_test_drift(
             "full_test_exit_code": 0,
             "torch_cuda_available": True,
             "editable_install_used": False,
+            "wheel_import_verified": True,
+            "installed_distribution_name": "gwlens-mm",
+            "installed_module_from_repository_source": False,
+            "repository_root_pythonpath_used": True,
+            "repository_src_pythonpath_used": False,
             "gpu_names": [EXPECTED_GPU_MODEL] * 3,
         },
     )

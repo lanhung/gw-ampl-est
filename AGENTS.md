@@ -1020,6 +1020,15 @@ The terminal probe release-packet implementation checkpoint is
 This is candidate software evidence only until the exact wheel passes the
 post-publication AutoDL test contract.
 
+The exact-wheel test contract now has a fail-closed verifier at
+`scripts/phase4/verify_terminal_training_wheel.py`. It requires the installed
+archive hash to equal the candidate wheel, rejects editable and repository
+`src` imports, verifies CUDA and the frozen GPU model, and runs both focused
+and full tests with the repository pytest configuration disabled so its
+`src` path cannot shadow the installed distribution. The verifier may run
+only as post-publication software evidence; it opens no scientific data and
+cannot authorize or start an optimizer.
+
 ## Scientific integrity
 
 - Never fabricate results, citations, completed runs or calibration.
