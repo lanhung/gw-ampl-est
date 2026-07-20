@@ -898,6 +898,12 @@ worker scheduler before execution. Sixty-four workers are explicitly not
 authorized. Training, architecture selection, calibration, SBC, final
 evaluation, extension above 131,072, real noise and GWOSC/GWTC remain closed.
 
+The worker-32 release certificate passed with no blockers and
+220,975,267,840 free bytes. The official segment started at
+`2026-07-20T01:32:59.843129+00:00` as AutoDL PID `2515891`, with exactly 32
+worker children and the unchanged official identities. This is active staging,
+not a completed or published result.
+
 ## Scientific integrity
 
 - Never fabricate results, citations, completed runs or calibration.

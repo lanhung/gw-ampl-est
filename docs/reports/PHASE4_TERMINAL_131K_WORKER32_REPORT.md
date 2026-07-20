@@ -51,3 +51,17 @@ The 32-worker restart must be monitored through its first complete shard. Any
 resource, checksum, schema or atomic-publication failure remains fail-closed.
 Training, architecture selection, calibration, SBC, final evaluation,
 extension above 131,072 and GWOSC/GWTC remain closed.
+
+## Official restart
+
+The fresh worker-32 release certificate passed at
+`2026-07-20T01:32Z` with no blockers and 220,975,267,840 free bytes. It
+reproduced the frozen wheel, environment lock, PSD hashes, corrected-65k
+reference, preregistration/configuration hashes and every official identity.
+
+The official scheduler segment started at
+`2026-07-20T01:32:59.843129+00:00` as AutoDL PID `2515891`. Its run manifest
+records 32 workers and orchestration commit `8977ca55...`; 32 worker children
+were observed. Initial combined child RSS was approximately 10.1 GiB, about
+51 GiB memory remained available and no execution-result error artifact was
+present. This is an active run, not a completed publication result.

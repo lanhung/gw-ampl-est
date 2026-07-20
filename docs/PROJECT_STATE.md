@@ -496,3 +496,10 @@ mypy and build. Exactly 32 workers are authorized for the fresh staging
 restart; 64 workers are rejected. The release must pass a new exact preflight
 and first-complete-shard resource observation before unattended continuation.
 All downstream scientific gates remain unchanged and closed.
+
+That worker-32 preflight has now passed with no blockers and
+220,975,267,840 free bytes. The official segment started at
+`2026-07-20T01:32:59.843129+00:00` as PID `2515891`; exactly 32 worker children
+were observed, initial child RSS was approximately 10.1 GiB, about 51 GiB
+memory remained available and no execution-result error artifact existed.
+Atomic publication is still pending.
