@@ -99,7 +99,7 @@ class TrainingRunIdentity:
             character not in "0123456789abcdef" for character in self.training_code_commit
         ):
             raise ValueError("training code identity must be a lowercase Git commit")
-        if self.training_rung_count not in (16384, 32768, 65536):
+        if self.training_rung_count not in (16384, 32768, 65536, 131072):
             raise ValueError("training run uses an unregistered rung")
         if self.seed not in (0, 1, 2):
             raise ValueError("training seed is outside the preregistered set")

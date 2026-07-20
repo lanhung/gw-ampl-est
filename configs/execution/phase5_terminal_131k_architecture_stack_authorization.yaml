@@ -1,0 +1,33 @@
+phase: "5"
+stage: terminal_131k_architecture_stack
+authorization_status: authorized_implementation_only
+authorized_by: delegated_human_project_owner_review
+authorization_date: "2026-07-20"
+
+frozen_preregistration:
+  version: "1.2.0-rc.1"
+  path: configs/statistics/terminal_131k_preregistration.yaml
+  canonical_hash: "77ff5b6b45b886657e90023c50ae002afffb077db594c80665166d537fd2346a"
+
+implementation_scope:
+  terminal_architecture_gate_authorized: true
+  terminal_probe_reuse_validation_authorized: true
+  nine_new_fit_runner_authorized: true
+  twelve_result_selector_authorized: true
+  synthetic_fixture_tests_authorized: true
+
+authorization:
+  scientific_data_access_authorized: false
+  checkpoint_access_authorized: false
+  architecture_fit_execution_authorized: false
+  architecture_selection_execution_authorized: false
+  probe_retraining_authorized: false
+  model_tuning_authorized: false
+  calibration_authorized: false
+  sbc_authorized: false
+  final_evaluation_authorized: false
+  extension_above_131072_authorized: false
+  real_noise_authorized: false
+  gwosc_gwtc_access_authorized: false
+
+stop_after_implementation_and_push: true

@@ -1,0 +1,42 @@
+phase: "4"
+stage: terminal_131k_probe_stack
+authorization_status: authorized_implementation_only
+authorized_by: delegated_human_project_owner_review
+authorization_date: "2026-07-20"
+
+base_implementation_checkpoint: "3f040cfae6df407e4d56a9eb0ad44b8e1d6f93f2"
+
+frozen_preregistration:
+  version: "1.2.0-rc.1"
+  path: configs/statistics/terminal_131k_preregistration.yaml
+  canonical_hash: "77ff5b6b45b886657e90023c50ae002afffb077db594c80665166d537fd2346a"
+
+implementation_scope:
+  terminal_publication_resolver_authorized: true
+  bounded_memory_131k_reader_authorized: true
+  retained_65k_tail_evaluator_authorized: true
+  three_seed_131k_launcher_authorized: true
+  terminal_learning_curve_comparator_authorized: true
+  synthetic_fixture_tests_authorized: true
+
+authorization:
+  terminal_publication_data_access_authorized: false
+  development_tail_data_access_authorized: false
+  corrected_65k_checkpoint_access_authorized: false
+  scientific_131k_probe_training_authorized: false
+  optimizer_execution_authorized: false
+  terminal_learning_curve_decision_execution_authorized: false
+  architecture_selection_authorized: false
+  calibration_authorized: false
+  sbc_authorized: false
+  final_evaluation_authorized: false
+  extension_above_131072_authorized: false
+  real_noise_authorized: false
+  gwosc_gwtc_access_authorized: false
+
+test_data_policy:
+  synthetic_fixtures_only: true
+  Stage_A_or_Stage_B_or_terminal_scientific_arrays_authorized: false
+  scientific_checkpoint_creation_authorized: false
+
+stop_after_implementation_and_push: true

@@ -1,0 +1,34 @@
+phase: "4-terminal-131k-execution-stack"
+authorization_status: authorized_implementation_and_synthetic_tests_only
+authorized_by: delegated_project_owner_review
+authorization_date: "2026-07-20"
+
+base_main_commit: "c669fd8aa6ad3862734d68a10a75af7e4edeb9c4"
+
+frozen_preregistration:
+  version: "1.2.0-rc.1"
+  path: configs/statistics/terminal_131k_preregistration.yaml
+  canonical_hash: "77ff5b6b45b886657e90023c50ae002afffb077db594c80665166d537fd2346a"
+
+implementation_scope:
+  train_increment_runner_authorized: true
+  development_tail_runner_authorized: true
+  atomic_combined_131k_manifest_authorized: true
+  release_gate_authorized: true
+  synthetic_fixture_tests_authorized: true
+  bounded_dry_run_authorized: true
+
+authorization:
+  scientific_pair_generation_authorized: false
+  official_identity_creation_authorized: false
+  staging_access_authorized: false
+  existing_publication_mutation_authorized: false
+  train_131k_probe_authorized: false
+  architecture_selection_authorized: false
+  calibration_authorized: false
+  sbc_authorized: false
+  final_evaluation_authorized: false
+  real_noise_authorized: false
+  gwosc_gwtc_access_authorized: false
+
+stop_after_clean_implementation_release: true

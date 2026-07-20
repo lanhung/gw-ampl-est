@@ -193,8 +193,20 @@ def main() -> None:
         required_reference_splits
     ):
         raise ValueError("release certificate lacks all published reference pools")
+    authorized_references = authorization["published_reference_contract"]
+    reference_mode = str(
+        authorized_references.get("training_reference_mode", "corrected_65k")
+    )
+    expected_train_count = int(
+        authorized_references.get("logical_system_counts", {}).get("train", -1)
+    )
+    if (reference_mode, expected_train_count) not in {
+        ("corrected_65k", 65536),
+        ("terminal_131k", 131072),
+    }:
+        raise ValueError("final-evaluation training reference is not a frozen rung")
     expected_reference_counts = {
-        "train": 65536,
+        "train": expected_train_count,
         "validation": 6144,
         "calibration_fit": 4096,
         "sbc_diagnostic": 2048,
@@ -211,22 +223,30 @@ def main() -> None:
         roots = tuple(Path(str(value)).resolve() for value in roots_value)
         exclusions = tuple(str(value) for value in exclusions_value)
         if role == "train":
-            if len(roots) != 4 or len(exclusions) != 5:
+            expected_root_count = 5 if reference_mode == "terminal_131k" else 4
+            if len(roots) != expected_root_count or len(exclusions) != 5:
                 raise ValueError(
-                    "corrected train reference must bind four roots and five exclusions"
+                    "train reference has the wrong root or exclusion count"
                 )
-            if not isinstance(
-                specification.get("corrected_combined_train_manifest_sha256"), str
-            ):
-                raise ValueError("corrected train reference lacks its view hash")
+            manifest_key = (
+                "terminal_combined_train_manifest_sha256"
+                if reference_mode == "terminal_131k"
+                else "corrected_combined_train_manifest_sha256"
+            )
+            if not isinstance(specification.get(manifest_key), str):
+                raise ValueError("train reference lacks its locked-rung view hash")
         elif len(roots) != 1 or exclusions:
             raise ValueError("non-train reference must bind one unmodified dataset root")
         reference_contracts[role] = (roots, exclusions)
-    authorized_references = authorization["published_reference_contract"]
-    if reference_roots_value["train"].get(
-        "corrected_combined_train_manifest_sha256"
-    ) != authorized_references.get("corrected_combined_train_manifest_sha256"):
-        raise ValueError("release certificate corrected train view differs from authorization")
+    manifest_key = (
+        "terminal_combined_train_manifest_sha256"
+        if reference_mode == "terminal_131k"
+        else "corrected_combined_train_manifest_sha256"
+    )
+    if reference_roots_value["train"].get(manifest_key) != authorized_references.get(
+        manifest_key
+    ):
+        raise ValueError("release certificate train view differs from authorization")
     parent_id = str(identities["parent_run_id"])
     if any(
         str(value).startswith(("qualification-", "phase3ca", "phase4-canary"))
@@ -369,9 +389,8 @@ def main() -> None:
         "validations": validations,
         "all_namespaces_group_disjoint": True,
         "published_reference_system_counts": expected_reference_counts,
-        "corrected_train_manifest_sha256": reference_roots_value["train"][
-            "corrected_combined_train_manifest_sha256"
-        ],
+        "training_reference_mode": reference_mode,
+        "locked_train_manifest_sha256": reference_roots_value["train"][manifest_key],
         "all_reference_pools_group_disjoint": True,
         "sealed": True,
         "unsealing_authorized": False,

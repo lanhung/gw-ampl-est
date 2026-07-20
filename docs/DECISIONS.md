@@ -1145,3 +1145,125 @@ split-conformal and independent SBC stages. If saturation fails, the project
 must report `lock_train_131k_resource_capped_data_limited` rather than pretend
 convergence. Either honest terminal label permits later architecture review,
 but neither permits another data rung.
+
+## D096 — Freeze one atomic release for the terminal train and development-tail data
+
+The terminal runner reuses the qualified direct-target generator and applies
+the frozen numerical-waveform rejection to every new IMRPhenomXPHM attempt. It
+publishes the 65,536-system increment and the four tail namespaces separately,
+then creates a small logical 131k reference only after streaming validation
+proves all group identifiers are disjoint from the corrected 65k view and the
+unchanged validation set.
+
+The release is frozen at `a4e6bac014ccd521d510c97593cb1368e826d5eb` and exact
+wheel SHA-256 `c7bc8ecadb373ed5d7307ee9c96b131cc68cc9ad8ea10ae2100c54aed2a8958f`.
+Its prelaunch free-space threshold is 201,596,510,484 bytes; 221,613,056,000
+bytes were observed at review. This roughly 20 GB margin is sufficient under
+the conservative measured projection but not large enough to waive the launch
+remeasurement or the 100 GB post-peak floor.
+
+The second-image development-tail condition is executed as the already frozen
+half-open interval `[10,12)`. The change from the old inclusive endpoint is a
+contract-alignment bug fix made before any development-tail data or identity
+existed. It does not alter training, selection or final-evaluation counts.
+
+## D097 — Separate terminal scheduling concurrency from scientific identity
+
+The initial terminal run used the frozen 16-worker configuration and was
+stopped before its first complete shard when the owner requested greater CPU
+use. The 16 partial shards are immutable interruption evidence and are not
+reused. Because scheduler concurrency does not enter proposal sampling, shard
+seeds, accepted-rank allocation or record identity, changing only the external
+process-pool width does not require a new scientific preregistration or dataset
+identity.
+
+An independently frozen orchestration layer permits exactly 32 workers while
+passing the original namespace configuration to every shard worker. It binds
+the unchanged generator, wheel, configuration hash, root seed and official
+identities, and records its own commit in release/run evidence. Requests for 64
+workers fail before execution: the host has 64 logical CPUs, and consuming all
+of them would leave no headroom for the parent, storage, checksums or operating
+system. Thirty-two workers approximately doubles the CPU-parallel portion while
+retaining a conservative resource margin.
+
+## D098 — Build the terminal probe path while materialization remains immutable
+
+The terminal train extension is CPU-bound and runs independently from the GPU
+training software. To remove a later serial delay without opening active
+staging, the project implements the 131k publication resolver, bounded-memory
+reader, retained-65k tail evaluator, three-seed launcher and terminal comparison
+using synthetic fixtures only.
+
+The 65k-to-131k decision differs deliberately from the inherited 32k-to-65k
+helper. The same 6,144 core validation IDs own the paired NLP/CRPS saturation
+test. Raw marginal/joint and EM-cell coverage and all four 128-case tail strata
+are mandatory reports, but they are nonblocking because split-conformal
+calibration and independent SBC own later calibrated claims. The result must be
+either `lock_train_131k_saturated` or
+`lock_train_131k_resource_capped_data_limited`; both lock 131,072, retain all
+three seeds and forbid automatic extension.
+
+Implementation readiness is not data or optimizer authorization. A later gate
+must bind the completed atomic train/tail/combined manifests, the exact code and
+wheel, the frozen model configuration and CUDA environment before the resolver
+may open even one scientific record.
+
+## D099 — Adapt architecture selection to the terminal lock without rewriting 65k history
+
+The existing correction-aware architecture runner is preserved for audit
+replay. A separate terminal adapter accepts either
+`lock_train_131k_saturated` or
+`lock_train_131k_resource_capped_data_limited`, requires the exact logical
+131k manifest and reuses the three `10 transforms × width 256` probe fits.
+
+Only the remaining three architectures by three seeds may be fitted. All use
+the same 131,072 systems, 6,144 validation cases, standardizers, optimizer,
+budget and finalized evaluation commitment. Selection remains mean validation
+NLP across three seeds with parameter-count tie-break; selecting a best seed,
+consulting the 512 tail pool for architecture choice or opening final data is
+forbidden. This is software readiness only until an exact post-lock gate binds
+the scientific artifacts and environment.
+
+## D100 — Require an explicit terminal-rung binding in every downstream gate
+
+Historical Phase 6/7 score software accepted checkpoints from the originally
+reachable 32k/65k locks. Merely broadening that implicit list to 131k would let
+an old authorization accept a new scientific identity without recording the
+terminal decision. Instead, legacy authorizations remain limited to their old
+rungs, and a 131k checkpoint is valid only when the exact later authorization
+contains `selected_architecture.locked_training_rung: 131072`.
+
+A common terminal adapter owns the two valid terminal labels, twelve-result
+architecture-selection contract and compact publication reference. The adapter
+does not execute a decision or open data. It exists so calibration/SBC, final
+inference, ablations and non-neural references can share one fail-closed size
+identity rather than drifting independently after the terminal lock.
+
+## D101 — Extend downstream leakage references, not frozen evaluation counts
+
+The terminal rung changes which scientific training groups must be excluded
+from later calibration/SBC and final pools; it does not change those pools'
+counts, seeds or distributions. Future release certificates therefore gain a
+`terminal_131k` reference mode while the historical corrected-65k mode remains
+available only for audit replay.
+
+Calibration/SBC leakage checks stream 131,072 train, 6,144 validation and all
+512 development-tail identifiers before publication. Final materialization
+streams the same 131,072 train groups plus its separately published validation,
+calibration and SBC references. No final case is unsealed by these checks. A
+reference mode cannot be inferred from a checkpoint; it must be explicit and
+hash-bound to the terminal size and architecture decisions.
+
+## D102 — Use the locked 131k rung consistently in ablations and references
+
+Once the terminal size and architecture are locked, input ablations must use
+the same complete training membership, preprocessing, optimization budget and
+three seeds as the selected primary architecture. Continuing to train ablations
+on the historical 65k view would confound input removal with sample size and is
+therefore forbidden.
+
+The RC.7 non-neural bank likewise uses the selected complete training rung. It
+does not use the 512-case development-tail pool, calibration, SBC or final data.
+This preserves its role as a selected-prior simulation reference while keeping
+the independent tail pool available only for the preregistered 65k-to-131k
+development comparison.

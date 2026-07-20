@@ -205,6 +205,49 @@ def test_future_identity_and_materialization_gate_are_exact() -> None:
             changed, config=config, generator_commit=commit
         )
 
+    terminal = deepcopy(authorization)
+    terminal["training_reference_mode"] = "terminal_131k"
+    terminal["entry_gate"]["locked_training_rung"] = 131072
+    terminal["terminal_training_reference"] = {
+        "terminal_preregistration_hash": (
+            "77ff5b6b45b886657e90023c50ae002afffb077db594c80665166d537fd2346a"
+        ),
+        "terminal_combined_manifest_sha256": "1" * 64,
+        "terminal_train_increment_parent_manifest_sha256": "2" * 64,
+        "development_tail_manifest_sha256": "3" * 64,
+        "validation_manifest_sha256": "4" * 64,
+        "logical_train_system_count": 131072,
+        "new_train_increment_system_count": 65536,
+        "unchanged_validation_system_count": 6144,
+        "development_tail_system_count": 512,
+        "strict_corrected_65k_subset": True,
+        "proposal_equals_evaluation": True,
+        "all_importance_weights_one": True,
+        "development_tail_excluded_from_training": True,
+        "extension_above_131072_authorized": False,
+    }
+    terminal["training_size_decision"] = {
+        "decision": "lock_train_131k_resource_capped_data_limited",
+        "selected_training_count": 131072,
+        "sha256": "5" * 64,
+    }
+    terminal["architecture_decision"] = {
+        "locked_training_rung": 131072,
+        "result_count": 12,
+        "sha256": "6" * 64,
+    }
+    validate_future_materialization_authorization(
+        terminal, config=config, generator_commit=commit
+    )
+    terminal_changed = deepcopy(terminal)
+    terminal_changed["terminal_training_reference"][
+        "development_tail_excluded_from_training"
+    ] = False
+    with pytest.raises(ValueError, match="terminal training reference"):
+        validate_future_materialization_authorization(
+            terminal_changed, config=config, generator_commit=commit
+        )
+
 
 def test_real_release_gate_is_blocked_before_future_authorization(
     tmp_path: Path,

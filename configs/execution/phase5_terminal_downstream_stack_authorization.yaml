@@ -1,0 +1,54 @@
+phase: "5-terminal-downstream-stack"
+authorization_status: authorized_implementation_only
+authorized_by: codex_as_delegated_scientific_and_engineering_reviewer
+authorization_date: "2026-07-20"
+
+authorization_basis:
+  owner_delegation: continue_without_routine_human_intervention
+  implementation_may_overlap_terminal_materialization: true
+  active_staging_or_scientific_checkpoint_accessed: false
+
+frozen_preregistration:
+  version: "1.2.0-rc.1"
+  path: configs/statistics/terminal_131k_preregistration.yaml
+  canonical_hash: "77ff5b6b45b886657e90023c50ae002afffb077db594c80665166d537fd2346a"
+
+implementation_contract:
+  locked_training_rung: 131072
+  terminal_decisions:
+    - lock_train_131k_resource_capped_data_limited
+    - lock_train_131k_saturated
+  architecture_result_count: 12
+  retained_model_seed_count: 3
+  validation_system_count: 6144
+  extension_above_131072_forbidden: true
+
+authorization:
+  scientific_data_access_authorized: false
+  scientific_checkpoint_access_authorized: false
+  terminal_decision_execution_authorized: false
+  architecture_fit_or_selection_authorized: false
+  calibration_sbc_materialization_authorized: false
+  calibration_fit_or_sbc_execution_authorized: false
+  final_evaluation_materialization_authorized: false
+  final_evaluation_unsealing_authorized: false
+  final_inference_authorized: false
+  ablation_training_authorized: false
+  reference_execution_authorized: false
+  model_tuning_authorized: false
+  extension_above_131072_authorized: false
+  real_noise_authorized: false
+  gwosc_gwtc_access_authorized: false
+
+future_exact_gates_must_bind:
+  - atomic_terminal_131k_combined_manifest_and_sha256
+  - atomic_development_tail_manifest_and_sha256
+  - terminal_size_decision_and_sha256
+  - selected_architecture_decision_and_sha256
+  - all_three_selected_seed_checkpoint_sha256_values
+  - selected_131k_preprocessing_and_membership_sha256_values
+  - immutable_software_wheel_and_cuda_environment
+  - finalized_final_evaluation_commitment_sha256
+  - exact_output_identities
+
+stop_after_implementation: true

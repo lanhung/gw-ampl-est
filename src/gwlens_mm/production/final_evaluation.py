@@ -40,6 +40,13 @@ NUMERICAL_VALIDITY_ADDENDUM_HASH = (
     "431c09f2c279e1c745bd118fb1b0c06643de7dc42f605af78a49ca99b5b0019b"
 )
 ORIGINAL_COMMITTED_GENERATOR = "bc02054c1f95e7f6cd143fb9dc796ae48f0a15ac"
+TERMINAL_PREREGISTRATION_HASH = (
+    "77ff5b6b45b886657e90023c50ae002afffb077db594c80665166d537fd2346a"
+)
+TERMINAL_LOCK_LABELS = {
+    "lock_train_131k_saturated",
+    "lock_train_131k_resource_capped_data_limited",
+}
 
 
 @dataclass(frozen=True)
@@ -168,21 +175,54 @@ def validate_future_final_evaluation_authorization(
     if contract.get("training_size_and_architecture_locked") is not True:
         raise PermissionError("final pool cannot materialize before model design lock")
     references = authorization.get("published_reference_contract", {})
-    if (
+    common_reference_invalid = (
         references.get("corrected_combined_train_manifest_sha256") is None
         or len(str(references.get("corrected_combined_train_manifest_sha256"))) != 64
         or references.get("correction_parent_manifest_sha256")
         != "0fcfb117c620d58a2e0ccd8b19c0d3f3a371dd844fb637b50c8b565eee6864f2"
         or references.get("correction_publication_tree_sha256")
         != "a57aa2691e256b34403392f595e964dceec1325cfc54a38ed4d2a0b714d38c12"
-        or references.get("logical_system_counts")
-        != {
+    )
+    reference_mode = references.get("training_reference_mode", "corrected_65k")
+    counts = references.get("logical_system_counts")
+    if reference_mode == "corrected_65k":
+        expected_counts = {
             "train": 65536,
             "validation": 6144,
             "calibration_fit": 4096,
             "sbc_diagnostic": 2048,
         }
-    ):
+        terminal_invalid = False
+    elif reference_mode == "terminal_131k":
+        expected_counts = {
+            "train": 131072,
+            "validation": 6144,
+            "calibration_fit": 4096,
+            "sbc_diagnostic": 2048,
+        }
+        terminal_hashes = (
+            "terminal_combined_train_manifest_sha256",
+            "terminal_train_increment_parent_manifest_sha256",
+            "development_tail_manifest_sha256",
+            "validation_manifest_sha256",
+        )
+        terminal_invalid = (
+            references.get("terminal_preregistration_hash")
+            != TERMINAL_PREREGISTRATION_HASH
+            or any(len(str(references.get(key, ""))) != 64 for key in terminal_hashes)
+            or references.get("strict_corrected_65k_subset") is not True
+            or references.get("development_tail_excluded_from_final_reference")
+            is not True
+            or references.get("extension_above_131072_authorized") is not False
+            or references.get("terminal_size_decision") not in TERMINAL_LOCK_LABELS
+            or len(str(references.get("terminal_size_decision_sha256", ""))) != 64
+            or int(references.get("selected_architecture_locked_rung", -1)) != 131072
+            or len(str(references.get("selected_architecture_decision_sha256", "")))
+            != 64
+        )
+    else:
+        raise ValueError("final-evaluation training reference mode is unknown")
+    if common_reference_invalid or counts != expected_counts or terminal_invalid:
         raise ValueError("final-evaluation published-reference contract is incomplete")
     flags = authorization.get("authorization", {})
     if flags.get("sealed_materialization_authorized") is not True:

@@ -1,0 +1,70 @@
+phase: "4-terminal-131k-worker32"
+authorization_status: authorized_worker32_orchestration_restart_only
+authorized_by: codex_as_delegated_scientific_and_engineering_reviewer
+authorization_date: "2026-07-20"
+
+authorization_basis:
+  owner_request: increase_current_autodl_worker_count
+  engineering_classification: scheduler_only_no_scientific_contract_change
+  local_full_test_result: "370 passed, 7 optional skips"
+  ruff_result: passed
+  mypy_result: passed
+  package_build_result: passed
+
+frozen_execution:
+  generator_commit: "a4e6bac014ccd521d510c97593cb1368e826d5eb"
+  generator_wheel_sha256: "c7bc8ecadb373ed5d7307ee9c96b131cc68cc9ad8ea10ae2100c54aed2a8958f"
+  orchestration_commit: "8977ca55f13963441afdda831afb190a3872517c"
+  configuration_hash: "abd07c5b8031a5cc9564531d29d9349f65b0918fafc494767fc912b7e7444ed7"
+  preregistration_hash: "77ff5b6b45b886657e90023c50ae002afffb077db594c80665166d537fd2346a"
+  parent_run_id: phase4-terminal-131k-a4e6bac014cc-abd07c5b8031
+  train_dataset_id: gwlens-v2-2.0.0-alpha.3-e592848e725db2c3-train-increment
+  new_train_root_seed: 2026071404
+  accepted_train_target: 65536
+  train_shard_target: 512
+  development_tail_target: 512
+  terminal_train_target: 131072
+
+interrupted_worker16_evidence:
+  stopped_at_utc: "2026-07-20T01:21:24Z"
+  parent_pid: 2513450
+  path: /root/autodl-tmp/lensing-4/data_v2/scientific/terminal_131k/interrupted_evidence/phase4-terminal-131k-a4e6bac014cc-abd07c5b8031-workers16-20260720T012124Z
+  complete_shard_count: 0
+  partial_shard_count: 16
+  retained_bytes: 631856490
+  partial_evidence_reuse_authorized: false
+  deletion_authorized: false
+  scientific_use_authorized: false
+
+scheduler_contract:
+  configured_worker_processes: 16
+  authorized_scheduler_workers: 32
+  maximum_scheduler_workers: 32
+  physical_logical_cpu_count: 64
+  execution_mode: single_process_pool
+  same_generator_wheel_required: true
+  same_configuration_hash_required: true
+  same_root_seed_required: true
+  same_official_identities_required: true
+  fresh_staging_after_partial_evidence_seal_required: true
+
+authorization_boundaries:
+  scientific_contract_change_authorized: false
+  new_dataset_identity_authorized: false
+  worker_64_authorized: false
+  training_authorized: false
+  calibration_authorized: false
+  final_evaluation_authorized: false
+  extension_above_131072_authorized: false
+  real_noise_authorized: false
+  gwosc_gwtc_access_authorized: false
+
+restart_contract:
+  official_identity_reuse_authorized: true
+  completed_shard_rewrite_authorized: false
+  interrupted_partial_reuse_authorized: false
+  new_release_certificate_required: true
+  scheduler_commit_marker_required: true
+  monitor_first_complete_shard_before_unattended_continuation: true
+
+stop_after_existing_terminal_materialization_gate: true

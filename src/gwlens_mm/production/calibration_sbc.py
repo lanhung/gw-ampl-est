@@ -49,6 +49,13 @@ CORRECTION_PUBLICATION_TREE_HASH = (
 CORRECTED_COMBINED_TRAIN_MANIFEST_HASH = (
     "da8aaa8d86afb4d93156191976b420bfc7bbc7dfe0fdc6c6f627515d804a7379"
 )
+TERMINAL_PREREGISTRATION_HASH = (
+    "77ff5b6b45b886657e90023c50ae002afffb077db594c80665166d537fd2346a"
+)
+TERMINAL_LOCK_LABELS = {
+    "lock_train_131k_saturated",
+    "lock_train_131k_resource_capped_data_limited",
+}
 
 
 @dataclass(frozen=True)
@@ -359,7 +366,7 @@ def validate_future_materialization_authorization(
     ):
         raise PermissionError("calibration/SBC entry gate is not locked")
     reference = authorization.get("corrected_training_reference", {})
-    if reference != {
+    expected_corrected_reference = {
         "base_generator_commit": BASE_GENERATOR_COMMIT,
         "base_preregistration_hash": RC4_HASH,
         "stage_a_parent_manifest_sha256": STAGE_A_PARENT_MANIFEST_HASH,
@@ -376,8 +383,51 @@ def validate_future_materialization_authorization(
         "replacement_system_count": 5,
         "logical_train_system_count": 65536,
         "unchanged_validation_system_count": 6144,
-    }:
-        raise ValueError("calibration/SBC corrected training reference changed")
+    }
+    reference_mode = authorization.get("training_reference_mode", "corrected_65k")
+    if reference_mode == "corrected_65k":
+        if reference != expected_corrected_reference:
+            raise ValueError("calibration/SBC corrected training reference changed")
+    elif reference_mode == "terminal_131k":
+        if reference != expected_corrected_reference:
+            raise ValueError("calibration/SBC corrected training reference changed")
+        terminal = authorization.get("terminal_training_reference", {})
+        required_hashes = (
+            "terminal_combined_manifest_sha256",
+            "terminal_train_increment_parent_manifest_sha256",
+            "development_tail_manifest_sha256",
+            "validation_manifest_sha256",
+        )
+        if (
+            terminal.get("terminal_preregistration_hash")
+            != TERMINAL_PREREGISTRATION_HASH
+            or int(terminal.get("logical_train_system_count", -1)) != 131072
+            or int(terminal.get("new_train_increment_system_count", -1)) != 65536
+            or int(terminal.get("unchanged_validation_system_count", -1)) != 6144
+            or int(terminal.get("development_tail_system_count", -1)) != 512
+            or terminal.get("strict_corrected_65k_subset") is not True
+            or terminal.get("proposal_equals_evaluation") is not True
+            or terminal.get("all_importance_weights_one") is not True
+            or terminal.get("development_tail_excluded_from_training") is not True
+            or terminal.get("extension_above_131072_authorized") is not False
+            or any(
+                len(str(terminal.get(key, ""))) != 64 for key in required_hashes
+            )
+        ):
+            raise ValueError("calibration/SBC terminal training reference changed")
+        terminal_decision = authorization.get("training_size_decision", {})
+        architecture_decision = authorization.get("architecture_decision", {})
+        if (
+            terminal_decision.get("decision") not in TERMINAL_LOCK_LABELS
+            or int(terminal_decision.get("selected_training_count", -1)) != 131072
+            or len(str(terminal_decision.get("sha256", ""))) != 64
+            or int(architecture_decision.get("locked_training_rung", -1)) != 131072
+            or int(architecture_decision.get("result_count", -1)) != 12
+            or len(str(architecture_decision.get("sha256", ""))) != 64
+        ):
+            raise PermissionError("calibration/SBC terminal decisions are not locked")
+    else:
+        raise ValueError("calibration/SBC training reference mode is unknown")
     counts = authorization.get("materialization_contract", {})
     if (
         counts.get("calibration_fit_accepted_count"),

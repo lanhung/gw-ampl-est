@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import subprocess
 import sys
@@ -14,6 +15,7 @@ from gwlens_mm.training.ablations import (
     ABLATION_VIEWS,
     AblatedDevelopmentDataset,
     AblatedStandardizedDataset,
+    _validate_terminal_size_lock,
     ablation_model_configuration,
     apply_ablation_view,
     summarize_ablation_results,
@@ -216,6 +218,38 @@ def test_implementation_authorization_cannot_execute_or_index_scientific_data(
             primary_rung_preparation_path=tmp_path / "preparation.json",
         )
     assert not any(tmp_path.iterdir())
+
+
+@pytest.mark.parametrize(
+    "label",
+    [
+        "lock_train_131k_saturated",
+        "lock_train_131k_resource_capped_data_limited",
+    ],
+)
+def test_ablation_gate_accepts_both_exact_terminal_131k_labels(
+    tmp_path: Path, label: str
+) -> None:
+    decision = {
+        "status": "terminal_learning_curve_decision_complete",
+        "comparison": "corrected_train_65k_to_train_131k_terminal",
+        "decision": label,
+        "selected_training_count": 131072,
+        "architecture_selection_review_allowed": True,
+        "extension_above_131072_authorized": False,
+        "all_three_probe_seeds_retained": True,
+        "best_seed_selected": False,
+        "calibration_accessed": False,
+        "final_evaluation_accessed": False,
+    }
+    path = tmp_path / "decision.json"
+    path.write_text(json.dumps(decision) + "\n")
+    authorization = {
+        "locked_training_rung": 131072,
+        "terminal_size_decision_path": str(path),
+        "terminal_size_decision_sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+    }
+    assert _validate_terminal_size_lock(authorization, path)["decision"] == label
 
 
 def test_runner_defaults_to_a_nonexecuting_plan() -> None:

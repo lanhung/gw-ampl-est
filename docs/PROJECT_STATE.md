@@ -87,6 +87,15 @@ stratum. The terminal outcome is labeled either saturated or resource-capped
 data limited; both stop at 131k and require a later architecture execution
 gate. No new pair or optimizer is authorized by the design freeze.
 
+The terminal materialization software is now frozen at commit
+`a4e6bac014ccd521d510c97593cb1368e826d5eb`, with exact wheel SHA-256
+`c7bc8ecadb373ed5d7307ee9c96b131cc68cc9ad8ea10ae2100c54aed2a8958f`.
+Full local and AutoDL regression passed. The exact-count execution gate permits
+only 65,536 new direct-target train systems plus the four-by-128 development-
+tail pool. At review, AutoDL had 221.613 GB free versus a conservative 201.597
+GB launch threshold. No official identity or new pair exists until the release
+gate repeats that measurement and returns ready.
+
 The corrected-probe gates bound the corrected views, implementation commit,
 wheel, model, CUDA environment and final-evaluation commitment. The authorized
 16k/32k and terminal 65k runs are now complete; all earlier pre-correction
@@ -459,6 +468,27 @@ uses the same five-exclusion/five-replacement logical view as the active probe.
 No Phase 6 identity or pair has been created; materialization, checkpoint access,
 calibration fitting and SBC execution remain closed.
 
+The terminal 131k materialization is active under its exact 32-worker scheduler.
+The first complete atomic shard has now appeared while all 32 workers remain
+alive; no execution-result or failure artifact exists. At that observation,
+about 50.9 GiB memory and 216.7 GB disk remained available. This proves forward
+atomic progress but is not publication evidence.
+
+In parallel, the terminal probe execution stack is implemented under a
+synthetic-only gate. It supports the logical corrected-65k plus 65,536-system
+increment reader, exact 131,072-member identity, the three frozen probe seeds,
+evaluation of both retained 65k and new 131k checkpoints on the same four-by-128
+tail pool, and the RC.1 terminal decision. Scientific data/checkpoint access and
+optimizer execution remain closed until the materialization completes and a new
+exact training release is frozen.
+
+The post-lock architecture software now also supports the terminal rung without
+changing the historical 65k code path. It validates either legitimate 131k
+terminal label, reuses all three terminal probe fits, executes at most nine new
+fits and selects from exactly twelve development-only results. The implementation
+gate remains synthetic-only; no architecture checkpoint or scientific record was
+opened.
+
 The future RC.7 non-neural reference core is now execution-ready at the pure
 software layer. A reader drift was corrected so metadata-only examples retain
 their exact Parquet EM-cell partition label without opening Zarr. A deterministic
@@ -473,3 +503,58 @@ immutable wheel/environment and one exact query publication. It streams one
 query at a time into atomic JSONL and summary products with raw coverage counts
 and Wilson intervals; current authorization still rejects every scientific
 execution attempt.
+
+## Terminal 131k materialization concurrency update
+
+The exact terminal release is active under the unchanged scientific generator
+and official identities. Its first 16-worker segment was stopped before any
+complete shard, and all 16 partial shards (631,856,490 bytes) were sealed as
+immutable interruption evidence. No completed or published output was lost.
+
+The scheduler-only implementation at
+`8977ca55f13963441afdda831afb190a3872517c` passed 370 local tests, Ruff,
+mypy and build. Exactly 32 workers are authorized for the fresh staging
+restart; 64 workers are rejected. The release must pass a new exact preflight
+and first-complete-shard resource observation before unattended continuation.
+All downstream scientific gates remain unchanged and closed.
+
+That worker-32 preflight has now passed with no blockers and
+220,975,267,840 free bytes. The official segment started at
+`2026-07-20T01:32:59.843129+00:00` as PID `2515891`; exactly 32 worker children
+were observed, initial child RSS was approximately 10.1 GiB, about 51 GiB
+memory remained available and no execution-result error artifact existed.
+Atomic publication is still pending.
+
+The shared terminal downstream binding stack is also implemented under a
+synthetic-only gate. It rejects 65k labels in the terminal path, accepts only
+the two frozen 131k resource-cap outcomes, requires the exact twelve-result
+development architecture lock and prevents a 131k checkpoint from entering an
+old 32k/65k score authorization. Focused tests passed 25 cases with one optional
+Torch skip; the full suite passed 387 tests with seven optional dependency
+skips, and Ruff, mypy and package build passed. No staging path, scientific
+publication, checkpoint, calibration/SBC record or final case was opened.
+The frozen implementation commit is `cfb3e92f6600975c81e7dfdc58237ebf82acce7c`
+and its exact wheel SHA-256 is `35909951c13cffbe695fe4af631d282fd58634e4f80156057a8cd107609c2b4a`.
+
+The future calibration/SBC and sealed final materialization runners now have an
+implementation-only terminal reference mode. It preserves the historical 65k
+parser, but terminal execution requires exact 131k combined/increment/tail and
+decision hashes. Calibration/SBC will prove disjointness against exactly
+137,728 train+validation+development-tail systems; final generation retains its
+unchanged 20,480 sealed cases. Materialization-focused tests passed 27 cases;
+the full suite passed 388 with seven optional skips, and Ruff, mypy, script
+compilation and build passed. No scientific record or identity was created.
+The frozen implementation commit is `45d05287fbd9a8b7f9bc1999b749be5c521d7931`
+and its exact wheel SHA-256 is `bc5d3cd2fd6f898b08590be7f348dc4970edb7fe5f23f4422ffc29185336f4cd`.
+
+Terminal adapters for the two RC.6 input ablations and the RC.7 non-neural
+reference are implemented. Both support the logical 131k publication while
+preserving historical 65k replay. The ablations share the locked membership,
+architecture, optimizer and seeds; the reference bank uses all 131,072 train
+systems but never the 512 development-tail cases. Seventeen focused and 392
+full tests passed with seven optional skips; Ruff and mypy passed. Execution,
+checkpoint and query access remain closed.
+
+The frozen terminal analysis-adapter implementation is
+`c5cd67d0537dad81797d2a77913a5f3bbd142f00`; its exact wheel SHA-256 is
+`0ae3da4bbb96312b1347babe03ed95cfa45950966c12959e921e78abf7981fd7`.

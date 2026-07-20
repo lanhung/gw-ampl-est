@@ -15,7 +15,7 @@ from gwlens_mm.training.engine import (
     _validate_execution_evidence,
     authorized_probe_execution_evidence,
 )
-from gwlens_mm.training.learning_curve import compare_32k_to_65k
+from gwlens_mm.training.learning_curve import compare_32k_to_65k, compare_65k_to_131k
 from gwlens_mm.training.rung65 import (
     validate_65k_training_gate,
     validate_immutable_training_artifacts,
@@ -479,3 +479,104 @@ def test_terminal_learning_curve_locks_or_stops_without_auto_extension(
     assert improving["decision"] == "stop_data_limited_and_new_preregistration"
     assert improving["all_saturation_conditions_passed"] is False
     assert improving["extension_above_65536_authorized"] is False
+
+
+def _terminal_tail_cases(path: Path, *, nlp: float, crps: float) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    groups = (
+        "high_absolute_magnification",
+        "extreme_relative_magnification",
+        "second_image_near_threshold",
+        "extreme_profile_or_environment",
+    )
+    rows = []
+    for index in range(512):
+        row = {
+            "physical_system_id": f"terminal-tail-system-{index:04d}",
+            "lens_family": (
+                "sie_external_shear" if index % 2 == 0 else "epl_external_shear"
+            ),
+            "em_cell_signature": "all_modalities",
+            "tail_view": groups[index // 128],
+            "nlp_nat_per_target_dimension": nlp,
+            "crps_log_mu_primary": crps,
+            "crps_log_mu_secondary": crps,
+            "crps_mean": crps,
+        }
+        for level in (0.50, 0.80, 0.90, 0.95):
+            key = f"{level:.2f}"
+            covered = index < round(level * 512)
+            for target in ("primary", "secondary", "joint"):
+                row[f"covered_{target}_{key}"] = covered
+            row[f"width_primary_{key}"] = 1.0
+            row[f"width_secondary_{key}"] = 1.0
+        rows.append(row)
+    with path.open("w", newline="", encoding="utf-8") as stream:
+        writer = csv.DictWriter(stream, fieldnames=list(rows[0]))
+        writer.writeheader()
+        writer.writerows(rows)
+
+
+def _terminal_comparison_inputs(
+    tmp_path: Path, *, terminal_nlp: float, terminal_crps: float
+) -> tuple[Path, Path, Path]:
+    retained = tmp_path / "retained"
+    terminal = tmp_path / "terminal"
+    tail = tmp_path / "tail"
+    for seed in (0, 1, 2):
+        _cases(
+            retained / "rung-65536" / f"seed-{seed}" / "development_cases.csv",
+            nlp=1.0,
+            crps=1.0,
+        )
+        _cases(
+            terminal / "rung-131072" / f"seed-{seed}" / "development_cases.csv",
+            nlp=terminal_nlp,
+            crps=terminal_crps,
+        )
+        _terminal_tail_cases(
+            tail / "rung-65536" / f"seed-{seed}" / "development_cases.csv",
+            nlp=1.1,
+            crps=1.1,
+        )
+        _terminal_tail_cases(
+            tail / "rung-131072" / f"seed-{seed}" / "development_cases.csv",
+            nlp=terminal_nlp + 0.1,
+            crps=terminal_crps + 0.1,
+        )
+    return retained, terminal, tail
+
+
+def test_terminal_131k_comparison_always_locks_at_resource_cap(tmp_path: Path) -> None:
+    retained, terminal, tail = _terminal_comparison_inputs(
+        tmp_path, terminal_nlp=0.995, terminal_crps=0.995
+    )
+    saturated = compare_65k_to_131k(
+        retained, terminal, tail, tail, bootstrap_replicates=100
+    )
+    assert saturated["decision"] == "lock_train_131k_saturated"
+    assert saturated["selected_training_count"] == 131072
+    assert saturated["raw_coverage_is_nonblocking"] is True
+    assert saturated["extension_above_131072_authorized"] is False
+
+    retained, terminal, tail = _terminal_comparison_inputs(
+        tmp_path / "improving", terminal_nlp=0.8, terminal_crps=0.8
+    )
+    data_limited = compare_65k_to_131k(
+        retained, terminal, tail, tail, bootstrap_replicates=100
+    )
+    assert data_limited["decision"] == "lock_train_131k_resource_capped_data_limited"
+    assert data_limited["architecture_selection_review_allowed"] is True
+    assert data_limited["best_seed_selected"] is False
+    assert data_limited["extension_above_131072_authorized"] is False
+
+
+def test_terminal_131k_comparison_requires_complete_tail(tmp_path: Path) -> None:
+    retained, terminal, tail = _terminal_comparison_inputs(
+        tmp_path, terminal_nlp=0.995, terminal_crps=0.995
+    )
+    path = tail / "rung-131072" / "seed-2" / "development_cases.csv"
+    rows = path.read_text(encoding="utf-8").splitlines()
+    path.write_text("\n".join(rows[:-1]) + "\n", encoding="utf-8")
+    with pytest.raises(TrainingGateError, match="exactly 128 cases"):
+        compare_65k_to_131k(retained, terminal, tail, tail, bootstrap_replicates=10)

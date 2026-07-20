@@ -858,6 +858,145 @@ architecture fit, calibration, SBC, final evaluation, real noise or
 GWOSC/GWTC access. A separate exact release and resource gate is required
 before any new identity or output may be created.
 
+The terminal materialization implementation is frozen at
+`a4e6bac014ccd521d510c97593cb1368e826d5eb`, exact wheel SHA-256
+`c7bc8ecadb373ed5d7307ee9c96b131cc68cc9ad8ea10ae2100c54aed2a8958f`.
+Local verification passed 368 tests with seven optional skips; the exact wheel
+passed 378 AutoDL tests with one optional Torch skip. The measured AutoDL free
+space was 221,613,056,000 bytes, above the conservative 201,596,510,484-byte
+prelaunch gate.
+
+Delegated expert review now authorizes exact materialization only through:
+
+`configs/execution/phase4_terminal_131k_execution_authorization.yaml`
+
+This gate permits exactly 65,536 new direct-target train systems in 512 atomic
+shards and exactly 512 development-tail systems, 128 in each of four priority
+strata. It permits a logical atomic 131,072-system training reference after
+group-disjoint validation. It does not authorize the 131k optimizer,
+architecture selection, calibration, SBC, final evaluation, extension above
+131,072, real noise or GWOSC/GWTC. Official identities may be derived only by
+a fresh ready release certificate, and publication must stop for review.
+
+The first official terminal-materialization segment started with the frozen
+configuration's 16-worker process pool. At `2026-07-20T01:21:24Z` it was
+stopped before any atomic shard completed in order to apply the owner's
+engineering-only concurrency request. Exactly 16 partial shards totaling
+631,856,490 bytes were moved by same-filesystem rename into immutable
+interruption evidence; they may not be reused, deleted or counted.
+
+Delegated engineering review authorizes a scheduler-only restart at exactly 32
+workers through:
+
+`configs/execution/phase4_terminal_131k_worker32_authorization.yaml`
+
+The orchestration implementation is frozen at
+`8977ca55f13963441afdda831afb190a3872517c`. The scientific generator commit,
+wheel, configuration hash, preregistration, root seeds, counts and official
+identities remain unchanged. A fresh release certificate must bind the 32-
+worker scheduler before execution. Sixty-four workers are explicitly not
+authorized. Training, architecture selection, calibration, SBC, final
+evaluation, extension above 131,072, real noise and GWOSC/GWTC remain closed.
+
+The worker-32 release certificate passed with no blockers and
+220,975,267,840 free bytes. The official segment started at
+`2026-07-20T01:32:59.843129+00:00` as AutoDL PID `2515891`, with exactly 32
+worker children and the unchanged official identities. This is active staging,
+not a completed or published result.
+
+While that immutable materialization runs, delegated engineering review
+authorizes only a synthetic-fixture implementation of the terminal probe stack
+through:
+
+`configs/execution/phase4_terminal_131k_probe_stack_authorization.yaml`
+
+The software may validate the future atomic 131k publication, build a bounded-
+memory corrected-65k-plus-increment reader, evaluate the three retained 65k
+checkpoints on the new 512-case development-tail pool, launch the frozen 131k
+probe for seeds 0/1/2 and apply the preregistered terminal comparison. It may not
+open any active staging or scientific publication, access a checkpoint, start an
+optimizer, execute a scientific decision, fit an architecture, calibrate, unseal
+final evaluation or access GWOSC/GWTC. A later exact gate must bind the completed
+publication manifests, training commit/wheel, model configuration and CUDA
+environment before any terminal scientific array may be opened.
+
+The implementation checkpoint is
+`77257c3d4871937883eebd330fb8496246a85ff4`; its exact wheel SHA-256 is
+`dea53afc08609789ea6c1ac066ed411bf1aad135434cf33f86b5e46e3f92e0ad`.
+This identity is implementation evidence only and does not activate the future
+scientific gate.
+
+The same synthetic-only boundary permits the terminal post-lock architecture
+adapter through:
+
+`configs/execution/phase5_terminal_131k_architecture_stack_authorization.yaml`
+
+It may accept either frozen 131k lock label, validate reuse of the three 131k
+probe fits and implement the nine remaining grid fits plus validation-only
+selection. It may not open scientific data/checkpoints, start a fit, select an
+architecture, calibrate, unseal final evaluation or access GWOSC/GWTC. The
+historical 65k architecture path remains unchanged.
+
+The terminal architecture implementation checkpoint is
+`2689119d0526c82f8145c0424741e56a048e96df`; its exact wheel SHA-256 is
+`fc10efa29ba129f19ab3874d88a6cab4c0840045fa1ef8b5b102ca91f8c9231f`.
+It remains implementation evidence, not an execution identity.
+
+The synthetic-only implementation boundary now also includes the shared
+terminal downstream binding stack through:
+
+`configs/execution/phase5_terminal_downstream_stack_authorization.yaml`
+
+It accepts only the two frozen 131k terminal labels and the exact twelve-result
+development-only architecture lock. Historical score-inference gates without
+an explicit locked-rung field remain limited to 32k/65k checkpoints; a 131k
+checkpoint requires a later authorization that explicitly binds
+`locked_training_rung: 131072`. The stack validates only small decision and
+manifest identities. It does not open active staging, scientific data,
+checkpoints, calibration/SBC, final evaluation, ablation/reference execution,
+real noise or GWOSC/GWTC.
+
+The terminal downstream implementation checkpoint is
+`cfb3e92f6600975c81e7dfdc58237ebf82acce7c`; its exact wheel SHA-256 is
+`35909951c13cffbe695fe4af631d282fd58634e4f80156057a8cd107609c2b4a`.
+These are implementation identities only and do not activate a future exact
+scientific gate.
+
+The implementation-only boundary also includes terminal reference adapters for
+future calibration/SBC and sealed final materialization through:
+
+`configs/execution/phase6_terminal_materialization_adapter_authorization.yaml`
+
+The adapters preserve historical corrected-65k replay while requiring terminal
+mode to bind exact combined/increment/validation/development-tail hashes, a
+131,072-system lock and the twelve-result architecture decision. The future
+calibration/SBC leakage reference must include terminal train, validation and
+the separately nontraining 512-case development-tail pool. The final pool stays
+sealed and unchanged at 20,480 cases. This software authorizes no materialization,
+unsealing, checkpoint access, statistic, fit, real noise or GWOSC/GWTC access.
+
+The terminal materialization-adapter implementation checkpoint is
+`45d05287fbd9a8b7f9bc1999b749be5c521d7931`; its exact wheel SHA-256 is
+`bc5d3cd2fd6f898b08590be7f348dc4970edb7fe5f23f4422ffc29185336f4cd`.
+It is not an execution identity.
+
+The implementation-only terminal analysis adapters are authorized through:
+
+`configs/execution/phase7_terminal_analysis_adapter_authorization.yaml`
+
+They allow future ablation and RC.7 reference runners to use the logical
+131,072-system training view only after an exact gate. The two ablations retain
+the selected architecture and seeds 0/1/2; the reference bank retains exact
+lens-family/EM-cell grouping and 256-neighbor semantics. The 512 development-
+tail cases enter neither training nor the reference bank. No scientific array,
+checkpoint, optimizer, query, final record, real noise or GWOSC/GWTC access is
+authorized by this implementation gate.
+
+The terminal analysis-adapter implementation checkpoint is
+`c5cd67d0537dad81797d2a77913a5f3bbd142f00`; its exact wheel SHA-256 is
+`0ae3da4bbb96312b1347babe03ed95cfa45950966c12959e921e78abf7981fd7`.
+It is implementation evidence only and does not authorize execution.
+
 ## Scientific integrity
 
 - Never fabricate results, citations, completed runs or calibration.

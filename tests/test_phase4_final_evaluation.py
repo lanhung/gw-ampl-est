@@ -228,6 +228,12 @@ def test_balanced_tail_priority_is_frozen() -> None:
         external_convergence=0.2,
         density_slope=2.0,
     ) is BalancedTailStratum.EXTREME_PROFILE_OR_ENVIRONMENT
+    assert classify_balanced_tail(
+        (_Image(9.0), _Image(1.0)),
+        secondary_network_snr=12.0,
+        external_convergence=0.0,
+        density_slope=2.0,
+    ) is None
 
 
 def test_psd_constructor_semantics_and_commitment_are_fail_closed() -> None:
@@ -423,6 +429,96 @@ def test_future_materialization_binds_narrow_generator_revision() -> None:
         "counts_seeds_distributions_changed"
     ] = True
     with pytest.raises(ValueError, match="narrowly bound"):
+        validate_future_final_evaluation_authorization(
+            changed,
+            config=config,
+            generator_commit=generator_commit,
+            commitment_sha256=FINAL_EVALUATION_COMMITMENT_HASH,
+            numerical_validity_addendum_sha256=NUMERICAL_VALIDITY_ADDENDUM_HASH,
+        )
+
+
+def test_future_final_materialization_accepts_only_exact_terminal_reference() -> None:
+    config, _ = load_final_evaluation_contract(ROOT)
+    generator_commit = "a" * 40
+    authorization = {
+        "authorization_status": (
+            "authorized_sealed_final_evaluation_materialization_only"
+        ),
+        "immutable_generator": {"git_commit": generator_commit},
+        "frozen_contract": {
+            "configuration_hash": configuration_hash(config),
+            "commitment_sha256": FINAL_EVALUATION_COMMITMENT_HASH,
+            "numerical_validity_addendum_sha256": NUMERICAL_VALIDITY_ADDENDUM_HASH,
+            "waveform_numerical_validity_preregistration_hash": (
+                "7fca209de9f06e98da1c5a96ae0f4fc6daec5d2f0c2339a718e1f899bb915b69"
+            ),
+        },
+        "prospective_generator_revision": {
+            "original_committed_generator": ORIGINAL_COMMITTED_GENERATOR,
+            "scope": "waveform_numerical_validity_implementation_only",
+            "counts_seeds_distributions_changed": False,
+            "original_commitment_mutated": False,
+        },
+        "materialization_contract": {
+            "accepted_pair_count": 20480,
+            "shard_count": 160,
+            "namespace_count": 15,
+            "training_size_and_architecture_locked": True,
+        },
+        "published_reference_contract": {
+            "training_reference_mode": "terminal_131k",
+            "corrected_combined_train_manifest_sha256": "1" * 64,
+            "correction_parent_manifest_sha256": (
+                "0fcfb117c620d58a2e0ccd8b19c0d3f3a371dd844fb637b50c8b565eee6864f2"
+            ),
+            "correction_publication_tree_sha256": (
+                "a57aa2691e256b34403392f595e964dceec1325cfc54a38ed4d2a0b714d38c12"
+            ),
+            "terminal_preregistration_hash": (
+                "77ff5b6b45b886657e90023c50ae002afffb077db594c80665166d537fd2346a"
+            ),
+            "terminal_combined_train_manifest_sha256": "2" * 64,
+            "terminal_train_increment_parent_manifest_sha256": "3" * 64,
+            "development_tail_manifest_sha256": "4" * 64,
+            "validation_manifest_sha256": "5" * 64,
+            "strict_corrected_65k_subset": True,
+            "development_tail_excluded_from_final_reference": True,
+            "extension_above_131072_authorized": False,
+            "terminal_size_decision": "lock_train_131k_saturated",
+            "terminal_size_decision_sha256": "6" * 64,
+            "selected_architecture_locked_rung": 131072,
+            "selected_architecture_decision_sha256": "7" * 64,
+            "logical_system_counts": {
+                "train": 131072,
+                "validation": 6144,
+                "calibration_fit": 4096,
+                "sbc_diagnostic": 2048,
+            },
+        },
+        "authorization": {
+            "sealed_materialization_authorized": True,
+            "unsealing_authorized": False,
+            "scientific_analysis_authorized": False,
+            "model_training_authorized": False,
+            "calibration_fit_authorized": False,
+            "learning_curve_use_authorized": False,
+            "architecture_selection_use_authorized": False,
+            "gwosc_gwtc_access_authorized": False,
+        },
+    }
+    validate_future_final_evaluation_authorization(
+        authorization,
+        config=config,
+        generator_commit=generator_commit,
+        commitment_sha256=FINAL_EVALUATION_COMMITMENT_HASH,
+        numerical_validity_addendum_sha256=NUMERICAL_VALIDITY_ADDENDUM_HASH,
+    )
+    changed = deepcopy(authorization)
+    changed["published_reference_contract"]["terminal_size_decision"] = (
+        "lock_train_65k"
+    )
+    with pytest.raises(ValueError, match="published-reference"):
         validate_future_final_evaluation_authorization(
             changed,
             config=config,

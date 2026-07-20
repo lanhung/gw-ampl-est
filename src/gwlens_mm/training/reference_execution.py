@@ -7,7 +7,7 @@ import json
 import os
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Dict, Mapping, Tuple
+from typing import Any, Dict, Mapping, Optional, Tuple
 
 import numpy as np
 
@@ -36,6 +36,13 @@ from .reference_baseline import (
 )
 from .rung65 import TRAIN_65K_COUNT, VALIDATION_COUNT, _load_standardizers
 from .runner import _verified_curves, _verify_training_checkout
+from .terminal131 import (
+    TRAIN_131K_COUNT,
+    Terminal131TrainingPublication,
+    resolve_terminal_131k_training_publication,
+    terminal_131k_training_dataset,
+)
+from .terminal_downstream import validate_terminal_size_decision
 
 IMPLEMENTATION_AUTHORIZATION = (
     "configs/execution/phase7_reference_execution_stack_authorization.yaml"
@@ -111,20 +118,36 @@ def _validate_terminal_and_architecture(
     *,
     terminal_decision_path: Path,
     selected_architecture_decision_path: Path,
-) -> Tuple[str, Mapping[str, Any]]:
+) -> Tuple[str, Mapping[str, Any], int]:
     configured_terminal = Path(
         str(authorization.get("terminal_size_decision_path", ""))
     ).resolve()
     terminal = _load_mapping(terminal_decision_path)
+    locked_rung = int(authorization.get("locked_training_rung", TRAIN_65K_COUNT))
     if not (
         terminal_decision_path.resolve() == configured_terminal
         and _sha256(terminal_decision_path)
         == authorization.get("terminal_size_decision_sha256")
-        and terminal.get("decision") == "lock_train_65k"
-        and terminal.get("comparison") == "train_32k_to_train_65k"
-        and terminal.get("extension_above_65536_authorized") is False
     ):
         raise ReferenceBaselineGateError("reference gate lacks the exact terminal lock")
+    if locked_rung == TRAIN_65K_COUNT:
+        if not (
+            terminal.get("decision") == "lock_train_65k"
+            and terminal.get("comparison") == "train_32k_to_train_65k"
+            and terminal.get("extension_above_65536_authorized") is False
+        ):
+            raise ReferenceBaselineGateError(
+                "reference gate lacks the exact historical 65k lock"
+            )
+    elif locked_rung == TRAIN_131K_COUNT:
+        try:
+            validate_terminal_size_decision(terminal)
+        except Exception as error:
+            raise ReferenceBaselineGateError(
+                "reference gate lacks the exact terminal 131k lock"
+            ) from error
+    else:
+        raise ReferenceBaselineGateError("reference gate selected an unsupported rung")
 
     configured_selection = Path(
         str(authorization.get("selected_architecture_decision_path", ""))
@@ -150,7 +173,7 @@ def _validate_terminal_and_architecture(
         "selected_primary_model_configuration_hash"
     ):
         raise ReferenceBaselineGateError("selected primary model changed")
-    return architecture_id, model
+    return architecture_id, model, locked_rung
 
 
 def validate_reference_query_execution_gate(
@@ -166,6 +189,9 @@ def validate_reference_query_execution_gate(
     primary_rung_preparation_path: Path,
     query_dataset_root: Path,
     query_parent_manifest_path: Path,
+    terminal_train_parent_root: Optional[Path] = None,
+    terminal_combined_publication_root: Optional[Path] = None,
+    terminal_development_tail_parent_root: Optional[Path] = None,
 ) -> Mapping[str, Any]:
     """Resolve exact metadata-only bank/query identities before record access."""
 
@@ -220,14 +246,14 @@ def validate_reference_query_execution_gate(
     ):
         raise ReferenceBaselineGateError("validation reference gate crossed final boundary")
 
-    architecture_id, model = _validate_terminal_and_architecture(
+    architecture_id, model, locked_rung = _validate_terminal_and_architecture(
         root,
         authorization,
         terminal_decision_path=terminal_decision_path,
         selected_architecture_decision_path=selected_architecture_decision_path,
     )
     correction = authorization.get("correction_publication", {})
-    publication = resolve_corrected_training_publication(
+    corrected_publication = resolve_corrected_training_publication(
         correction_publication_root,
         stage_a_parent_root=stage_a_publication_root,
         stage_b_parent_root=stage_b_publication_root,
@@ -249,9 +275,77 @@ def validate_reference_query_execution_gate(
         ),
     )
     if authorization.get("corrected_combined_train_manifest_sha256") != (
-        publication.corrected_combined_train_manifest_sha256
+        corrected_publication.corrected_combined_train_manifest_sha256
     ):
         raise ReferenceBaselineGateError("reference gate changed the corrected bank")
+    publication: CorrectedTrainingPublication | Terminal131TrainingPublication
+    train_manifest_sha256: str
+    validation_root: Path
+    validation_manifest_sha256: str
+    if locked_rung == TRAIN_65K_COUNT:
+        publication = corrected_publication
+        train_manifest_sha256 = (
+            corrected_publication.corrected_combined_train_manifest_sha256
+        )
+        validation_root = corrected_publication.stage_a.validation_root
+        validation_manifest_sha256 = (
+            corrected_publication.stage_a.namespace_manifest_sha256["validation"]
+        )
+    else:
+        if any(
+            value is None
+            for value in (
+                terminal_train_parent_root,
+                terminal_combined_publication_root,
+                terminal_development_tail_parent_root,
+            )
+        ):
+            raise ReferenceBaselineGateError(
+                "terminal reference gate lacks its three publication roots"
+            )
+        terminal_contract = authorization.get("terminal_publication", {})
+        terminal_authorization = {
+            "corrected_65k_publication": {
+                "base_generator_commit": str(
+                    authorization.get("base_generator_commit", "")
+                ),
+                "base_preregistration_hash": str(
+                    authorization.get("base_preregistration_hash", "")
+                ),
+                "correction_generator_commit": str(
+                    correction.get("generator_commit", "")
+                ),
+                "correction_preregistration_hash": WAVEFORM_CORRECTION_HASH,
+                "correction_parent_manifest_sha256": str(
+                    correction.get("parent_manifest_sha256", "")
+                ),
+                "correction_publication_tree_sha256": str(
+                    correction.get("publication_tree_sha256", "")
+                ),
+                "combined_base_manifest_sha256": str(
+                    authorization.get("combined_base_manifest_sha256", "")
+                ),
+            },
+            "terminal_publication": terminal_contract,
+        }
+        assert terminal_train_parent_root is not None
+        assert terminal_combined_publication_root is not None
+        assert terminal_development_tail_parent_root is not None
+        publication = resolve_terminal_131k_training_publication(
+            terminal_authorization,
+            stage_a_publication_root=stage_a_publication_root,
+            stage_b_publication_root=stage_b_publication_root,
+            combined_base_publication_root=combined_publication_root,
+            correction_publication_root=correction_publication_root,
+            train_parent_root=terminal_train_parent_root,
+            combined_131k_publication_root=terminal_combined_publication_root,
+            development_tail_parent_root=terminal_development_tail_parent_root,
+        )
+        train_manifest_sha256 = publication.combined_manifest_sha256
+        validation_root = publication.corrected_65k.stage_a.validation_root
+        validation_manifest_sha256 = publication.corrected_65k.stage_a.namespace_manifest_sha256[
+            "validation"
+        ]
 
     configured_preparation = Path(
         str(authorization.get("primary_rung_preparation_path", ""))
@@ -262,12 +356,12 @@ def validate_reference_query_execution_gate(
         and _sha256(primary_rung_preparation_path)
         == authorization.get("primary_rung_preparation_sha256")
         and preparation.get("status") == "ready_for_authorized_probe_fits"
-        and int(preparation.get("rung_count", -1)) == TRAIN_65K_COUNT
-        and int(preparation.get("member_count", -1)) == TRAIN_65K_COUNT
+        and int(preparation.get("rung_count", -1)) == locked_rung
+        and int(preparation.get("member_count", -1)) == locked_rung
         and preparation.get("train_manifest_sha256")
-        == publication.corrected_combined_train_manifest_sha256
+        == train_manifest_sha256
         and preparation.get("validation_manifest_sha256")
-        == publication.stage_a.namespace_manifest_sha256["validation"]
+        == validation_manifest_sha256
     ):
         raise ReferenceBaselineGateError("reference gate lacks primary preprocessing")
     input_standardizer, _ = _load_standardizers(preparation)
@@ -295,9 +389,9 @@ def validate_reference_query_execution_gate(
     ):
         raise ReferenceBaselineGateError("reference query dataset manifest changed")
     if role == "validation" and not (
-        query_dataset_root.resolve() == publication.stage_a.validation_root.resolve()
+        query_dataset_root.resolve() == validation_root.resolve()
         and _sha256(dataset_manifest)
-        == publication.stage_a.namespace_manifest_sha256["validation"]
+        == validation_manifest_sha256
     ):
         raise ReferenceBaselineGateError("validation query is not the locked development set")
     return {
@@ -308,6 +402,8 @@ def validate_reference_query_execution_gate(
         "query_count": expected_count,
         "selected_architecture_id": architecture_id,
         "selected_primary_model": model,
+        "locked_training_rung": locked_rung,
+        "locked_train_manifest_sha256": train_manifest_sha256,
         "input_standardizer": input_standardizer,
         "query_dataset_manifest_sha256": _sha256(dataset_manifest),
     }
@@ -467,6 +563,9 @@ def run_authorized_reference_query(
     psd_root: Path,
     output_root: Path,
     execution_commit: str,
+    terminal_train_parent_root: Optional[Path] = None,
+    terminal_combined_publication_root: Optional[Path] = None,
+    terminal_development_tail_parent_root: Optional[Path] = None,
 ) -> Mapping[str, Any]:
     """Execute one exact future validation or final RC.7 reference query."""
 
@@ -482,6 +581,9 @@ def run_authorized_reference_query(
         primary_rung_preparation_path=primary_rung_preparation_path,
         query_dataset_root=query_dataset_root,
         query_parent_manifest_path=query_parent_manifest_path,
+        terminal_train_parent_root=terminal_train_parent_root,
+        terminal_combined_publication_root=terminal_combined_publication_root,
+        terminal_development_tail_parent_root=terminal_development_tail_parent_root,
     )
     authorization = gate["authorization"]
     immutable = authorization.get("immutable_execution", {})
@@ -507,9 +609,12 @@ def run_authorized_reference_query(
     load_input_policy(root)
     curves = _verified_curves(model, psd_root)
     publication = gate["publication"]
-    if not isinstance(publication, CorrectedTrainingPublication):
+    if isinstance(publication, CorrectedTrainingPublication):
+        bank_dataset = corrected_65k_training_dataset(publication, curves)
+    elif isinstance(publication, Terminal131TrainingPublication):
+        bank_dataset = terminal_131k_training_dataset(publication, curves)
+    else:
         raise ReferenceBaselineGateError("reference gate returned an invalid bank")
-    bank_dataset = corrected_65k_training_dataset(publication, curves)
     query_dataset = PublishedStageADataset(
         query_dataset_root,
         expected_split=gate["query_split"],
@@ -538,9 +643,8 @@ def run_authorized_reference_query(
         "immutable_wheel_sha256": immutable.get("wheel_sha256"),
         "environment_lock_sha256": immutable.get("environment_lock_sha256"),
         "selected_architecture_id": gate["selected_architecture_id"],
-        "corrected_train_manifest_sha256": (
-            publication.corrected_combined_train_manifest_sha256
-        ),
+        "locked_training_rung": gate["locked_training_rung"],
+        "locked_train_manifest_sha256": gate["locked_train_manifest_sha256"],
         "query_dataset_manifest_sha256": gate["query_dataset_manifest_sha256"],
         "query_role": role,
         "query_count": gate["query_count"],

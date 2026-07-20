@@ -52,6 +52,13 @@ from .runner import (
     _verified_curves,
     _verify_training_checkout,
 )
+from .terminal131 import (
+    TRAIN_131K_COUNT,
+    Terminal131TrainingPublication,
+    resolve_terminal_131k_training_publication,
+    terminal_131k_training_dataset,
+)
+from .terminal_downstream import validate_terminal_size_decision
 
 FINAL_ANALYSIS_PATH = "configs/statistics/final_evaluation_analysis_preregistration.yaml"
 FINAL_ANALYSIS_HASH = "7e0e252f0a972e0b0ad2fe8f93f74f1f0172639a6fb258fc7a953be5fb7973e1"
@@ -269,13 +276,25 @@ def _validate_terminal_size_lock(
     if decision_path.resolve() != configured.resolve():
         raise TrainingGateError("terminal size-decision path changed")
     decision = _load_mapping(decision_path)
-    if (
-        decision.get("decision") != "lock_train_65k"
-        or decision.get("comparison") != "train_32k_to_train_65k"
-        or decision.get("extension_above_65536_authorized") is not False
-        or _sha256(decision_path) != authorization.get("terminal_size_decision_sha256")
-    ):
-        raise TrainingGateError("ablation gate lacks the exact terminal 65k lock")
+    locked_rung = int(authorization.get("locked_training_rung", TRAIN_65K_COUNT))
+    if _sha256(decision_path) != authorization.get("terminal_size_decision_sha256"):
+        raise TrainingGateError("ablation terminal decision hash changed")
+    if locked_rung == TRAIN_65K_COUNT:
+        if (
+            decision.get("decision") != "lock_train_65k"
+            or decision.get("comparison") != "train_32k_to_train_65k"
+            or decision.get("extension_above_65536_authorized") is not False
+        ):
+            raise TrainingGateError("ablation gate lacks the exact terminal 65k lock")
+    elif locked_rung == TRAIN_131K_COUNT:
+        try:
+            validate_terminal_size_decision(decision)
+        except Exception as error:
+            raise TrainingGateError(
+                "ablation gate lacks the exact terminal 131k lock"
+            ) from error
+    else:
+        raise TrainingGateError("ablation gate selected an unsupported training rung")
     return decision
 
 
@@ -290,12 +309,21 @@ def validate_ablation_training_execution_gate(
     terminal_size_decision_path: Path,
     selected_architecture_decision_path: Path,
     primary_rung_preparation_path: Path,
+    terminal_train_parent_root: Optional[Path] = None,
+    terminal_combined_publication_root: Optional[Path] = None,
+    terminal_development_tail_parent_root: Optional[Path] = None,
 ) -> Mapping[str, Any]:
     """Bind a future six-fit gate before any published strain or checkpoint opens."""
 
     validate_ablation_stack_contract(root)
     authorization = load_yaml(authorization_path)
-    if authorization.get("authorization_status") != "authorized_ablation_training_only":
+    locked_rung = int(authorization.get("locked_training_rung", TRAIN_65K_COUNT))
+    expected_status = (
+        "authorized_terminal_131k_ablation_training_only"
+        if locked_rung == TRAIN_131K_COUNT
+        else "authorized_ablation_training_only"
+    )
+    if authorization.get("authorization_status") != expected_status:
         raise TrainingGateError("scientific ablation-training authorization is absent")
     flags = authorization.get("authorization", {})
     for required in (
@@ -305,6 +333,15 @@ def validate_ablation_training_execution_gate(
     ):
         if flags.get(required) is not True:
             raise TrainingGateError(f"ablation execution requires {required}=true")
+    if locked_rung == TRAIN_131K_COUNT:
+        for required in (
+            "terminal_train_increment_data_access_authorized",
+            "terminal_131k_combined_reference_access_authorized",
+        ):
+            if flags.get(required) is not True:
+                raise TrainingGateError(
+                    f"terminal ablation execution requires {required}=true"
+                )
     for forbidden in (
         "primary_model_retraining_authorized",
         "architecture_or_size_selection_authorized",
@@ -313,13 +350,20 @@ def validate_ablation_training_execution_gate(
         "final_evaluation_materialization_authorized",
         "final_evaluation_unsealing_authorized",
         "final_evaluation_inference_authorized",
-        "extension_above_65536_authorized",
         "gwosc_gwtc_access_authorized",
     ):
         if flags.get(forbidden) is not False:
             raise TrainingGateError(f"ablation gate must keep {forbidden}=false")
+    extension_key = (
+        "extension_above_131072_authorized"
+        if locked_rung == TRAIN_131K_COUNT
+        else "extension_above_65536_authorized"
+    )
+    if flags.get(extension_key) is not False:
+        raise TrainingGateError(f"ablation gate must keep {extension_key}=false")
     if not (
-        authorization.get("locked_training_rung") == TRAIN_65K_COUNT
+        authorization.get("locked_training_rung") == locked_rung
+        and locked_rung in {TRAIN_65K_COUNT, TRAIN_131K_COUNT}
         and authorization.get("authorized_ablation_views") == list(ABLATION_VIEWS)
         and authorization.get("authorized_training_seeds") == list(SEEDS)
         and int(authorization.get("maximum_fit_count", -1)) == MAXIMUM_FITS
@@ -343,7 +387,7 @@ def validate_ablation_training_execution_gate(
         raise TrainingGateError("ablation gate lacks the sealed final commitment")
 
     correction = authorization.get("correction_publication", {})
-    publication = resolve_corrected_training_publication(
+    corrected_publication = resolve_corrected_training_publication(
         correction_publication_root,
         stage_a_parent_root=stage_a_publication_root,
         stage_b_parent_root=stage_b_publication_root,
@@ -365,9 +409,70 @@ def validate_ablation_training_execution_gate(
         ),
     )
     if authorization.get("corrected_combined_train_manifest_sha256") != (
-        publication.corrected_combined_train_manifest_sha256
+        corrected_publication.corrected_combined_train_manifest_sha256
     ):
         raise TrainingGateError("ablation gate changed the corrected 65k view")
+    publication: CorrectedTrainingPublication | Terminal131TrainingPublication
+    train_manifest_sha256: str
+    validation_manifest_sha256 = corrected_publication.stage_a.namespace_manifest_sha256[
+        "validation"
+    ]
+    if locked_rung == TRAIN_65K_COUNT:
+        publication = corrected_publication
+        train_manifest_sha256 = (
+            corrected_publication.corrected_combined_train_manifest_sha256
+        )
+    else:
+        if any(
+            value is None
+            for value in (
+                terminal_train_parent_root,
+                terminal_combined_publication_root,
+                terminal_development_tail_parent_root,
+            )
+        ):
+            raise TrainingGateError(
+                "terminal ablation gate lacks its three publication roots"
+            )
+        terminal_contract = authorization.get("terminal_publication", {})
+        terminal_authorization = {
+            "corrected_65k_publication": {
+                "base_generator_commit": str(
+                    authorization.get("base_generator_commit", "")
+                ),
+                "base_preregistration_hash": str(
+                    authorization.get("base_preregistration_hash", "")
+                ),
+                "correction_generator_commit": str(
+                    correction.get("generator_commit", "")
+                ),
+                "correction_preregistration_hash": WAVEFORM_CORRECTION_HASH,
+                "correction_parent_manifest_sha256": str(
+                    correction.get("parent_manifest_sha256", "")
+                ),
+                "correction_publication_tree_sha256": str(
+                    correction.get("publication_tree_sha256", "")
+                ),
+                "combined_base_manifest_sha256": str(
+                    authorization.get("combined_base_manifest_sha256", "")
+                ),
+            },
+            "terminal_publication": terminal_contract,
+        }
+        assert terminal_train_parent_root is not None
+        assert terminal_combined_publication_root is not None
+        assert terminal_development_tail_parent_root is not None
+        publication = resolve_terminal_131k_training_publication(
+            terminal_authorization,
+            stage_a_publication_root=stage_a_publication_root,
+            stage_b_publication_root=stage_b_publication_root,
+            combined_base_publication_root=combined_publication_root,
+            correction_publication_root=correction_publication_root,
+            train_parent_root=terminal_train_parent_root,
+            combined_131k_publication_root=terminal_combined_publication_root,
+            development_tail_parent_root=terminal_development_tail_parent_root,
+        )
+        train_manifest_sha256 = publication.combined_manifest_sha256
 
     configured_preparation = Path(
         str(authorization.get("primary_rung_preparation_path", ""))
@@ -378,13 +483,13 @@ def validate_ablation_training_execution_gate(
     train_ids = tuple(str(value) for value in preparation.get("member_ids", ()))
     if not (
         preparation.get("status") == "ready_for_authorized_probe_fits"
-        and int(preparation.get("rung_count", -1)) == TRAIN_65K_COUNT
-        and len(train_ids) == TRAIN_65K_COUNT
-        and len(set(train_ids)) == TRAIN_65K_COUNT
+        and int(preparation.get("rung_count", -1)) == locked_rung
+        and len(train_ids) == locked_rung
+        and len(set(train_ids)) == locked_rung
         and preparation.get("train_manifest_sha256")
-        == publication.corrected_combined_train_manifest_sha256
+        == train_manifest_sha256
         and preparation.get("validation_manifest_sha256")
-        == publication.stage_a.namespace_manifest_sha256["validation"]
+        == validation_manifest_sha256
         and preparation.get("final_evaluation_commitment_sha256") == commitment_hash
         and _sha256(primary_rung_preparation_path)
         == authorization.get("primary_rung_preparation_sha256")
@@ -409,6 +514,9 @@ def validate_ablation_training_execution_gate(
         "input_standardizer": input_standardizer,
         "target_standardizer": target_standardizer,
         "train_ids": train_ids,
+        "locked_training_rung": locked_rung,
+        "locked_train_manifest_sha256": train_manifest_sha256,
+        "validation_manifest_sha256": validation_manifest_sha256,
         "final_evaluation_commitment_sha256": commitment_hash,
     }
 
@@ -432,6 +540,9 @@ def run_authorized_ablation_fit(
     seed: int,
     device_name: str,
     resume_checkpoint: Optional[Path] = None,
+    terminal_train_parent_root: Optional[Path] = None,
+    terminal_combined_publication_root: Optional[Path] = None,
+    terminal_development_tail_parent_root: Optional[Path] = None,
 ) -> Mapping[str, Any]:
     """Execute one future authorized ablation fit and development evaluation."""
 
@@ -447,6 +558,9 @@ def run_authorized_ablation_fit(
         terminal_size_decision_path=terminal_size_decision_path,
         selected_architecture_decision_path=selected_architecture_decision_path,
         primary_rung_preparation_path=primary_rung_preparation_path,
+        terminal_train_parent_root=terminal_train_parent_root,
+        terminal_combined_publication_root=terminal_combined_publication_root,
+        terminal_development_tail_parent_root=terminal_development_tail_parent_root,
     )
     authorization = gate["authorization"]
     artifacts = validate_immutable_training_artifacts(
@@ -469,11 +583,16 @@ def run_authorized_ablation_fit(
     load_input_policy(root)
     curves = _verified_curves(model, psd_root)
     publication = gate["publication"]
-    if not isinstance(publication, CorrectedTrainingPublication):
-        raise TrainingGateError("ablation gate returned a non-corrected publication")
-    train_dataset = corrected_65k_training_dataset(publication, curves)
+    if isinstance(publication, CorrectedTrainingPublication):
+        train_dataset = corrected_65k_training_dataset(publication, curves)
+        validation_root = publication.stage_a.validation_root
+    elif isinstance(publication, Terminal131TrainingPublication):
+        train_dataset = terminal_131k_training_dataset(publication, curves)
+        validation_root = publication.corrected_65k.stage_a.validation_root
+    else:
+        raise TrainingGateError("ablation gate returned an invalid publication")
     validation_dataset = PublishedStageADataset(
-        publication.stage_a.validation_root,
+        validation_root,
         expected_split=SplitName.VALIDATION,
         detector_curves=curves,
         expected_total_pairs=VALIDATION_COUNT,
@@ -489,17 +608,15 @@ def run_authorized_ablation_fit(
         model_configuration_hash=model_configuration_hash(model),
         training_code_commit=training_commit,
         training_environment_sha256=artifacts["environment_lock_sha256"],
-        train_manifest_sha256=publication.corrected_combined_train_manifest_sha256,
-        validation_manifest_sha256=publication.stage_a.namespace_manifest_sha256[
-            "validation"
-        ],
+        train_manifest_sha256=str(gate["locked_train_manifest_sha256"]),
+        validation_manifest_sha256=str(gate["validation_manifest_sha256"]),
         final_evaluation_commitment_sha256=str(
             gate["final_evaluation_commitment_sha256"]
         ),
         membership_sha256=membership_hash(train_ids),
         input_standardizer_sha256=standardizer_hash(input_standardizer),
         target_standardizer_sha256=standardizer_hash(target_standardizer),
-        training_rung_count=TRAIN_65K_COUNT,
+        training_rung_count=int(gate["locked_training_rung"]),
         seed=seed,
     )
     identity.validate()
