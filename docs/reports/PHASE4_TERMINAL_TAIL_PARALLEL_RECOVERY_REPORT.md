@@ -57,6 +57,14 @@ environment checks, train-publication hash binding, free-space gates, complete
 namespace validation and cross-component grouped-ID validation before atomic
 tail and combined-reference publication.
 
+The preflight additionally installs the recovery package from commit
+`6c8d717d5c095d8ab881355d01cc10e0ff84db1b` into a separate noneditable target.
+Its wheel SHA-256 is
+`230ae7c89708aca9f492e59e9e49e3bc0d076aad404afb4a8430c6447baee05c`.
+A member-by-member wheel comparison proves that all generator-relevant package
+files are byte-identical to the original `a4e6bac...` wheel; only unrelated
+downstream modules and the terminal orchestration package are allowed to differ.
+
 Pre-freeze verification passed 440 tests with seven optional dependency skips;
 the eight focused recovery tests passed. Maintained-scope Ruff, mypy over all
 67 source files, sdist and wheel builds passed. The exact orchestration commit
