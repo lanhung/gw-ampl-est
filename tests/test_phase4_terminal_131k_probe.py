@@ -11,6 +11,7 @@ from gwlens_mm.training.engine import TrainingRunIdentity
 from gwlens_mm.training.terminal131 import (
     EXPECTED_TERMINAL_GPU_MODEL,
     TAIL_STRATA,
+    _validated_tail_shard_layout,
     validate_terminal_131k_training_gate,
     validate_terminal_probe_release_binding,
 )
@@ -61,6 +62,32 @@ def test_terminal_probe_execution_remains_closed_without_exact_gate(
 def test_terminal_tail_contract_has_four_distinct_strata() -> None:
     assert len(TAIL_STRATA) == 4
     assert len(set(TAIL_STRATA)) == 4
+
+
+def test_terminal_tail_reader_accepts_original_and_parallel_physical_layouts() -> None:
+    assert _validated_tail_shard_layout({}) == (1, 128)
+    assert _validated_tail_shard_layout(
+        {"shards_per_namespace": 1, "accepted_pairs_per_shard": 128}
+    ) == (1, 128)
+    assert _validated_tail_shard_layout(
+        {"shards_per_namespace": 32, "accepted_pairs_per_shard": 4}
+    ) == (32, 4)
+
+
+@pytest.mark.parametrize(
+    "manifest",
+    [
+        {"shards_per_namespace": 32},
+        {"accepted_pairs_per_shard": 4},
+        {"shards_per_namespace": 16, "accepted_pairs_per_shard": 8},
+        {"shards_per_namespace": 64, "accepted_pairs_per_shard": 2},
+    ],
+)
+def test_terminal_tail_reader_rejects_unreviewed_physical_layout(
+    manifest: dict[str, int]
+) -> None:
+    with pytest.raises(TrainingGateError, match="shard layout"):
+        _validated_tail_shard_layout(manifest)
 
 
 def test_terminal_runner_dry_plan_is_execution_disabled(tmp_path: Path) -> None:
