@@ -207,6 +207,28 @@ class Terminal131TrainingPublication:
     development_tail_parent_root: Path
     development_tail_manifest_sha256: str
     development_tail_dataset_ids: Mapping[str, str]
+    development_tail_shards_per_namespace: int
+    development_tail_pairs_per_shard: int
+
+
+def _validated_tail_shard_layout(manifest: Mapping[str, Any]) -> Tuple[int, int]:
+    """Accept only the original or reviewed parallel physical tail layout."""
+
+    fields_present = (
+        "shards_per_namespace" in manifest,
+        "accepted_pairs_per_shard" in manifest,
+    )
+    if any(fields_present) and not all(fields_present):
+        raise TrainingGateError("terminal tail shard layout is only partially declared")
+    if not any(fields_present):
+        return 1, 128
+    layout = (
+        int(manifest["shards_per_namespace"]),
+        int(manifest["accepted_pairs_per_shard"]),
+    )
+    if layout not in ((1, 128), (32, 4)) or layout[0] * layout[1] != 128:
+        raise TrainingGateError("terminal tail physical shard layout is unauthorized")
+    return layout
 
 
 def _resolve_corrected_from_authorization(
@@ -388,6 +410,9 @@ def resolve_terminal_131k_training_publication(
         raise TrainingGateError("terminal development-tail parent contract failed")
     if any(not (tail_parent / str(dataset_id)).is_dir() for dataset_id in dataset_ids.values()):
         raise TrainingGateError("terminal development-tail child dataset is absent")
+    tail_shards_per_namespace, tail_pairs_per_shard = _validated_tail_shard_layout(
+        tail_manifest
+    )
     return Terminal131TrainingPublication(
         combined_root=combined_root,
         combined_manifest_path=combined_manifest_path,
@@ -403,6 +428,8 @@ def resolve_terminal_131k_training_publication(
         development_tail_dataset_ids={
             str(key): str(value) for key, value in dataset_ids.items()
         },
+        development_tail_shards_per_namespace=tail_shards_per_namespace,
+        development_tail_pairs_per_shard=tail_pairs_per_shard,
     )
 
 
@@ -439,6 +466,9 @@ class TerminalDevelopmentTailDataset:
                 publication.development_tail_parent_root / dataset_id,
                 expected_split=SplitName.BALANCED_TAIL_DIAGNOSTIC,
                 detector_curves=detector_curves,
+                expected_pairs_per_shard=(
+                    publication.development_tail_pairs_per_shard
+                ),
                 expected_total_pairs=128,
             )
             datasets.append((stratum, dataset))
