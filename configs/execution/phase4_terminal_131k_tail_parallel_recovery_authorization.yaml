@@ -33,7 +33,7 @@ frozen_scientific_contract:
   importance_weight: 1.0
 
 immutable_orchestration:
-  git_commit: "__ORCHESTRATION_COMMIT__"
+  git_commit: "6c8d717d5c095d8ab881355d01cc10e0ff84db1b"
   generator_wheel_path: /root/autodl-tmp/lensing-4/artifacts/phase4/terminal-131k/a4e6bac014ccd521d510c97593cb1368e826d5eb/gwlens_mm-0.1.0-py3-none-any.whl
   generator_wheel_sha256: "c7bc8ecadb373ed5d7307ee9c96b131cc68cc9ad8ea10ae2100c54aed2a8958f"
   python_executable: /root/autodl-tmp/lensing-4/envs/phase1b-smoke/bin/python

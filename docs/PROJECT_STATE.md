@@ -532,7 +532,8 @@ the conditional tail population. A same-phase recovery keeps all four
 atomic four-case shards per stratum so the authorized 32 physical workers can
 operate. It binds the read-only train publication, requires fresh tail and
 combined identities and leaves training and every downstream execution gate
-closed until independent atomic closeout passes.
+closed until independent atomic closeout passes. The frozen recovery
+orchestration commit is `6c8d717d5c095d8ab881355d01cc10e0ff84db1b`.
 
 The shared terminal downstream binding stack is also implemented under a
 synthetic-only gate. It rejects 65k labels in the terminal path, accepts only

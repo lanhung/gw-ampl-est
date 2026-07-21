@@ -60,7 +60,7 @@ tail and combined-reference publication.
 Pre-freeze verification passed 440 tests with seven optional dependency skips;
 the eight focused recovery tests passed. Maintained-scope Ruff, mypy over all
 67 source files, sdist and wheel builds passed. The exact orchestration commit
-is populated only after this reviewed implementation commit is clean.
+is `6c8d717d5c095d8ab881355d01cc10e0ff84db1b`.
 
 ## Closed boundaries
 
