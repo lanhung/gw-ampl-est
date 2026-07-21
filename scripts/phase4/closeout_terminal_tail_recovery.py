@@ -257,6 +257,11 @@ def closeout_tail_recovery_publication(
         "development_tail_manifest_sha256": (
             publication.development_tail_manifest_sha256
         ),
+        "publication_roots": {
+            "terminal_train_increment": str(train_parent),
+            "terminal_combined_131k": str(combined_root),
+            "development_tail": str(tail_parent),
+        },
         "proposal_equals_evaluation": True,
         "all_importance_weights_one": True,
         "stopped_tail_evidence_reused": False,
