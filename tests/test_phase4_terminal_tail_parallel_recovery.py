@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from copy import deepcopy
 from pathlib import Path
+from zipfile import ZipFile
 
 import pytest
 
@@ -144,3 +145,28 @@ def test_parallel_tail_does_not_authorize_scientific_execution() -> None:
     assert authorization["authorization"]["extension_above_131072_authorized"] is False
     assert authorization["authorization"]["real_noise_authorized"] is False
     assert authorization["authorization"]["gwosc_gwtc_access_authorized"] is False
+
+
+def test_recovery_wheel_preserves_generator_core(tmp_path: Path) -> None:
+    original = tmp_path / "original.whl"
+    recovery_wheel = tmp_path / "recovery.whl"
+    with ZipFile(original, "w") as archive:
+        archive.writestr("gwlens_mm/production/generator.py", b"frozen")
+        archive.writestr("gwlens_mm/training/runner.py", b"old")
+    with ZipFile(recovery_wheel, "w") as archive:
+        archive.writestr("gwlens_mm/production/generator.py", b"frozen")
+        archive.writestr("gwlens_mm/production/terminal131.py", b"added")
+        archive.writestr("gwlens_mm/training/runner.py", b"new")
+    observed = recovery._verify_generator_core_unchanged(original, recovery_wheel)
+    assert len(observed) == 64
+
+
+def test_recovery_wheel_rejects_generator_core_drift(tmp_path: Path) -> None:
+    original = tmp_path / "original.whl"
+    recovery_wheel = tmp_path / "recovery.whl"
+    with ZipFile(original, "w") as archive:
+        archive.writestr("gwlens_mm/production/generator.py", b"frozen")
+    with ZipFile(recovery_wheel, "w") as archive:
+        archive.writestr("gwlens_mm/production/generator.py", b"changed")
+    with pytest.raises(ValueError, match="changed frozen generator code"):
+        recovery._verify_generator_core_unchanged(original, recovery_wheel)

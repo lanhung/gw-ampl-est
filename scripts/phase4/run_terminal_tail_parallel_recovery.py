@@ -16,11 +16,13 @@ import os
 import shutil
 import subprocess
 import time
+import zipfile
 from dataclasses import replace
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, Mapping, Set
 
+import gwlens_mm
 from gwlens_mm.config import load_yaml
 from gwlens_mm.production.storage import tree_checksum
 from gwlens_mm.production.terminal131 import (
@@ -71,6 +73,41 @@ def _git_head(root: Path) -> str:
     ).stdout.strip()
 
 
+def _verify_generator_core_unchanged(original_wheel: Path, recovery_wheel: Path) -> str:
+    """Prove that the recovery package did not alter executable generator code."""
+
+    excluded = {
+        "gwlens_mm/production/calibration_sbc.py",
+        "gwlens_mm/production/final_evaluation.py",
+        "gwlens_mm/production/terminal131.py",
+    }
+    with zipfile.ZipFile(original_wheel) as original, zipfile.ZipFile(recovery_wheel) as recovery:
+        original_names = {
+            name
+            for name in original.namelist()
+            if name.startswith("gwlens_mm/")
+            and not name.startswith("gwlens_mm/training/")
+            and name not in excluded
+        }
+        recovery_names = set(recovery.namelist())
+        missing = sorted(original_names - recovery_names)
+        changed = sorted(
+            name
+            for name in original_names & recovery_names
+            if original.read(name) != recovery.read(name)
+        )
+        payload = {
+            name: hashlib.sha256(recovery.read(name)).hexdigest()
+            for name in sorted(original_names)
+            if name in recovery_names
+        }
+    if missing or changed:
+        raise ValueError(
+            "recovery wheel changed frozen generator code: " + ", ".join((*missing, *changed))
+        )
+    return hashlib.sha256(canonical_json(payload).encode()).hexdigest()
+
+
 def _verify_orchestration_identity(root: Path, expected: str) -> None:
     if len(expected) != 40:
         raise ValueError("parallel-tail orchestration commit must be a full SHA")
@@ -86,11 +123,14 @@ def _verify_orchestration_identity(root: Path, expected: str) -> None:
             raise ValueError("parallel-tail checkout is dirty")
         if head == expected:
             return
-        if subprocess.run(
-            ["git", "merge-base", "--is-ancestor", expected, head],
-            cwd=root,
-            check=False,
-        ).returncode != 0:
+        if (
+            subprocess.run(
+                ["git", "merge-base", "--is-ancestor", expected, head],
+                cwd=root,
+                check=False,
+            ).returncode
+            != 0
+        ):
             raise ValueError("parallel-tail commit is not an ancestor of checkout")
         changed = subprocess.run(
             ["git", "diff", "--name-only", f"{expected}..{head}"],
@@ -102,8 +142,7 @@ def _verify_orchestration_identity(root: Path, expected: str) -> None:
         unexpected = sorted(set(changed) - _POSTFREEZE_PATHS)
         if unexpected:
             raise ValueError(
-                "parallel-tail post-freeze protected paths changed: "
-                + ", ".join(unexpected)
+                "parallel-tail post-freeze protected paths changed: " + ", ".join(unexpected)
             )
         return
     marker = root / "SYNCED_ORCHESTRATION_COMMIT"
@@ -216,14 +255,8 @@ def _authorization(config: Mapping[str, Any]) -> Dict[str, Any]:
         if path.is_dir() and not path.name.endswith(".partial")
     )
     journals = tuple(evidence.rglob("*.jsonl"))
-    attempt_lines = sum(
-        sum(1 for _ in path.open("r", encoding="utf-8")) for path in journals
-    )
-    accepted_chunks = sum(
-        1
-        for path in evidence.rglob("noisy.zarr/[0-9]*.0.0.0")
-        if path.is_file()
-    )
+    attempt_lines = sum(sum(1 for _ in path.open("r", encoding="utf-8")) for path in journals)
+    accepted_chunks = sum(1 for path in evidence.rglob("noisy.zarr/[0-9]*.0.0.0") if path.is_file())
     evidence_bytes = sum(path.stat().st_size for path in evidence.rglob("*") if path.is_file())
     if (
         len(partials),
@@ -299,11 +332,26 @@ def evaluate_release_gate(*, orchestration_commit: str) -> Dict[str, Any]:
             break
     immutable = authorization["immutable_orchestration"]
     try:
-        wheel = Path(str(immutable["generator_wheel_path"]))
-        observed_wheel_hash = _sha256(wheel)
+        generator_wheel = Path(str(immutable["generator_wheel_path"]))
+        observed_wheel_hash = _sha256(generator_wheel)
         checks["generator_wheel_sha256"] = observed_wheel_hash
         if observed_wheel_hash != immutable["generator_wheel_sha256"]:
             blockers.append("parallel tail generator wheel hash mismatch")
+        recovery_wheel = Path(str(immutable["recovery_wheel_path"]))
+        observed_recovery_hash = _sha256(recovery_wheel)
+        checks["recovery_wheel_sha256"] = observed_recovery_hash
+        if observed_recovery_hash != immutable["recovery_wheel_sha256"]:
+            blockers.append("parallel tail recovery wheel hash mismatch")
+        checks["generator_core_manifest_sha256"] = _verify_generator_core_unchanged(
+            generator_wheel, recovery_wheel
+        )
+        if checks["generator_core_manifest_sha256"] != immutable["generator_core_manifest_sha256"]:
+            blockers.append("parallel tail frozen generator-core manifest mismatch")
+        runtime_site = Path(str(immutable["runtime_site_packages"])).resolve()
+        imported_package = Path(str(gwlens_mm.__file__)).resolve()
+        checks["imported_package_path"] = str(imported_package)
+        if not imported_package.is_relative_to(runtime_site):
+            blockers.append("parallel tail package is not imported from recovery wheel")
         environment_lock = ROOT / str(config["environment"]["dependency_lock_path"])
         observed_lock_hash = _sha256(environment_lock)
         checks["environment_lock_sha256"] = observed_lock_hash

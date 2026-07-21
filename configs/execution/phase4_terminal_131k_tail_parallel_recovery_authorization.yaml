@@ -33,9 +33,14 @@ frozen_scientific_contract:
   importance_weight: 1.0
 
 immutable_orchestration:
-  git_commit: "6c8d717d5c095d8ab881355d01cc10e0ff84db1b"
+  git_commit: "ab8e18934eac23cb73be7f7e9c92ce8cb2a3f598"
   generator_wheel_path: /root/autodl-tmp/lensing-4/artifacts/phase4/terminal-131k/a4e6bac014ccd521d510c97593cb1368e826d5eb/gwlens_mm-0.1.0-py3-none-any.whl
   generator_wheel_sha256: "c7bc8ecadb373ed5d7307ee9c96b131cc68cc9ad8ea10ae2100c54aed2a8958f"
+  recovery_package_commit: "6c8d717d5c095d8ab881355d01cc10e0ff84db1b"
+  recovery_wheel_path: /root/autodl-tmp/lensing-4/artifacts/phase4/terminal-tail-recovery/6c8d717d5c095d8ab881355d01cc10e0ff84db1b/gwlens_mm-0.1.0-py3-none-any.whl
+  recovery_wheel_sha256: "230ae7c89708aca9f492e59e9e49e3bc0d076aad404afb4a8430c6447baee05c"
+  generator_core_manifest_sha256: "ebb900d52719dd570e378b63a6d2178b5b47a4b4ed6326769fa55e486b6ebda5"
+  runtime_site_packages: /root/autodl-tmp/lensing-4/runtime/terminal-tail-recovery/6c8d717d5c095d8ab881355d01cc10e0ff84db1b/site-packages
   python_executable: /root/autodl-tmp/lensing-4/envs/phase1b-smoke/bin/python
   environment_lock_sha256: "792a93f24f6c38c18ec214665d34c8348e042b21beebd177333dae2c30224d8f"
   editable_install_authorized: false
