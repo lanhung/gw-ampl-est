@@ -108,3 +108,11 @@ def test_recovery_closeout_rejects_worker64_authorization(
         closeout.validate_tail_recovery_execution_result(
             ROOT, config, _result_fixture()
         )
+
+
+def test_recovery_closeout_source_records_exact_parallel_publication_roots() -> None:
+    source = (
+        ROOT / "scripts/phase4/closeout_terminal_tail_recovery.py"
+    ).read_text(encoding="utf-8")
+    assert '"publication_roots": {' in source
+    assert '"development_tail": str(tail_parent)' in source

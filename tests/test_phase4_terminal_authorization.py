@@ -37,6 +37,7 @@ def _packet_and_review(tmp_path: Path) -> tuple[Path, Path, Path]:
     closeout_path = root / "results/phase4/terminal_probe_closeout.json"
     closeout = {
         "status": "terminal_131k_independent_closeout_passed",
+        "execution_mode": "parallel_tail_recovery",
         "new_train_accepted_count": 65536,
         "development_tail_accepted_count": 512,
         "logical_train_accepted_count": 131072,
@@ -48,6 +49,17 @@ def _packet_and_review(tmp_path: Path) -> tuple[Path, Path, Path]:
         "combined_train_id": "combined",
         "observed_remaining_free_bytes": 150_000_000_000,
         "tree_evidence": {"recomputed": True},
+        "publication_roots": {
+            "terminal_train_increment": (
+                "/root/autodl-tmp/lensing-4/data/train/published/parent"
+            ),
+            "terminal_combined_131k": (
+                "/root/autodl-tmp/lensing-4/data/combined/published/combined"
+            ),
+            "development_tail": (
+                "/root/autodl-tmp/lensing-4/data/tail/published/tail"
+            ),
+        },
     }
     _write_json(closeout_path, closeout)
     packet_path = root / "results/phase4/terminal_probe_release_packet.json"
@@ -167,6 +179,54 @@ def test_builder_requires_separate_review_and_closes_downstream(tmp_path: Path) 
     assert authorization["terminal_probe_release_review"][
         "delegated_review_status"
     ] == "accepted_for_exact_terminal_probe_authorization"
+    assert authorization["publication_roots"]["development_tail"] == (
+        "/root/autodl-tmp/lensing-4/data/tail/published/tail"
+    )
+
+
+@pytest.mark.parametrize(
+    ("root_key", "invalid"),
+    [
+        ("development_tail", "/tmp/published/tail"),
+        (
+            "terminal_combined_131k",
+            "/root/autodl-tmp/lensing-4/data/combined/published/wrong",
+        ),
+    ],
+)
+def test_builder_rejects_parallel_recovery_publication_root_drift(
+    tmp_path: Path, root_key: str, invalid: str
+) -> None:
+    root, packet_path, review_path = _packet_and_review(tmp_path)
+    closeout_path = root / "results/phase4/terminal_probe_closeout.json"
+    closeout = json.loads(closeout_path.read_text(encoding="utf-8"))
+    closeout["publication_roots"][root_key] = invalid
+    _write_json(closeout_path, closeout)
+    packet = json.loads(packet_path.read_text(encoding="utf-8"))
+    packet["closeout_result_sha256"] = hashlib.sha256(
+        closeout_path.read_bytes()
+    ).hexdigest()
+    _write_json(packet_path, packet)
+    review = json.loads(review_path.read_text(encoding="utf-8"))
+    review["reviewed_release_packet_sha256"] = hashlib.sha256(
+        packet_path.read_bytes()
+    ).hexdigest()
+    _write_json(review_path, review)
+    with pytest.raises(TrainingGateError, match="publication root"):
+        build_terminal_probe_authorization(
+            root,
+            release_packet_path=packet_path,
+            delegated_review_path=review_path,
+            authorization_output_path=(
+                root / "configs/execution/future_terminal_probe_fixture.yaml"
+            ),
+            retained_65k_output_root=Path(
+                "/root/autodl-tmp/lensing-4/training/retained-65k"
+            ),
+            training_output_root=Path(
+                "/root/autodl-tmp/lensing-4/training/terminal-131k"
+            ),
+        )
 
 
 @pytest.mark.parametrize(

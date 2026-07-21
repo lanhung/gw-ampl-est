@@ -189,7 +189,6 @@ def build_terminal_probe_authorization(
 
     config = load_yaml(root / TERMINAL_CONFIG_PATH)
     reference = config["corrected_65k_reference"]
-    paths = config["paths"]
     frozen = packet.get("terminal_preregistration", {})
     if not isinstance(frozen, Mapping):
         raise TrainingGateError("terminal packet preregistration identity is malformed")
@@ -203,15 +202,53 @@ def build_terminal_probe_authorization(
         "terminal_learning_curve_decision_authorized": True,
         **{str(key): False for key in review["closed_boundaries"]},
     }
-    train_parent = Path(str(paths["train_publication_root"])) / str(
-        closeout["parent_run_id"]
-    )
-    tail_parent = Path(str(paths["tail_publication_root"])) / str(
-        closeout["development_tail_parent_id"]
-    )
-    combined_root = Path(str(paths["combined_publication_root"])) / str(
-        closeout["combined_train_id"]
-    )
+    closeout_roots = closeout.get("publication_roots")
+    if closeout.get("execution_mode") == "parallel_tail_recovery":
+        if not isinstance(closeout_roots, Mapping):
+            raise TrainingGateError(
+                "parallel terminal closeout lacks exact publication roots"
+            )
+        if set(closeout_roots) != {
+            "terminal_train_increment",
+            "terminal_combined_131k",
+            "development_tail",
+        }:
+            raise TrainingGateError(
+                "parallel terminal closeout publication roots are incomplete"
+            )
+        train_parent = Path(
+            str(closeout_roots["terminal_train_increment"])
+        ).resolve()
+        tail_parent = Path(str(closeout_roots["development_tail"])).resolve()
+        combined_root = Path(
+            str(closeout_roots["terminal_combined_131k"])
+        ).resolve()
+        if any(
+            not value.is_relative_to(PROJECT_ROOT) or "published" not in value.parts
+            for value in (train_parent, tail_parent, combined_root)
+        ):
+            raise TrainingGateError(
+                "parallel terminal closeout publication root is outside approved storage"
+            )
+        if (
+            train_parent.name != str(closeout["parent_run_id"])
+            or tail_parent.name != str(closeout["development_tail_parent_id"])
+            or combined_root.name != str(closeout["combined_train_id"])
+        ):
+            raise TrainingGateError(
+                "parallel terminal closeout publication root identity changed"
+            )
+    else:
+        paths = config["paths"]
+        train_parent = Path(str(paths["train_publication_root"])) / str(
+            closeout["parent_run_id"]
+        )
+        tail_parent = Path(str(paths["tail_publication_root"])) / str(
+            closeout["development_tail_parent_id"]
+        )
+        combined_root = Path(str(paths["combined_publication_root"])) / str(
+            closeout["combined_train_id"]
+        )
     authorization = {
         "phase": "4-terminal-probe-131k",
         "authorization_status": AUTHORIZATION_STATUS,
