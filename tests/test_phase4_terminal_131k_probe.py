@@ -11,6 +11,7 @@ from gwlens_mm.training.engine import TrainingRunIdentity
 from gwlens_mm.training.terminal131 import (
     EXPECTED_TERMINAL_GPU_MODEL,
     TAIL_STRATA,
+    _validate_authorized_publication_roots,
     _validated_tail_shard_layout,
     validate_terminal_131k_training_gate,
     validate_terminal_probe_release_binding,
@@ -88,6 +89,34 @@ def test_terminal_tail_reader_rejects_unreviewed_physical_layout(
 ) -> None:
     with pytest.raises(TrainingGateError, match="shard layout"):
         _validated_tail_shard_layout(manifest)
+
+
+def test_terminal_execution_roots_are_bound_to_authorization(tmp_path: Path) -> None:
+    observed = {
+        "stage_a": tmp_path / "stage-a",
+        "stage_b": tmp_path / "stage-b",
+        "combined_base": tmp_path / "combined-base",
+        "correction": tmp_path / "correction",
+        "terminal_train_increment": tmp_path / "increment",
+        "terminal_combined_131k": tmp_path / "combined-131k",
+        "development_tail": tmp_path / "tail",
+    }
+    authorization = {
+        "publication_roots": {name: str(path) for name, path in observed.items()}
+    }
+    _validate_authorized_publication_roots(authorization, **observed)
+    changed = dict(observed)
+    changed["development_tail"] = tmp_path / "other-tail"
+    with pytest.raises(TrainingGateError, match="development_tail"):
+        _validate_authorized_publication_roots(authorization, **changed)
+    missing = dict(authorization)
+    missing["publication_roots"] = {
+        name: value
+        for name, value in authorization["publication_roots"].items()
+        if name != "development_tail"
+    }
+    with pytest.raises(TrainingGateError, match="root set"):
+        _validate_authorized_publication_roots(missing, **observed)
 
 
 def test_terminal_runner_dry_plan_is_execution_disabled(tmp_path: Path) -> None:

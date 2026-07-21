@@ -576,6 +576,16 @@ def validate_terminal_131k_training_gate(
     ):
         raise TrainingGateError("terminal gate lacks the finalized evaluation commitment")
     release_packet = validate_terminal_probe_release_binding(root, authorization)
+    _validate_authorized_publication_roots(
+        authorization,
+        stage_a=stage_a_publication_root,
+        stage_b=stage_b_publication_root,
+        combined_base=combined_base_publication_root,
+        correction=correction_publication_root,
+        terminal_train_increment=train_parent_root,
+        terminal_combined_131k=combined_131k_publication_root,
+        development_tail=development_tail_parent_root,
+    )
     publication = resolve_terminal_131k_training_publication(
         authorization,
         stage_a_publication_root=stage_a_publication_root,
@@ -596,6 +606,21 @@ def validate_terminal_131k_training_gate(
             "terminal_probe_release_review"
         ]["sha256"],
     }
+
+
+def _validate_authorized_publication_roots(
+    authorization: Mapping[str, Any], **observed: Path
+) -> None:
+    """Bind every CLI data root to the separately reviewed authorization."""
+
+    configured = authorization.get("publication_roots")
+    if not isinstance(configured, Mapping) or set(configured) != set(observed):
+        raise TrainingGateError("terminal gate publication-root set changed")
+    for name, path in observed.items():
+        if Path(str(configured[name])).resolve() != path.resolve():
+            raise TrainingGateError(
+                f"terminal gate publication root changed for {name}"
+            )
 
 
 def _terminal_datasets(
