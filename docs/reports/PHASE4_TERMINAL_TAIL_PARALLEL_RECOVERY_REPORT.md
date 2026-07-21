@@ -64,6 +64,8 @@ Its wheel SHA-256 is
 A member-by-member wheel comparison proves that all generator-relevant package
 files are byte-identical to the original `a4e6bac...` wheel; only unrelated
 downstream modules and the terminal orchestration package are allowed to differ.
+The runtime-binding orchestration commit is
+`ab8e18934eac23cb73be7f7e9c92ce8cb2a3f598`.
 
 Pre-freeze verification passed 440 tests with seven optional dependency skips;
 the eight focused recovery tests passed. Maintained-scope Ruff, mypy over all

@@ -533,7 +533,8 @@ atomic four-case shards per stratum so the authorized 32 physical workers can
 operate. It binds the read-only train publication, requires fresh tail and
 combined identities and leaves training and every downstream execution gate
 closed until independent atomic closeout passes. The frozen recovery
-orchestration commit is `6c8d717d5c095d8ab881355d01cc10e0ff84db1b`.
+package commit is `6c8d717d5c095d8ab881355d01cc10e0ff84db1b`; runtime
+binding is frozen at `ab8e18934eac23cb73be7f7e9c92ce8cb2a3f598`.
 
 The shared terminal downstream binding stack is also implemented under a
 synthetic-only gate. It rejects 65k labels in the terminal path, accepts only
