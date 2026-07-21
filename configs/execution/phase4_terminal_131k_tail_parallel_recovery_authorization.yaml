@@ -1,0 +1,110 @@
+phase: "4-terminal-131k-tail-recovery"
+authorization_status: authorized_engineering_tail_parallel_recovery_only
+authorized_by: codex_as_delegated_scientific_and_engineering_reviewer
+authorization_date: "2026-07-21"
+
+authorization_basis:
+  classification: engineering_shard_layout_only
+  reason: frozen_one_by_128_tail_shard_cannot_meet_active_time_gate
+  observed_attempt_count: 91839
+  observed_accepted_partial_count: 15
+  observed_acceptance_rate: 0.00016332930454382124
+  projected_accepted_at_12_hours: 55.1
+  upper_95_acceptance_projection_at_12_hours: 81.4
+  upper_95_probability_of_reaching_128_by_cap: 0.0000001225
+  scientific_distribution_change: false
+
+frozen_scientific_contract:
+  preregistration_version: "1.2.0-rc.1"
+  preregistration_hash: "77ff5b6b45b886657e90023c50ae002afffb077db594c80665166d537fd2346a"
+  base_configuration_path: configs/data/phase4_terminal_131k.yaml
+  base_configuration_hash: "abd07c5b8031a5cc9564531d29d9349f65b0918fafc494767fc912b7e7444ed7"
+  generator_commit: "a4e6bac014ccd521d510c97593cb1368e826d5eb"
+  generator_wheel_sha256: "c7bc8ecadb373ed5d7307ee9c96b131cc68cc9ad8ea10ae2100c54aed2a8958f"
+  train_parent_id: phase4-terminal-131k-a4e6bac014cc-abd07c5b8031
+  train_dataset_id: gwlens-v2-2.0.0-alpha.3-e592848e725db2c3-train-increment
+  train_accepted_count: 65536
+  development_tail_accepted_count: 512
+  development_tail_strata_count: 4
+  development_tail_accepted_per_stratum: 128
+  terminal_train_count: 131072
+  proposal_equals_evaluation: true
+  log_importance_weight: 0.0
+  importance_weight: 1.0
+
+immutable_orchestration:
+  git_commit: "__ORCHESTRATION_COMMIT__"
+  generator_wheel_path: /root/autodl-tmp/lensing-4/artifacts/phase4/terminal-131k/a4e6bac014ccd521d510c97593cb1368e826d5eb/gwlens_mm-0.1.0-py3-none-any.whl
+  generator_wheel_sha256: "c7bc8ecadb373ed5d7307ee9c96b131cc68cc9ad8ea10ae2100c54aed2a8958f"
+  python_executable: /root/autodl-tmp/lensing-4/envs/phase1b-smoke/bin/python
+  environment_lock_sha256: "792a93f24f6c38c18ec214665d34c8348e042b21beebd177333dae2c30224d8f"
+  editable_install_authorized: false
+
+published_train_increment:
+  parent_root: /root/autodl-tmp/lensing-4/data_v2/scientific/terminal_131k/train_increment/published/phase4-terminal-131k-a4e6bac014cc-abd07c5b8031
+  parent_manifest_sha256: "0f2bb99c851b8079672b42350223cdcfe838a7f5214bf69d9de6f851b9e1c534"
+  publication_tree_sha256: "0ab144922ec34d08db1496af517ecc986fba00e5c95c3c3a554348e93bd6a8ed"
+  accepted_count: 65536
+  complete_shard_count: 512
+  rewrite_authorized: false
+
+stopped_tail_evidence:
+  stopped_at_utc: "2026-07-21T20:02:00Z"
+  path: /root/autodl-tmp/lensing-4/data_v2/scientific/terminal_131k/interrupted_evidence/tail-resource-projection-stop-20260721T2000Z
+  complete_shard_count: 0
+  partial_shard_count: 1
+  accepted_partial_count: 15
+  attempt_count: 91839
+  retained_bytes: 85707721
+  reuse_authorized: false
+  deletion_authorized: false
+  scientific_use_authorized: false
+
+parallel_execution_contract:
+  worker_processes: 32
+  physical_cpu_count: 32
+  logical_cpu_count: 64
+  namespace_count: 4
+  accepted_pairs_per_namespace: 128
+  shards_per_namespace: 32
+  accepted_pairs_per_shard: 4
+  total_shard_count: 128
+  total_accepted_pairs: 512
+  original_master_root_seed_preserved: true
+  original_conditional_strata_preserved: true
+  new_id_prefixes_required: true
+  old_partial_attempts_count_toward_result: false
+
+paths:
+  tail_staging_root: /root/autodl-tmp/lensing-4/data_v2/scientific/terminal_131k/development_tail_parallel32/staging
+  tail_publication_root: /root/autodl-tmp/lensing-4/data_v2/scientific/terminal_131k/development_tail_parallel32/published
+  combined_staging_root: /root/autodl-tmp/lensing-4/data_v2/scientific/train_131k/staging
+  combined_publication_root: /root/autodl-tmp/lensing-4/data_v2/scientific/train_131k/published
+  manifest_root: /root/autodl-tmp/lensing-4/manifests/phase4/terminal_131k_tail_recovery
+  log_root: /root/autodl-tmp/lensing-4/logs/phase4/terminal_131k_tail_recovery
+
+resource_gates:
+  minimum_prelaunch_free_bytes: 102000000000
+  minimum_post_run_free_bytes: 100000000000
+  maximum_tail_output_bytes: 2000000000
+  maximum_tail_active_hours: 24.0
+  maximum_active_seconds_per_worker: 43200
+
+authorization:
+  tail_recovery_authorized: true
+  reuse_published_train_increment_authorized: true
+
+  scientific_contract_change_authorized: false
+  train_increment_rewrite_authorized: false
+  stopped_tail_evidence_reuse_authorized: false
+  worker_64_authorized: false
+  training_authorized: false
+  architecture_selection_authorized: false
+  calibration_authorized: false
+  sbc_authorized: false
+  final_evaluation_authorized: false
+  extension_above_131072_authorized: false
+  real_noise_authorized: false
+  gwosc_gwtc_access_authorized: false
+
+stop_after_atomic_tail_and_combined_reference_publication: true

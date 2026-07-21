@@ -1373,3 +1373,19 @@ must belong to an exact closeout-evidence allowlist; any software, model,
 configuration or unregistered path fails closed. The packet records both the
 immutable training commit and the evidence-review checkout commit. Training
 still imports only the exact wheel built from the former.
+
+## D110 — Parallelize physical tail shards without changing the tail population
+
+The terminal train increment is already atomic and must not be regenerated.
+The initial development-tail execution demonstrated that one rare conditional
+128-case shard cannot satisfy the frozen 12-hour per-worker resource cap: after
+91,839 attempts it contained only 15 partial cases, and even its 95% upper rate
+bound made cap completion effectively impossible.
+
+This is handled as a software-release correction, not a new scientific phase.
+The four conditional strata, 128 accepted cases per stratum, direct-target
+measure, unit weights, master seed and terminal training cap remain unchanged.
+Each namespace is physically partitioned into 32 atomic four-case shards and
+uses new parent/dataset/ID-prefix/attempt-namespace identities. The stopped
+one-by-128 partial is immutable and excluded. Only the existing 32 physical
+workers are authorized; 64-worker oversubscription remains forbidden.

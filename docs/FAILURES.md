@@ -674,3 +674,20 @@ architecture lock plus separate materialization and inference gates.
   failure unchanged, adds one terminal 131k resource-capped rung and fixes the
   independent development-tail count before any new data exist. It does not
   reinterpret 65k as saturated or open execution by itself.
+
+## The original terminal-tail shard layout could not meet its worker cap
+
+- The 32-worker terminal run successfully completed and atomically published
+  all 65,536 new train systems before entering the development-only tail pool.
+- The first high-absolute-magnification tail namespace used the frozen single
+  128-case shard. After 3.29 active hours it had 91,839 attempts and only 15
+  partial accepted cases; no shard or tail parent was complete.
+- The measured-rate projection was about 55 cases at the 12-hour worker cap.
+  Even the 95% upper acceptance-rate bound projected about 81, with only
+  approximately 1.2e-7 probability of completing 128 by the cap.
+- The process was stopped early rather than spending another nine hours to
+  reproduce the inevitable resource failure. Its 85,707,721-byte partial tree
+  is immutable, unpublished and excluded from every result.
+- Recovery changes only the physical partition to 32 four-case shards per
+  stratum. Counts, target, conditional strata, root seed, weights and all
+  scientific gates remain unchanged; the train increment is read-only.

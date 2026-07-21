@@ -901,8 +901,32 @@ evaluation, extension above 131,072, real noise and GWOSC/GWTC remain closed.
 The worker-32 release certificate passed with no blockers and
 220,975,267,840 free bytes. The official segment started at
 `2026-07-20T01:32:59.843129+00:00` as AutoDL PID `2515891`, with exactly 32
-worker children and the unchanged official identities. This is active staging,
-not a completed or published result.
+worker children and the unchanged official identities. That launch record is
+retained as historical execution evidence.
+
+The 32-worker segment completed and atomically published all 65,536 new train
+systems in 512 shards. Its original development-tail layout then exposed a
+pure execution-partition resource mismatch: the first high-magnification
+one-by-128 shard accepted 15 of 91,839 attempts in 3.29 active hours. Its
+95%-upper-bound projection still had only a 1.2e-7 probability of reaching 128
+before the frozen 12-hour worker cap. Delegated engineering review therefore
+stopped the segment at `2026-07-21T20:02:00Z`, before the inevitable cap, and
+retained the zero-complete/one-partial tail tree as immutable non-result
+evidence. The atomic train publication was not modified.
+
+The same scientific tail contract is now authorized for an engineering-only
+parallel recovery through:
+
+`configs/execution/phase4_terminal_131k_tail_parallel_recovery_authorization.yaml`
+
+It preserves the generator, preregistration, distributions, four strata,
+128 cases per stratum, root seed, q=p unit weights and 131,072 terminal cap.
+Only the storage/execution partition changes from one 128-case shard to 32
+four-case shards per stratum so the existing 32 physical workers can be used.
+The recovery requires new tail and combined identities, excludes the stopped
+partial evidence and may reuse only the read-only published train increment.
+Sixty-four workers, training and every downstream scientific gate remain
+closed.
 
 While that immutable materialization runs, delegated engineering review
 authorizes only a synthetic-fixture implementation of the terminal probe stack

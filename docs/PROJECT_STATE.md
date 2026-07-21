@@ -518,12 +518,21 @@ restart; 64 workers are rejected. The release must pass a new exact preflight
 and first-complete-shard resource observation before unattended continuation.
 All downstream scientific gates remain unchanged and closed.
 
-That worker-32 preflight has now passed with no blockers and
-220,975,267,840 free bytes. The official segment started at
-`2026-07-20T01:32:59.843129+00:00` as PID `2515891`; exactly 32 worker children
-were observed, initial child RSS was approximately 10.1 GiB, about 51 GiB
-memory remained available and no execution-result error artifact existed.
-Atomic publication is still pending.
+That worker-32 preflight passed with no blockers and 220,975,267,840 free
+bytes. The segment subsequently completed and atomically published the exact
+65,536-system train increment in all 512 shards. The original one-by-128
+development-tail layout was then stopped after 3.29 active hours at 15 accepted
+cases from 91,839 attempts: even the 95% upper acceptance-rate bound implied
+only a 1.2e-7 chance of reaching 128 by the 12-hour worker cap. No tail shard
+was complete, and the one partial tree is immutable non-result evidence.
+
+This is an engineering execution-partition mismatch rather than a change to
+the conditional tail population. A same-phase recovery keeps all four
+128-case strata and the original scientific/root-seed contract, but uses 32
+atomic four-case shards per stratum so the authorized 32 physical workers can
+operate. It binds the read-only train publication, requires fresh tail and
+combined identities and leaves training and every downstream execution gate
+closed until independent atomic closeout passes.
 
 The shared terminal downstream binding stack is also implemented under a
 synthetic-only gate. It rejects 65k labels in the terminal path, accepts only
