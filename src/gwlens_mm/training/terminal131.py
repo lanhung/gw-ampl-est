@@ -212,7 +212,7 @@ class Terminal131TrainingPublication:
 
 
 def _validated_tail_shard_layout(manifest: Mapping[str, Any]) -> Tuple[int, int]:
-    """Accept only the original or reviewed parallel physical tail layout."""
+    """Accept only reviewed physical layouts that preserve 128 cases."""
 
     fields_present = (
         "shards_per_namespace" in manifest,
@@ -226,7 +226,7 @@ def _validated_tail_shard_layout(manifest: Mapping[str, Any]) -> Tuple[int, int]
         int(manifest["shards_per_namespace"]),
         int(manifest["accepted_pairs_per_shard"]),
     )
-    if layout not in ((1, 128), (32, 4)) or layout[0] * layout[1] != 128:
+    if layout not in ((1, 128), (32, 4), (128, 1)) or layout[0] * layout[1] != 128:
         raise TrainingGateError("terminal tail physical shard layout is unauthorized")
     return layout
 

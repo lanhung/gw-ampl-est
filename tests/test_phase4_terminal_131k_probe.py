@@ -65,7 +65,7 @@ def test_terminal_tail_contract_has_four_distinct_strata() -> None:
     assert len(set(TAIL_STRATA)) == 4
 
 
-def test_terminal_tail_reader_accepts_original_and_parallel_physical_layouts() -> None:
+def test_terminal_tail_reader_accepts_all_reviewed_physical_layouts() -> None:
     assert _validated_tail_shard_layout({}) == (1, 128)
     assert _validated_tail_shard_layout(
         {"shards_per_namespace": 1, "accepted_pairs_per_shard": 128}
@@ -73,6 +73,9 @@ def test_terminal_tail_reader_accepts_original_and_parallel_physical_layouts() -
     assert _validated_tail_shard_layout(
         {"shards_per_namespace": 32, "accepted_pairs_per_shard": 4}
     ) == (32, 4)
+    assert _validated_tail_shard_layout(
+        {"shards_per_namespace": 128, "accepted_pairs_per_shard": 1}
+    ) == (128, 1)
 
 
 @pytest.mark.parametrize(

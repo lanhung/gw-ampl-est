@@ -691,3 +691,25 @@ architecture lock plus separate materialization and inference gates.
 - Recovery changes only the physical partition to 32 four-case shards per
   stratum. Counts, target, conditional strata, root seed, weights and all
   scientific gates remain unchanged; the train increment is read-only.
+
+## The fixed four-case recovery retained an impossible joint completion gate
+
+- The first `32 × 4` namespace completed 128 high-absolute-magnification
+  cases in 809,914 attempts, proving the runner, schema and atomic storage
+  paths were operational.
+- The next extreme-relative-magnification namespace had six accepted partial
+  cases after 328,134 attempts; 26 of 32 shards still had zero cases.
+- An independent scan of the immutable 65,536-system terminal train increment
+  found exactly 347 extreme-relative cases in 24,636,731 attempts. Its
+  one-sided 95% rate upper bound was `1.539336e-5` per attempt.
+- Projecting every observed worker to its 12-hour cap gave only
+  `1.414149e-26` probability that all 32 fixed quotas would finish. The run
+  was stopped instead of consuming another eleven hours for a predetermined
+  resource failure.
+- The stopped tree contains 32 complete first-stratum shards, 32 partial
+  second-stratum shards and 1,058,865,790 bytes. It is retained under tree
+  hash `2866e667...253a`; no part is reused.
+- The correction is a fresh-identity `128 × 1` microshard layout dynamically
+  scheduled over the same 32 physical workers. Scientific distributions,
+  counts, target, seeds and unit weights do not change. Training remains
+  closed until a complete atomic tail and independent closeout exist.

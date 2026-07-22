@@ -1389,3 +1389,27 @@ Each namespace is physically partitioned into 32 atomic four-case shards and
 uses new parent/dataset/ID-prefix/attempt-namespace identities. The stopped
 one-by-128 partial is immutable and excluded. Only the existing 32 physical
 workers are authorized; 64-worker oversubscription remains forbidden.
+
+## D111 — Replace fixed tail quotas with deterministic atomic microshards
+
+The reviewed 32-by-4 layout improved aggregate concurrency but retained a
+hidden order-statistic failure: every one of 32 attempt streams had to find
+four rare cases. The extreme-relative-magnification rate measured from
+24,636,731 already published direct-target attempts was only
+`1.408466e-5`. The optimistic probability that all fixed streams could finish
+by their 12-hour caps was `1.414149e-26`, so continuing was not a credible use
+of the frozen resource budget.
+
+The next same-phase implementation uses 128 one-case atomic microshards per
+stratum and the existing process-pool scheduler. A completed worker immediately
+takes another deterministic shard; accepted index, EM-cell balance, attempt
+sequence, root seed and dataset identity remain deterministic within the new
+release. No pooled arrival-order assignment or shared RNG is introduced.
+
+This is a storage/work-partition release, not a scientific distribution
+change. All four strata remain independently generated from the frozen direct
+target with 128 accepted cases each. Both prior failed parents remain
+immutable and excluded. The measured projection is about 11.2 million total
+attempts; the new resource gate budgets 42 projected hours and a 96-hour hard
+cap while retaining the 100 GB post-run free-space floor. Execution stays
+closed until an exact commit/wheel/environment authorization is recorded.
