@@ -1446,3 +1446,18 @@ requires packet equality, and the runtime checks each hash before `torch.load`
 then requires the checkpoint's embedded identity to equal the bound summary.
 This is an execution-integrity correction and changes no model, data, metric or
 scientific stopping rule.
+
+## D114 — Disable repository conftest files in exact-wheel verification
+
+Disabling the repository pytest configuration is not sufficient to isolate an
+installed wheel. The maintained `tests/conftest.py` independently prepends the
+checkout's `src` directory to `sys.path`, so an otherwise passing verifier
+could silently test source files that are not present in the wheel runtime.
+
+The exact-wheel test command therefore uses both `-c /dev/null` and
+`--noconftest`. The repository root remains on `PYTHONPATH` only for maintained
+`scripts/` imports. A subprocess regression fixture contains a conftest that
+raises on import and proves it is not loaded. Wheel installation also uses a
+PEP 610 `file:` URL with the frozen SHA-256 fragment. This is a release-integrity
+correction made before publication, authorization or optimizer execution; it
+changes no model, data, training objective or scientific rule.

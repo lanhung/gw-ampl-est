@@ -594,7 +594,11 @@ The corresponding exact-wheel verifier is implemented locally without
 touching the active AutoDL checkout. It probes the requested runtime in a
 separate interpreter, binds PEP 610 archive evidence to the wheel SHA-256,
 rejects editable or repository-`src` imports, verifies CUDA/GPU identity and
-runs focused plus full tests under `/dev/null` pytest configuration. The
+runs focused plus full tests under `/dev/null` pytest configuration with
+`--noconftest`. The latter is necessary because the maintained
+`tests/conftest.py` explicitly inserts the checkout's `src` path and would
+otherwise defeat installed-wheel isolation even when pytest configuration is
+disabled. The
 repository root is available only for `scripts/` imports; `src/` is never
 added to `PYTHONPATH`. The current local suite passes 412 tests with seven
 optional dependency skips. The verifier has not yet run on the future final

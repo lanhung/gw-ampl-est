@@ -22,10 +22,13 @@ running tests it verifies:
   `NVIDIA RTX 5000 Ada Generation`.
 
 Focused and full pytest commands use the runtime interpreter with
-`-c /dev/null`. `PYTHONPATH` contains the repository root only so tests may
-import maintained `scripts/`; the repository `src` directory is never added.
-Separate logs and their SHA-256 values are recorded beside an atomically
-renamed JSON result.
+`-c /dev/null --noconftest`. The second flag is essential:
+`tests/conftest.py` inserts the repository `src` directory independently of
+pytest configuration and would otherwise make the test subprocess import the
+checkout rather than the installed wheel. `PYTHONPATH` contains the repository
+root only so tests may import maintained `scripts/`; the repository `src`
+directory is never added. Separate logs and their SHA-256 values are recorded
+beside an atomically renamed JSON result.
 
 The terminal release packet was hardened to require these import-provenance
 fields in addition to zero focused/full exit codes.
@@ -40,6 +43,14 @@ fields in addition to zero focused/full exit codes.
 The exact post-publication wheel has not yet been built or tested on AutoDL.
 That future execution must occur only after the active immutable terminal
 materialization finishes and a safe disposable runtime is available.
+
+Before publication, an isolated runtime smoke installation exposed and fixed
+two release-evidence details without opening data: the wheel is installed from
+a `file:` URL carrying its frozen SHA-256 fragment so PEP 610 records the
+archive hash, and the future pytest subprocess is forced to ignore repository
+conftest files. A regression test creates a deliberately failing conftest and
+proves that the generated command does not load it. The full exact-wheel test
+remains post-publication only.
 
 ## Safety boundary
 

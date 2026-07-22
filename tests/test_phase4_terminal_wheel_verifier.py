@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import subprocess
+import sys
 from pathlib import Path
 
 import pytest
@@ -72,4 +74,25 @@ def test_pytest_command_disables_repository_configuration(tmp_path: Path) -> Non
     command = pytest_command(Path("/runtime/bin/python"), tmp_path, ("tests",))
     assert command[:4] == ["/runtime/bin/python", "-m", "pytest", "-q"]
     assert command[4:6] == ["-c", "/dev/null"]
+    assert "--noconftest" in command
     assert str(tmp_path / "src") not in command
+
+
+def test_pytest_command_does_not_load_repository_conftest(tmp_path: Path) -> None:
+    tests = tmp_path / "tests"
+    tests.mkdir()
+    (tests / "conftest.py").write_text(
+        'raise RuntimeError("repository conftest must remain isolated")\n',
+        encoding="utf-8",
+    )
+    (tests / "test_smoke.py").write_text(
+        "def test_smoke():\n    assert True\n",
+        encoding="utf-8",
+    )
+    completed = subprocess.run(
+        pytest_command(Path(sys.executable), tmp_path, ("tests/test_smoke.py",)),
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    assert completed.returncode == 0, completed.stdout + completed.stderr
