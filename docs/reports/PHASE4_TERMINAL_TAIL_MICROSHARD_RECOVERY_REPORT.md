@@ -90,8 +90,8 @@ byte-for-byte before execution.
 
 Delegated engineering review authorizes the exact 32-worker microshard
 execution. The frozen orchestration commit is
-`bceef5bd49d208091777c4dbb541d062c5571ff9`; its wheel SHA-256 is
-`22408b8fa7e3f89a3daf1168633fe77cc4ac6871a6bfa31415639d235aa14164`.
+`adb4c0981fd15a809005212c76dd972a59822489`; its wheel SHA-256 is
+`a5b08e40ddcff7d542a68b195d5bfc52577e2a67a8a978e374e1d7581f1e4b52`.
 The frozen generator-core manifest is
 `ebb900d52719dd570e378b63a6d2178b5b47a4b4ed6326769fa55e486b6ebda5`,
 proving that the original production generator and physics files are

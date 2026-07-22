@@ -658,8 +658,8 @@ the post-run disk floor remains 100 GB. Local verification passed 477 tests
 with seven optional-dependency skips, Ruff, mypy and package build.
 
 The exact 32-worker microshard execution is authorized. The frozen release is
-commit `bceef5bd49d208091777c4dbb541d062c5571ff9`, wheel SHA-256
-`22408b8fa7e3f89a3daf1168633fe77cc4ac6871a6bfa31415639d235aa14164`,
+commit `adb4c0981fd15a809005212c76dd972a59822489`, wheel SHA-256
+`a5b08e40ddcff7d542a68b195d5bfc52577e2a67a8a978e374e1d7581f1e4b52`,
 and generator-core manifest SHA-256
 `ebb900d52719dd570e378b63a6d2178b5b47a4b4ed6326769fa55e486b6ebda5`.
 The host has 64 logical CPUs but only 32 physical cores; the official run is
