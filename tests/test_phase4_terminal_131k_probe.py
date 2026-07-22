@@ -170,6 +170,28 @@ def _release_packet() -> dict[str, object]:
             "exact_wheel_test_result_path": "/root/autodl-tmp/test.json",
             "exact_wheel_test_result_sha256": "8" * 64,
         },
+        "retained_65k_probe": {
+            "output_root": "/root/autodl-tmp/lensing-4/training/retained-65k",
+            "training_rung_count": 65536,
+            "shared_identity": {
+                "model_configuration_hash": "6" * 64,
+                "training_code_commit": "a" * 40,
+                "training_environment_sha256": "7" * 64,
+                "train_manifest_sha256": "b" * 64,
+                "validation_manifest_sha256": "c" * 64,
+                "final_evaluation_commitment_sha256": "9" * 64,
+                "membership_sha256": "d" * 64,
+                "input_standardizer_sha256": "e" * 64,
+                "target_standardizer_sha256": "f" * 64,
+            },
+            "artifacts": {
+                str(seed): {
+                    "run_summary_sha256": str(seed + 1) * 64,
+                    "best_checkpoint_sha256": str(seed + 4) * 64,
+                }
+                for seed in range(3)
+            },
+        },
         "final_evaluation_commitment_sha256": "9" * 64,
     }
 
@@ -182,8 +204,10 @@ def _release_authorization(
     packet_path.write_text(json.dumps(packet, sort_keys=True) + "\n", encoding="utf-8")
     training = packet["immutable_training"]
     publication = packet["publication"]
+    retained = packet["retained_65k_probe"]
     assert isinstance(training, dict)
     assert isinstance(publication, dict)
+    assert isinstance(retained, dict)
     return {
         "terminal_probe_release_review": {
             "path": "results/phase4/terminal-probe-release.json",
@@ -194,6 +218,7 @@ def _release_authorization(
         },
         "terminal_publication": dict(publication),
         "immutable_training": dict(training),
+        "retained_65k_probe": dict(retained),
         "final_evaluation_commitment_sha256": "9" * 64,
     }
 
@@ -210,7 +235,15 @@ def test_terminal_probe_release_packet_is_hash_and_identity_bound(
 
 @pytest.mark.parametrize(
     "drift",
-    ("packet_hash", "publication", "wheel", "gpu", "optimizer", "review"),
+    (
+        "packet_hash",
+        "publication",
+        "wheel",
+        "retained",
+        "gpu",
+        "optimizer",
+        "review",
+    ),
 )
 def test_terminal_probe_release_binding_fails_closed(
     tmp_path: Path, drift: str
@@ -223,6 +256,10 @@ def test_terminal_probe_release_binding_fails_closed(
         authorization["terminal_publication"]["combined_manifest_sha256"] = "a" * 64
     elif drift == "wheel":
         authorization["immutable_training"]["wheel_sha256"] = "b" * 64
+    elif drift == "retained":
+        authorization["retained_65k_probe"]["artifacts"]["0"][
+            "best_checkpoint_sha256"
+        ] = "b" * 64
     elif drift == "gpu":
         packet["immutable_training"]["observed_gpu_names"] = ["other"] * 4
         authorization = _release_authorization(tmp_path, packet)
@@ -233,7 +270,7 @@ def test_terminal_probe_release_binding_fails_closed(
         authorization["terminal_probe_release_review"][
             "delegated_review_status"
         ] = "pending"
-    with pytest.raises(TrainingGateError, match="release|packet|CUDA"):
+    with pytest.raises(TrainingGateError, match="release|packet|CUDA|retained"):
         validate_terminal_probe_release_binding(tmp_path, authorization)
 
 

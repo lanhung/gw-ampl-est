@@ -1061,6 +1061,13 @@ carried into shared preprocessing, every 131k run identity summary and the
 retained-65k development-tail evaluation. No terminal-probe authorization or
 optimizer exists yet.
 
+The release packet must also hash-bind all three retained corrected-65k
+`best.ckpt` and `run_summary.json` artifacts, plus their shared training,
+manifest, standardizer, model, environment and final-evaluation-commitment
+identity. The runtime verifies these hashes before loading a retained
+checkpoint and requires its embedded identity to equal the bound summary.
+Binding only the retained output directory is insufficient.
+
 A separate authorization builder is implemented at
 `scripts/phase4/authorize_terminal_probe.py`. It cannot promote a release
 packet by itself: it requires a second JSON review decision whose packet hash,

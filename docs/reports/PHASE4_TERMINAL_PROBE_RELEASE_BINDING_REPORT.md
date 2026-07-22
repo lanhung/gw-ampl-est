@@ -32,6 +32,15 @@ Before publication resolution, the gate now requires:
 The accepted packet SHA is persisted in the 131k rung preparation, each new
 seed's preparation and summary, and each retained-65k terminal-tail summary.
 
+Before the terminal publication completed, a second integration audit found
+that the retained corrected-65k comparison input was bound only by output-root
+name. The packet now also requires the three existing run summaries and best
+checkpoints, hashes each file, validates the shared training/manifest/model/
+standardizer/environment/commitment identity and records the mapping. The
+authorization must copy the mapping exactly. Runtime verifies both file hashes
+before loading a checkpoint and then requires the checkpoint's embedded
+identity to equal the bound run summary.
+
 ## Verification
 
 Synthetic tests cover a valid packet and fail-closed drift in packet hash,
@@ -45,9 +54,12 @@ terminal-probe authorization exists.
 - mypy over `src` and all Phase 4 scripts: passed;
 - sdist and wheel build: passed.
 
+The retained-artifact extension passed 41 focused tests and the complete local
+suite passed 480 tests with 7 optional dependency skips. Ruff and mypy passed.
+
 ## Safety
 
 This is software-release hardening only. It authorizes no publication access,
-checkpoint access, preprocessing, optimizer, terminal decision, architecture
+checkpoint deserialization, preprocessing, optimizer, terminal decision, architecture
 selection, calibration, SBC, final evaluation, real noise or GWOSC/GWTC use.
 The active worker-32 materialization was not synchronized or modified.

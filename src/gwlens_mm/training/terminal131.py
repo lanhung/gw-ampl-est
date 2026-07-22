@@ -188,6 +188,14 @@ def validate_terminal_probe_release_binding(
         != authorization.get("final_evaluation_commitment_sha256")
     ):
         raise TrainingGateError("terminal release packet commitment identity drifted")
+    packet_retained = packet.get("retained_65k_probe", {})
+    authorized_retained = authorization.get("retained_65k_probe", {})
+    if (
+        not isinstance(packet_retained, Mapping)
+        or not isinstance(authorized_retained, Mapping)
+        or dict(packet_retained) != dict(authorized_retained)
+    ):
+        raise TrainingGateError("terminal retained 65k probe identity drifted")
     return packet
 
 
@@ -977,8 +985,46 @@ def evaluate_retained_65k_on_terminal_tail(
     checkpoint_path = (
         retained_65k_output_root / "rung-65536" / f"seed-{seed}" / "best.ckpt"
     )
-    if not checkpoint_path.is_file():
-        raise TrainingGateError("retained corrected-65k best checkpoint is absent")
+    summary_path = checkpoint_path.parent / "run_summary.json"
+    retained_binding = authorization.get("retained_65k_probe", {})
+    retained_artifacts = (
+        retained_binding.get("artifacts", {})
+        if isinstance(retained_binding, Mapping)
+        else {}
+    )
+    expected_artifact = (
+        retained_artifacts.get(str(seed), {})
+        if isinstance(retained_artifacts, Mapping)
+        else {}
+    )
+    if (
+        not isinstance(retained_binding, Mapping)
+        or Path(str(retained_binding.get("output_root", ""))).resolve()
+        != retained_65k_output_root.resolve()
+        or int(retained_binding.get("training_rung_count", -1)) != 65536
+        or not isinstance(expected_artifact, Mapping)
+        or not checkpoint_path.is_file()
+        or not summary_path.is_file()
+        or _sha256_file(checkpoint_path)
+        != expected_artifact.get("best_checkpoint_sha256")
+        or _sha256_file(summary_path) != expected_artifact.get("run_summary_sha256")
+    ):
+        raise TrainingGateError("retained corrected-65k artifact hash mismatch")
+    retained_summary = _load_json(summary_path)
+    retained_identity = retained_summary.get("identity", {})
+    shared_identity = retained_binding.get("shared_identity", {})
+    expected_identity = {
+        **(dict(shared_identity) if isinstance(shared_identity, Mapping) else {}),
+        "seed": seed,
+        "training_rung_count": 65536,
+    }
+    if (
+        retained_summary.get("status")
+        != "completed_65k_probe_fit_and_development_validation"
+        or not isinstance(retained_identity, Mapping)
+        or dict(retained_identity) != expected_identity
+    ):
+        raise TrainingGateError("retained corrected-65k run summary changed")
     torch = importlib.import_module("torch")
     device = torch.device(device_name)
     state = torch.load(checkpoint_path, map_location="cpu", weights_only=False)
@@ -988,6 +1034,7 @@ def evaluate_retained_65k_on_terminal_tail(
         or int(identity.get("seed", -1)) != seed
         or identity.get("model_configuration_hash")
         != model_configuration_hash(model_config)
+        or dict(identity) != dict(retained_identity)
     ):
         raise TrainingGateError("retained corrected-65k checkpoint identity mismatch")
     input_standardizer, target_standardizer = _load_standardizers(
