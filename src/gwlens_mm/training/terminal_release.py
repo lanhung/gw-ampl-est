@@ -31,6 +31,8 @@ FINAL_COMMITMENT_HASH = (
 )
 EXPECTED_GPU_MODEL = "NVIDIA RTX 5000 Ada Generation"
 MINIMUM_GPU_COUNT = 3
+RETAINED_65K_COUNT = 65536
+RETAINED_65K_STATUS = "completed_65k_probe_fit_and_development_validation"
 RELEASE_POST_FREEZE_ALLOWED_PATHS = frozenset(
     {
         "AGENTS.md",
@@ -54,6 +56,87 @@ def _load_json(path: Path) -> Mapping[str, Any]:
     if not isinstance(value, dict):
         raise TrainingGateError(f"expected a JSON mapping: {path}")
     return value
+
+
+def _retained_65k_probe_binding(
+    retained_output_root: Path,
+    *,
+    expected_model_hash: str,
+    expected_train_manifest_hash: str,
+    expected_environment_hash: str,
+    expected_commitment_hash: str,
+) -> Mapping[str, Any]:
+    """Hash and structurally validate all three retained 65k probe artifacts."""
+
+    output_root = retained_output_root.resolve()
+    if not output_root.is_absolute():
+        raise TrainingGateError("retained 65k probe root must be absolute")
+    artifacts: dict[str, Mapping[str, Any]] = {}
+    shared_identity: dict[str, str] | None = None
+    for seed in (0, 1, 2):
+        run_root = output_root / "rung-65536" / f"seed-{seed}"
+        summary_path = run_root / "run_summary.json"
+        checkpoint_path = run_root / "best.ckpt"
+        if not summary_path.is_file() or not checkpoint_path.is_file():
+            raise TrainingGateError("retained 65k probe artifact is absent")
+        summary = _load_json(summary_path)
+        identity = summary.get("identity")
+        development = summary.get("development")
+        if not isinstance(identity, Mapping) or not isinstance(development, Mapping):
+            raise TrainingGateError("retained 65k probe summary is malformed")
+        if (
+            summary.get("status") != RETAINED_65K_STATUS
+            or int(identity.get("training_rung_count", -1)) != RETAINED_65K_COUNT
+            or int(identity.get("seed", -1)) != seed
+            or identity.get("model_configuration_hash") != expected_model_hash
+            or identity.get("train_manifest_sha256")
+            != expected_train_manifest_hash
+            or identity.get("training_environment_sha256")
+            != expected_environment_hash
+            or identity.get("final_evaluation_commitment_sha256")
+            != expected_commitment_hash
+            or development.get("status") != "completed_development_validation"
+            or int(development.get("case_count", -1)) != 6144
+            or summary.get("architecture_selection_authorized") is not False
+            or summary.get("calibration_accessed") is not False
+            or summary.get("final_evaluation_accessed") is not False
+        ):
+            raise TrainingGateError("retained 65k probe summary violates its contract")
+        observed_shared = {
+            key: str(identity.get(key, ""))
+            for key in (
+                "model_configuration_hash",
+                "training_code_commit",
+                "training_environment_sha256",
+                "train_manifest_sha256",
+                "validation_manifest_sha256",
+                "final_evaluation_commitment_sha256",
+                "membership_sha256",
+                "input_standardizer_sha256",
+                "target_standardizer_sha256",
+            )
+        }
+        if len(observed_shared["training_code_commit"]) != 40 or any(
+            len(value) != 64
+            for key, value in observed_shared.items()
+            if key != "training_code_commit"
+        ):
+            raise TrainingGateError("retained 65k probe identity hash is invalid")
+        if shared_identity is None:
+            shared_identity = observed_shared
+        elif shared_identity != observed_shared:
+            raise TrainingGateError("retained 65k probe fits do not share one identity")
+        artifacts[str(seed)] = {
+            "run_summary_sha256": _sha256(summary_path),
+            "best_checkpoint_sha256": _sha256(checkpoint_path),
+        }
+    assert shared_identity is not None
+    return {
+        "output_root": str(output_root),
+        "training_rung_count": RETAINED_65K_COUNT,
+        "shared_identity": shared_identity,
+        "artifacts": artifacts,
+    }
 
 
 def _validate_closeout(closeout: Mapping[str, Any]) -> Mapping[str, Any]:
@@ -127,6 +210,7 @@ def prepare_terminal_probe_review_packet(
     environment_lock_path: Path,
     wheel_test_result_path: Path,
     gpu_names: Sequence[str],
+    retained_65k_output_root: Path,
 ) -> Mapping[str, Any]:
     """Bind every exact pre-authorization identity without opening data."""
 
@@ -192,6 +276,17 @@ def prepare_terminal_probe_review_packet(
         or commitment.get("commitment_status") != "finalized_before_training"
     ):
         raise TrainingGateError("terminal probe review frozen scientific input changed")
+    retained_65k_probe = _retained_65k_probe_binding(
+        retained_65k_output_root,
+        expected_model_hash=MODEL_CONFIGURATION_HASH,
+        expected_train_manifest_hash=str(
+            preregistration["terminal_training_ladder"]["corrected_train_65k"][
+                "manifest_sha256"
+            ]
+        ),
+        expected_environment_hash=ENVIRONMENT_LOCK_HASH,
+        expected_commitment_hash=FINAL_COMMITMENT_HASH,
+    )
     return {
         "status": "ready_for_delegated_terminal_probe_authorization_review",
         "authorization_created": False,
@@ -231,6 +326,7 @@ def prepare_terminal_probe_review_packet(
             "exact_wheel_test_result_path": str(wheel_test_result_path),
             "exact_wheel_test_result_sha256": _sha256(wheel_test_result_path),
         },
+        "retained_65k_probe": retained_65k_probe,
         "final_evaluation_commitment_sha256": FINAL_COMMITMENT_HASH,
         "authorized_training_rungs_preview": [TRAIN_131K_COUNT],
         "authorized_training_seeds_preview": [0, 1, 2],

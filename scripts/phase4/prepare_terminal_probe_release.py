@@ -69,6 +69,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     parser.add_argument("--wheel", required=True, type=Path)
     parser.add_argument("--environment-lock", required=True, type=Path)
     parser.add_argument("--wheel-test-result", required=True, type=Path)
+    parser.add_argument("--retained-65k-output-root", required=True, type=Path)
     parser.add_argument("--output", required=True, type=Path)
     args = parser.parse_args(argv)
     review_checkout_commit = _verify_release_checkout(
@@ -83,6 +84,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         environment_lock_path=args.environment_lock,
         wheel_test_result_path=args.wheel_test_result,
         gpu_names=_gpu_names(),
+        retained_65k_output_root=args.retained_65k_output_root,
     )
     _atomic_json(args.output, packet)
     return 0

@@ -175,8 +175,21 @@ def build_terminal_probe_authorization(
     closeout = _load_json(closeout_path)
     publication = packet.get("publication", {})
     immutable = packet.get("immutable_training", {})
-    if not isinstance(publication, Mapping) or not isinstance(immutable, Mapping):
+    retained_probe = packet.get("retained_65k_probe", {})
+    if (
+        not isinstance(publication, Mapping)
+        or not isinstance(immutable, Mapping)
+        or not isinstance(retained_probe, Mapping)
+    ):
         raise TrainingGateError("terminal release packet identities are malformed")
+    retained_artifacts = retained_probe.get("artifacts", {})
+    if (
+        Path(str(retained_probe.get("output_root", ""))).resolve() != retained_root
+        or int(retained_probe.get("training_rung_count", -1)) != 65536
+        or not isinstance(retained_artifacts, Mapping)
+        or set(retained_artifacts) != {"0", "1", "2"}
+    ):
+        raise TrainingGateError("terminal retained 65k probe identity changed")
     if (
         closeout.get("status") != "terminal_131k_independent_closeout_passed"
         or int(closeout.get("new_train_accepted_count", -1)) != TRAIN_INCREMENT_COUNT
@@ -314,6 +327,7 @@ def build_terminal_probe_authorization(
             "development_tail": str(tail_parent),
         },
         "immutable_training": dict(immutable),
+        "retained_65k_probe": dict(retained_probe),
         "final_evaluation_commitment_sha256": final_commitment_hash,
         "retained_65k_output_root": str(retained_root),
         "training_output_root": str(training_root),

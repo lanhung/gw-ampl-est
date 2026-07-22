@@ -60,6 +60,47 @@ def _fixture_root(tmp_path: Path) -> Path:
     return tmp_path
 
 
+def _retained_output(tmp_path: Path) -> Path:
+    output = tmp_path / "retained-65k"
+    shared = {
+        "final_evaluation_commitment_sha256": (
+            "c13412eced163bac26abc4b22d054f3a6fa967e7e5a4dd7849ebf54f42df6083"
+        ),
+        "input_standardizer_sha256": "1" * 64,
+        "membership_sha256": "2" * 64,
+        "model_configuration_hash": (
+            "8d0919c211b6aa057712a402f689f06d9ea916ba3c0c11cc32d0561aeb8d3087"
+        ),
+        "target_standardizer_sha256": "3" * 64,
+        "train_manifest_sha256": (
+            "da8aaa8d86afb4d93156191976b420bfc7bbc7dfe0fdc6c6f627515d804a7379"
+        ),
+        "training_code_commit": "4" * 40,
+        "training_environment_sha256": ENVIRONMENT_LOCK_HASH,
+        "validation_manifest_sha256": "5" * 64,
+        "training_rung_count": 65536,
+    }
+    for seed in range(3):
+        run = output / "rung-65536" / f"seed-{seed}"
+        run.mkdir(parents=True)
+        _write_json(
+            run / "run_summary.json",
+            {
+                "status": "completed_65k_probe_fit_and_development_validation",
+                "identity": {**shared, "seed": seed},
+                "development": {
+                    "status": "completed_development_validation",
+                    "case_count": 6144,
+                },
+                "architecture_selection_authorized": False,
+                "calibration_accessed": False,
+                "final_evaluation_accessed": False,
+            },
+        )
+        (run / "best.ckpt").write_bytes(f"checkpoint-{seed}".encode())
+    return output
+
+
 def _packet(tmp_path: Path) -> dict[str, object]:
     root = _fixture_root(tmp_path)
     closeout_path = root / "results/phase4/terminal_probe_closeout.json"
@@ -69,6 +110,7 @@ def _packet(tmp_path: Path) -> dict[str, object]:
     wheel_path.write_bytes(b"exact wheel fixture")
     wheel_hash = hashlib.sha256(wheel_path.read_bytes()).hexdigest()
     gpu_names = [EXPECTED_GPU_MODEL] * 3
+    retained_output = _retained_output(tmp_path)
     _write_json(
         wheel_test_path,
         {
@@ -97,6 +139,7 @@ def _packet(tmp_path: Path) -> dict[str, object]:
             / "configs/environment/phase4-training-freeze.txt",
             wheel_test_result_path=wheel_test_path,
             gpu_names=gpu_names,
+            retained_65k_output_root=retained_output,
         )
     )
 
@@ -151,6 +194,7 @@ def test_terminal_probe_release_packet_rejects_closeout_drift(
             / "configs/environment/phase4-training-freeze.txt",
             wheel_test_result_path=wheel_test_path,
             gpu_names=[EXPECTED_GPU_MODEL] * 3,
+            retained_65k_output_root=tmp_path / "unused-retained-output",
         )
 
 
@@ -191,6 +235,7 @@ def test_terminal_probe_release_packet_rejects_gpu_or_wheel_test_drift(
             / "configs/environment/phase4-training-freeze.txt",
             wheel_test_result_path=wheel_test_path,
             gpu_names=[EXPECTED_GPU_MODEL] * 2,
+            retained_65k_output_root=tmp_path / "unused-retained-output",
         )
 
 
@@ -215,6 +260,54 @@ def test_terminal_probe_release_packet_rejects_closeout_outside_repository(
             / "configs/environment/phase4-training-freeze.txt",
             wheel_test_result_path=wheel_test_path,
             gpu_names=[EXPECTED_GPU_MODEL] * 3,
+            retained_65k_output_root=tmp_path / "unused-retained-output",
+        )
+
+
+def test_terminal_probe_release_packet_rejects_retained_probe_drift(
+    tmp_path: Path,
+) -> None:
+    retained = _retained_output(tmp_path)
+    summary = retained / "rung-65536/seed-1/run_summary.json"
+    value = json.loads(summary.read_text(encoding="utf-8"))
+    value["identity"]["train_manifest_sha256"] = "0" * 64
+    _write_json(summary, value)
+    root = _fixture_root(tmp_path / "repository")
+    closeout_path = root / "results/phase4/terminal_probe_closeout.json"
+    wheel_path = tmp_path / "fixture.whl"
+    wheel_test_path = tmp_path / "wheel-test.json"
+    _write_json(closeout_path, _closeout())
+    wheel_path.write_bytes(b"wheel")
+    wheel_hash = hashlib.sha256(wheel_path.read_bytes()).hexdigest()
+    _write_json(
+        wheel_test_path,
+        {
+            "status": "passed_exact_wheel_on_autodl",
+            "wheel_sha256": wheel_hash,
+            "focused_test_exit_code": 0,
+            "full_test_exit_code": 0,
+            "torch_cuda_available": True,
+            "editable_install_used": False,
+            "wheel_import_verified": True,
+            "installed_distribution_name": "gwlens-mm",
+            "installed_module_from_repository_source": False,
+            "repository_root_pythonpath_used": True,
+            "repository_src_pythonpath_used": False,
+            "gpu_names": [EXPECTED_GPU_MODEL] * 3,
+        },
+    )
+    with pytest.raises(TrainingGateError, match="summary violates|share one identity"):
+        prepare_terminal_probe_review_packet(
+            root,
+            closeout_result_path=closeout_path,
+            training_commit="1" * 40,
+            review_checkout_commit="2" * 40,
+            wheel_path=wheel_path,
+            environment_lock_path=ROOT
+            / "configs/environment/phase4-training-freeze.txt",
+            wheel_test_result_path=wheel_test_path,
+            gpu_names=[EXPECTED_GPU_MODEL] * 3,
+            retained_65k_output_root=retained,
         )
 
 

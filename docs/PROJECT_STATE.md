@@ -609,6 +609,13 @@ The packet SHA propagates into terminal preprocessing, three-seed run evidence
 and retained-65k tail summaries. These checks use synthetic fixtures only;
 no terminal authorization, data access or optimizer execution occurred.
 
+The release packet now additionally binds the exact three retained corrected-
+65k checkpoints and run summaries. Directory identity alone is rejected. Each
+artifact SHA-256 and the shared manifest, standardizer, model, environment,
+training-commit and final-evaluation-commitment identity are copied into the
+authorization and revalidated before a checkpoint is loaded. This hardening
+used synthetic fixtures only and did not access a scientific checkpoint.
+
 The post-publication authorization assembly is also implemented as a separate
 two-evidence operation. It accepts only a review-ready packet plus an explicit
 delegated-review JSON bound to that packet SHA, the 131,072 rung, seeds 0/1/2,

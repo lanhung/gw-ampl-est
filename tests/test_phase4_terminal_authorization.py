@@ -108,6 +108,28 @@ def _packet_and_review(tmp_path: Path) -> tuple[Path, Path, Path]:
             "exact_wheel_test_result_path": str(tmp_path / "wheel-test.json"),
             "exact_wheel_test_result_sha256": "8" * 64,
         },
+        "retained_65k_probe": {
+            "output_root": "/root/autodl-tmp/lensing-4/training/retained-65k",
+            "training_rung_count": 65536,
+            "shared_identity": {
+                "model_configuration_hash": "6" * 64,
+                "training_code_commit": "a" * 40,
+                "training_environment_sha256": "7" * 64,
+                "train_manifest_sha256": "b" * 64,
+                "validation_manifest_sha256": "c" * 64,
+                "final_evaluation_commitment_sha256": "9" * 64,
+                "membership_sha256": "d" * 64,
+                "input_standardizer_sha256": "e" * 64,
+                "target_standardizer_sha256": "f" * 64,
+            },
+            "artifacts": {
+                str(seed): {
+                    "run_summary_sha256": str(seed + 1) * 64,
+                    "best_checkpoint_sha256": str(seed + 4) * 64,
+                }
+                for seed in range(3)
+            },
+        },
         "final_evaluation_commitment_sha256": "9" * 64,
     }
     _write_json(packet_path, packet)
@@ -181,6 +203,13 @@ def test_builder_requires_separate_review_and_closes_downstream(tmp_path: Path) 
     ] == "accepted_for_exact_terminal_probe_authorization"
     assert authorization["publication_roots"]["development_tail"] == (
         "/root/autodl-tmp/lensing-4/data/tail/published/tail"
+    )
+    assert authorization["retained_65k_probe"] == (
+        json.loads(
+            (tmp_path / "results/phase4/terminal_probe_release_packet.json").read_text(
+                encoding="utf-8"
+            )
+        )["retained_65k_probe"]
     )
 
 

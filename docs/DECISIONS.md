@@ -1429,3 +1429,20 @@ layout, immediately gives each free process another deterministic one-case
 microshard. Sixty-four workers remain fail-closed. This decision changes only
 resource scheduling; all four tail strata, seeds, accepted counts, target,
 weights and terminal 131,072-system cap remain frozen.
+
+## D113 — Hash-bind the retained 65k checkpoints before terminal comparison
+
+The terminal comparison evaluates the already completed corrected-65k probe
+on the new development-tail pool. A reviewed output-directory name is not an
+immutable checkpoint identity: files below that directory could drift without
+changing the directory path.
+
+The terminal release packet therefore validates and records the SHA-256 of all
+three retained `best.ckpt` and `run_summary.json` files. It also binds their
+common training manifest, validation manifest, membership, standardizers,
+model, environment, training commit and finalized-evaluation-commitment
+identity. Authorization copies this exact mapping, the release-binding gate
+requires packet equality, and the runtime checks each hash before `torch.load`
+then requires the checkpoint's embedded identity to equal the bound summary.
+This is an execution-integrity correction and changes no model, data, metric or
+scientific stopping rule.
