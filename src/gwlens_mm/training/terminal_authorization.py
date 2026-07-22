@@ -34,6 +34,12 @@ CLOSED_BOUNDARIES = (
     "real_noise_authorized",
     "gwosc_gwtc_access_authorized",
 )
+EXPLICIT_RECOVERY_EXECUTION_MODES = frozenset(
+    {
+        "parallel_tail_recovery",
+        "dynamic_microshard_tail_recovery",
+    }
+)
 REVIEW_SCOPE_FIELDS = (
     "training_rung",
     "training_seeds",
@@ -203,10 +209,10 @@ def build_terminal_probe_authorization(
         **{str(key): False for key in review["closed_boundaries"]},
     }
     closeout_roots = closeout.get("publication_roots")
-    if closeout.get("execution_mode") == "parallel_tail_recovery":
+    if closeout.get("execution_mode") in EXPLICIT_RECOVERY_EXECUTION_MODES:
         if not isinstance(closeout_roots, Mapping):
             raise TrainingGateError(
-                "parallel terminal closeout lacks exact publication roots"
+                "recovered terminal closeout lacks exact publication roots"
             )
         if set(closeout_roots) != {
             "terminal_train_increment",
@@ -214,7 +220,7 @@ def build_terminal_probe_authorization(
             "development_tail",
         }:
             raise TrainingGateError(
-                "parallel terminal closeout publication roots are incomplete"
+                "recovered terminal closeout publication roots are incomplete"
             )
         train_parent = Path(
             str(closeout_roots["terminal_train_increment"])
@@ -228,7 +234,7 @@ def build_terminal_probe_authorization(
             for value in (train_parent, tail_parent, combined_root)
         ):
             raise TrainingGateError(
-                "parallel terminal closeout publication root is outside approved storage"
+                "recovered terminal closeout publication root is outside approved storage"
             )
         if (
             train_parent.name != str(closeout["parent_run_id"])
@@ -236,7 +242,7 @@ def build_terminal_probe_authorization(
             or combined_root.name != str(closeout["combined_train_id"])
         ):
             raise TrainingGateError(
-                "parallel terminal closeout publication root identity changed"
+                "recovered terminal closeout publication root identity changed"
             )
     else:
         paths = config["paths"]

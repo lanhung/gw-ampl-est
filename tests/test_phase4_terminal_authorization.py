@@ -184,6 +184,42 @@ def test_builder_requires_separate_review_and_closes_downstream(tmp_path: Path) 
     )
 
 
+def test_builder_uses_dynamic_microshard_closeout_roots(tmp_path: Path) -> None:
+    root, packet_path, review_path = _packet_and_review(tmp_path)
+    closeout_path = root / "results/phase4/terminal_probe_closeout.json"
+    closeout = json.loads(closeout_path.read_text(encoding="utf-8"))
+    closeout["execution_mode"] = "dynamic_microshard_tail_recovery"
+    _write_json(closeout_path, closeout)
+    packet = json.loads(packet_path.read_text(encoding="utf-8"))
+    packet["closeout_result_sha256"] = hashlib.sha256(
+        closeout_path.read_bytes()
+    ).hexdigest()
+    _write_json(packet_path, packet)
+    review = json.loads(review_path.read_text(encoding="utf-8"))
+    review["reviewed_release_packet_sha256"] = hashlib.sha256(
+        packet_path.read_bytes()
+    ).hexdigest()
+    _write_json(review_path, review)
+
+    authorization = build_terminal_probe_authorization(
+        root,
+        release_packet_path=packet_path,
+        delegated_review_path=review_path,
+        authorization_output_path=(
+            root / "configs/execution/future_terminal_probe_fixture.yaml"
+        ),
+        retained_65k_output_root=Path(
+            "/root/autodl-tmp/lensing-4/training/retained-65k"
+        ),
+        training_output_root=Path(
+            "/root/autodl-tmp/lensing-4/training/terminal-131k"
+        ),
+    )
+
+    for role, publication_root in closeout["publication_roots"].items():
+        assert authorization["publication_roots"][role] == publication_root
+
+
 @pytest.mark.parametrize(
     ("root_key", "invalid"),
     [
