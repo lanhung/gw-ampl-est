@@ -1049,7 +1049,10 @@ The exact-wheel test contract now has a fail-closed verifier at
 archive hash to equal the candidate wheel, rejects editable and repository
 `src` imports, verifies CUDA and the frozen GPU model, and runs both focused
 and full tests with the repository pytest configuration disabled so its
-`src` path cannot shadow the installed distribution. The verifier may run
+`src` path cannot shadow the installed distribution. The pytest commands also
+use `--noconftest`; this is required because `tests/conftest.py` otherwise
+inserts the repository `src` path independently of pytest configuration. The
+verifier may run
 only as post-publication software evidence; it opens no scientific data and
 cannot authorize or start an optimizer.
 

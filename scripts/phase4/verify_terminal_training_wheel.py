@@ -172,6 +172,7 @@ def pytest_command(
         "-q",
         "-c",
         "/dev/null",
+        "--noconftest",
         "--rootdir",
         str(root),
         *(str(root / path) for path in test_paths),
@@ -247,6 +248,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         "full_test_log_sha256": _sha256(full_log),
         "repository_root_pythonpath_used": True,
         "repository_src_pythonpath_used": False,
+        "repository_conftest_used": False,
+        "pytest_noconftest_used": True,
         "scientific_data_opened": False,
         "optimizer_started": False,
     }
