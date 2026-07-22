@@ -657,15 +657,20 @@ million attempts and 42 active hours; the fail-closed hard cap is 96 hours and
 the post-run disk floor remains 100 GB. Local verification passed 477 tests
 with seven optional-dependency skips, Ruff, mypy and package build.
 
-The execution authorization is still `implementation_only`. Next steps are:
+The exact 32-worker microshard execution is authorized. The frozen release is
+commit `bceef5bd49d208091777c4dbb541d062c5571ff9`, wheel SHA-256
+`22408b8fa7e3f89a3daf1168633fe77cc4ac6871a6bfa31415639d235aa14164`,
+and generator-core manifest SHA-256
+`ebb900d52719dd570e378b63a6d2178b5b47a4b4ed6326769fa55e486b6ebda5`.
+The host has 64 logical CPUs but only 32 physical cores; the official run is
+fixed at 32 workers to preserve memory, I/O and operating-system headroom.
 
-1. freeze and push the implementation commit;
-2. build and hash the exact recovery wheel and prove frozen generator-core
-   byte identity;
-3. promote only the microshard execution flag after AutoDL preflight;
-4. generate exactly 512 development-only cases and atomically publish the
+Next steps are:
+
+1. reproduce the AutoDL release certificate;
+2. generate exactly 512 development-only cases and atomically publish the
    tail plus combined 131k reference;
-5. run the independent closeout and only then review the 131k probe gate.
+3. run the independent closeout and only then review the 131k probe gate.
 
 Training, architecture selection, calibration, SBC, final evaluation, real
 noise and GWOSC/GWTC remain closed.

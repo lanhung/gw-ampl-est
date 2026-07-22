@@ -1101,17 +1101,26 @@ Its tree SHA-256 is
 It contains 32 complete first-stratum shards and 32 second-stratum partial
 shards. None may be resumed, reused, published or interpreted scientifically.
 
-An implementation-only dynamic microshard recovery is defined through:
+A dynamic microshard recovery is authorized through:
 
 `configs/execution/phase4_terminal_131k_tail_microshard_recovery_authorization.yaml`
 
 It preserves the four direct-target conditional strata, 128 accepted cases
 per stratum, root seeds, target, unit weights and terminal 131,072-system cap.
 It changes only the physical layout to 128 atomic one-case shards per stratum,
-dynamically scheduled over 32 physical workers. Implementation does not
-authorize execution. The authorization must be separately promoted after the
-implementation commit, wheel, generator-core byte identity, environment,
-failed-evidence tree and free-space gates are frozen and reproduced.
+dynamically scheduled over 32 physical workers. The frozen orchestration commit
+is `bceef5bd49d208091777c4dbb541d062c5571ff9`, its wheel SHA-256 is
+`22408b8fa7e3f89a3daf1168633fe77cc4ac6871a6bfa31415639d235aa14164`,
+and its generator-core manifest SHA-256 is
+`ebb900d52719dd570e378b63a6d2178b5b47a4b4ed6326769fa55e486b6ebda5`.
+The exact wheel is installed non-editably in a distinct AutoDL runtime.
+
+Execution is authorized for exactly 512 development-only tail cases using 32
+workers. Sixty-four workers remain closed: the host has 64 logical CPUs but
+only 32 physical cores, about 61 GB available memory at authorization, and
+only about 140 GB free disk against a 125 GB prelaunch floor. Do not alter the
+worker count, counts, identities, seeds or scientific distributions inside the
+official run. Stop after atomic tail and combined-131k publication.
 
 Training, architecture selection, calibration, SBC, final evaluation,
 extension above 131,072, real noise and GWOSC/GWTC remain closed.

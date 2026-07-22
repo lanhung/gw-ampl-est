@@ -88,7 +88,20 @@ byte-for-byte before execution.
 
 ## Gate state
 
-The current authorization is implementation-only. It authorizes no tail
-generation, training, architecture selection, calibration, SBC, final
-evaluation, real noise or GWOSC/GWTC access. Execution requires a separately
-frozen commit, wheel, environment and ready release certificate.
+Delegated engineering review authorizes the exact 32-worker microshard
+execution. The frozen orchestration commit is
+`bceef5bd49d208091777c4dbb541d062c5571ff9`; its wheel SHA-256 is
+`22408b8fa7e3f89a3daf1168633fe77cc4ac6871a6bfa31415639d235aa14164`.
+The frozen generator-core manifest is
+`ebb900d52719dd570e378b63a6d2178b5b47a4b4ed6326769fa55e486b6ebda5`,
+proving that the original production generator and physics files are
+byte-identical in the recovery wheel.
+
+The AutoDL host exposes 64 logical CPUs but 32 physical cores. With about
+61 GB available memory and about 140 GB free disk at authorization, 64 workers
+would remove CPU headroom and materially increase memory and I/O failure risk.
+It is therefore not authorized. The official scheduler uses 32 workers.
+
+The authorization permits exactly 512 development-only cases and atomic
+combined-131k publication. Training, architecture selection, calibration,
+SBC, final evaluation, real noise and GWOSC/GWTC remain closed.
