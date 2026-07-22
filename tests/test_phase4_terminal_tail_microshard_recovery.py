@@ -66,11 +66,17 @@ def test_microshard_config_freezes_dynamic_resource_caps() -> None:
     assert observed["pairs_per_shard"] == 1
 
 
-def test_implementation_gate_keeps_all_scientific_execution_closed() -> None:
+def test_gate_transition_keeps_all_scientific_execution_closed() -> None:
     config = load_terminal_131k_contract(ROOT)
     authorization = recovery._authorization(config)
-    assert authorization["authorization_status"] == "implementation_only"
-    assert authorization["authorization"]["tail_microshard_recovery_authorized"] is False
+    status = authorization["authorization_status"]
+    assert status in {
+        "implementation_only",
+        "authorized_engineering_microshard_recovery_only",
+    }
+    assert authorization["authorization"]["tail_microshard_recovery_authorized"] is (
+        status == "authorized_engineering_microshard_recovery_only"
+    )
     for key in (
         "scientific_contract_change_authorized",
         "training_authorized",

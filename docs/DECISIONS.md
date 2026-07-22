@@ -1413,3 +1413,19 @@ immutable and excluded. The measured projection is about 11.2 million total
 attempts; the new resource gate budgets 42 projected hours and a 96-hour hard
 cap while retaining the 100 GB post-run free-space floor. Execution stays
 closed until an exact commit/wheel/environment authorization is recorded.
+
+## D112 — Use 32 physical workers for the dynamic microshard recovery
+
+The AutoDL host exposes 64 logical CPUs but only 32 physical cores. At the
+execution review it had about 61 GB available memory and about 140 GB free
+disk, only 15 GB above the frozen prelaunch floor. Running 64 generator
+processes would consume every logical CPU, remove operating-system and I/O
+headroom, and approximately halve the memory available per worker without a
+measured throughput guarantee.
+
+The official dynamic scheduler therefore uses exactly 32 processes. This is
+already twice the former 16-worker allocation and, unlike the failed fixed
+layout, immediately gives each free process another deterministic one-case
+microshard. Sixty-four workers remain fail-closed. This decision changes only
+resource scheduling; all four tail strata, seeds, accepted counts, target,
+weights and terminal 131,072-system cap remain frozen.

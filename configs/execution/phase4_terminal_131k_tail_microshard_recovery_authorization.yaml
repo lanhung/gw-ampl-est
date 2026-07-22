@@ -1,5 +1,5 @@
 phase: "4-terminal-131k-tail-microshard-recovery"
-authorization_status: implementation_only
+authorization_status: authorized_engineering_microshard_recovery_only
 authorized_by: codex_as_delegated_scientific_and_engineering_reviewer
 authorization_date: "2026-07-22"
 
@@ -39,13 +39,13 @@ frozen_scientific_contract:
   importance_weight: 1.0
 
 immutable_orchestration:
-  git_commit: null
+  git_commit: "adb4c0981fd15a809005212c76dd972a59822489"
   generator_wheel_path: /root/autodl-tmp/lensing-4/artifacts/phase4/terminal-131k/a4e6bac014ccd521d510c97593cb1368e826d5eb/gwlens_mm-0.1.0-py3-none-any.whl
   generator_wheel_sha256: "c7bc8ecadb373ed5d7307ee9c96b131cc68cc9ad8ea10ae2100c54aed2a8958f"
-  recovery_wheel_path: null
-  recovery_wheel_sha256: null
-  generator_core_manifest_sha256: null
-  runtime_site_packages: null
+  recovery_wheel_path: /root/autodl-tmp/lensing-4/artifacts/phase4/terminal-tail-microshard/adb4c0981fd15a809005212c76dd972a59822489/gwlens_mm-0.1.0-py3-none-any.whl
+  recovery_wheel_sha256: "a5b08e40ddcff7d542a68b195d5bfc52577e2a67a8a978e374e1d7581f1e4b52"
+  generator_core_manifest_sha256: "ebb900d52719dd570e378b63a6d2178b5b47a4b4ed6326769fa55e486b6ebda5"
+  runtime_site_packages: /root/autodl-tmp/lensing-4/runtime/terminal-tail-microshard/adb4c0981fd15a809005212c76dd972a59822489/site-packages
   python_executable: /root/autodl-tmp/lensing-4/envs/phase1b-smoke/bin/python
   environment_lock_sha256: "792a93f24f6c38c18ec214665d34c8348e042b21beebd177333dae2c30224d8f"
   editable_install_authorized: false
@@ -105,7 +105,7 @@ resource_gates:
   maximum_tail_active_hours: 96.0
 
 authorization:
-  tail_microshard_recovery_authorized: false
+  tail_microshard_recovery_authorized: true
   reuse_published_train_increment_authorized: true
 
   scientific_contract_change_authorized: false
