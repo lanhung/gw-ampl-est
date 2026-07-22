@@ -1083,6 +1083,39 @@ any post-freeze source, model, configuration or unregistered-file change fails
 closed. This resolves the necessary publish-then-review ordering without
 changing the exact wheel used for training.
 
+The worker-32 fixed-four-case tail recovery stopped fail-closed before its
+resource cap. The first stratum completed exactly 128 cases, but the
+extreme-relative-magnification stratum produced only six partial cases from
+328,134 attempts. A read-only audit of the already published 65,536-system
+train increment measured 347 such cases in 24,636,731 proposal attempts. Even
+using the one-sided 95% optimistic rate bound, the probability that all 32
+fixed shards would independently reach four cases by their worker caps was
+`1.4141494186098862e-26`.
+
+The failed parent is immutable at:
+
+`/root/autodl-tmp/lensing-4/data_v2/scientific/terminal_131k/interrupted_evidence/tail-parallel32-resource-stop-20260722T0002Z`
+
+Its tree SHA-256 is
+`2866e66739aa26f70e560bc8bacb196baccc2406acbcb64719d5b4a2338a253a`.
+It contains 32 complete first-stratum shards and 32 second-stratum partial
+shards. None may be resumed, reused, published or interpreted scientifically.
+
+An implementation-only dynamic microshard recovery is defined through:
+
+`configs/execution/phase4_terminal_131k_tail_microshard_recovery_authorization.yaml`
+
+It preserves the four direct-target conditional strata, 128 accepted cases
+per stratum, root seeds, target, unit weights and terminal 131,072-system cap.
+It changes only the physical layout to 128 atomic one-case shards per stratum,
+dynamically scheduled over 32 physical workers. Implementation does not
+authorize execution. The authorization must be separately promoted after the
+implementation commit, wheel, generator-core byte identity, environment,
+failed-evidence tree and free-space gates are frozen and reproduced.
+
+Training, architecture selection, calibration, SBC, final evaluation,
+extension above 131,072, real noise and GWOSC/GWTC remain closed.
+
 ## Scientific integrity
 
 - Never fabricate results, citations, completed runs or calibration.

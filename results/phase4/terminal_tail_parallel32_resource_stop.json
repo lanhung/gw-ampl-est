@@ -1,0 +1,32 @@
+{
+  "status": "resource_projection_stop",
+  "phase": "4-terminal-tail-parallel-recovery",
+  "stopped_at": "2026-07-22T00:02:00.833880+00:00",
+  "reason": "fixed_shard_completion_probability_below_fail_closed_threshold",
+  "parent_run_id": "phase4-terminal-tail-parallel32-ab8e18934eac-4972723824bc",
+  "orchestration_commit": "ab8e18934eac23cb73be7f7e9c92ce8cb2a3f598",
+  "worker_processes": 32,
+  "physical_cpu_count": 32,
+  "completed_first_stratum_shards": 32,
+  "completed_first_stratum_accepted": 128,
+  "current_second_stratum_attempts": 328134,
+  "current_second_stratum_accepted": 6,
+  "historical_direct_target_audit": {
+    "accepted_train_systems": 65536,
+    "attempts": 24636731,
+    "extreme_relative_magnification_count": 347,
+    "rate_per_attempt": 0.000014084660826146131,
+    "one_sided_95_rate_upper": 0.000015393357515695833
+  },
+  "projected_total_second_stratum_attempts_at_worker_cap": 4385935,
+  "all_32_fixed_shards_optimistic_completion_probability": 1.4141494186098862e-26,
+  "minimum_individual_shard_completion_probability": 0.11412418281366829,
+  "retained_evidence_path": "/root/autodl-tmp/lensing-4/data_v2/scientific/terminal_131k/interrupted_evidence/tail-parallel32-resource-stop-20260722T0002Z",
+  "retained_evidence_tree_sha256": "2866e66739aa26f70e560bc8bacb196baccc2406acbcb64719d5b4a2338a253a",
+  "retained_evidence_bytes": 1058865790,
+  "complete_shard_count": 32,
+  "partial_shard_count": 32,
+  "partial_evidence_reuse_authorized": false,
+  "scientific_contract_changed": false,
+  "training_authorized": false
+}

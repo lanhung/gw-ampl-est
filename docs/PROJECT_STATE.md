@@ -635,3 +635,37 @@ closeout-evidence allowlist and records the descendant commit in the packet.
 Thirty focused and 432 full tests pass with seven optional dependency skips;
 Ruff and mypy pass. No scientific data or checkpoint was opened by this
 checkout-control change.
+
+## Terminal development-tail microshard recovery
+
+The terminal train increment remains complete and immutable: 65,536 new
+direct-target train systems in 512 shards. The original one-shard tail and the
+subsequent fixed-four-case recovery both stopped on prospective resource
+evidence, not on a physics, schema or storage error.
+
+The fixed-four-case run completed all 128 high-absolute-magnification cases,
+then reached only six partial extreme-relative cases in 328,134 attempts. The
+published train attempt stream independently fixes the expected rare-stratum
+rate and implies a `1.414149e-26` optimistic probability that all fixed quotas
+could finish before their caps. The 1,058,865,790-byte failed parent is
+immutable and excluded.
+
+A fresh implementation now represents each 128-case stratum as 128 atomic
+one-case shards. Thirty-two physical workers dynamically consume those
+deterministic shard tasks. The estimated complete pool cost is about 11.2
+million attempts and 42 active hours; the fail-closed hard cap is 96 hours and
+the post-run disk floor remains 100 GB. Local verification passed 477 tests
+with seven optional-dependency skips, Ruff, mypy and package build.
+
+The execution authorization is still `implementation_only`. Next steps are:
+
+1. freeze and push the implementation commit;
+2. build and hash the exact recovery wheel and prove frozen generator-core
+   byte identity;
+3. promote only the microshard execution flag after AutoDL preflight;
+4. generate exactly 512 development-only cases and atomically publish the
+   tail plus combined 131k reference;
+5. run the independent closeout and only then review the 131k probe gate.
+
+Training, architecture selection, calibration, SBC, final evaluation, real
+noise and GWOSC/GWTC remain closed.
