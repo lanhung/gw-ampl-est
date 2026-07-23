@@ -685,3 +685,35 @@ Next steps are:
 
 Training, architecture selection, calibration, SBC, final evaluation, real
 noise and GWOSC/GWTC remain closed.
+
+## Terminal 131k publication closeout
+
+The dynamic microshard execution completed on 2026-07-23. It published exactly
+512 development-only tail cases in 512 atomic one-case shards, with exactly 128
+cases in each of the four frozen strata. The tail parent is
+`phase4-terminal-tail-micro128-adb4c0981fd1-30fa02d9ec5b`; its manifest
+SHA-256 is `58fcafd58cbcd407ecf6b35dfa98c0bd2bd66f37151e19e6bf530ca2601260c7`
+and its independently recomputed tree SHA-256 is
+`90ca582f3bd768046f9ceabb4d42689d76945be2c963b0290ac432662ff619c0`.
+
+The logical terminal reference
+`phase4-train-131k-adb4c0981fd1-30fa02d9ec5b` now binds exactly 131,072
+unique direct-target train systems and the unchanged 6,144-system validation
+publication. Its manifest SHA-256 is
+`ad26d51d4f9475c6710cdfee4e71409526e1d776e0b8ec14734feff02855cee5`.
+The separately published development-tail pool is diagnostic-only and remains
+excluded from training.
+
+Independent closeout recomputed the 79,373,465,020-byte train-increment tree
+and the 8,989,124,609-byte development-tail tree, verified q=p and exact unit
+weights, and confirmed that neither failed tail parent was reused. No
+GWOSC/GWTC access occurred. The observed free space was 253,429,231,616 bytes,
+well above the 100 GB floor.
+
+The materialization critical path is complete. The next step is not direct
+training: the exact post-publication wheel verification, release packet and
+delegated terminal-probe authorization must first bind the publication hashes,
+retained corrected-65k artifacts, model configuration, finalized evaluation
+commitment and immutable CUDA environment. Architecture selection,
+calibration, SBC, final evaluation, extension above 131,072 and GWOSC/GWTC
+remain closed.

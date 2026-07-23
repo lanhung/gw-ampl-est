@@ -713,3 +713,20 @@ architecture lock plus separate materialization and inference gates.
   scheduled over the same 32 physical workers. Scientific distributions,
   counts, target, seeds and unit weights do not change. Training remains
   closed until a complete atomic tail and independent closeout exist.
+
+## The microshard recovery resolved the tail execution-partition failures
+
+- The fresh `128 × 1` dynamic layout completed exactly 512 accepted
+  development-tail cases, 128 per frozen stratum, without changing the target,
+  seeds, priority assignment or unit-weight semantics.
+- The rare extreme-relative-magnification layer exhibited genuine
+  order-statistic stragglers; the final three streams remained active and well
+  below their two-million-attempt and 96-hour caps. They were not skipped,
+  duplicated or replaced.
+- Both earlier failed parents remain immutable and excluded. Their partial
+  cases and attempt streams were not counted toward the successful parent.
+- Independent closeout recomputed the published train and tail trees, verified
+  the exact 131,072/6,144/512 counts and passed with more than 253 GB free.
+- This closes the engineering partition failure. It does not retrospectively
+  turn either failed run into evidence and does not authorize training or any
+  downstream scientific execution.

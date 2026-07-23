@@ -1132,8 +1132,37 @@ only about 140 GB free disk against a 125 GB prelaunch floor. Do not alter the
 worker count, counts, identities, seeds or scientific distributions inside the
 official run. Stop after atomic tail and combined-131k publication.
 
+The dynamic microshard recovery completed and atomically published exactly 512
+development-only cases: four namespaces of 128 one-case shards. The immutable
+tail parent is:
+
+`phase4-terminal-tail-micro128-adb4c0981fd1-30fa02d9ec5b`
+
+Its manifest SHA-256 is
+`58fcafd58cbcd407ecf6b35dfa98c0bd2bd66f37151e19e6bf530ca2601260c7`
+and its independently recomputed publication-tree SHA-256 is
+`90ca582f3bd768046f9ceabb4d42689d76945be2c963b0290ac432662ff619c0`.
+
+The atomic combined terminal training reference is:
+
+`phase4-train-131k-adb4c0981fd1-30fa02d9ec5b`
+
+It binds exactly 131,072 unique direct-target train systems, the unchanged
+6,144-system validation publication and the separate 512-case development
+tail. Its manifest SHA-256 is
+`ad26d51d4f9475c6710cdfee4e71409526e1d776e0b8ec14734feff02855cee5`.
+Independent closeout passed with q=p, exact unit weights, no reuse of failed
+tail evidence, no GWOSC/GWTC access and 253,429,231,616 free bytes remaining.
+
+Passing closeout does not authorize the terminal optimizer. A separate exact
+release packet and delegated authorization must bind this closeout, the
+immutable training wheel, CUDA environment, model configuration, finalized
+evaluation commitment and retained corrected-65k checkpoint hashes before the
+131k membership or any scientific checkpoint may be opened.
+
 Training, architecture selection, calibration, SBC, final evaluation,
-extension above 131,072, real noise and GWOSC/GWTC remain closed.
+extension above 131,072, real noise and GWOSC/GWTC remain closed until their
+separate machine-readable gates pass.
 
 ## Scientific integrity
 

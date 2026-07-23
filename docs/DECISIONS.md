@@ -1461,3 +1461,25 @@ raises on import and proves it is not loaded. Wheel installation also uses a
 PEP 610 `file:` URL with the frozen SHA-256 fragment. This is a release-integrity
 correction made before publication, authorization or optimizer execution; it
 changes no model, data, training objective or scientific rule.
+
+## D115 — Accept the atomic terminal 131k reference, but keep training closed
+
+The dynamic 128-by-1 tail layout completed all four frozen 128-case
+development strata and independently closed out without reusing either failed
+tail parent. The train increment remains the immutable 65,536-system
+publication generated at commit `a4e6bac...`; the combined logical reference
+now binds it with the corrected 65,536-system base for exactly 131,072 unique
+train systems. The validation set remains exactly 6,144 systems and the 512
+tail cases remain development diagnostics only.
+
+The accepted closeout identities are the combined manifest
+`ad26d51d...5cee5`, tail manifest `58fcafd5...60c7`, train tree
+`0ab14492...a8ed` and tail tree `90ca582f...19c0`. Proposal equals evaluation,
+all importance weights are one, no failed evidence was reused and no
+GWOSC/GWTC product was accessed.
+
+Atomic publication is necessary but not sufficient to start the optimizer.
+The terminal-probe gate must separately bind the committed closeout evidence,
+exact installed wheel, CUDA environment, model configuration, finalized
+evaluation commitment and all three retained corrected-65k checkpoint hashes.
+Architecture selection and every downstream scientific gate remain closed.
