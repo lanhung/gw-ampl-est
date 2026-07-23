@@ -752,3 +752,24 @@ The runtime may evaluate retained 65k checkpoints on the development-tail
 pool, fit the 131k probe from scratch and produce exactly one terminal
 learning-curve decision. Architecture selection, calibration, SBC, final
 evaluation, extension above 131,072 and GWOSC/GWTC remain closed.
+
+## Terminal architecture release-control implementation
+
+The post-lock architecture runner already existed, but an exact release and
+authorization builder did not. Implementation commit
+`4ef6626eef201aeb91a74f5e9d799ec410459c6a` now creates:
+
+- a non-authorizing release packet bound to the terminal decision;
+- hashes for the three reused 131k probe summaries and best checkpoints;
+- the frozen grid and all three candidate model hashes;
+- an exact wheel, CUDA environment and fresh architecture output identity;
+- a separate delegated-review document and fail-closed runtime authorization.
+
+The terminal architecture runtime now verifies checkpoint bytes as well as
+summary bytes before reuse. Verification passed 489 full tests with seven
+optional skips, 26 focused tests, Ruff and mypy.
+
+No terminal probe metric was read to implement this software, and architecture
+execution remains closed. After the terminal decision, a new exact wheel must
+pass AutoDL verification and the release packet must receive delegated review
+before any of the nine fits can start.
