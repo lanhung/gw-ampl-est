@@ -70,18 +70,33 @@ def _validate_terminal_probe_reuse(
     validation_manifest_sha256: str,
 ) -> Tuple[Mapping[str, Any], ...]:
     expected_hashes = authorization.get("reused_probe_run_summary_sha256", {})
+    expected_checkpoint_hashes = authorization.get(
+        "reused_probe_best_checkpoint_sha256", {}
+    )
     if not isinstance(expected_hashes, dict) or set(expected_hashes) != {
         str(seed) for seed in SEEDS
     }:
         raise TrainingGateError("terminal architecture gate must bind three probe fits")
+    if not isinstance(expected_checkpoint_hashes, dict) or set(
+        expected_checkpoint_hashes
+    ) != {str(seed) for seed in SEEDS}:
+        raise TrainingGateError(
+            "terminal architecture gate must bind three probe checkpoints"
+        )
     expected_model_hash = str(
         authorization.get("reused_probe_model_configuration_hash", "")
     )
     summaries = []
     for seed in SEEDS:
         path = probe_output_root / "rung-131072" / f"seed-{seed}" / "run_summary.json"
+        checkpoint_path = path.parent / "best.ckpt"
         if not path.is_file() or _sha256(path) != expected_hashes[str(seed)]:
             raise TrainingGateError("terminal reused probe summary hash mismatch")
+        if (
+            not checkpoint_path.is_file()
+            or _sha256(checkpoint_path) != expected_checkpoint_hashes[str(seed)]
+        ):
+            raise TrainingGateError("terminal reused probe checkpoint hash mismatch")
         summary = _load_mapping(path)
         identity = summary.get("identity", {})
         development = summary.get("development", {})
@@ -100,7 +115,6 @@ def _validate_terminal_probe_reuse(
             or summary.get("architecture_selection_authorized") is not False
             or development.get("posthoc_calibration_applied") is not False
             or development.get("final_evaluation_accessed") is not False
-            or not (path.parent / "best.ckpt").is_file()
         ):
             raise TrainingGateError("terminal reused probe violates architecture contract")
         summaries.append(summary)
