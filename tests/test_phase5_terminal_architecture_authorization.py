@@ -21,6 +21,7 @@ from gwlens_mm.training.terminal_architecture_authorization import (
     build_terminal_architecture_authorization,
     build_terminal_architecture_release_packet,
 )
+from scripts.phase5 import launch_terminal_architecture_grid as launcher_module
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -336,3 +337,100 @@ def test_authorization_rejects_review_drift(
             delegated_review_path=review_path,
             output_path=Path(paths["authorization"]),
         )
+
+
+@pytest.mark.parametrize(
+    ("value", "expected"),
+    (
+        ("0", ("0",)),
+        ("0,1", ("0", "1")),
+        ("0,1,2", ("0", "1", "2")),
+    ),
+)
+def test_terminal_launcher_accepts_one_to_three_gpus(
+    value: str, expected: tuple[str, ...]
+) -> None:
+    assert launcher_module._parse_gpu_indices(value) == expected
+
+
+@pytest.mark.parametrize("value", ("", "0,0", "0,1,2,3", "gpu0"))
+def test_terminal_launcher_rejects_invalid_gpu_pool(value: str) -> None:
+    with pytest.raises(ValueError, match="one to three distinct numeric GPUs"):
+        launcher_module._parse_gpu_indices(value)
+
+
+def test_terminal_launcher_bounds_concurrency_to_available_gpus(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    class FakeProcess:
+        active_count = 0
+        maximum_active_count = 0
+        launches: list[tuple[str, str]] = []
+
+        def __init__(self, command: list[str], **_: object) -> None:
+            architecture = command[command.index("--architecture") + 1]
+            seed = command[command.index("--seed") + 1]
+            self.remaining_polls = 2 + int(seed)
+            self.completed = False
+            type(self).active_count += 1
+            type(self).maximum_active_count = max(
+                type(self).maximum_active_count, type(self).active_count
+            )
+            type(self).launches.append((architecture, seed))
+
+        def poll(self) -> int | None:
+            if self.completed:
+                return 0
+            self.remaining_polls -= 1
+            if self.remaining_polls > 0:
+                return None
+            self.completed = True
+            type(self).active_count -= 1
+            return 0
+
+    monkeypatch.setattr(launcher_module.subprocess, "Popen", FakeProcess)
+    monkeypatch.setattr(launcher_module.time, "sleep", lambda _: None)
+    output_root = tmp_path / "architecture"
+    arguments = ["--root", str(tmp_path)]
+    for name in (
+        "authorization",
+        "stage-a-publication",
+        "stage-b-publication",
+        "combined-base-publication",
+        "correction-publication",
+        "train-increment-publication",
+        "combined-131k-publication",
+        "development-tail-publication",
+        "terminal-decision",
+        "probe-output-root",
+        "environment-lock",
+        "psd-root",
+    ):
+        arguments.extend([f"--{name}", str(tmp_path / name)])
+    arguments.extend(
+        [
+            "--output-root",
+            str(output_root),
+            "--training-commit",
+            "a" * 40,
+            "--gpu-indices",
+            "0,1",
+        ]
+    )
+    assert launcher_module.main(arguments) == 0
+    summary = json.loads(
+        (
+            output_root
+            / "launcher-results/terminal-architecture-launcher-summary.json"
+        ).read_text(encoding="utf-8")
+    )
+    assert summary["status"] == "completed_nine_terminal_architecture_fits"
+    assert summary["configured_concurrent_fits"] == 2
+    assert FakeProcess.maximum_active_count == 2
+    assert len(FakeProcess.launches) == 9
+    for architecture in launcher_module.ARCHITECTURES:
+        assert {
+            seed
+            for launched_architecture, seed in FakeProcess.launches
+            if launched_architecture == architecture
+        } == {"0", "1", "2"}
