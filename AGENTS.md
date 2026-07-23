@@ -1164,6 +1164,40 @@ Training, architecture selection, calibration, SBC, final evaluation,
 extension above 131,072, real noise and GWOSC/GWTC remain closed until their
 separate machine-readable gates pass.
 
+The exact terminal training wheel passed its post-publication AutoDL contract:
+68 focused tests passed with one optional skip and 482 full tests passed with
+six optional skips. The installed module came from the non-editable wheel in
+the isolated CUDA environment; all four observed GPUs were NVIDIA RTX 5000 Ada
+Generation devices. No scientific data was opened and no optimizer was
+started.
+
+Delegated scientific and engineering review accepts release packet
+`results/phase4/terminal_probe_release_packet.json`, SHA-256
+`286b8e505b2f69465b1a13dc8e6e0e5921af32840991fbce3b01a0132ce54eb2`,
+and authorizes only the frozen 131,072-system three-seed terminal probe through:
+
+`configs/execution/phase4_terminal_131k_probe_authorization.yaml`
+
+The frozen training software commit is
+`a261d1a9fa390313e2f0821e8e75c5f224b759cb`, the exact wheel SHA-256 is
+`1484036f774d6119abdac468bbea5dd911273e6778a0781e48edab7b4a98332e`,
+the model configuration hash is
+`8d0919c211b6aa057712a402f689f06d9ea916ba3c0c11cc32d0561aeb8d3087`,
+and the CUDA environment hash is
+`2e45000a8cea6712ae307c87782c593245ad56607a772f27a0cc5af726e37b95`.
+
+This gate permits reading only the exact corrected 65k base, terminal
+increment, atomic combined 131k reference, unchanged 6,144-system validation
+set and separate 512-case development-tail pool. It permits fitting the frozen
+probe from scratch for seeds 0, 1 and 2, evaluating the retained 65k
+checkpoints on the new development-tail pool and applying the preregistered
+terminal comparison.
+
+Model tuning, architecture selection, calibration, SBC, final evaluation,
+extension above 131,072, real noise and GWOSC/GWTC remain closed. Either
+permitted terminal decision locks the training resource cap at 131,072 and
+requires a later architecture-selection authorization.
+
 ## Scientific integrity
 
 - Never fabricate results, citations, completed runs or calibration.

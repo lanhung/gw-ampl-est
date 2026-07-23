@@ -1,0 +1,29 @@
+{
+  "authorization_scope": {
+    "probe_optimizer_execution_authorized": true,
+    "publication_data_access_authorized": true,
+    "retained_65k_output_root": "/root/autodl-tmp/lensing-4/training/phase4/corrected-probe-65k-adcb1a7",
+    "terminal_learning_curve_decision_authorized": true,
+    "training_output_root": "/root/autodl-tmp/lensing-4/training/phase4/terminal-probe-131k-a261d1a-286b8e5",
+    "training_rung": 131072,
+    "training_seeds": [
+      0,
+      1,
+      2
+    ]
+  },
+  "closed_boundaries": {
+    "architecture_selection_authorized": false,
+    "calibration_authorized": false,
+    "extension_above_131072_authorized": false,
+    "final_evaluation_authorized": false,
+    "gwosc_gwtc_access_authorized": false,
+    "model_tuning_authorized": false,
+    "real_noise_authorized": false,
+    "sbc_authorized": false
+  },
+  "review_date": "2026-07-23",
+  "reviewed_by": "codex_as_delegated_scientific_and_engineering_reviewer",
+  "reviewed_release_packet_sha256": "286b8e505b2f69465b1a13dc8e6e0e5921af32840991fbce3b01a0132ce54eb2",
+  "status": "delegated_terminal_probe_authorization_approved"
+}

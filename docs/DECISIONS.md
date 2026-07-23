@@ -1483,3 +1483,23 @@ The terminal-probe gate must separately bind the committed closeout evidence,
 exact installed wheel, CUDA environment, model configuration, finalized
 evaluation commitment and all three retained corrected-65k checkpoint hashes.
 Architecture selection and every downstream scientific gate remain closed.
+
+## D116 — Authorize the terminal probe only after exact-wheel and checkpoint binding
+
+The post-publication release packet was assembled from a clean evidence-only
+descendant of the frozen training commit. It binds the independently closed
+131k publication, the exact non-editable wheel, four identical RTX 5000 Ada
+devices, the normalized CUDA environment, model configuration, final-evaluation
+commitment and the summary/checkpoint hashes for all three retained corrected-
+65k fits.
+
+The exact wheel passed 68 focused tests with one optional skip and 482 full
+tests with six optional skips. A separate delegated-review JSON then approved
+only one training rung, seeds 0/1/2 and the terminal comparison. The generated
+authorization keeps model tuning, architecture selection, calibration, SBC,
+final evaluation, real noise, GWOSC/GWTC and extension above 131,072 false.
+
+Both allowed terminal decision labels stop at 131,072. A scientific
+architecture fit therefore cannot begin automatically after the probe; it
+requires a new exact gate bound to the terminal decision and all twelve
+development-only architecture results.
