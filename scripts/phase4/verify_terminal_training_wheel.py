@@ -25,6 +25,8 @@ FOCUSED_TESTS = (
     "tests/test_phase4_rung65.py",
     "tests/test_phase4_terminal_131k_probe.py",
     "tests/test_phase4_terminal_release.py",
+    "tests/test_phase5_architecture_selection.py",
+    "tests/test_phase5_terminal_architecture_authorization.py",
     "tests/test_phase5_terminal_downstream.py",
 )
 

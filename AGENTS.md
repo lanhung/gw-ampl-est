@@ -1207,6 +1207,20 @@ extension above 131,072, real noise and GWOSC/GWTC remain closed. Either
 permitted terminal decision locks the training resource cap at 131,072 and
 requires a later architecture-selection authorization.
 
+While the terminal probe runs, the implementation-only Phase 5 boundary also
+permits exact post-lock release-control software. Implementation commit
+`4ef6626eef201aeb91a74f5e9d799ec410459c6a` adds a non-authorizing release
+packet, separate delegated-review authorization builder and mandatory SHA-256
+binding of all three reused probe summaries and `best.ckpt` files. It passed
+489 full tests with seven optional-dependency skips, 26 focused tests, Ruff and
+mypy.
+
+This implementation does not authorize architecture data or checkpoint access,
+the nine new fits or architecture selection. A future release packet must bind
+one completed terminal decision, a separately verified exact wheel and fresh
+output identity. Calibration, SBC, final evaluation, extension above 131,072,
+real noise and GWOSC/GWTC remain closed.
+
 ## Scientific integrity
 
 - Never fabricate results, citations, completed runs or calibration.

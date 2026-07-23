@@ -1518,3 +1518,19 @@ differ, it fails closed. This correction changes no publication byte,
 membership, model tensor, optimizer, target, seed or stopping rule. The
 previous training authorization is superseded before any optimizer step; the
 new wheel and release packet use fresh identities.
+
+## D118 — Bind the terminal architecture phase through a reviewed release packet
+
+The terminal 131k architecture adapter must not infer execution authority from
+a successful learning-curve decision. A non-authorizing release packet first
+binds the exact terminal decision, all three reused probe summaries and best
+checkpoints, the frozen architecture grid, candidate model hashes, exact wheel,
+CUDA environment and a fresh output root. A separate delegated-review JSON is
+then required to create the runtime authorization.
+
+The runtime now hashes each reused `best.ckpt` before accepting it; existence
+alone is insufficient. This change affects release integrity only. The model
+grid, training data, optimizer, validation-only selection rule and terminal
+resource cap are unchanged. Until the future packet is reviewed, the nine new
+fits, architecture selection and every downstream scientific action remain
+closed.
