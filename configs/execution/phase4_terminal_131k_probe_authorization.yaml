@@ -1,0 +1,145 @@
+phase: 4-terminal-probe-131k
+authorization_status: authorized_terminal_131k_probe_only
+authorized_by: codex_as_delegated_scientific_and_engineering_reviewer
+authorization_date: '2026-07-23'
+authorization_basis:
+  delegated_review_path: results/phase4/terminal_probe_delegated_review.json
+  delegated_review_sha256: 83676256c2b94c5a3921b3bcdd8d6f0b9f591be6097ba9463a153ec44eefda82
+  release_packet_status: ready_for_delegated_terminal_probe_authorization_review
+  independent_closeout_status: terminal_131k_independent_closeout_passed
+terminal_probe_release_review:
+  path: results/phase4/terminal_probe_release_packet.json
+  sha256: 286b8e505b2f69465b1a13dc8e6e0e5921af32840991fbce3b01a0132ce54eb2
+  delegated_review_status: accepted_for_exact_terminal_probe_authorization
+frozen_preregistration:
+  version: 1.2.0-rc.1
+  path: configs/statistics/terminal_131k_preregistration.yaml
+  canonical_hash: 77ff5b6b45b886657e90023c50ae002afffb077db594c80665166d537fd2346a
+authorization:
+  corrected_65k_data_access_authorized: true
+  terminal_train_increment_data_access_authorized: true
+  development_tail_data_access_authorized: true
+  scientific_131k_probe_training_authorized: true
+  probe_optimizer_execution_authorized: true
+  terminal_learning_curve_decision_authorized: true
+  architecture_selection_authorized: false
+  calibration_authorized: false
+  extension_above_131072_authorized: false
+  final_evaluation_authorized: false
+  gwosc_gwtc_access_authorized: false
+  model_tuning_authorized: false
+  real_noise_authorized: false
+  sbc_authorized: false
+authorized_training_rungs:
+- 131072
+authorized_training_seeds:
+- 0
+- 1
+- 2
+maximum_concurrent_fits: 3
+data_loader_worker_processes: 4
+corrected_65k_publication:
+  base_generator_commit: 2be777e727ef9d8e1a85f89c68966df5d37932b0
+  base_preregistration_hash: 5aeaac395463bd073c44ead4ff4c5c729b5a2d4b4f1840c0825a53b30ab1bc98
+  correction_generator_commit: 499f86b3159af82612e38c134cd81003eedcc4e4
+  correction_preregistration_hash: 7fca209de9f06e98da1c5a96ae0f4fc6daec5d2f0c2339a718e1f899bb915b69
+  correction_parent_manifest_sha256: 0fcfb117c620d58a2e0ccd8b19c0d3f3a371dd844fb637b50c8b565eee6864f2
+  correction_publication_tree_sha256: a57aa2691e256b34403392f595e964dceec1325cfc54a38ed4d2a0b714d38c12
+  combined_base_manifest_sha256: 753ace3d2fe475f1279b3bd8560005017f4e75a822fa951d94f9ada60eb3eca4
+terminal_publication:
+  combined_manifest_sha256: ad26d51d4f9475c6710cdfee4e71409526e1d776e0b8ec14734feff02855cee5
+  train_parent_manifest_sha256: 0f2bb99c851b8079672b42350223cdcfe838a7f5214bf69d9de6f851b9e1c534
+  development_tail_manifest_sha256: 58fcafd58cbcd407ecf6b35dfa98c0bd2bd66f37151e19e6bf530ca2601260c7
+publication_roots:
+  stage_a: /root/autodl-tmp/lensing-4/data_v2/scientific/stage_a/published/phase4-stage-a-2be777e727ef-d3a60034bbd6
+  stage_b: /root/autodl-tmp/lensing-4/data_v2/scientific/stage_b/published/phase4-stage-b-2be777e727ef-6a4f106f9640
+  combined_base: /root/autodl-tmp/lensing-4/data_v2/scientific/train_65k/published/phase4-train-65k-2be777e727ef-6a4f106f9640
+  correction: /root/autodl-tmp/lensing-4/data_v2/scientific/waveform_correction/published/phase4-waveform-correction-499f86b3159a-1db109b08189
+  terminal_train_increment: /root/autodl-tmp/lensing-4/data_v2/scientific/terminal_131k/train_increment/published/phase4-terminal-131k-a4e6bac014cc-abd07c5b8031
+  terminal_combined_131k: /root/autodl-tmp/lensing-4/data_v2/scientific/train_131k/published/phase4-train-131k-adb4c0981fd1-30fa02d9ec5b
+  development_tail: /root/autodl-tmp/lensing-4/data_v2/scientific/terminal_131k/development_tail_micro128/published/phase4-terminal-tail-micro128-adb4c0981fd1-30fa02d9ec5b
+immutable_training:
+  cuda_required: true
+  editable_install_authorized: false
+  environment_lock_path: /root/autodl-tmp/lensing-4/review/terminal-probe-release-134cad2/configs/environment/phase4-training-freeze.txt
+  environment_lock_sha256: 2e45000a8cea6712ae307c87782c593245ad56607a772f27a0cc5af726e37b95
+  exact_wheel_test_result_path: /root/autodl-tmp/lensing-4/manifests/phase4/terminal_probe_release/exact_wheel_test_result.json
+  exact_wheel_test_result_sha256: f5ee1a3411cc8816580c6fc5798463966d27bf215855b94fe0d14b845105a625
+  git_commit: a261d1a9fa390313e2f0821e8e75c5f224b759cb
+  gpu_model: NVIDIA RTX 5000 Ada Generation
+  minimum_gpu_count: 3
+  model_configuration_hash: 8d0919c211b6aa057712a402f689f06d9ea916ba3c0c11cc32d0561aeb8d3087
+  model_configuration_path: configs/models/phase4_probe_nsf.yaml
+  observed_gpu_names:
+  - NVIDIA RTX 5000 Ada Generation
+  - NVIDIA RTX 5000 Ada Generation
+  - NVIDIA RTX 5000 Ada Generation
+  - NVIDIA RTX 5000 Ada Generation
+  wheel_filename: gwlens_mm-0.1.0-py3-none-any.whl
+  wheel_path: /root/autodl-tmp/lensing-4/artifacts/phase4/terminal-probe/a261d1a9fa390313e2f0821e8e75c5f224b759cb/gwlens_mm-0.1.0-py3-none-any.whl
+  wheel_sha256: 1484036f774d6119abdac468bbea5dd911273e6778a0781e48edab7b4a98332e
+retained_65k_probe:
+  artifacts:
+    '0':
+      best_checkpoint_sha256: 38d0588033732301ffdac1f4d750333356ecca04604745005bdc8e86fdd3e8f2
+      run_summary_sha256: 13ae9e81c7a15dc03444f7ce1b33cc49bbb28c5426bbed688699c4e1b94f4501
+    '1':
+      best_checkpoint_sha256: 95abdf93b1bb18f90dd6910ebd66b591ff27a445f703793df7b786819975a9f3
+      run_summary_sha256: ac905fad667507a56e35275a632aeca0d3df873342413add2eca2875bd664175
+    '2':
+      best_checkpoint_sha256: fe8b85732ba0e220645413d29ae696a2c47e29777ab7e5256868bfa9acf9e0a5
+      run_summary_sha256: a2b59dc20c52e3724b790c75d79d908b227bd07fafd2773da921011e91f61600
+  output_root: /root/autodl-tmp/lensing-4/training/phase4/corrected-probe-65k-adcb1a7
+  shared_identity:
+    final_evaluation_commitment_sha256: c13412eced163bac26abc4b22d054f3a6fa967e7e5a4dd7849ebf54f42df6083
+    input_standardizer_sha256: 2b9d65d7634a69c4441800fe1b78f76dcdbf8fe998b0a2f15b33d63ad5d54719
+    membership_sha256: 2f20908b1494f0e9119d9c6995cbb84cb3d62c0306d523f0512d3e6803fa1eef
+    model_configuration_hash: 8d0919c211b6aa057712a402f689f06d9ea916ba3c0c11cc32d0561aeb8d3087
+    target_standardizer_sha256: 01c7c7690bdba39d10ba82cad839214aa6bdf4b3231bd17e8a0f207c388efa73
+    train_manifest_sha256: da8aaa8d86afb4d93156191976b420bfc7bbc7dfe0fdc6c6f627515d804a7379
+    training_code_commit: adcb1a79e1534e4d742238aa99869c57da95dd96
+    training_environment_sha256: 2e45000a8cea6712ae307c87782c593245ad56607a772f27a0cc5af726e37b95
+    validation_manifest_sha256: 4348e278980bd81033a2db80568444262c165e0dea13f9d57d374f932ca823a3
+  training_rung_count: 65536
+final_evaluation_commitment_sha256: c13412eced163bac26abc4b22d054f3a6fa967e7e5a4dd7849ebf54f42df6083
+retained_65k_output_root: /root/autodl-tmp/lensing-4/training/phase4/corrected-probe-65k-adcb1a7
+training_output_root: /root/autodl-tmp/lensing-4/training/phase4/terminal-probe-131k-a261d1a-286b8e5
+learning_curve_output_path: /root/autodl-tmp/lensing-4/training/phase4/terminal-probe-131k-a261d1a-286b8e5/learning_curve_65k_to_131k_decision.json
+execution_contract:
+  training_rung: 131072
+  train_from_scratch: true
+  seeds:
+  - 0
+  - 1
+  - 2
+  retained_65k_checkpoint_retraining_authorized: false
+  same_core_validation_system_count: 6144
+  development_tail_system_count: 512
+  calibration_during_scale_selection_forbidden: true
+  final_evaluation_access_forbidden: true
+  best_seed_selection_forbidden: true
+  paired_bootstrap_replicates: 10000
+  frozen_effective_batch_size: 256
+  physical_microbatch_size: 64
+  gradient_accumulation_steps: 4
+resource_gates:
+  observed_post_publication_free_bytes: 253429231616
+  minimum_prelaunch_free_bytes: 100000000000
+  maximum_training_output_bytes: 50000000000
+  maximum_concurrent_fits: 3
+post_freeze_allowed_paths:
+- configs/execution/phase4_terminal_131k_probe_authorization.yaml
+- docs/DECISIONS.md
+- docs/FAILURES.md
+- docs/PROJECT_STATE.md
+- docs/reports/PHASE4_TERMINAL_131K_PROBE_AUTHORIZATION_REPORT.md
+- docs/reports/PHASE4_TERMINAL_131K_PROBE_RESULT_REPORT.md
+- results/experiment_registry.csv
+- results/phase4/terminal_probe_delegated_review.json
+- results/phase4/terminal_probe_closeout.json
+- results/phase4/terminal_probe_release_packet.json
+- results/phase4/terminal_probe_decision.json
+terminal_decision_states:
+- lock_train_131k_saturated
+- lock_train_131k_resource_capped_data_limited
+stop_after_terminal_learning_curve_decision: true

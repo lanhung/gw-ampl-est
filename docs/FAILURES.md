@@ -730,3 +730,18 @@ architecture lock plus separate materialization and inference gates.
 - This closes the engineering partition failure. It does not retrospectively
   turn either failed run into evidence and does not authorize training or any
   downstream scientific execution.
+
+## The first exact-wheel verification harness lacked pytest
+
+- The frozen training environment intentionally contained runtime training
+  dependencies but not the test runner.
+- The first exact-wheel verifier invocation stopped before any scientific data
+  access or optimizer step because `pytest` was absent.
+- The failed verifier evidence is retained under
+  `manifests/phase4/terminal_probe_release/failed_preflight_missing_pytest_20260723`
+  on AutoDL.
+- A separate verification-only harness installed pytest 8.3.3 without
+  modifying the frozen training environment or wheel. The rerun passed 68
+  focused and 482 full tests, with one and six optional skips respectively.
+- This was a release-harness dependency issue, not a model, data, CUDA or
+  scientific-contract failure.
