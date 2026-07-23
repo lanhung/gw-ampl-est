@@ -4,12 +4,12 @@ authorized_by: codex_as_delegated_scientific_and_engineering_reviewer
 authorization_date: '2026-07-23'
 authorization_basis:
   delegated_review_path: results/phase4/terminal_probe_delegated_review.json
-  delegated_review_sha256: 83676256c2b94c5a3921b3bcdd8d6f0b9f591be6097ba9463a153ec44eefda82
+  delegated_review_sha256: d0a91645a351aa20a8e03df561e74b5cdb7420e7c4bcc9d3f584156e3fa4e634
   release_packet_status: ready_for_delegated_terminal_probe_authorization_review
   independent_closeout_status: terminal_131k_independent_closeout_passed
 terminal_probe_release_review:
   path: results/phase4/terminal_probe_release_packet.json
-  sha256: 286b8e505b2f69465b1a13dc8e6e0e5921af32840991fbce3b01a0132ce54eb2
+  sha256: d2e4fde7b918ce363ca67781d7a462d97ffe37dd4fadde186f587b44be7cdf7a
   delegated_review_status: accepted_for_exact_terminal_probe_authorization
 frozen_preregistration:
   version: 1.2.0-rc.1
@@ -61,11 +61,11 @@ publication_roots:
 immutable_training:
   cuda_required: true
   editable_install_authorized: false
-  environment_lock_path: /root/autodl-tmp/lensing-4/review/terminal-probe-release-134cad2/configs/environment/phase4-training-freeze.txt
+  environment_lock_path: /root/autodl-tmp/lensing-4/review/terminal-probe-release-d8a3f11/configs/environment/phase4-training-freeze.txt
   environment_lock_sha256: 2e45000a8cea6712ae307c87782c593245ad56607a772f27a0cc5af726e37b95
-  exact_wheel_test_result_path: /root/autodl-tmp/lensing-4/manifests/phase4/terminal_probe_release/exact_wheel_test_result.json
-  exact_wheel_test_result_sha256: f5ee1a3411cc8816580c6fc5798463966d27bf215855b94fe0d14b845105a625
-  git_commit: a261d1a9fa390313e2f0821e8e75c5f224b759cb
+  exact_wheel_test_result_path: /root/autodl-tmp/lensing-4/manifests/phase4/terminal_probe_release/d8a3f1153155797921267557672c03d1ea6543a9/exact_wheel_test_result.json
+  exact_wheel_test_result_sha256: 15b39d2d41cbf99b114bd08685844d271761ac14125aec8c05d92cd46ffe3972
+  git_commit: d8a3f1153155797921267557672c03d1ea6543a9
   gpu_model: NVIDIA RTX 5000 Ada Generation
   minimum_gpu_count: 3
   model_configuration_hash: 8d0919c211b6aa057712a402f689f06d9ea916ba3c0c11cc32d0561aeb8d3087
@@ -76,8 +76,8 @@ immutable_training:
   - NVIDIA RTX 5000 Ada Generation
   - NVIDIA RTX 5000 Ada Generation
   wheel_filename: gwlens_mm-0.1.0-py3-none-any.whl
-  wheel_path: /root/autodl-tmp/lensing-4/artifacts/phase4/terminal-probe/a261d1a9fa390313e2f0821e8e75c5f224b759cb/gwlens_mm-0.1.0-py3-none-any.whl
-  wheel_sha256: 1484036f774d6119abdac468bbea5dd911273e6778a0781e48edab7b4a98332e
+  wheel_path: /root/autodl-tmp/lensing-4/artifacts/phase4/terminal-probe/d8a3f1153155797921267557672c03d1ea6543a9/gwlens_mm-0.1.0-py3-none-any.whl
+  wheel_sha256: fd8da0465f9609e31805abf01f1bf41dc07b486b8e470a6c345a64923b63dda8
 retained_65k_probe:
   artifacts:
     '0':
@@ -103,8 +103,8 @@ retained_65k_probe:
   training_rung_count: 65536
 final_evaluation_commitment_sha256: c13412eced163bac26abc4b22d054f3a6fa967e7e5a4dd7849ebf54f42df6083
 retained_65k_output_root: /root/autodl-tmp/lensing-4/training/phase4/corrected-probe-65k-adcb1a7
-training_output_root: /root/autodl-tmp/lensing-4/training/phase4/terminal-probe-131k-a261d1a-286b8e5
-learning_curve_output_path: /root/autodl-tmp/lensing-4/training/phase4/terminal-probe-131k-a261d1a-286b8e5/learning_curve_65k_to_131k_decision.json
+training_output_root: /root/autodl-tmp/lensing-4/training/phase4/terminal-probe-131k-d8a3f11-d2e4fde
+learning_curve_output_path: /root/autodl-tmp/lensing-4/training/phase4/terminal-probe-131k-d8a3f11-d2e4fde/learning_curve_65k_to_131k_decision.json
 execution_contract:
   training_rung: 131072
   train_from_scratch: true

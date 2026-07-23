@@ -1503,3 +1503,18 @@ Both allowed terminal decision labels stop at 131,072. A scientific
 architecture fit therefore cannot begin automatically after the probe; it
 requires a new exact gate bound to the terminal decision and all twelve
 development-only architecture results.
+
+## D117 — Treat the singular terminal validation manifest as reader compatibility
+
+The first terminal reader invocation failed before preprocessing because the
+new train-increment publisher records its one child validation under
+`validation`, while the inherited generic reader accepted only the Stage A
+multi-child `validations` mapping. The parent manifest itself was valid,
+hash-bound and independently closed out.
+
+The reader now accepts either an unambiguous plural mapping or one singular
+mapping whose `dataset_id` equals the child directory. If both forms exist and
+differ, it fails closed. This correction changes no publication byte,
+membership, model tensor, optimizer, target, seed or stopping rule. The
+previous training authorization is superseded before any optimizer step; the
+new wheel and release packet use fresh identities.

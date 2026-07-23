@@ -18,10 +18,10 @@ The release packet is:
 
 - path: `results/phase4/terminal_probe_release_packet.json`;
 - SHA-256:
-  `286b8e505b2f69465b1a13dc8e6e0e5921af32840991fbce3b01a0132ce54eb2`;
+  `d2e4fde7b918ce363ca67781d7a462d97ffe37dd4fadde186f587b44be7cdf7a`;
 - status: `ready_for_delegated_terminal_probe_authorization_review`;
 - review checkout:
-  `134cad27e7b78c986b5a5c6c41e8dd9bf68b1c49`.
+  `d8a3f1153155797921267557672c03d1ea6543a9`.
 
 It binds the independently validated combined publication manifest
 `ad26d51d4f9475c6710cdfee4e71409526e1d776e0b8ec14734feff02855cee5`
@@ -31,9 +31,9 @@ and the 512-case development-tail manifest
 ## Immutable training identity
 
 - training commit:
-  `a261d1a9fa390313e2f0821e8e75c5f224b759cb`;
+  `d8a3f1153155797921267557672c03d1ea6543a9`;
 - exact wheel SHA-256:
-  `1484036f774d6119abdac468bbea5dd911273e6778a0781e48edab7b4a98332e`;
+  `fd8da0465f9609e31805abf01f1bf41dc07b486b8e470a6c345a64923b63dda8`;
 - model configuration SHA-256:
   `8d0919c211b6aa057712a402f689f06d9ea916ba3c0c11cc32d0561aeb8d3087`;
 - normalized CUDA environment SHA-256:
@@ -50,8 +50,8 @@ standardizers, model, environment and final-evaluation commitment also match.
 The exact installed wheel passed the post-publication verifier:
 
 - status: `passed_exact_wheel_on_autodl`;
-- focused tests: 68 passed, 1 optional skip;
-- full tests: 482 passed, 6 optional skips;
+- focused tests: 70 passed;
+- full tests: 486 passed, 3 optional skips;
 - CUDA available: true;
 - observed GPUs: four NVIDIA RTX 5000 Ada Generation devices;
 - editable install: false;
@@ -60,16 +60,15 @@ The exact installed wheel passed the post-publication verifier:
 - optimizer started: false.
 
 The verifier-result SHA-256 is
-`f5ee1a3411cc8816580c6fc5798463966d27bf215855b94fe0d14b845105a625`.
-The first verifier invocation stopped because the isolated training
-environment did not contain pytest. Its evidence is retained. Pytest was added
-only to a separate verification harness; the frozen training environment and
-wheel were not modified.
+`15b39d2d41cbf99b114bd08685844d271761ac14125aec8c05d92cd46ffe3972`.
+The exact runtime dependency versions matched the frozen model configuration.
+The exact wheel also indexed the real 65,536-system terminal parent with
+65,536 unique IDs without opening strain.
 
 ## Delegated review and scope
 
 The delegated-review decision SHA-256 is
-`83676256c2b94c5a3921b3bcdd8d6f0b9f591be6097ba9463a153ec44eefda82`.
+`d0a91645a351aa20a8e03df561e74b5cdb7420e7c4bcc9d3f584156e3fa4e634`.
 It permits:
 
 - read-only access to the exact corrected 65k, terminal increment, combined
@@ -80,10 +79,22 @@ It permits:
 
 The fresh output root is:
 
-`/root/autodl-tmp/lensing-4/training/phase4/terminal-probe-131k-a261d1a-286b8e5`
+`/root/autodl-tmp/lensing-4/training/phase4/terminal-probe-131k-d8a3f11-d2e4fde`
 
 The generated authorization SHA-256 is
-`2cca4283c351e875435ffe927258c1e6e1a09b49ec84113ca3821c6d68788034`.
+`3a8a9c2986f800e28698360538aec1d51fdb3f5afb3a3b5dd5c651a43317aee6`.
+
+## Superseded pre-optimizer attempt
+
+The first authorization bound training commit `a261d1a9...` and stopped while
+the generic reader indexed the real terminal increment parent. That publisher
+uses one singular `validation` mapping, while the reader recognized only the
+older plural `validations` mapping. No rung preparation, checkpoint, optimizer
+step or scientific metric was created.
+
+The correction accepts both unambiguous layouts and rejects conflicting
+declarations. It is an engineering schema-accessor patch only; all data,
+model, environment, seeds, metrics and scientific gates are unchanged.
 
 ## Stop boundary
 

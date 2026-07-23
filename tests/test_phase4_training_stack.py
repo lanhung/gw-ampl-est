@@ -267,6 +267,68 @@ def test_manifest_only_shard_index_refuses_partial_and_duplicates(tmp_path: Path
         index_complete_shards(dataset, expected_pairs_per_shard=2, require_published=False)
 
 
+def test_shard_index_accepts_terminal_singular_parent_validation(
+    tmp_path: Path,
+) -> None:
+    parent = tmp_path / "published" / "terminal-parent"
+    dataset = parent / "terminal-train"
+    shard = dataset / "shards" / "shard-00000"
+    shard.mkdir(parents=True)
+    (shard / "COMPLETE.json").write_text("{}\n", encoding="utf-8")
+    (shard / "shard_manifest.json").write_text(
+        json.dumps(
+            {
+                "status": "complete",
+                "accepted_pair_count": 2,
+                "physical_system_ids": ["terminal-system-0", "terminal-system-1"],
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    validation = {
+        "dataset_id": dataset.name,
+        "accepted_pair_count": 2,
+        "complete_shard_count": 1,
+        "status": "passed",
+    }
+    (parent / "dataset_manifest.json").write_text(
+        json.dumps(
+            {
+                "status": "passed",
+                "dataset_id": dataset.name,
+                "validation": validation,
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+
+    entries = index_complete_shards(
+        dataset,
+        expected_pairs_per_shard=2,
+        expected_total_pairs=2,
+    )
+    assert tuple(entry.physical_system_id for entry in entries) == (
+        "terminal-system-0",
+        "terminal-system-1",
+    )
+
+    manifest = json.loads((parent / "dataset_manifest.json").read_text())
+    manifest["validations"] = {
+        "train": {**validation, "accepted_pair_count": 1}
+    }
+    (parent / "dataset_manifest.json").write_text(
+        json.dumps(manifest) + "\n", encoding="utf-8"
+    )
+    with pytest.raises(TrainingGateError, match="conflicting dataset validations"):
+        index_complete_shards(
+            dataset,
+            expected_pairs_per_shard=2,
+            expected_total_pairs=2,
+        )
+
+
 def test_atomic_parent_publication_resolves_child_datasets(tmp_path: Path) -> None:
     parent = _write_parent_publication(
         tmp_path, train_count=4, validation_count=2, pairs_per_shard=2

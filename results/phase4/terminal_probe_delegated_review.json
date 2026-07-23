@@ -4,7 +4,7 @@
     "publication_data_access_authorized": true,
     "retained_65k_output_root": "/root/autodl-tmp/lensing-4/training/phase4/corrected-probe-65k-adcb1a7",
     "terminal_learning_curve_decision_authorized": true,
-    "training_output_root": "/root/autodl-tmp/lensing-4/training/phase4/terminal-probe-131k-a261d1a-286b8e5",
+    "training_output_root": "/root/autodl-tmp/lensing-4/training/phase4/terminal-probe-131k-d8a3f11-d2e4fde",
     "training_rung": 131072,
     "training_seeds": [
       0,
@@ -24,6 +24,6 @@
   },
   "review_date": "2026-07-23",
   "reviewed_by": "codex_as_delegated_scientific_and_engineering_reviewer",
-  "reviewed_release_packet_sha256": "286b8e505b2f69465b1a13dc8e6e0e5921af32840991fbce3b01a0132ce54eb2",
+  "reviewed_release_packet_sha256": "d2e4fde7b918ce363ca67781d7a462d97ffe37dd4fadde186f587b44be7cdf7a",
   "status": "delegated_terminal_probe_authorization_approved"
 }

@@ -1164,23 +1164,32 @@ Training, architecture selection, calibration, SBC, final evaluation,
 extension above 131,072, real noise and GWOSC/GWTC remain closed until their
 separate machine-readable gates pass.
 
-The exact terminal training wheel passed its post-publication AutoDL contract:
-68 focused tests passed with one optional skip and 482 full tests passed with
-six optional skips. The installed module came from the non-editable wheel in
-the isolated CUDA environment; all four observed GPUs were NVIDIA RTX 5000 Ada
-Generation devices. No scientific data was opened and no optimizer was
-started.
+The first authorized reader stopped before preprocessing or its first optimizer
+step because the immutable terminal train parent used its real singular
+`validation` manifest field while the reader accepted only the older
+`validations` mapping. It created no preparation, checkpoint or scientific
+metric. This was a schema-accessor integration defect, not a data, model or
+scientific-contract failure.
+
+The narrow compatibility correction is frozen at
+`d8a3f1153155797921267557672c03d1ea6543a9`. Its exact terminal training wheel
+passed the post-publication AutoDL contract: 70 focused tests passed and 486
+full tests passed with three optional skips. A read-only regression indexed all
+65,536 terminal increment IDs from the real singular parent manifest. The
+installed module came from the non-editable wheel in the isolated CUDA
+environment; all four observed GPUs were NVIDIA RTX 5000 Ada Generation
+devices. No strain was opened and no optimizer was started.
 
 Delegated scientific and engineering review accepts release packet
 `results/phase4/terminal_probe_release_packet.json`, SHA-256
-`286b8e505b2f69465b1a13dc8e6e0e5921af32840991fbce3b01a0132ce54eb2`,
+`d2e4fde7b918ce363ca67781d7a462d97ffe37dd4fadde186f587b44be7cdf7a`,
 and authorizes only the frozen 131,072-system three-seed terminal probe through:
 
 `configs/execution/phase4_terminal_131k_probe_authorization.yaml`
 
 The frozen training software commit is
-`a261d1a9fa390313e2f0821e8e75c5f224b759cb`, the exact wheel SHA-256 is
-`1484036f774d6119abdac468bbea5dd911273e6778a0781e48edab7b4a98332e`,
+`d8a3f1153155797921267557672c03d1ea6543a9`, the exact wheel SHA-256 is
+`fd8da0465f9609e31805abf01f1bf41dc07b486b8e470a6c345a64923b63dda8`,
 the model configuration hash is
 `8d0919c211b6aa057712a402f689f06d9ea916ba3c0c11cc32d0561aeb8d3087`,
 and the CUDA environment hash is

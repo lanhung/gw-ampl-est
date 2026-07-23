@@ -666,15 +666,38 @@ def index_complete_shards(
         if not parent_manifest.is_file():
             raise TrainingGateError("atomic parent publication manifest is missing")
         parent = _load_mapping(parent_manifest)
-        validation = parent.get("validations", {}).get(dataset_root.name)
-        if validation is None:
-            validation = next(
-                (
-                    item
-                    for item in parent.get("validations", {}).values()
-                    if isinstance(item, dict) and item.get("dataset_id") == dataset_root.name
-                ),
-                None,
+        validation_candidates: List[Mapping[str, Any]] = []
+        validations = parent.get("validations")
+        if validations is not None:
+            if not isinstance(validations, Mapping):
+                raise TrainingGateError(
+                    "atomic parent publication validations are malformed"
+                )
+            direct = validations.get(dataset_root.name)
+            if isinstance(direct, Mapping):
+                validation_candidates.append(direct)
+            validation_candidates.extend(
+                item
+                for item in validations.values()
+                if isinstance(item, Mapping)
+                and item.get("dataset_id") == dataset_root.name
+                and item is not direct
+            )
+        singular_validation = parent.get("validation")
+        if singular_validation is not None:
+            if not isinstance(singular_validation, Mapping):
+                raise TrainingGateError(
+                    "atomic parent publication validation is malformed"
+                )
+            if singular_validation.get("dataset_id") == dataset_root.name:
+                validation_candidates.append(singular_validation)
+        validation = validation_candidates[0] if validation_candidates else None
+        if validation is not None and any(
+            dict(candidate) != dict(validation)
+            for candidate in validation_candidates[1:]
+        ):
+            raise TrainingGateError(
+                "atomic parent publication has conflicting dataset validations"
             )
         if parent.get("status") != "passed" or not isinstance(validation, dict):
             raise TrainingGateError("dataset is not named by a passed parent publication")

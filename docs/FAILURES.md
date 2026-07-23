@@ -745,3 +745,17 @@ architecture lock plus separate materialization and inference gates.
   focused and 482 full tests, with one and six optional skips respectively.
 - This was a release-harness dependency issue, not a model, data, CUDA or
   scientific-contract failure.
+
+## The first terminal reader rejected the publisher's singular validation field
+
+- The terminal train increment parent was atomically published with one
+  `validation` object. The inherited generic reader looked only for a
+  `validations` mapping used by multi-child Stage A parents.
+- The authorized command failed while indexing shard manifests, before shared
+  preprocessing, strain access, checkpoint creation or an optimizer step.
+- The publication was not modified. A typed compatibility path now accepts the
+  real singular layout, preserves plural-layout support and rejects conflicting
+  dual declarations.
+- The corrected exact wheel indexed all 65,536 unique terminal increment IDs
+  in a read-only real-manifest regression and passed the complete AutoDL test
+  contract.
