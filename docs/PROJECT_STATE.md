@@ -720,28 +720,34 @@ remain closed.
 
 ## Terminal 131k probe release authorization
 
-The post-publication exact-wheel verification passed on AutoDL. The isolated
-wheel runtime imported `gwlens_mm` from its non-editable site-packages
-installation, detected four NVIDIA RTX 5000 Ada Generation devices, passed 68
-focused tests with one optional skip and passed 482 full tests with six
-optional skips. The verifier did not open scientific data or start an
-optimizer.
+The first execution attempt stopped before preprocessing because the real
+terminal increment parent has one singular `validation` mapping while the
+training reader recognized only the older plural `validations` layout. No
+preparation, checkpoint, optimizer step or scientific metric exists from that
+attempt.
+
+A narrow reader compatibility correction accepted both unambiguous manifest
+layouts and rejects conflicting dual declarations. The exact corrected wheel
+indexed all 65,536 unique IDs from the real parent without opening strain. Its
+isolated AutoDL runtime imported `gwlens_mm` from the non-editable wheel,
+detected four NVIDIA RTX 5000 Ada Generation devices, passed 70 focused tests
+and passed 486 full tests with three optional skips.
 
 Release packet SHA-256
-`286b8e505b2f69465b1a13dc8e6e0e5921af32840991fbce3b01a0132ce54eb2`
+`d2e4fde7b918ce363ca67781d7a462d97ffe37dd4fadde186f587b44be7cdf7a`
 binds:
 
 - the exact 131,072-system combined publication and 512-case tail pool;
-- training commit `a261d1a9fa390313e2f0821e8e75c5f224b759cb`;
+- training commit `d8a3f1153155797921267557672c03d1ea6543a9`;
 - wheel SHA-256
-  `1484036f774d6119abdac468bbea5dd911273e6778a0781e48edab7b4a98332e`;
+  `fd8da0465f9609e31805abf01f1bf41dc07b486b8e470a6c345a64923b63dda8`;
 - the immutable CUDA environment and probe-model configuration;
 - all three retained corrected-65k summaries and best checkpoints;
 - the finalized pre-training final-evaluation commitment.
 
 Delegated review approved only the 131k probe for seeds 0, 1 and 2. The fresh
 output identity is
-`/root/autodl-tmp/lensing-4/training/phase4/terminal-probe-131k-a261d1a-286b8e5`.
+`/root/autodl-tmp/lensing-4/training/phase4/terminal-probe-131k-d8a3f11-d2e4fde`.
 The runtime may evaluate retained 65k checkpoints on the development-tail
 pool, fit the 131k probe from scratch and produce exactly one terminal
 learning-curve decision. Architecture selection, calibration, SBC, final

@@ -19,11 +19,11 @@
   "immutable_training": {
     "cuda_required": true,
     "editable_install_authorized": false,
-    "environment_lock_path": "/root/autodl-tmp/lensing-4/review/terminal-probe-release-134cad2/configs/environment/phase4-training-freeze.txt",
+    "environment_lock_path": "/root/autodl-tmp/lensing-4/review/terminal-probe-release-d8a3f11/configs/environment/phase4-training-freeze.txt",
     "environment_lock_sha256": "2e45000a8cea6712ae307c87782c593245ad56607a772f27a0cc5af726e37b95",
-    "exact_wheel_test_result_path": "/root/autodl-tmp/lensing-4/manifests/phase4/terminal_probe_release/exact_wheel_test_result.json",
-    "exact_wheel_test_result_sha256": "f5ee1a3411cc8816580c6fc5798463966d27bf215855b94fe0d14b845105a625",
-    "git_commit": "a261d1a9fa390313e2f0821e8e75c5f224b759cb",
+    "exact_wheel_test_result_path": "/root/autodl-tmp/lensing-4/manifests/phase4/terminal_probe_release/d8a3f1153155797921267557672c03d1ea6543a9/exact_wheel_test_result.json",
+    "exact_wheel_test_result_sha256": "15b39d2d41cbf99b114bd08685844d271761ac14125aec8c05d92cd46ffe3972",
+    "git_commit": "d8a3f1153155797921267557672c03d1ea6543a9",
     "gpu_model": "NVIDIA RTX 5000 Ada Generation",
     "minimum_gpu_count": 3,
     "model_configuration_hash": "8d0919c211b6aa057712a402f689f06d9ea916ba3c0c11cc32d0561aeb8d3087",
@@ -35,8 +35,8 @@
       "NVIDIA RTX 5000 Ada Generation"
     ],
     "wheel_filename": "gwlens_mm-0.1.0-py3-none-any.whl",
-    "wheel_path": "/root/autodl-tmp/lensing-4/artifacts/phase4/terminal-probe/a261d1a9fa390313e2f0821e8e75c5f224b759cb/gwlens_mm-0.1.0-py3-none-any.whl",
-    "wheel_sha256": "1484036f774d6119abdac468bbea5dd911273e6778a0781e48edab7b4a98332e"
+    "wheel_path": "/root/autodl-tmp/lensing-4/artifacts/phase4/terminal-probe/d8a3f1153155797921267557672c03d1ea6543a9/gwlens_mm-0.1.0-py3-none-any.whl",
+    "wheel_sha256": "fd8da0465f9609e31805abf01f1bf41dc07b486b8e470a6c345a64923b63dda8"
   },
   "optimizer_execution_authorized": false,
   "publication": {
@@ -46,7 +46,7 @@
     "logical_train_accepted_count": 131072,
     "train_parent_manifest_sha256": "0f2bb99c851b8079672b42350223cdcfe838a7f5214bf69d9de6f851b9e1c534"
   },
-  "release_review_checkout_commit": "134cad27e7b78c986b5a5c6c41e8dd9bf68b1c49",
+  "release_review_checkout_commit": "d8a3f1153155797921267557672c03d1ea6543a9",
   "retained_65k_probe": {
     "artifacts": {
       "0": {
