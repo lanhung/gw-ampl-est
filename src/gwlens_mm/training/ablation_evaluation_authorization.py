@@ -341,7 +341,7 @@ def _primary_statistics_completed(
     authorization: Mapping[str, Any],
     *,
     selected_architecture_id: str,
-) -> None:
+) -> Mapping[str, Any]:
     if authorization.get("authorization_status") != (
         STATISTICS_AUTHORIZATION_STATUS
     ):
@@ -354,6 +354,8 @@ def _primary_statistics_completed(
     ):
         raise TrainingGateError("primary statistics use a different selected model")
     roots = authorization.get("statistics_output_roots", {})
+    score_artifacts = authorization.get("score_artifacts_by_seed", {})
+    calibration_artifacts: dict[str, Any] = {}
     for seed in MODEL_SEEDS:
         root = _project_path(
             Path(str(roots.get(str(seed), ""))),
@@ -368,6 +370,21 @@ def _primary_statistics_completed(
             != "completed_calibration_fit_and_independent_sbc"
         ):
             raise TrainingGateError("primary calibration/SBC result did not complete")
+        calibration = score_artifacts.get(str(seed), {}).get(
+            "calibration_fit", {}
+        )
+        score_path = _project_path(
+            Path(str(calibration.get("path", ""))),
+            name=f"primary seed-{seed} calibration score",
+            require_file=True,
+        )
+        if _sha256(score_path) != calibration.get("sha256"):
+            raise TrainingGateError("primary calibration score identity changed")
+        calibration_artifacts[str(seed)] = {
+            "path": str(score_path),
+            "sha256": _sha256(score_path),
+        }
+    return calibration_artifacts
 
 
 def build_ablation_calibration_release_packet(
@@ -420,7 +437,7 @@ def build_ablation_calibration_release_packet(
     ):
         raise TrainingGateError("primary score and ablation model identities differ")
     statistics = load_yaml(primary_statistics_authorization_path)
-    _primary_statistics_completed(
+    primary_calibration_scores = _primary_statistics_completed(
         statistics, selected_architecture_id=architecture_id
     )
     publication = score_authorization.get("development_publication", {})
@@ -496,6 +513,7 @@ def build_ablation_calibration_release_packet(
             ),
             "sha256": _sha256(primary_statistics_authorization_path),
         },
+        "primary_same_seed_calibration_scores": primary_calibration_scores,
         "calibration_publication": {
             **dict(publication),
             "parent_manifest_sha256": _sha256(manifest_path),
@@ -629,6 +647,9 @@ def build_ablation_calibration_authorization(
         "selected_architecture": dict(packet["selected_architecture"]),
         "ablation_checkpoints": dict(packet["ablation_checkpoints"]),
         "calibration_publication": dict(packet["calibration_publication"]),
+        "primary_same_seed_calibration_scores": dict(
+            packet["primary_same_seed_calibration_scores"]
+        ),
         "immutable_inference": dict(packet["immutable_inference"]),
         "calibration_score_outputs": dict(packet["calibration_score_outputs"]),
         "calibration_map_outputs": dict(packet["calibration_map_outputs"]),

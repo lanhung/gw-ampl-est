@@ -1,0 +1,72 @@
+configuration_version: "1.0.0"
+status: frozen_execution_disabled
+scope: ablation_calibration_and_iid_inference_only
+
+parent_contract:
+  version: "1.1.0-rc.8"
+  path: configs/statistics/ablation_calibration_iid_preregistration.yaml
+  canonical_hash: "219160f67030bad745b0a4573d78d02f9d0db7536a6490c907196e8570647c9a"
+
+locked_training_rung: 131072
+ablation_views: [gw_only, em_only]
+model_seeds: [0, 1, 2]
+best_seed_selection_authorized: false
+
+calibration:
+  split: calibration_fit
+  accepted_case_count: 4096
+  posterior_draws_per_case: 4096
+  physical_batch_size: 16
+  posterior_draw_chunk_size: 256
+  root_seed_by_view_and_model_seed:
+    gw_only:
+      "0": 2026072410
+      "1": 2026072411
+      "2": 2026072412
+    em_only:
+      "0": 2026072413
+      "1": 2026072414
+      "2": 2026072415
+  fit_separate_map_per_view_and_seed: true
+  primary_map_reuse_authorized: false
+  pooling_authorized: false
+
+iid:
+  split: iid_test
+  accepted_case_count: 8192
+  posterior_draws_per_case: 4096
+  physical_batch_size: 16
+  posterior_draw_chunk_size: 256
+  root_seed_by_view_and_model_seed:
+    gw_only:
+      "0": 2026072420
+      "1": 2026072421
+      "2": 2026072422
+    em_only:
+      "0": 2026072423
+      "1": 2026072424
+      "2": 2026072425
+  same_cases_as_primary_iid: true
+  matching_view_seed_map_required: true
+  posterior_draws_persisted: false
+
+paired_comparison:
+  replicates: 10000
+  seed_domain: final_iid_ablation_paired_bootstrap_v1
+  same_seed_primary_required: true
+  best_seed_selection_authorized: false
+  result_can_trigger_retraining_or_tuning: false
+
+execution:
+  scientific_checkpoint_access_enabled: false
+  calibration_fit_data_access_enabled: false
+  calibration_score_execution_enabled: false
+  calibration_map_fit_enabled: false
+  iid_unsealing_enabled: false
+  iid_inference_enabled: false
+  primary_iid_score_access_enabled: false
+  paired_comparison_enabled: false
+  model_training_or_tuning_enabled: false
+  sbc_enabled: false
+  non_iid_ablation_enabled: false
+  gwosc_gwtc_access_enabled: false

@@ -1385,6 +1385,25 @@ requires its own hash-bound delegated review. This software used synthetic
 fixtures only; no checkpoint, calibration case, IID record or primary score
 was opened, and no execution authorization was created.
 
+The implementation-only Phase 7 boundary now also contains the typed runtime
+for those two future releases through:
+
+`configs/execution/phase7_ablation_evaluation_runtime_stack_authorization.yaml`
+
+The frozen execution configuration is
+`configs/inference/phase7_ablation_evaluation.yaml`, canonical hash
+`1fb19fe9bfcf451919196b0510fad471c507ad5220bbc1410ebd196d00b20dcd`.
+It fixes twelve collision-free posterior-draw seed domains, bounded physical
+and draw microbatches, six calibration jobs and six IID jobs. The runtime
+reuses the primary calibration and final-inference score kernels, applies
+ablations only after the primary input standardizer and persists no posterior
+draws.
+
+Both command-line runners default to dry-run and require a future exact
+runtime authorization for `--execute`. Synthetic gate and atomic-output tests
+only were used. Scientific checkpoint access, calibration scoring/map fitting,
+IID unsealing/inference, paired comparison and GWOSC/GWTC remain closed.
+
 ## Scientific integrity
 
 - Never fabricate results, citations, completed runs or calibration.

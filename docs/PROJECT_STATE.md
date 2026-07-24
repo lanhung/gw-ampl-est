@@ -995,3 +995,21 @@ closed. Verification passed 7 focused tests and 548 full tests with eight
 optional-dependency skips, maintained Ruff, mypy over 78 source files and
 package build. No scientific artifact was opened. The active 131k three-seed
 probe remains the critical path.
+
+## Ablation evaluation runtime
+
+The two RC.8 releases now have a shared-kernel runtime and dry-run CLIs.
+Calibration applies each frozen input view after primary standardization,
+extracts the same posterior-region scores as the primary model and atomically
+writes one view/seed-specific map. IID uses the primary final-score kernel,
+requires the matching map, persists no posterior draws and atomically writes
+one score plus one same-seed paired comparison.
+
+The runtime configuration hash is
+`1fb19fe9bfcf451919196b0510fad471c507ad5220bbc1410ebd196d00b20dcd`.
+It freezes twelve unique RNG domains, physical batch 16 and draw microbatch
+256. Verification passed 8 focused tests and 556 full tests with eight
+optional-dependency skips, maintained Ruff, mypy over 79 source files and
+package build. Tests cover the closed contract, exact gate identities, dry-run
+CLIs and both atomic output paths using synthetic kernels. Scientific execution
+is still closed; the active 131k probe remains the critical path.
