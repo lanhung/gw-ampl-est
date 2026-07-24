@@ -52,7 +52,9 @@ def _stat_identity(path: Path) -> Tuple[int, int, int]:
     return stat.st_ino, stat.st_size, stat.st_mtime_ns
 
 
-def _contract(authorization: Mapping[str, Any]) -> LegacySISStressContract:
+def legacy_sis_contract(
+    authorization: Mapping[str, Any],
+) -> LegacySISStressContract:
     identity = authorization.get("frozen_legacy_identity", {})
     metric = authorization.get("descriptive_metric_contract", {})
     return LegacySISStressContract(
@@ -77,7 +79,13 @@ def validate_legacy_sis_stack_contract(root: Path) -> Mapping[str, Any]:
     if authorization.get("authorization_status") != "authorized_implementation_only":
         raise LegacySISStressGateError("legacy SIS implementation gate is absent")
     flags = authorization.get("authorization", {})
-    allowed = {"verifier_implementation_authorized", "synthetic_fixture_tests_authorized"}
+    allowed = {
+        "verifier_implementation_authorized",
+        "exact_read_only_runtime_gate_implementation_authorized",
+        "nonauthorizing_release_packet_implementation_authorized",
+        "delegated_review_builder_implementation_authorized",
+        "synthetic_fixture_tests_authorized",
+    }
     if any(flags.get(name) is not True for name in allowed):
         raise LegacySISStressGateError("legacy SIS verifier implementation is incomplete")
     if any(value is not False for name, value in flags.items() if name not in allowed):
@@ -100,7 +108,7 @@ def validate_legacy_sis_stack_contract(root: Path) -> Mapping[str, Any]:
         boundary.get(name) is not False for name in required_false
     ):
         raise LegacySISStressGateError("legacy SIS claim boundary drifted")
-    contract = _contract(authorization)
+    contract = legacy_sis_contract(authorization)
     numeric = (
         contract.expected_mae,
         contract.expected_rmse,

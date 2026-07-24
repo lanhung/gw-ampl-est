@@ -8,11 +8,8 @@ import json
 from pathlib import Path
 from typing import Any, Mapping, Optional, Sequence
 
-from gwlens_mm.config import load_yaml
-from gwlens_mm.training.legacy_sis_stress import (
-    LegacySISStressContract,
-    verify_legacy_sis_stress_control,
-    write_legacy_sis_evidence,
+from gwlens_mm.training.legacy_sis_authorization import (
+    run_authorized_legacy_sis_reproduction,
 )
 
 
@@ -23,6 +20,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     parser.add_argument("--checkpoint", type=Path)
     parser.add_argument("--predictions", type=Path)
     parser.add_argument("--output", type=Path)
+    parser.add_argument("--execution-commit")
     parser.add_argument("--execute", action="store_true")
     args = parser.parse_args(argv)
     result: Mapping[str, Any]
@@ -38,38 +36,28 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     else:
         if any(
             value is None
-            for value in (args.authorization, args.checkpoint, args.predictions, args.output)
+            for value in (
+                args.authorization,
+                args.checkpoint,
+                args.predictions,
+                args.output,
+                args.execution_commit,
+            )
         ):
             raise ValueError("legacy SIS execution requires every exact identity")
-        authorization = load_yaml(args.authorization)
-        if authorization.get("authorization_status") != "authorized_read_only_reproduction":
-            raise ValueError("legacy SIS read-only execution gate is absent")
-        flags = authorization.get("authorization", {})
-        if not (
-            flags.get("legacy_asset_read_authorized") is True
-            and flags.get("legacy_checkpoint_deserialization_authorized") is False
-            and flags.get("legacy_asset_write_authorized") is False
-            and flags.get("v2_final_data_application_authorized") is False
-            and flags.get("gwosc_gwtc_access_authorized") is False
-        ):
-            raise ValueError("legacy SIS execution boundary changed")
-        identity = authorization.get("frozen_legacy_identity", {})
-        metric = authorization.get("descriptive_metric_contract", {})
-        contract = LegacySISStressContract(
-            checkpoint_sha256=str(identity.get("checkpoint_sha256", "")),
-            predictions_sha256=str(identity.get("validation_predictions_sha256", "")),
-            validation_rows=int(identity.get("validation_rows", -1)),
-            expected_mae=float(metric.get("mae")),
-            expected_rmse=float(metric.get("rmse")),
-            expected_mape_percent=float(metric.get("mape_percent")),
-            expected_pearson=float(metric.get("pearson")),
-            numeric_tolerance=float(metric.get("absolute_numeric_tolerance")),
-            sis_identity_tolerance=float(metric.get("sis_identity_absolute_tolerance")),
+        assert args.authorization is not None
+        assert args.checkpoint is not None
+        assert args.predictions is not None
+        assert args.output is not None
+        assert args.execution_commit is not None
+        result = run_authorized_legacy_sis_reproduction(
+            args.root.resolve(),
+            authorization_path=args.authorization.resolve(),
+            checkpoint_path=args.checkpoint.resolve(),
+            predictions_path=args.predictions.resolve(),
+            evidence_output_path=args.output.resolve(),
+            execution_commit=args.execution_commit,
         )
-        result = verify_legacy_sis_stress_control(
-            args.checkpoint, args.predictions, contract
-        )
-        write_legacy_sis_evidence(args.output, result)
     print(json.dumps(result, indent=2, sort_keys=True, allow_nan=False))
     return 0
 

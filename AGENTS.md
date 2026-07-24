@@ -1310,6 +1310,25 @@ validation/final query execution, checkpoint access and GWOSC/GWTC remain
 closed. Only synthetic directory fixtures were used; no scientific record,
 checkpoint or final case was opened.
 
+The implementation-only Phase 7 boundary now also contains an exact read-only
+release chain for the frozen legacy SIS descriptive stress control through:
+
+`configs/execution/phase7_legacy_sis_stress_control_authorization.yaml`
+
+Implementation commit `be669fab86ce5f251c56732da6187c3f633e8e8b`
+adds a non-authorizing release packet, a separately hash-bound delegated-review
+authorization builder and one typed runtime gate. The future execution may
+hash, stat and read the frozen prediction CSV, but it may never deserialize the
+legacy checkpoint or write below a legacy root. Before/after inode, size and
+mtime identity is mandatory, and any evidence output must be fresh and below
+the new project root.
+
+This implementation used synthetic fixtures only. No legacy asset,
+scientific record, checkpoint, final case or GWOSC/GWTC product was opened.
+Actual legacy read-only reproduction remains closed until an exact wheel and
+environment pass on AutoDL and the resulting packet receives a separate
+delegated review.
+
 ## Scientific integrity
 
 - Never fabricate results, citations, completed runs or calibration.

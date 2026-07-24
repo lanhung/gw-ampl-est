@@ -60,7 +60,13 @@ def test_legacy_sis_implementation_gate_keeps_execution_closed() -> None:
     authorization = validate_legacy_sis_stack_contract(ROOT)
     assert authorization["authorization_status"] == "authorized_implementation_only"
     flags = authorization["authorization"]
-    allowed = {"verifier_implementation_authorized", "synthetic_fixture_tests_authorized"}
+    allowed = {
+        "verifier_implementation_authorized",
+        "exact_read_only_runtime_gate_implementation_authorized",
+        "nonauthorizing_release_packet_implementation_authorized",
+        "delegated_review_builder_implementation_authorized",
+        "synthetic_fixture_tests_authorized",
+    }
     assert all(flags[name] is True for name in allowed)
     assert all(value is False for name, value in flags.items() if name not in allowed)
     boundary = authorization["claim_boundary"]

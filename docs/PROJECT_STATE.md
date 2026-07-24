@@ -908,3 +908,26 @@ dependency skips, maintained-scope Ruff, mypy over 74 source files and package
 build. Only synthetic directory fixtures were used. The scientific reference
 bank, validation/final records and checkpoints remain unopened, and the active
 131k three-seed probe remains the critical path.
+
+## Legacy SIS read-only release control
+
+Implementation commit `be669fab86ce5f251c56732da6187c3f633e8e8b`
+closes the remaining release-control gap for the historical SIS
+point-regression stress control. The implementation creates:
+
+- a non-authorizing packet binding the exact implementation wheel,
+  environment, legacy paths/hashes, descriptive metrics and fresh evidence
+  output;
+- a separate delegated-review authorization builder;
+- a typed runtime gate shared by the command-line verifier;
+- read-only before/after inode, size and mtime validation;
+- explicit checkpoint non-deserialization and new-project-only evidence
+  publication.
+
+Verification passed 8 focused tests and 527 full tests with eight optional
+dependency skips, maintained-scope Ruff, mypy over 75 source files and package
+build. Only synthetic legacy fixtures were used. No real legacy file,
+scientific data, checkpoint, final case or GWOSC/GWTC product was opened.
+Actual read-only reproduction remains closed pending an exact AutoDL wheel
+test and a separately hash-bound delegated review. The active 131k three-seed
+probe remains the critical path.

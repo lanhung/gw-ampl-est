@@ -39,6 +39,9 @@ claim_boundary:
 
 authorization:
   verifier_implementation_authorized: true
+  exact_read_only_runtime_gate_implementation_authorized: true
+  nonauthorizing_release_packet_implementation_authorized: true
+  delegated_review_builder_implementation_authorized: true
   synthetic_fixture_tests_authorized: true
 
   legacy_asset_read_authorized: false
