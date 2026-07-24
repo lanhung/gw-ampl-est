@@ -1,0 +1,42 @@
+phase: "7-final-summary-release-stack"
+authorization_status: authorized_implementation_and_synthetic_fixture_only
+authorized_by: codex_as_delegated_scientific_and_engineering_reviewer
+authorization_date: "2026-07-24"
+
+authorization_basis:
+  owner_delegation: continue_without_routine_human_intervention
+  terminal_training_size_locked: false
+  terminal_architecture_locked: false
+  final_score_artifacts_completed: false
+  no_final_score_artifact_opened: true
+
+frozen_contracts:
+  locked_training_rung: 131072
+  model_seeds: [0, 1, 2]
+  final_analysis_path: configs/statistics/final_evaluation_analysis_preregistration.yaml
+  final_analysis_hash: "7e0e252f0a972e0b0ad2fe8f93f74f1f0172639a6fb258fc7a953be5fb7973e1"
+  final_generation_commitment_sha256: "c13412eced163bac26abc4b22d054f3a6fa967e7e5a4dd7849ebf54f42df6083"
+  namespace_count: 15
+  accepted_case_count: 20480
+  score_artifact_count: 45
+  nominal_levels: [0.50, 0.80, 0.90, 0.95]
+
+authorization:
+  final_score_summary_implementation_authorized: true
+  nonauthorizing_release_packet_implementation_authorized: true
+  delegated_review_builder_implementation_authorized: true
+  synthetic_fixture_tests_authorized: true
+
+  final_score_artifact_access_authorized: false
+  final_summary_execution_authorized: false
+  final_record_access_authorized: false
+  checkpoint_access_authorized: false
+  calibration_map_access_authorized: false
+  model_training_or_tuning_authorized: false
+  calibration_refit_authorized: false
+  architecture_or_size_selection_authorized: false
+  final_result_threshold_change_authorized: false
+  manuscript_claim_finalization_authorized: false
+  gwosc_gwtc_access_authorized: false
+
+stop_after_implementation: true
