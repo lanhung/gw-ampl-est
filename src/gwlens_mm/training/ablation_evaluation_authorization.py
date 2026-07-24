@@ -99,6 +99,7 @@ IID_REVIEW_SCOPE = (
     "primary_same_seed_iid_score_access_authorized",
     "ablation_iid_inference_authorized",
     "paired_comparison_execution_authorized",
+    "descriptive_aggregate_execution_authorized",
 )
 IID_CLOSED_BOUNDARIES = (
     "calibration_refit_authorized",
@@ -820,6 +821,7 @@ def build_ablation_iid_release_packet(
         }
         for view in ABLATION_VIEWS
     }
+    aggregate_output = output_root / "ablation_iid_summary.json"
     scope = {
         "locked_training_rung": TRAIN_131K_COUNT,
         "selected_architecture_id": selected["architecture_id"],
@@ -834,6 +836,7 @@ def build_ablation_iid_release_packet(
         "primary_same_seed_iid_score_access_authorized": True,
         "ablation_iid_inference_authorized": True,
         "paired_comparison_execution_authorized": True,
+        "descriptive_aggregate_execution_authorized": True,
     }
     return {
         "status": IID_RELEASE_STATUS,
@@ -875,6 +878,7 @@ def build_ablation_iid_release_packet(
         ),
         "ablation_iid_score_outputs": score_outputs,
         "paired_comparison_outputs": comparison_outputs,
+        "ablation_iid_aggregate_output": str(aggregate_output),
         "review_scope": scope,
         "closed_boundaries": {
             name: False for name in IID_CLOSED_BOUNDARIES
@@ -934,6 +938,7 @@ def build_ablation_iid_authorization(
             "primary_same_seed_iid_score_access_authorized": True,
             "ablation_iid_inference_authorized": True,
             "paired_comparison_execution_authorized": True,
+            "descriptive_aggregate_execution_authorized": True,
             **{name: False for name in IID_CLOSED_BOUNDARIES},
         },
         "selected_architecture": dict(packet["selected_architecture"]),
@@ -954,6 +959,9 @@ def build_ablation_iid_authorization(
         "paired_comparison_outputs": dict(
             packet["paired_comparison_outputs"]
         ),
+        "ablation_iid_aggregate_output": packet[
+            "ablation_iid_aggregate_output"
+        ],
         "post_freeze_allowed_paths": [
             output_relative,
             packet["release_packet_repository_path"],
@@ -961,5 +969,5 @@ def build_ablation_iid_authorization(
             "results/phase7/ablation_iid_summary.json",
             "docs/reports/PHASE7_ABLATION_EVALUATION_REPORT.md",
         ],
-        "stop_after_six_iid_scores_and_paired_comparisons": True,
+        "stop_after_six_iid_scores_comparisons_and_descriptive_aggregate": True,
     }

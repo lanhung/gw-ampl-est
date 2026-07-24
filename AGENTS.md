@@ -1404,6 +1404,21 @@ runtime authorization for `--execute`. Synthetic gate and atomic-output tests
 only were used. Scientific checkpoint access, calibration scoring/map fitting,
 IID unsealing/inference, paired comparison and GWOSC/GWTC remain closed.
 
+The same implementation-only boundary also contains a fail-closed descriptive
+ablation IID finalizer. A future IID release now allocates one exact aggregate
+output in addition to six score artifacts and six same-seed comparisons. The
+finalizer cannot run until all six jobs and their companion summaries exist,
+their paths and SHA-256 identities match the reviewed authorization, and the
+immutable inference environment is reproduced. It reports both views and all
+three seeds with the frozen mean/sample-standard-deviation aggregation; best
+seed selection, non-IID ablation analysis, calibration refitting and
+result-driven retraining remain forbidden.
+
+This software used synthetic completed-job evidence only. It does not
+authorize checkpoint access, calibration scoring, IID unsealing, ablation
+inference, paired comparison or aggregate execution. The active 131k
+three-seed terminal probe remains the scientific critical path.
+
 ## Scientific integrity
 
 - Never fabricate results, citations, completed runs or calibration.

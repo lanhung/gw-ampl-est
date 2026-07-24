@@ -79,6 +79,7 @@ def _iid_scope() -> dict:
         "primary_same_seed_iid_score_access_authorized": True,
         "ablation_iid_inference_authorized": True,
         "paired_comparison_execution_authorized": True,
+        "descriptive_aggregate_execution_authorized": True,
     }
 
 
@@ -209,6 +210,9 @@ def _iid_packet() -> dict:
             }
             for view in ("gw_only", "em_only")
         },
+        "ablation_iid_aggregate_output": (
+            f"{output_root}/ablation_iid_summary.json"
+        ),
         "review_scope": _iid_scope(),
         "closed_boundaries": {name: False for name in IID_CLOSED_BOUNDARIES},
         "future_authorization_path": (

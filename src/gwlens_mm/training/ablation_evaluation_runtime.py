@@ -27,6 +27,7 @@ from .ablation_evaluation import (
     MODEL_SEEDS,
     AblatedCalibrationDataset,
     AblatedIIDDataset,
+    aggregate_ablation_iid_comparisons,
     fit_ablation_calibration_map,
     paired_ablation_iid_comparison,
     summarize_ablation_iid_scores,
@@ -184,6 +185,7 @@ def load_ablation_evaluation_runtime_contract(
     allowed = {
         "typed_calibration_runtime_implementation_authorized",
         "typed_iid_runtime_implementation_authorized",
+        "descriptive_iid_aggregate_runtime_implementation_authorized",
         "fail_closed_cli_implementation_authorized",
         "synthetic_fixture_tests_authorized",
     }
@@ -843,6 +845,165 @@ def run_authorized_ablation_iid(
     return summary
 
 
+def validate_ablation_iid_aggregate_gate(
+    root: Path,
+    *,
+    authorization_path: Path,
+    environment_lock_path: Path,
+    output_path: Path,
+) -> Mapping[str, Any]:
+    """Bind six completed comparisons before descriptive aggregation."""
+
+    load_ablation_evaluation_runtime_contract(root)
+    authorization = load_yaml(authorization_path)
+    if authorization.get("authorization_status") != IID_AUTHORIZATION_STATUS:
+        raise AblationEvaluationRuntimeError(
+            "ablation IID aggregate execution is not authorized"
+        )
+    flags = authorization.get("authorization", {})
+    required_true = {
+        "final_iid_unsealing_authorized",
+        "ablation_checkpoint_access_authorized",
+        "matching_ablation_calibration_map_access_authorized",
+        "primary_same_seed_iid_score_access_authorized",
+        "ablation_iid_inference_authorized",
+        "paired_comparison_execution_authorized",
+        "descriptive_aggregate_execution_authorized",
+    }
+    if any(flags.get(name) is not True for name in required_true) or any(
+        flags.get(name) is not False
+        for name in (
+            "calibration_refit_authorized",
+            "sbc_authorized",
+            "model_training_or_tuning_authorized",
+            "non_iid_ablation_inference_authorized",
+            "result_driven_retraining_authorized",
+            "gwosc_gwtc_access_authorized",
+        )
+    ):
+        raise AblationEvaluationRuntimeError(
+            "ablation IID aggregate authorization crossed its boundary"
+        )
+    expected_output = _remote_path(
+        Path(str(authorization.get("ablation_iid_aggregate_output", ""))),
+        name="ablation IID aggregate output",
+    )
+    output = _remote_path(output_path, name="ablation IID aggregate output")
+    if output != expected_output or output.exists():
+        raise AblationEvaluationRuntimeError(
+            "ablation IID aggregate output identity is invalid or reused"
+        )
+    commit = _validate_immutable_runtime(
+        root, authorization_path, authorization, environment_lock_path
+    )
+    selected = authorization.get("selected_architecture", {})
+    if int(selected.get("locked_training_rung", -1)) != TRAIN_131K_COUNT:
+        raise AblationEvaluationRuntimeError(
+            "ablation IID aggregate rung is not terminal"
+        )
+    comparisons: list[Mapping[str, Any]] = []
+    evidence: dict[str, Any] = {}
+    for view in ABLATION_VIEWS:
+        evidence[view] = {}
+        for seed in MODEL_SEEDS:
+            score_path = _remote_path(
+                Path(
+                    str(
+                        authorization.get("ablation_iid_score_outputs", {})
+                        .get(view, {})
+                        .get(str(seed), "")
+                    )
+                ),
+                name=f"{view} seed-{seed} ablation IID score",
+                require_file=True,
+            )
+            comparison_path = _remote_path(
+                Path(
+                    str(
+                        authorization.get("paired_comparison_outputs", {})
+                        .get(view, {})
+                        .get(str(seed), "")
+                    )
+                ),
+                name=f"{view} seed-{seed} paired comparison",
+                require_file=True,
+            )
+            summary_path = score_path.with_suffix(".summary.json")
+            if not summary_path.is_file():
+                raise AblationEvaluationRuntimeError(
+                    "ablation IID run summary is absent"
+                )
+            summary = _load_json(summary_path)
+            comparison = _load_json(comparison_path)
+            if (
+                summary.get("status")
+                != "completed_ablation_iid_inference_and_paired_comparison"
+                or summary.get("view") != view
+                or int(summary.get("model_seed", -1)) != seed
+                or int(summary.get("iid_case_count", -1)) != IID_COUNT
+                or Path(str(summary.get("ablation_iid_score_path", ""))).resolve()
+                != score_path
+                or summary.get("ablation_iid_score_sha256") != _sha256(score_path)
+                or Path(str(summary.get("paired_comparison_path", ""))).resolve()
+                != comparison_path
+                or summary.get("paired_comparison_sha256")
+                != _sha256(comparison_path)
+                or summary.get("best_seed_selected") is not False
+                or summary.get("model_retrained_or_tuned") is not False
+                or summary.get("non_iid_ablation_executed") is not False
+            ):
+                raise AblationEvaluationRuntimeError(
+                    "ablation IID completed-job evidence is invalid"
+                )
+            comparisons.append(comparison)
+            evidence[view][str(seed)] = {
+                "score_path": str(score_path),
+                "score_sha256": _sha256(score_path),
+                "run_summary_path": str(summary_path.resolve()),
+                "run_summary_sha256": _sha256(summary_path),
+                "paired_comparison_path": str(comparison_path),
+                "paired_comparison_sha256": _sha256(comparison_path),
+            }
+    return {
+        "authorization": authorization,
+        "inference_commit": commit,
+        "architecture_id": str(selected.get("architecture_id", "")),
+        "comparisons": comparisons,
+        "evidence": evidence,
+    }
+
+
+def run_authorized_ablation_iid_aggregate(
+    root: Path,
+    *,
+    authorization_path: Path,
+    environment_lock_path: Path,
+    output_path: Path,
+) -> Mapping[str, Any]:
+    """Create the frozen all-seed descriptive aggregate from six JSON results."""
+
+    gate = validate_ablation_iid_aggregate_gate(
+        root,
+        authorization_path=authorization_path,
+        environment_lock_path=environment_lock_path,
+        output_path=output_path,
+    )
+    aggregate = aggregate_ablation_iid_comparisons(gate["comparisons"])
+    result = {
+        **aggregate,
+        "architecture_id": gate["architecture_id"],
+        "locked_training_rung": TRAIN_131K_COUNT,
+        "inference_commit": gate["inference_commit"],
+        "input_artifacts": gate["evidence"],
+        "calibration_refit": False,
+        "non_iid_ablation_executed": False,
+        "model_retrained_or_tuned": False,
+        "gwosc_gwtc_accessed": False,
+    }
+    _atomic_json(output_path, result)
+    return result
+
+
 def dry_run_ablation_evaluation_runtime(root: Path) -> Mapping[str, Any]:
     """Expose the exact workload while proving all scientific access is off."""
 
@@ -856,6 +1017,7 @@ def dry_run_ablation_evaluation_runtime(root: Path) -> Mapping[str, Any]:
         "calibration_case_count_per_job": CALIBRATION_COUNT,
         "iid_job_count": 6,
         "iid_case_count_per_job": IID_COUNT,
+        "descriptive_aggregate_count": 1,
         "posterior_draws_per_case": POSTERIOR_DRAW_COUNT,
         "calibration_physical_batch_size": contract["calibration"][
             "physical_batch_size"

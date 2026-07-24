@@ -63,6 +63,7 @@ def test_runtime_contract_is_unique_seeded_and_execution_closed() -> None:
     plan = dry_run_ablation_evaluation_runtime(ROOT)
     assert plan["calibration_job_count"] == 6
     assert plan["iid_job_count"] == 6
+    assert plan["descriptive_aggregate_count"] == 1
     assert plan["scientific_checkpoint_accessed"] is False
     assert plan["iid_data_unsealed"] is False
 
@@ -519,6 +520,138 @@ def test_iid_runtime_writes_score_comparison_and_descriptive_summary(
     assert score_path.with_suffix(".summary.json").is_file()
 
 
+def test_iid_aggregate_binds_all_six_completed_jobs(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    project = tmp_path / "project"
+    output = project / "outputs/ablation_iid_summary.json"
+    score_outputs: dict[str, dict[str, str]] = {}
+    comparison_outputs: dict[str, dict[str, str]] = {}
+    common_case_hash = "c" * 64
+    for view_index, view in enumerate(("gw_only", "em_only")):
+        score_outputs[view] = {}
+        comparison_outputs[view] = {}
+        for seed in (0, 1, 2):
+            job = project / "outputs" / view / f"seed-{seed}"
+            score = job / "iid_scores.npz"
+            score.parent.mkdir(parents=True, exist_ok=True)
+            np.savez(score, marker=np.asarray([seed], dtype=np.int64))
+            comparison = job / "paired_comparison.json"
+            _write_json(
+                comparison,
+                {
+                    "status": (
+                        "completed_descriptive_paired_iid_ablation_comparison"
+                    ),
+                    "view": view,
+                    "model_seed": seed,
+                    "case_count": 8192,
+                    "case_ids_sha256": common_case_hash,
+                    "difference_direction": (
+                        "ablation_minus_same_seed_primary"
+                    ),
+                    "paired_bootstrap": {
+                        "nlp": {
+                            "point_estimate": [
+                                float(view_index + seed),
+                                float(view_index - seed),
+                            ]
+                        }
+                    },
+                    "confidence_level": 0.95,
+                    "resampling_unit": "physical_system_id",
+                    "best_seed_selected": False,
+                    "superiority_gate": None,
+                    "result_can_trigger_retraining_or_tuning": False,
+                },
+            )
+            summary = score.with_suffix(".summary.json")
+            _write_json(
+                summary,
+                {
+                    "status": (
+                        "completed_ablation_iid_inference_and_paired_comparison"
+                    ),
+                    "view": view,
+                    "model_seed": seed,
+                    "iid_case_count": 8192,
+                    "ablation_iid_score_path": str(score.resolve()),
+                    "ablation_iid_score_sha256": _sha256(score),
+                    "paired_comparison_path": str(comparison.resolve()),
+                    "paired_comparison_sha256": _sha256(comparison),
+                    "best_seed_selected": False,
+                    "model_retrained_or_tuned": False,
+                    "non_iid_ablation_executed": False,
+                },
+            )
+            score_outputs[view][str(seed)] = str(score)
+            comparison_outputs[view][str(seed)] = str(comparison)
+    authorization = project / "authorization.yaml"
+    _write_yaml(
+        authorization,
+        {
+            "authorization_status": (
+                "authorized_ablation_iid_inference_and_paired_comparison_only"
+            ),
+            "authorization": {
+                "final_iid_unsealing_authorized": True,
+                "ablation_checkpoint_access_authorized": True,
+                "matching_ablation_calibration_map_access_authorized": True,
+                "primary_same_seed_iid_score_access_authorized": True,
+                "ablation_iid_inference_authorized": True,
+                "paired_comparison_execution_authorized": True,
+                "descriptive_aggregate_execution_authorized": True,
+                "calibration_refit_authorized": False,
+                "sbc_authorized": False,
+                "model_training_or_tuning_authorized": False,
+                "non_iid_ablation_inference_authorized": False,
+                "result_driven_retraining_authorized": False,
+                "gwosc_gwtc_access_authorized": False,
+            },
+            "selected_architecture": {
+                "architecture_id": "nsf-t10-w256",
+                "locked_training_rung": 131072,
+            },
+            "ablation_iid_score_outputs": score_outputs,
+            "paired_comparison_outputs": comparison_outputs,
+            "ablation_iid_aggregate_output": str(output),
+        },
+    )
+    environment = project / "environment.txt"
+    environment.write_text("frozen\n", encoding="utf-8")
+    monkeypatch.setattr(runtime, "APPROVED_REMOTE_ROOT", project)
+    monkeypatch.setattr(
+        runtime,
+        "load_ablation_evaluation_runtime_contract",
+        lambda value: {},
+    )
+    monkeypatch.setattr(
+        runtime,
+        "_validate_immutable_runtime",
+        lambda *args, **kwargs: "d" * 40,
+    )
+    result = runtime.run_authorized_ablation_iid_aggregate(
+        ROOT,
+        authorization_path=authorization,
+        environment_lock_path=environment,
+        output_path=output,
+    )
+    assert result["status"] == (
+        "completed_all_seed_descriptive_ablation_iid_comparison"
+    )
+    assert result["comparison_count"] == 6
+    assert result["best_seed_selected"] is False
+    assert result["model_retrained_or_tuned"] is False
+    assert output.is_file()
+    with pytest.raises(AblationEvaluationRuntimeError):
+        runtime.run_authorized_ablation_iid_aggregate(
+            ROOT,
+            authorization_path=authorization,
+            environment_lock_path=environment,
+            output_path=output,
+        )
+
+
 @pytest.mark.parametrize(
     "script",
     (
@@ -585,3 +718,30 @@ def test_runtime_reuses_primary_score_kernels() -> None:
     assert "_score_batches" in source
     assert "_score_final_batches" in source
     assert "posterior_draws_persisted" not in source
+
+
+def test_iid_summary_cli_defaults_to_dry_run(tmp_path: Path) -> None:
+    command = [
+        sys.executable,
+        str(ROOT / "scripts/phase7/run_ablation_iid_summary.py"),
+        "--authorization",
+        str(tmp_path / "absent-authorization.yaml"),
+        "--environment-lock",
+        str(tmp_path / "absent-environment"),
+        "--output",
+        str(tmp_path / "absent-output.json"),
+    ]
+    environment = dict(os.environ)
+    environment["PYTHONPATH"] = str(ROOT / "src")
+    completed = subprocess.run(
+        command,
+        cwd=ROOT,
+        check=True,
+        capture_output=True,
+        text=True,
+        env=environment,
+    )
+    result = json.loads(completed.stdout)
+    assert result["status"] == "implementation_ready_execution_closed"
+    assert result["descriptive_aggregate_count"] == 1
+    assert result["iid_data_unsealed"] is False
