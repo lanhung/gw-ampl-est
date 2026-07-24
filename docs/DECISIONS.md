@@ -1630,3 +1630,23 @@ A separate delegated-review JSON is required to create the runtime
 authorization. No best seed may be selected, no ablation architecture may be
 tuned, and calibration/SBC/final evaluation cannot be opened by this release.
 The implementation used synthetic fixtures only.
+
+## D124 — Bind each RC.7 query to its real atomic publication layout
+
+The future reference runner must not invent a `dataset_manifest.json` inside a
+publication child. Validation, calibration and final datasets are atomic
+children of a common parent, and only that parent owns the publication
+manifest. Each reference-query release therefore binds the exact child
+directory, parent directory and parent-manifest SHA-256.
+
+The frozen balanced-tail diagnostic is not one 4,096-case child. It consists
+of four independently generated 1,024-case children, one for each priority
+stratum. The runner validates all four parent bindings, concatenates only their
+metadata views and rejects duplicate identities before scoring.
+
+Every validation, IID or balanced-tail query receives its own non-authorizing
+release packet and separate delegated review. Validation cannot unseal final
+data; IID and balanced-tail cannot execute without an explicit final-unsealing
+scope. The implementation creates no scientific authorization and preserves
+RC.7's prohibition on exact-likelihood, gold-posterior and importance-sampling
+efficiency claims.
