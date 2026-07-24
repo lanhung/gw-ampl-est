@@ -1650,3 +1650,24 @@ data; IID and balanced-tail cannot execute without an explicit final-unsealing
 scope. The implementation creates no scientific authorization and preserves
 RC.7's prohibition on exact-likelihood, gold-posterior and importance-sampling
 efficiency claims.
+
+## D125 — Release the legacy SIS control as a read-only descriptive reproduction
+
+The inherited SIS point-regression checkpoint is an out-of-domain descriptive
+stress control, not a matched competitor and not a calibrated posterior. Its
+future reproduction must therefore bind the exact checkpoint and saved
+validation-prediction hashes without deserializing the checkpoint or applying
+the model to v2 scientific data.
+
+A non-authorizing packet now binds the implementation commit, exact wheel,
+environment lock, frozen legacy paths and hashes, descriptive metric contract
+and one fresh evidence path below the new project root. A separate delegated
+review is required to create the runtime YAML. The runtime gate permits only
+legacy byte reads and saved-prediction metric reproduction; it forbids legacy
+writes, scientific/final data access, manuscript-claim finalization and
+GWOSC/GWTC access.
+
+The verifier records checkpoint and prediction inode, size and mtime before
+and after use, rejects any identity change and never loads the checkpoint.
+This preserves the legacy roots while still making the narrow historical
+comparison reproducible.
