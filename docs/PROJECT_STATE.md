@@ -773,3 +773,23 @@ No terminal probe metric was read to implement this software, and architecture
 execution remains closed. After the terminal decision, a new exact wheel must
 pass AutoDL verification and the release packet must receive delegated review
 before any of the nine fits can start.
+
+## Calibration/SBC materialization release control
+
+The Phase 6 generator and atomic publisher already enforced the frozen
+4,096-system calibration-fit and 2,048-system SBC split, but its future exact
+authorization previously had to be assembled manually. The release builder now
+binds:
+
+- the terminal 131k size decision and twelve-result architecture lock;
+- the selected architecture identity without selecting a best seed;
+- the exact generator wheel and immutable environment;
+- all seven Stage A, Stage B, correction and terminal publication roots and
+  manifest hashes;
+- the unchanged direct-target distribution, numerical-validity contract and
+  48-shard count arithmetic.
+
+The packet is non-authorizing. Only a separately hash-bound delegated review
+can create the materialization-only YAML. Checkpoint inference, calibration
+fitting, SBC statistics, final evaluation, model tuning and GWOSC/GWTC remain
+closed until their own later gates.
