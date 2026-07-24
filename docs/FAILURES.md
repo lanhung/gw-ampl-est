@@ -759,3 +759,18 @@ architecture lock plus separate materialization and inference gates.
 - The corrected exact wheel indexed all 65,536 unique terminal increment IDs
   in a read-only real-manifest regression and passed the complete AutoDL test
   contract.
+
+## The prospective reference query assumed the wrong publication shape
+
+- The implementation-only RC.7 runner originally required a
+  `dataset_manifest.json` inside each query child. Real project publications
+  intentionally keep one atomic manifest at the common parent.
+- The original runner also accepted only one query directory, while the frozen
+  4,096-case balanced-tail diagnostic consists of four 1,024-case stratum
+  children.
+- This mismatch was found during synthetic release-control review before any
+  scientific reference bank, validation record, final record or checkpoint was
+  opened. No result or artifact identity was affected.
+- The corrected typed path binds each child to its exact parent-manifest hash
+  and concatenates the four tail metadata views with duplicate-ID checks. A
+  role-specific reviewed release remains required before execution.

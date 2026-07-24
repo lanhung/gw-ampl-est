@@ -885,3 +885,26 @@ No terminal metric, scientific array, checkpoint, calibration/SBC or final
 record was opened. The active 131k probe remains the critical path; ablation
 execution still requires terminal size and architecture locks plus a separate
 reviewed release.
+
+## RC.7 reference-query release control
+
+Implementation commit `beaa41be7827990edc57bc4de5253a7e7ed298ea`
+closes the remaining release-control gap for the non-neural selected-prior
+reference. It replaces the prospective child-manifest assumption with the real
+atomic layout: every query child is hash-bound to its common parent manifest.
+Validation and IID each use one child; balanced-tail uses four separate
+1,024-case stratum children and a bounded-memory concatenated metadata view.
+
+The release is role-specific. A non-authorizing packet binds the terminal size
+and architecture decisions, selected 131k standardizer, immutable
+wheel/environment, exact query catalog and fresh output. A separate delegated
+review is required to create the runtime YAML. Validation scope cannot unseal
+final data; IID and balanced-tail scope must explicitly authorize final
+unsealing. RC.7 still forbids exact-likelihood, gold-posterior and
+importance-sampling-efficiency claims.
+
+Verification passed 16 focused tests and 524 full tests with eight optional
+dependency skips, maintained-scope Ruff, mypy over 74 source files and package
+build. Only synthetic directory fixtures were used. The scientific reference
+bank, validation/final records and checkpoints remain unopened, and the active
+131k three-seed probe remains the critical path.

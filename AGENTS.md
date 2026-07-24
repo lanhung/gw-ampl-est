@@ -1290,6 +1290,26 @@ This implementation used synthetic fixtures only. Terminal probe completion,
 architecture selection, all six ablation fits, calibration/SBC, final
 evaluation and GWOSC/GWTC remain separately closed.
 
+The implementation-only Phase 7 boundary now also contains the exact RC.7
+reference-query release chain through:
+
+`configs/execution/phase7_reference_execution_stack_authorization.yaml`
+
+Implementation commit `beaa41be7827990edc57bc4de5253a7e7ed298ea`
+corrects the future runner to bind query children to their atomic parent
+manifest instead of requiring a nonexistent child manifest. Validation and
+IID each bind one child; the 4,096-case balanced-tail query binds four
+independent 1,024-case children and presents them as one bounded-memory
+metadata-only dataset.
+
+The same implementation adds a non-authorizing role-specific release packet
+and a separate hash-bound delegated-review authorization builder. A validation
+release cannot unseal final data, while IID and balanced-tail releases require
+their explicit final-unsealing scope. Scientific reference-bank access,
+validation/final query execution, checkpoint access and GWOSC/GWTC remain
+closed. Only synthetic directory fixtures were used; no scientific record,
+checkpoint or final case was opened.
+
 ## Scientific integrity
 
 - Never fabricate results, citations, completed runs or calibration.
