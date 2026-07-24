@@ -1044,3 +1044,19 @@ the existing synthetic builder suites. No scientific data, checkpoint, score
 or review artifact was opened. Verification passed 21 focused tests and 562
 full tests with eight optional-dependency skips, maintained-scope Ruff, mypy
 over 79 source files and package build.
+
+## Terminal architecture launcher recovery
+
+The future nine-fit Phase 5 controller can now restart safely after a process
+interruption. It verifies three artifacts before reusing any completed fit,
+resumes only an unambiguous `last.ckpt` partial identity and records fresh,
+resumed and reused counts in the parent summary. Existing failed parent
+summaries and ambiguous partial directories remain immutable and fail closed.
+
+Only synthetic process/checkpoint fixtures were used. Architecture data,
+probe checkpoints and terminal metrics were not opened, and no architecture
+fit or selection was authorized.
+
+Verification passed 18 focused tests and 565 full tests with eight
+optional-dependency skips, maintained-scope Ruff, mypy over 79 source files
+and package build.

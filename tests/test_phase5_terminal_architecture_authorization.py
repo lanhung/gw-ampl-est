@@ -370,6 +370,12 @@ def test_terminal_launcher_bounds_concurrency_to_available_gpus(
         def __init__(self, command: list[str], **_: object) -> None:
             architecture = command[command.index("--architecture") + 1]
             seed = command[command.index("--seed") + 1]
+            self.architecture = architecture
+            self.seed = seed
+            self.output_root = Path(
+                command[command.index("--output-root") + 1]
+            )
+            self.result_path = Path(command[command.index("--result") + 1])
             self.remaining_polls = 2 + int(seed)
             self.completed = False
             type(self).active_count += 1
@@ -386,6 +392,25 @@ def test_terminal_launcher_bounds_concurrency_to_available_gpus(
                 return None
             self.completed = True
             type(self).active_count -= 1
+            payload = {
+                "status": (
+                    "completed_terminal_architecture_fit_and_"
+                    "development_validation"
+                ),
+                "architecture_id": self.architecture,
+                "seed": int(self.seed),
+                "calibration_accessed": False,
+                "final_evaluation_accessed": False,
+                "extension_above_131072_authorized": False,
+            }
+            run_directory = (
+                self.output_root
+                / self.architecture
+                / f"seed-{self.seed}"
+            )
+            _write_json(run_directory / "run_summary.json", payload)
+            (run_directory / "best.ckpt").write_bytes(b"checkpoint")
+            _write_json(self.result_path, payload)
             return 0
 
     monkeypatch.setattr(launcher_module.subprocess, "Popen", FakeProcess)
@@ -428,9 +453,213 @@ def test_terminal_launcher_bounds_concurrency_to_available_gpus(
     assert summary["configured_concurrent_fits"] == 2
     assert FakeProcess.maximum_active_count == 2
     assert len(FakeProcess.launches) == 9
+    assert summary["fresh_fit_count"] == 9
+    assert summary["resumed_fit_count"] == 0
+    assert summary["completed_fit_reuse_count"] == 0
     for architecture in launcher_module.ARCHITECTURES:
         assert {
             seed
             for launched_architecture, seed in FakeProcess.launches
             if launched_architecture == architecture
         } == {"0", "1", "2"}
+
+
+def test_terminal_launcher_reuses_complete_and_resumes_partial_fits(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    class FakeProcess:
+        commands: list[list[str]] = []
+
+        def __init__(self, command: list[str], **_: object) -> None:
+            self.command = command
+            self.completed = False
+            type(self).commands.append(command)
+
+        def poll(self) -> int | None:
+            if self.completed:
+                return 0
+            self.completed = True
+            architecture = self.command[
+                self.command.index("--architecture") + 1
+            ]
+            seed = self.command[self.command.index("--seed") + 1]
+            output_root = Path(
+                self.command[self.command.index("--output-root") + 1]
+            )
+            result_path = Path(
+                self.command[self.command.index("--result") + 1]
+            )
+            payload = {
+                "status": (
+                    "completed_terminal_architecture_fit_and_"
+                    "development_validation"
+                ),
+                "architecture_id": architecture,
+                "seed": int(seed),
+                "calibration_accessed": False,
+                "final_evaluation_accessed": False,
+                "extension_above_131072_authorized": False,
+            }
+            run_directory = output_root / architecture / f"seed-{seed}"
+            _write_json(run_directory / "run_summary.json", payload)
+            (run_directory / "best.ckpt").write_bytes(b"checkpoint")
+            _write_json(result_path, payload)
+            return 0
+
+    output_root = tmp_path / "architecture"
+    result_root = output_root / "launcher-results"
+    completed_architecture = launcher_module.ARCHITECTURES[0]
+    completed_seed = 0
+    completed_payload = {
+        "status": (
+            "completed_terminal_architecture_fit_and_development_validation"
+        ),
+        "architecture_id": completed_architecture,
+        "seed": completed_seed,
+        "calibration_accessed": False,
+        "final_evaluation_accessed": False,
+        "extension_above_131072_authorized": False,
+    }
+    completed_directory = (
+        output_root / completed_architecture / f"seed-{completed_seed}"
+    )
+    _write_json(completed_directory / "run_summary.json", completed_payload)
+    (completed_directory / "best.ckpt").write_bytes(b"complete")
+    _write_json(
+        result_root / completed_architecture / f"seed-{completed_seed}.json",
+        completed_payload,
+    )
+    resumed_architecture = launcher_module.ARCHITECTURES[0]
+    resumed_seed = 1
+    resumed_directory = (
+        output_root / resumed_architecture / f"seed-{resumed_seed}"
+    )
+    resumed_directory.mkdir(parents=True)
+    (resumed_directory / "last.ckpt").write_bytes(b"partial")
+    monkeypatch.setattr(launcher_module.subprocess, "Popen", FakeProcess)
+    monkeypatch.setattr(launcher_module.time, "sleep", lambda _: None)
+    arguments = ["--root", str(tmp_path)]
+    for name in (
+        "authorization",
+        "stage-a-publication",
+        "stage-b-publication",
+        "combined-base-publication",
+        "correction-publication",
+        "train-increment-publication",
+        "combined-131k-publication",
+        "development-tail-publication",
+        "terminal-decision",
+        "probe-output-root",
+        "environment-lock",
+        "psd-root",
+    ):
+        arguments.extend([f"--{name}", str(tmp_path / name)])
+    arguments.extend(
+        [
+            "--output-root",
+            str(output_root),
+            "--training-commit",
+            "a" * 40,
+            "--gpu-indices",
+            "0,1,2",
+        ]
+    )
+    assert launcher_module.main(arguments) == 0
+    summary = json.loads(
+        (
+            result_root / "terminal-architecture-launcher-summary.json"
+        ).read_text(encoding="utf-8")
+    )
+    assert summary["completed_fit_reuse_count"] == 1
+    assert summary["resumed_fit_count"] == 1
+    assert summary["fresh_fit_count"] == 7
+    assert len(FakeProcess.commands) == 8
+    resume_commands = [
+        command
+        for command in FakeProcess.commands
+        if command[command.index("--architecture") + 1]
+        == resumed_architecture
+        and command[command.index("--seed") + 1] == str(resumed_seed)
+    ]
+    assert len(resume_commands) == 1
+    command = resume_commands[0]
+    assert command[command.index("--resume-checkpoint") + 1] == str(
+        resumed_directory / "last.ckpt"
+    )
+
+
+def test_terminal_launcher_rejects_ambiguous_partial_identity(
+    tmp_path: Path,
+) -> None:
+    output_root = tmp_path / "architecture"
+    architecture = launcher_module.ARCHITECTURES[0]
+    seed = 0
+    run_directory = output_root / architecture / f"seed-{seed}"
+    _write_json(
+        run_directory / "run_summary.json",
+        {
+            "status": (
+                "completed_terminal_architecture_fit_and_"
+                "development_validation"
+            ),
+            "architecture_id": architecture,
+            "seed": seed,
+        },
+    )
+    with pytest.raises(
+        RuntimeError, match="cannot be safely resumed"
+    ):
+        launcher_module._resume_checkpoint(
+            output_root=output_root,
+            result_path=(
+                output_root
+                / "launcher-results"
+                / architecture
+                / f"seed-{seed}.json"
+            ),
+            architecture=architecture,
+            seed=seed,
+        )
+
+
+def test_terminal_launcher_does_not_overwrite_failed_parent_summary(
+    tmp_path: Path,
+) -> None:
+    output_root = tmp_path / "architecture"
+    summary_path = (
+        output_root
+        / "launcher-results/terminal-architecture-launcher-summary.json"
+    )
+    _write_json(
+        summary_path,
+        {"status": "terminal_architecture_fit_failed"},
+    )
+    arguments = ["--root", str(tmp_path)]
+    for name in (
+        "authorization",
+        "stage-a-publication",
+        "stage-b-publication",
+        "combined-base-publication",
+        "correction-publication",
+        "train-increment-publication",
+        "combined-131k-publication",
+        "development-tail-publication",
+        "terminal-decision",
+        "probe-output-root",
+        "environment-lock",
+        "psd-root",
+    ):
+        arguments.extend([f"--{name}", str(tmp_path / name)])
+    arguments.extend(
+        [
+            "--output-root",
+            str(output_root),
+            "--training-commit",
+            "a" * 40,
+        ]
+    )
+    with pytest.raises(RuntimeError, match="failed.*summary"):
+        launcher_module.main(arguments)
+    assert json.loads(summary_path.read_text(encoding="utf-8")) == {
+        "status": "terminal_architecture_fit_failed"
+    }
