@@ -1,0 +1,114 @@
+preregistration_version: "1.1.0-rc.8"
+status: design_frozen_execution_disabled
+scope: post_lock_ablation_calibration_and_iid_comparison_only
+
+parent_final_analysis_contract:
+  version: "1.1.0-rc.6"
+  path: configs/statistics/final_evaluation_analysis_preregistration.yaml
+  canonical_hash: "7e0e252f0a972e0b0ad2fe8f93f74f1f0172639a6fb258fc7a953be5fb7973e1"
+  estimand_changed: false
+  primary_model_or_target_changed: false
+  data_distribution_or_split_changed: false
+  ablation_view_or_training_contract_changed: false
+
+parent_calibration_contract:
+  version: "1.1.0-rc.5"
+  path: configs/statistics/calibration_sbc_preregistration.yaml
+  canonical_hash: "033b996930c93e7e4a9881fc3de49bb85cf4be96fcbd890bf2543b46368c9d8e"
+
+entry_gate:
+  terminal_training_size_locked: required
+  architecture_locked: required
+  primary_model_seeds: [0, 1, 2]
+  completed_ablation_views: [gw_only, em_only]
+  completed_ablation_seeds: [0, 1, 2]
+  exact_six_ablation_checkpoints_required: true
+  primary_calibration_sbc_completed: required
+  sealed_iid_publication_required: true
+  best_seed_selection_forbidden: true
+
+calibration_fit:
+  source_split: calibration_fit
+  accepted_physical_system_count: 4096
+  same_cases_as_primary_calibration: true
+  new_calibration_cases_generated: false
+  group_disjoint_from_train_validation_sbc_and_final: true
+  posterior_draws_per_case: 4096
+  fit_separately_for_each_view_and_model_seed: true
+  pooling_across_views_or_seeds: false
+  map_method: inherited_rc5_split_conformal_raw_posterior_region_level_map
+  global_and_em_cell_maps_required: true
+  nominal_levels: [0.50, 0.80, 0.90, 0.95]
+  clipping_or_post_result_smoothing: false
+
+iid_evaluation:
+  source_split: iid_test
+  accepted_physical_system_count: 8192
+  same_cases_as_primary_iid: true
+  posterior_draws_per_case: 4096
+  apply_matching_view_and_seed_calibration_map: true
+  refit_on_iid_forbidden: true
+  metrics:
+    - negative_log_probability_nat_per_target_dimension
+    - crps_log_abs_mu_primary
+    - crps_log_abs_mu_secondary
+    - calibrated_marginal_coverage
+    - calibrated_joint_coverage
+    - calibrated_interval_width
+  report_overall: true
+  report_each_lens_family: true
+  report_each_em_cell: true
+  raw_counts_and_wilson_95_intervals_required: true
+
+comparison:
+  primary_comparator_uses_identical_iid_cases: true
+  pair_by_physical_system_id_and_model_seed: true
+  compare_each_ablation_to_primary_same_seed: true
+  paired_metrics:
+    - negative_log_probability_nat_per_target_dimension
+    - crps_log_abs_mu_primary
+    - crps_log_abs_mu_secondary
+    - calibrated_interval_width
+  paired_bootstrap:
+    replicates: 10000
+    confidence_level: 0.95
+    resampling_unit: physical_system_id
+    seed_domain: final_iid_ablation_paired_bootstrap_v1
+  report_every_seed: true
+  aggregate_across_seeds: mean_and_sample_standard_deviation
+  best_seed_selection_forbidden: true
+  superiority_gate: none_descriptive_modality_ablation_only
+  result_may_not_trigger_retraining_or_architecture_change: true
+
+scope_boundary:
+  independent_sbc_for_ablations: not_required_not_reported
+  balanced_tail_for_ablations: not_executed
+  cross_family_for_ablations: not_executed
+  parameter_ood_for_ablations: not_executed
+  waveform_mismatch_for_ablations: not_executed
+  psd_mismatch_for_ablations: not_executed
+  primary_model_final_contract_unchanged: true
+  ablations_are_descriptive_modality_controls_not_alternative_selected_models: true
+
+hard_stops:
+  - primary_calibration_map_applied_to_ablation
+  - calibration_map_pooled_across_view_or_seed
+  - iid_case_used_to_fit_or_modify_ablation_calibration
+  - missing_view_or_seed_or_best_seed_selection
+  - mismatched_iid_physical_system_ids_between_primary_and_ablation
+  - final_iid_result_used_for_retraining_tuning_or_architecture_selection
+  - undeclared_ood_or_mismatch_ablation_execution
+
+execution:
+  ablation_checkpoint_access_enabled: false
+  calibration_fit_score_enabled: false
+  ablation_calibration_map_fit_enabled: false
+  iid_unsealing_enabled: false
+  iid_ablation_inference_enabled: false
+  paired_comparison_enabled: false
+  model_training_or_tuning_enabled: false
+  primary_calibration_refit_enabled: false
+  sbc_enabled: false
+  ood_or_mismatch_ablation_enabled: false
+  manuscript_claim_finalization_enabled: false
+  gwosc_gwtc_access_enabled: false

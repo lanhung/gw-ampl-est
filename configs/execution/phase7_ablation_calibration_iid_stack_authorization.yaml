@@ -1,0 +1,36 @@
+phase: "7-ablation-calibration-iid-stack"
+authorization_status: authorized_preregistration_and_pure_implementation_only
+authorized_by: codex_as_delegated_scientific_and_engineering_reviewer
+authorization_date: "2026-07-24"
+
+authorization_basis:
+  owner_delegation: continue_without_routine_human_intervention
+  ambiguity_resolved_before_calibration_or_final_data: true
+  no_scientific_checkpoint_score_or_case_opened: true
+
+frozen_addendum:
+  path: configs/statistics/ablation_calibration_iid_preregistration.yaml
+  version: "1.1.0-rc.8"
+  canonical_hash: "219160f67030bad745b0a4573d78d02f9d0db7536a6490c907196e8570647c9a"
+
+authorization:
+  downstream_preregistration_authorized: true
+  pure_ablation_score_adapter_implementation_authorized: true
+  pure_ablation_calibration_adapter_implementation_authorized: true
+  pure_iid_comparison_implementation_authorized: true
+  synthetic_fixture_tests_authorized: true
+
+  scientific_checkpoint_access_authorized: false
+  calibration_fit_data_access_authorized: false
+  ablation_calibration_fit_authorized: false
+  final_iid_unsealing_authorized: false
+  final_iid_ablation_inference_authorized: false
+  paired_comparison_execution_authorized: false
+  model_training_or_tuning_authorized: false
+  primary_calibration_refit_authorized: false
+  sbc_authorized: false
+  ood_or_mismatch_ablation_authorized: false
+  manuscript_claim_finalization_authorized: false
+  gwosc_gwtc_access_authorized: false
+
+stop_after_implementation: true

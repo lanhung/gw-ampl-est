@@ -1692,3 +1692,26 @@ group includes raw successes, totals and Wilson intervals. Lens-family,
 cross-family, parameter-OOD, waveform-mismatch and PSD-mismatch results remain
 diagnostic and cannot trigger retuning. Any failed primary or tail gate maps
 only to narrowing claims; manuscript claim finalization remains a later gate.
+
+## D127 — Calibrate each ablation separately and compare it on IID only
+
+The GW-only and EM-only controls are separately trained conditional density
+estimators. Applying a primary-model calibration map to either control would
+conflate input-modality misspecification with calibration-map transfer error.
+Pooling maps across views or seeds would likewise erase the preregistered
+three-seed uncertainty.
+
+Each future ablation checkpoint must therefore fit its own RC.5
+split-conformal region-level map on the same 4,096 calibration-fit physical
+systems used by the corresponding primary seed. The data are reused as a
+common calibration design, not regenerated or duplicated. Maps remain
+strictly indexed by ablation view and model seed; the primary map cannot be
+substituted, and IID cases cannot fit or modify a map.
+
+The modality controls are evaluated only on the same 8,192 IID cases as the
+primary model and paired by physical-system ID and model seed. The comparison
+reports NLP, CRPS and calibrated interval-width differences with a frozen
+10,000-replicate physical-system bootstrap. It is descriptive: there is no
+superiority gate, best-seed selection, retraining or architecture change.
+Ablation-specific SBC, balanced-tail, cross-family, parameter-OOD, waveform-
+mismatch and PSD-mismatch execution is not part of this contract.
