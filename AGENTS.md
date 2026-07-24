@@ -1329,6 +1329,26 @@ Actual legacy read-only reproduction remains closed until an exact wheel and
 environment pass on AutoDL and the resulting packet receives a separate
 delegated review.
 
+The implementation-only Phase 7 boundary now also contains an exact final-score
+summary release chain through:
+
+`configs/execution/phase7_final_summary_release_stack_authorization.yaml`
+
+Implementation commit `b4c7f0a07c717e2965ea3244c88c74d070449ce1`
+requires exactly 45 immutable score artifacts: fifteen frozen namespaces for
+each retained model seed 0, 1 and 2. It validates complete array schemas,
+forbids posterior-draw persistence, requires byte-identical case/truth identity
+across seeds and reports IID, lens-family, all eight EM-cell, all four
+balanced-tail and every OOD/mismatch context without selecting a best seed.
+
+The implementation applies the frozen IID, EM-cell and balanced-tail coverage
+rules with raw counts and Wilson intervals. Failed gates can only narrow
+claims. A non-authorizing packet and separate hash-bound delegated review are
+required before any scientific score artifact may be opened. Final records,
+checkpoints, calibration maps, threshold changes, manuscript-claim
+finalization and GWOSC/GWTC remain closed. Only synthetic score fixtures were
+used.
+
 ## Scientific integrity
 
 - Never fabricate results, citations, completed runs or calibration.
