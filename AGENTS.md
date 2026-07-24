@@ -1253,6 +1253,26 @@ This implementation has used synthetic directory fixtures only. Final
 materialization, unsealing, checkpoint or calibration-map access, scientific
 inference, model training and GWOSC/GWTC remain closed.
 
+The Phase 7 implementation-only boundary now also contains an exact final
+inference release chain through:
+
+`configs/execution/phase7_final_inference_release_stack_authorization.yaml`
+
+Implementation commit `7373d2d456a3cb73300392a2a2fa604380d6b77b` binds a
+future sealed 20,480-case/15-namespace publication, the terminal 131k
+architecture decision, all three selected checkpoint hashes and the three
+same-seed calibration/SBC result bundles. It allocates exactly 45 fresh score
+artifacts (15 namespaces times seeds 0/1/2) without selecting a best seed or
+persisting posterior draws.
+
+The release packet is non-authorizing. A separate hash-bound delegated review
+must approve the exact unsealing, checkpoint inference, same-seed calibration
+map application and immutable score paths before the runtime authorization may
+be created. Model training/tuning, calibration refitting, architecture or size
+selection, result-threshold changes, ablation/reference execution and
+GWOSC/GWTC remain closed. Only synthetic fixtures were used; no final record,
+scientific checkpoint or calibration map was opened.
+
 ## Scientific integrity
 
 - Never fabricate results, citations, completed runs or calibration.

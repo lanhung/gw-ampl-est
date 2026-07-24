@@ -1592,3 +1592,23 @@ twelve-result architecture decision, exact generator wheel/environment and
 the frozen 20,480-case sealed contract. A separate delegated review is still
 required before materialization. No final identity, pair, checkpoint or
 scientific result is created by this engineering correction.
+
+## D122 — Require one reviewed identity set for all 45 final score artifacts
+
+Final evaluation retains all three selected model seeds and contains fifteen
+frozen generation namespaces. The final inference handoff therefore cannot be
+authorized as one best-seed run or as independently assembled per-namespace
+commands.
+
+A non-authorizing release packet now binds the sealed parent manifest, all
+three selected `best.ckpt` hashes, the exact terminal architecture decision,
+three same-seed calibration/SBC result bundles, immutable inference
+wheel/environment and 45 fresh output paths. The output arithmetic is fixed as
+15 namespaces times seeds 0, 1 and 2. Posterior draws remain transient; only
+bounded score artifacts may be persisted.
+
+A separate delegated-review JSON is required before one runtime authorization
+can unseal final records, load checkpoints or apply calibration maps. The
+authorization keeps retraining, calibration refitting, architecture/size
+selection, threshold changes, ablation/reference execution and GWOSC/GWTC
+closed. This release-control implementation used synthetic fixtures only.
