@@ -2,6 +2,9 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
+import subprocess
+import sys
 from copy import deepcopy
 from pathlib import Path
 
@@ -45,6 +48,46 @@ def _write_json(path: Path, value: dict) -> None:
 def _write_yaml(path: Path, value: dict) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(yaml.safe_dump(value, sort_keys=False), encoding="utf-8")
+
+
+@pytest.mark.parametrize(
+    ("script", "builder"),
+    (
+        (
+            "scripts/phase7/prepare_ablation_calibration_release.py",
+            "build_ablation_calibration_release_packet",
+        ),
+        (
+            "scripts/phase7/authorize_ablation_calibration.py",
+            "build_ablation_calibration_authorization",
+        ),
+        (
+            "scripts/phase7/prepare_ablation_iid_release.py",
+            "build_ablation_iid_release_packet",
+        ),
+        (
+            "scripts/phase7/authorize_ablation_iid.py",
+            "build_ablation_iid_authorization",
+        ),
+    ),
+)
+def test_release_cli_imports_exact_typed_builder(
+    script: str, builder: str
+) -> None:
+    path = ROOT / script
+    source = path.read_text(encoding="utf-8")
+    assert builder in source
+    environment = dict(os.environ)
+    environment["PYTHONPATH"] = str(ROOT / "src")
+    completed = subprocess.run(
+        [sys.executable, str(path), "--help"],
+        cwd=ROOT,
+        check=True,
+        capture_output=True,
+        text=True,
+        env=environment,
+    )
+    assert "--root" in completed.stdout
 
 
 def _calibration_scope() -> dict:
