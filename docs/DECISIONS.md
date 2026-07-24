@@ -1798,3 +1798,21 @@ hash-bound delegated review.
 Adding these entrypoints changes no scientific gate. Missing upstream
 artifacts, absent review evidence, reused outputs or checkout drift continue
 to fail closed.
+
+## D132 — Resume the nine-fit architecture controller without rewriting evidence
+
+The terminal architecture grid contains nine expensive new fits executed in
+three sequential architecture groups. A controller or SSH/tmux interruption
+must not force already completed fits to run again, but merely seeing an
+existing directory is insufficient proof of completion.
+
+The launcher now reuses a completed fit only when the external result JSON,
+run-local summary and `best.ckpt` all exist, the JSON payloads are identical,
+and the frozen architecture, seed and downstream-closure flags match. An
+incomplete fit is resumable only when it has `last.ckpt` and neither final JSON
+exists. All other partial combinations fail closed.
+
+The parent launcher summary is also immutable. A completed summary can be
+returned only after all nine fit identities are revalidated; a failed summary
+cannot be overwritten by an automatic retry. This is controller recovery, not
+model retraining, tuning or a relaxation of the nine-fit grid.

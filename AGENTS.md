@@ -1429,6 +1429,18 @@ CLI availability does not authorize any scientific access or execution. No
 future authorization may be created until its complete upstream evidence and
 separate reviewed packet exist.
 
+The implementation-only Phase 5 boundary now also contains a restart-safe
+nine-fit launcher. A restarted controller may reuse a fit only when its
+launcher result, run summary and best checkpoint all exist and the two JSON
+payloads are identical with the exact architecture/seed and closed downstream
+flags. It may resume an incomplete fit only from that fit's `last.ckpt` when
+neither final result exists. Ambiguous partial identities and prior failed
+parent summaries stop without overwrite.
+
+This launcher hardening does not authorize architecture data/checkpoint access
+or any fit. It will apply only after the terminal decision and the separate
+Phase 5 release/review authorization.
+
 ## Scientific integrity
 
 - Never fabricate results, citations, completed runs or calibration.

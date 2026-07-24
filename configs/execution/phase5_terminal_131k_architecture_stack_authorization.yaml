@@ -13,6 +13,7 @@ implementation_scope:
   terminal_architecture_gate_authorized: true
   terminal_probe_reuse_validation_authorized: true
   nine_new_fit_runner_authorized: true
+  resume_safe_grid_launcher_authorized: true
   twelve_result_selector_authorized: true
   synthetic_fixture_tests_authorized: true
 
