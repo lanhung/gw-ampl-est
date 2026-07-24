@@ -834,3 +834,28 @@ sealed-materialization release packet and delegated-review authorization
 builder. Official identities remain null until the future reviewed release
 certificate passes. Synthetic tests only were used; final data, checkpoints,
 calibration maps and GWOSC/GWTC were not accessed.
+
+## Final-inference release control
+
+The final inference runtime already enforced sealed-data, selected-checkpoint
+and same-seed calibration-map identities, but its future authorization still
+had to be assembled manually. Implementation commit
+`7373d2d456a3cb73300392a2a2fa604380d6b77b` now adds a non-authorizing release
+packet and an independently reviewed authorization builder.
+
+The packet requires:
+
+- the exact terminal 131k architecture decision;
+- all three retained selected checkpoint and run-summary hashes;
+- the atomic sealed 20,480-case parent and its fifteen namespaces;
+- one complete calibration map, SBC result and independent coverage artifact
+  for each corresponding model seed;
+- an immutable inference wheel/environment;
+- exactly 45 fresh outputs, one per namespace and retained seed.
+
+The builder cannot select a best seed, pool calibration maps, refit
+calibration, persist posterior draws or open any downstream baseline. Full
+verification passed 514 tests with eight optional-dependency skips, maintained
+Ruff, mypy over 72 source files and package build. No scientific record,
+checkpoint or map was opened; terminal training remains the active critical
+path.
