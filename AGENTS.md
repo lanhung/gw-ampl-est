@@ -1366,6 +1366,25 @@ tests are authorized through
 Scientific checkpoint access, calibration fitting, IID unsealing, comparison
 execution, retraining, tuning and GWOSC/GWTC remain closed.
 
+The implementation-only Phase 7 boundary now also contains an exact two-stage
+release chain for the frozen RC.8 ablation evaluation through:
+
+`configs/execution/phase7_ablation_evaluation_release_stack_authorization.yaml`
+
+The first future release may be assembled only after all six GW-only/EM-only
+fits and the primary calibration/SBC analysis complete. It binds the same
+4,096 calibration-fit cases and allocates exactly six independent ablation
+score artifacts and six view/seed-specific conformal maps. It cannot unseal
+IID data.
+
+The second future release cannot be assembled until all six maps and all three
+primary same-seed IID score artifacts exist. It binds the single 8,192-case IID
+namespace, allocates exactly six ablation IID score artifacts and six paired
+comparisons, and forbids every non-IID ablation diagnostic. Each stage still
+requires its own hash-bound delegated review. This software used synthetic
+fixtures only; no checkpoint, calibration case, IID record or primary score
+was opened, and no execution authorization was created.
+
 ## Scientific integrity
 
 - Never fabricate results, citations, completed runs or calibration.

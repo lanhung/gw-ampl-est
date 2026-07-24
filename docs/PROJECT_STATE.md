@@ -978,3 +978,20 @@ dependency skips, maintained Ruff, mypy over 77 source files and package
 build. Only synthetic arrays were used. No checkpoint, calibration-fit case,
 final IID case or scientific metric was opened. The active 131k three-seed
 probe remains the critical path.
+
+## Ablation calibration/IID release control
+
+The RC.8 software handoff is now fail-closed in two ordered releases. A future
+calibration packet requires six completed ablation checkpoints plus completed
+primary calibration/SBC evidence and binds exactly six calibration scores and
+six independent maps on the common 4,096 cases. Its authorization cannot
+unseal IID data.
+
+A future IID packet requires all six completed maps plus all three primary
+same-seed IID score artifacts. It binds the one 8,192-case IID namespace,
+exactly six ablation IID score artifacts and six paired comparisons. Non-IID
+ablation analysis, map refitting, model selection and retraining remain
+closed. Verification passed 7 focused tests and 548 full tests with eight
+optional-dependency skips, maintained Ruff, mypy over 78 source files and
+package build. No scientific artifact was opened. The active 131k three-seed
+probe remains the critical path.

@@ -1715,3 +1715,27 @@ reports NLP, CRPS and calibrated interval-width differences with a frozen
 superiority gate, best-seed selection, retraining or architecture change.
 Ablation-specific SBC, balanced-tail, cross-family, parameter-OOD, waveform-
 mismatch and PSD-mismatch execution is not part of this contract.
+
+## D128 — Release ablation calibration before IID unsealing
+
+The RC.8 modality-ablation analysis has two scientifically distinct access
+boundaries. Six view/seed checkpoints need the shared calibration-fit
+publication before any final record is opened; the calibrated estimators need
+only the IID child after every map is frozen. Combining these into one broad
+authorization would allow a missing, pooled or mismatched calibration map to
+be discovered only after final IID access.
+
+The release is therefore strictly ordered. The first non-authorizing packet
+requires all six completed ablation fits, the selected architecture, completed
+primary calibration/SBC analysis, the atomic 4,096-case calibration-fit
+publication and immutable inference software. It allocates exactly six
+calibration score artifacts and six independently fitted maps. Its reviewed
+authorization keeps IID access false.
+
+Only completed map artifacts with matching view, seed and checkpoint hashes
+can enter the second packet. That packet additionally requires the primary
+same-seed scores for exactly one 8,192-case IID namespace and allocates six
+ablation IID scores plus six paired-comparison outputs. It cannot access SBC,
+tail, cross-family, OOD or mismatch cases, select a best seed, refit a map or
+trigger retraining. Both packets remain non-authorizing until separate
+hash-bound delegated reviews exist.

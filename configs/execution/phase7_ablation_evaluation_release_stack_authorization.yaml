@@ -1,0 +1,53 @@
+phase: "7-ablation-evaluation-release-stack"
+authorization_status: authorized_implementation_and_synthetic_fixture_only
+authorized_by: codex_as_delegated_scientific_and_engineering_reviewer
+authorization_date: "2026-07-24"
+
+authorization_basis:
+  owner_delegation: continue_without_routine_human_intervention
+  terminal_training_size_locked: false
+  terminal_architecture_locked: false
+  scientific_ablation_checkpoints_available: false
+  calibration_sbc_publication_available: false
+  sealed_iid_publication_available: false
+
+frozen_contracts:
+  ablation_evaluation_version: "1.1.0-rc.8"
+  ablation_evaluation_hash: "219160f67030bad745b0a4573d78d02f9d0db7536a6490c907196e8570647c9a"
+  locked_training_rung: 131072
+  ablation_views: [gw_only, em_only]
+  model_seeds: [0, 1, 2]
+  ablation_checkpoint_count: 6
+  calibration_case_count: 4096
+  ablation_calibration_map_count: 6
+  iid_case_count: 8192
+  ablation_iid_score_artifact_count: 6
+  paired_comparison_count: 6
+  posterior_draws_per_case: 4096
+  bootstrap_replicates: 10000
+  calibration_release_precedes_iid_release: true
+  same_cases_as_primary_required: true
+  same_seed_primary_comparator_required: true
+
+authorization:
+  nonauthorizing_calibration_release_packet_implementation_authorized: true
+  nonauthorizing_iid_release_packet_implementation_authorized: true
+  delegated_review_builder_implementation_authorized: true
+  synthetic_fixture_tests_authorized: true
+
+  scientific_checkpoint_access_authorized: false
+  calibration_fit_data_access_authorized: false
+  ablation_calibration_score_execution_authorized: false
+  ablation_calibration_map_fit_authorized: false
+  final_iid_unsealing_authorized: false
+  final_iid_ablation_inference_authorized: false
+  primary_iid_score_access_authorized: false
+  paired_comparison_execution_authorized: false
+  model_training_or_tuning_authorized: false
+  primary_calibration_refit_authorized: false
+  sbc_authorized: false
+  ood_or_mismatch_ablation_authorized: false
+  manuscript_claim_finalization_authorized: false
+  gwosc_gwtc_access_authorized: false
+
+stop_after_implementation: true
