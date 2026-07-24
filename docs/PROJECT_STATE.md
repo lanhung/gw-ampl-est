@@ -954,3 +954,27 @@ not inputs to this reporting runtime. Verification passed 8 focused tests and
 535 full tests with eight optional-dependency skips, maintained-scope Ruff,
 mypy over 76 source files and package build. Only synthetic NPZ artifacts were
 used. The active 131k probe remains the scientific critical path.
+
+## Ablation calibration and IID semantics
+
+The downstream-only addendum `1.1.0-rc.8` now resolves the last undeclared
+statistical handoff for the GW-only and EM-only controls before calibration or
+final data exist. Its canonical hash is
+`219160f67030bad745b0a4573d78d02f9d0db7536a6490c907196e8570647c9a`.
+
+The pure implementation provides:
+
+- calibration-fit and IID adapters that apply an ablation only after the
+  primary training-rung standardizer;
+- six separately identified conformal maps, one per view and seed;
+- exact rejection of primary-map reuse, pooling, case drift and seed drift;
+- IID overall, lens-family and eight-cell summaries with raw coverage counts
+  and Wilson intervals;
+- deterministic 10,000-replicate same-case/same-seed paired comparisons;
+- explicit no-selection, no-retuning and no-ablation-OOD boundaries.
+
+Verification passed six focused tests and 541 full tests with eight optional
+dependency skips, maintained Ruff, mypy over 77 source files and package
+build. Only synthetic arrays were used. No checkpoint, calibration-fit case,
+final IID case or scientific metric was opened. The active 131k three-seed
+probe remains the critical path.

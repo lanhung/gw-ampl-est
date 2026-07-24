@@ -1349,6 +1349,23 @@ checkpoints, calibration maps, threshold changes, manuscript-claim
 finalization and GWOSC/GWTC remain closed. Only synthetic score fixtures were
 used.
 
+Before calibration-fit or final IID data exist, delegated scientific review
+also freezes the downstream-only ablation addendum `1.1.0-rc.8` at
+`configs/statistics/ablation_calibration_iid_preregistration.yaml`, canonical
+hash `219160f67030bad745b0a4573d78d02f9d0db7536a6490c907196e8570647c9a`.
+Each GW-only and EM-only checkpoint must fit its own split-conformal map for
+its own model seed on the same 4,096 calibration-fit cases used by the
+primary model. Primary maps, pooled maps and IID refitting are forbidden.
+
+The six ablation results may later be compared descriptively with the
+same-seed primary model only on the identical 8,192 IID cases using a frozen
+10,000-replicate paired bootstrap. No best seed is selected, and no ablation
+SBC, tail, OOD or mismatch execution is declared. Pure adapters and synthetic
+tests are authorized through
+`configs/execution/phase7_ablation_calibration_iid_stack_authorization.yaml`.
+Scientific checkpoint access, calibration fitting, IID unsealing, comparison
+execution, retraining, tuning and GWOSC/GWTC remain closed.
+
 ## Scientific integrity
 
 - Never fabricate results, citations, completed runs or calibration.
