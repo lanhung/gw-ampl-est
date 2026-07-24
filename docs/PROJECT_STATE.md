@@ -931,3 +931,26 @@ scientific data, checkpoint, final case or GWOSC/GWTC product was opened.
 Actual read-only reproduction remains closed pending an exact AutoDL wheel
 test and a separately hash-bound delegated review. The active 131k three-seed
 probe remains the critical path.
+
+## Final-score summary release control
+
+Implementation commit `b4c7f0a07c717e2965ea3244c88c74d070449ce1`
+adds the missing post-inference release and runtime chain for the 45 primary
+final score artifacts. It freezes:
+
+- fifteen namespaces times retained seeds 0, 1 and 2;
+- exact artifact and companion-summary hashes;
+- complete metric-array schemas with no posterior draws;
+- cross-seed case, truth and offline-label equality;
+- IID overall, lens-family and all eight EM-cell summaries;
+- four balanced-tail strata and all cross-family/OOD/mismatch contexts;
+- raw coverage counts, Wilson intervals and frozen coverage gates;
+- mean and sample standard deviation across all three seeds;
+- a fail-to-narrow-claims action with no best-seed selection or retuning.
+
+The non-authorizing packet requires a separate delegated review before derived
+scientific score access. Final records, checkpoints and calibration maps are
+not inputs to this reporting runtime. Verification passed 8 focused tests and
+535 full tests with eight optional-dependency skips, maintained-scope Ruff,
+mypy over 76 source files and package build. Only synthetic NPZ artifacts were
+used. The active 131k probe remains the scientific critical path.

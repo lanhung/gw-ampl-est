@@ -1671,3 +1671,24 @@ The verifier records checkpoint and prediction inode, size and mtime before
 and after use, rejects any identity change and never loads the checkpoint.
 This preserves the legacy roots while still making the narrow historical
 comparison reproducible.
+
+## D126 — Summarize final scores only after one reviewed 45-artifact release
+
+The final pool contains fifteen namespaces and the selected model retains seeds
+0, 1 and 2. Final reporting must therefore consume exactly 45 immutable score
+artifacts and may not select a best seed, pool posterior draws or silently omit
+a failed namespace.
+
+The release packet binds every NPZ and companion summary hash, the final
+inference authorization, exact wheel/environment and one fresh summary output.
+A separate delegated review is required before the runtime can open a score
+artifact. The runtime requires identical physical-system IDs, truth and
+offline labels across all three seeds for each namespace and rejects any raw
+posterior-draw key.
+
+IID overall, each of eight EM cells and each of four balanced-tail strata use
+their frozen coverage floors and three-binomial-standard-error rule. Every
+group includes raw successes, totals and Wilson intervals. Lens-family,
+cross-family, parameter-OOD, waveform-mismatch and PSD-mismatch results remain
+diagnostic and cannot trigger retuning. Any failed primary or tail gate maps
+only to narrowing claims; manuscript claim finalization remains a later gate.
