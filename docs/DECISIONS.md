@@ -1612,3 +1612,21 @@ can unseal final records, load checkpoints or apply calibration maps. The
 authorization keeps retraining, calibration refitting, architecture/size
 selection, threshold changes, ablation/reference execution and GWOSC/GWTC
 closed. This release-control implementation used synthetic fixtures only.
+
+## D123 — Require one reviewed release for the six terminal input ablations
+
+The two RC.6 input ablations are scientific fits, not informal views of the
+primary checkpoint. Their future execution must therefore be released as one
+exact six-fit set: GW-only and EM-only, each for seeds 0, 1 and 2.
+
+A non-authorizing packet now binds the terminal 131k decision, twelve-result
+architecture lock, selected primary model hash, primary 131k membership and
+standardizers, immutable training wheel/environment, finalized evaluation
+commitment and six fresh output paths. The selected architecture, optimizer,
+effective batch and budget are unchanged. Four data-loader workers per fit and
+at most three concurrent fits are explicit engineering settings.
+
+A separate delegated-review JSON is required to create the runtime
+authorization. No best seed may be selected, no ablation architecture may be
+tuned, and calibration/SBC/final evaluation cannot be opened by this release.
+The implementation used synthetic fixtures only.

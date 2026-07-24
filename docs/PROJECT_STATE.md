@@ -859,3 +859,29 @@ verification passed 514 tests with eight optional-dependency skips, maintained
 Ruff, mypy over 72 source files and package build. No scientific record,
 checkpoint or map was opened; terminal training remains the active critical
 path.
+
+## Terminal input-ablation release control
+
+The runtime for the two RC.6 ablations already existed, but the future six-fit
+authorization still required manual assembly. Implementation commit
+`93ca300366cdc00b8d407fc18badd312d4946844` now adds a non-authorizing
+release packet and a separately reviewed authorization builder.
+
+The release binds:
+
+- either exact terminal 131k lock label and the twelve-result architecture
+  decision;
+- the selected primary architecture and derived GW-only/EM-only model hashes;
+- the exact 131,072-member preparation and primary standardizers;
+- the corrected-65k and terminal publication identities;
+- an immutable wheel/environment and exactly six fresh output paths;
+- two views, seeds 0/1/2, four loader workers per fit and at most three
+  concurrent fits.
+
+Verification passed 14 focused tests and 518 full tests with eight optional
+dependency skips, maintained-scope Ruff, mypy over 73 source files and package
+build. The known 18 Phase 0 Ruff findings remain outside maintained scope.
+No terminal metric, scientific array, checkpoint, calibration/SBC or final
+record was opened. The active 131k probe remains the critical path; ablation
+execution still requires terminal size and architecture locks plus a separate
+reviewed release.
