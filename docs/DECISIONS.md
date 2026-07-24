@@ -1534,3 +1534,19 @@ grid, training data, optimizer, validation-only selection rule and terminal
 resource cap are unchanged. Until the future packet is reviewed, the nine new
 fits, architecture selection and every downstream scientific action remain
 closed.
+
+## D119 — Bind Phase 6 materialization to both terminal decisions
+
+Calibration/SBC materialization must not infer authority from the existence of
+an architecture-selection JSON. A non-authorizing packet now validates and
+hash-binds the terminal 131k size decision, the twelve-result development-only
+architecture decision, the exact direct-target generator wheel and environment,
+the immutable Stage A/Stage B/correction/terminal publication manifests and the
+frozen 4,096/2,048 split counts.
+
+A separate delegated-review document is required to create the materialization-
+only authorization. That authorization permits generation and atomic
+publication of exactly 6,144 direct-target development systems while keeping
+checkpoint access, calibration fitting, SBC statistics, final evaluation,
+model tuning and GWOSC/GWTC false. Official identities remain prospective until
+the runtime release certificate passes on AutoDL.
