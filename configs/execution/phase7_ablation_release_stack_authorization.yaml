@@ -1,0 +1,41 @@
+phase: "7-ablation-release-stack"
+authorization_status: authorized_implementation_and_synthetic_fixture_only
+authorized_by: codex_as_delegated_scientific_and_engineering_reviewer
+authorization_date: "2026-07-24"
+
+authorization_basis:
+  owner_delegation: continue_without_routine_human_intervention
+  terminal_training_size_locked: false
+  terminal_architecture_locked: false
+  primary_rung_preparation_available: false
+
+frozen_contracts:
+  final_analysis_hash: "7e0e252f0a972e0b0ad2fe8f93f74f1f0172639a6fb258fc7a953be5fb7973e1"
+  locked_training_rung: 131072
+  ablation_views: [gw_only, em_only]
+  model_seeds: [0, 1, 2]
+  exact_fit_count: 6
+  maximum_concurrent_fits: 3
+  data_loader_worker_processes: 4
+  identical_optimizer_and_budget_required: true
+  final_evaluation_access_forbidden: true
+
+authorization:
+  nonauthorizing_release_packet_implementation_authorized: true
+  delegated_review_builder_implementation_authorized: true
+  synthetic_fixture_tests_authorized: true
+
+  scientific_data_access_authorized: false
+  scientific_checkpoint_access_authorized: false
+  ablation_fit_execution_authorized: false
+  primary_model_retraining_authorized: false
+  architecture_or_size_selection_authorized: false
+  model_tuning_authorized: false
+  calibration_or_sbc_access_authorized: false
+  final_evaluation_materialization_authorized: false
+  final_evaluation_unsealing_authorized: false
+  final_evaluation_inference_authorized: false
+  extension_above_131072_authorized: false
+  gwosc_gwtc_access_authorized: false
+
+stop_after_implementation: true
