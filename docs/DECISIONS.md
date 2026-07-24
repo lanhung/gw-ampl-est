@@ -1550,3 +1550,23 @@ publication of exactly 6,144 direct-target development systems while keeping
 checkpoint access, calibration fitting, SBC statistics, final evaluation,
 model tuning and GWOSC/GWTC false. Official identities remain prospective until
 the runtime release certificate passes on AutoDL.
+
+## D120 — Separate Phase 6 score extraction from calibration/SBC statistics
+
+The selected architecture retains all three model seeds, so downstream
+calibration cannot be implemented as one best-seed job. The execution chain is
+therefore split into two independently reviewed releases.
+
+The first release binds the locked 131,072-system architecture, all three exact
+`best.ckpt` and run-summary hashes, the atomic 4,096-system calibration-fit and
+2,048-system SBC publication, a fixed inference configuration and six fresh
+score paths. It may create exactly one calibration-fit and one SBC score
+artifact per model seed. It may not fit a calibration map or run an SBC test.
+
+Only after all six artifacts are complete and hash-validated may a second
+release authorize three seedwise calibration maps and three independent SBC
+analyses. The same physical development cases must be scored by every seed,
+calibration and SBC IDs must remain disjoint, maps are never pooled across
+seeds, and no best seed is selected. Checkpoint access closes before the
+statistics step; final evaluation, retraining and GWOSC/GWTC remain closed
+through both releases.

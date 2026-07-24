@@ -250,28 +250,38 @@ def test_statistics_runner_keeps_calibration_fit_and_sbc_independent(
         "authorization": {
             "calibration_fit_authorized": True,
             "sbc_execution_authorized": True,
+            "checkpoint_access_authorized": False,
             "final_evaluation_authorized": False,
             "model_retraining_or_tuning_authorized": False,
             "gwosc_gwtc_access_authorized": False,
         },
-        "score_artifacts": {
-            "calibration_scores_path": str(calibration_path),
-            "calibration_scores_sha256": hashlib.sha256(
-                calibration_path.read_bytes()
-            ).hexdigest(),
-            "sbc_ranks_and_scores_path": str(sbc_path),
-            "sbc_ranks_and_scores_sha256": hashlib.sha256(
-                sbc_path.read_bytes()
-            ).hexdigest(),
-        },
-        "score_identity": {
-            "model_seed": "0",
+        "selected_architecture": {
             "architecture_id": "nsf-t10-w256",
-            "checkpoint_sha256": "a" * 64,
-            "publication_manifest_sha256": "b" * 64,
-            "inference_commit": "c" * 40,
+            "locked_training_rung": 131072,
         },
-        "statistics_output_root": str(output),
+        "authorized_model_seeds": [0, 1, 2],
+        "score_artifacts_by_seed": {
+            "0": {
+                "calibration_fit": {
+                    "path": str(calibration_path),
+                    "sha256": hashlib.sha256(calibration_path.read_bytes()).hexdigest(),
+                },
+                "sbc_diagnostic": {
+                    "path": str(sbc_path),
+                    "sha256": hashlib.sha256(sbc_path.read_bytes()).hexdigest(),
+                },
+            },
+        },
+        "score_identities_by_seed": {
+            "0": {
+                "model_seed": "0",
+                "architecture_id": "nsf-t10-w256",
+                "checkpoint_sha256": "a" * 64,
+                "publication_manifest_sha256": "b" * 64,
+                "inference_commit": "c" * 40,
+            }
+        },
+        "statistics_output_roots": {"0": str(output)},
     }
     authorization_path = tmp_path / "authorization.yaml"
     authorization_path.write_text(yaml.safe_dump(authorization, sort_keys=True))
@@ -289,6 +299,8 @@ def test_statistics_runner_keeps_calibration_fit_and_sbc_independent(
             str(sbc_path),
             "--output-root",
             str(output),
+            "--seed",
+            "0",
             "--execute",
         ],
         check=True,

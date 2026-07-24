@@ -1221,6 +1221,20 @@ one completed terminal decision, a separately verified exact wheel and fresh
 output identity. Calibration, SBC, final evaluation, extension above 131,072,
 real noise and GWOSC/GWTC remain closed.
 
+The Phase 6 implementation-only boundary now also contains the exact
+post-materialization score and statistics release chain. It freezes six score
+artifacts (calibration-fit and SBC for each retained model seed), requires one
+hash-bound delegated review before checkpoint inference, and requires a second
+review before three seedwise calibration/SBC analyses. Calibration maps are
+fitted separately per seed; no best seed or seed pooling is permitted.
+
+This software has used synthetic score fixtures only. It does not authorize
+checkpoint access, calibration/SBC publication access, score extraction,
+calibration fitting, SBC execution, final evaluation or GWOSC/GWTC access.
+Those gates require the terminal architecture decision, exact selected
+checkpoint hashes, the atomic 4,096+2,048 publication, an exact inference
+wheel/environment and fresh output identities.
+
 ## Scientific integrity
 
 - Never fabricate results, citations, completed runs or calibration.

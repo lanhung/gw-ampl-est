@@ -123,6 +123,12 @@ def validate_score_inference_authorization(
         raise TrainingGateError("score inference received an unauthorized split")
     if seed not in (0, 1, 2):
         raise TrainingGateError("score inference seed is outside 0/1/2")
+    from .calibration_execution_authorization import load_score_contract
+
+    if dict(authorization.get("inference_contract", {})) != dict(
+        load_score_contract(root)
+    ):
+        raise TrainingGateError("score inference contract differs from frozen config")
     _require_remote_path(authorization_path, name="score authorization")
     _require_remote_path(checkpoint_path, name="selected checkpoint")
     _require_remote_path(publication_root, name="development publication")

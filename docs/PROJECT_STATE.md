@@ -793,3 +793,25 @@ The packet is non-authorizing. Only a separately hash-bound delegated review
 can create the materialization-only YAML. Checkpoint inference, calibration
 fitting, SBC statistics, final evaluation, model tuning and GWOSC/GWTC remain
 closed until their own later gates.
+
+## Calibration/SBC score and statistics release control
+
+The implementation-only Phase 6 handoff now covers the two post-publication
+steps without opening either one. The frozen score configuration has canonical
+hash
+`47df45922b8db62970e5b0a7c8315c14d95b5fc1ac7e97b030a975fe31d4f2d8`.
+It fixes 4,096 posterior draws for each calibration-fit case, 1,024 draws for
+each deterministic SBC replicate, six disjoint split/seed RNG namespaces and
+bounded 256-draw chunks.
+
+One non-authorizing packet will bind the terminal architecture decision, three
+selected checkpoints, the future atomic 4,096+2,048 publication, exact wheel
+and environment, and six fresh score outputs. A separate delegated review is
+required before checkpoint inference. After all six scores exist, a second
+packet verifies count, ID, split, checkpoint and hash consistency and requires
+another review before the three seedwise calibration/SBC jobs.
+
+Implementation verification passed 506 tests with seven optional-dependency
+skips, 17 focused tests, Ruff, mypy and package build. No scientific checkpoint
+or development publication was opened. Score extraction, calibration fitting,
+SBC execution, final evaluation and GWOSC/GWTC remain closed.
