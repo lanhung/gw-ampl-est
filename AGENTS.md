@@ -1419,6 +1419,16 @@ authorize checkpoint access, calibration scoring, IID unsealing, ablation
 inference, paired comparison or aggregate execution. The active 131k
 three-seed terminal probe remains the scientific critical path.
 
+All four RC.8 review transitions now also have thin command-line entrypoints:
+prepare and authorize ablation calibration, then prepare and authorize
+ablation IID. Each CLI calls the existing typed builder directly and creates
+no broader gate. The prepare commands remain non-authorizing; the authorize
+commands require the exact pre-existing delegated-review evidence.
+
+CLI availability does not authorize any scientific access or execution. No
+future authorization may be created until its complete upstream evidence and
+separate reviewed packet exist.
+
 ## Scientific integrity
 
 - Never fabricate results, citations, completed runs or calibration.

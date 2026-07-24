@@ -1030,3 +1030,17 @@ Scientific execution remains closed and the running 131k terminal probe is
 still the critical path. Verification passed 17 focused tests and 558 full
 tests with eight optional-dependency skips, maintained-scope Ruff, mypy over
 79 source files and package build.
+
+## Ablation evaluation release CLIs
+
+The complete RC.8 release chain is now operable without ad-hoc Python. Four
+thin CLIs call the existing typed builders for calibration packet preparation,
+calibration authorization, IID packet preparation and IID authorization.
+Prepare commands are non-authorizing; authorization commands still require
+their exact delegated-review JSON and write atomically.
+
+The CLIs add no execution scope and were tested only through import/help and
+the existing synthetic builder suites. No scientific data, checkpoint, score
+or review artifact was opened. Verification passed 21 focused tests and 562
+full tests with eight optional-dependency skips, maintained-scope Ruff, mypy
+over 79 source files and package build.

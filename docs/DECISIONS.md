@@ -1780,3 +1780,21 @@ This finalizer opens no final record, checkpoint or posterior draws. It cannot
 refit calibration, execute a non-IID ablation, choose a best seed or trigger
 training/tuning. The implementation and synthetic evidence do not authorize a
 future scientific aggregate.
+
+## D131 — Expose every RC.8 review transition through a typed thin CLI
+
+Release builders that exist only as Python functions are easy to exercise in
+unit tests but cannot be used reproducibly by the remote execution operator.
+Hand-written Python snippets at release time would duplicate path handling and
+increase the chance of selecting the wrong packet, review or output.
+
+RC.8 therefore exposes four thin entrypoints: prepare calibration release,
+authorize calibration, prepare IID release and authorize IID. They contain no
+scientific calculations and call the corresponding typed builder directly.
+Prepare commands write only non-authorizing JSON packets. Authorization
+commands atomically write YAML only after the builder verifies the exact
+hash-bound delegated review.
+
+Adding these entrypoints changes no scientific gate. Missing upstream
+artifacts, absent review evidence, reused outputs or checkout drift continue
+to fail closed.
