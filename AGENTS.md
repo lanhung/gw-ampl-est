@@ -1235,6 +1235,24 @@ Those gates require the terminal architecture decision, exact selected
 checkpoint hashes, the atomic 4,096+2,048 publication, an exact inference
 wheel/environment and fresh output identities.
 
+The Phase 7 implementation-only boundary now also contains the exact sealed
+final-materialization release chain. It represents each Stage A, Stage B,
+correction, terminal, calibration and SBC dataset child by its own directory
+while hash-binding that child to the atomic common-parent manifest. This
+matches the real publication layout; child directories do not fabricate
+duplicate `dataset_manifest.json` files.
+
+The future release packet binds the terminal size and architecture decisions,
+the exact generator wheel and environment, all eight child-dataset references,
+the five immutable correction exclusions and the 20,480-case/160-shard sealed
+contract. A separate delegated review is required before the
+materialization-only YAML can be created. No official final identity is
+derived by the packet or review builder.
+
+This implementation has used synthetic directory fixtures only. Final
+materialization, unsealing, checkpoint or calibration-map access, scientific
+inference, model training and GWOSC/GWTC remain closed.
+
 ## Scientific integrity
 
 - Never fabricate results, citations, completed runs or calibration.

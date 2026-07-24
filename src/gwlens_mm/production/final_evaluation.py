@@ -76,8 +76,65 @@ class FinalEvaluationIdentities:
     namespace_dataset_ids: Mapping[str, str]
 
 
+@dataclass(frozen=True)
+class BoundPublishedReferenceDataset:
+    """One dataset child bound to its atomically published parent manifest."""
+
+    dataset_id: str
+    dataset_root: Path
+    parent_root: Path
+    parent_manifest_path: Path
+    parent_manifest_sha256: str
+
+
 def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def resolve_bound_published_reference_dataset(
+    specification: Mapping[str, Any],
+    *,
+    approved_root: Path = Path("/root/autodl-tmp/lensing-4"),
+) -> BoundPublishedReferenceDataset:
+    """Resolve a child dataset without pretending it owns the parent manifest.
+
+    Stage A, Stage B, the numerical-correction overlay and the future
+    calibration/SBC pools are atomically published as common parents.  Their
+    individual dataset children intentionally do not duplicate
+    ``dataset_manifest.json``.  The final-evaluation release must therefore
+    bind each child to the exact parent manifest instead of requiring a
+    nonexistent child manifest.
+    """
+
+    dataset_id = str(specification.get("dataset_id", ""))
+    dataset_root = Path(str(specification.get("dataset_root", ""))).resolve()
+    parent_root = Path(str(specification.get("parent_root", ""))).resolve()
+    parent_manifest_path = parent_root / "dataset_manifest.json"
+    expected_hash = str(specification.get("parent_manifest_sha256", ""))
+    approved = approved_root.resolve()
+    if (
+        not dataset_id
+        or dataset_root.name != dataset_id
+        or dataset_root.parent != parent_root
+        or not dataset_root.is_relative_to(approved)
+        or not parent_root.is_relative_to(approved)
+        or "staging" in dataset_root.parts
+        or "staging" in parent_root.parts
+        or not dataset_root.is_dir()
+        or not parent_manifest_path.is_file()
+        or len(expected_hash) != 64
+        or _sha256(parent_manifest_path) != expected_hash
+    ):
+        raise ValueError("published reference dataset is not bound to its atomic parent")
+    if not any(dataset_root.rglob("records.parquet")):
+        raise ValueError("published reference dataset has no Parquet records")
+    return BoundPublishedReferenceDataset(
+        dataset_id=dataset_id,
+        dataset_root=dataset_root,
+        parent_root=parent_root,
+        parent_manifest_path=parent_manifest_path,
+        parent_manifest_sha256=expected_hash,
+    )
 
 
 def load_final_evaluation_numerical_validity_addendum(
@@ -726,6 +783,7 @@ def collect_published_group_identifiers(
     roots: Tuple[Path, ...],
     *,
     excluded_physical_system_ids: Tuple[str, ...] = (),
+    require_root_manifest: bool = True,
 ) -> Dict[str, Set[str]]:
     """Stream group IDs from published references, honoring a frozen overlay."""
 
@@ -743,7 +801,9 @@ def collect_published_group_identifiers(
         "augmentation_parent": set(),
     }
     for root in roots:
-        if not root.is_dir() or not (root / "dataset_manifest.json").is_file():
+        if not root.is_dir() or (
+            require_root_manifest and not (root / "dataset_manifest.json").is_file()
+        ):
             raise ValueError(f"published reference manifest is absent: {root}")
         records = tuple(sorted(root.rglob("records.parquet")))
         if not records:

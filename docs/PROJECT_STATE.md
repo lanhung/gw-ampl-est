@@ -815,3 +815,22 @@ Implementation verification passed 506 tests with seven optional-dependency
 skips, 17 focused tests, Ruff, mypy and package build. No scientific checkpoint
 or development publication was opened. Score extraction, calibration fitting,
 SBC execution, final evaluation and GWOSC/GWTC remain closed.
+
+## Final-evaluation atomic-reference release control
+
+The sealed final runner previously assumed that each dataset child owned a
+`dataset_manifest.json`. The actual atomic publications place that manifest at
+their common parent, so the assumption would have rejected valid Stage A/B and
+future calibration/SBC children before final materialization.
+
+The typed resolver now binds a child directory to its exact parent manifest
+and streams only that child's Parquet records. The future train reference is
+the exact five-child corrected terminal view; validation, calibration-fit and
+SBC remain separate one-child roles. Structured count, exclusion, root,
+parent-manifest and collision checks run in both preflight and execution.
+
+The implementation also adds a non-authorizing reference-catalog builder,
+sealed-materialization release packet and delegated-review authorization
+builder. Official identities remain null until the future reviewed release
+certificate passes. Synthetic tests only were used; final data, checkpoints,
+calibration maps and GWOSC/GWTC were not accessed.

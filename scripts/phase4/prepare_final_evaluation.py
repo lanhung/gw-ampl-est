@@ -18,6 +18,7 @@ from gwlens_mm.production.final_evaluation import (
     derive_final_evaluation_identities,
     dry_run_plan,
     load_final_evaluation_contract,
+    resolve_bound_published_reference_dataset,
     validate_future_final_evaluation_authorization,
 )
 from gwlens_mm.production.run_control import verify_psd_files
@@ -31,7 +32,16 @@ _ALLOWED_RELEASE_ONLY_PATHS = (
     "docs/PROJECT_STATE.md",
     "docs/reports/PHASE7_FINAL_EVALUATION_MATERIALIZATION_REPORT.md",
     "results/experiment_registry.csv",
+    "results/phase7/final_reference_catalog.json",
+    "results/phase7/final_materialization_release_packet.json",
+    "results/phase7/final_materialization_review.json",
 )
+_REFERENCE_COUNTS = {
+    "train": (131072, 5),
+    "validation": (6144, 1),
+    "calibration_fit": (4096, 1),
+    "sbc_diagnostic": (2048, 1),
+}
 
 
 def _sha256(path: Path) -> str:
@@ -92,18 +102,38 @@ def _evaluate_future_release_gate(
         raise ValueError("final-evaluation release lacks all reference datasets")
     approved = Path("/root/autodl-tmp/lensing-4")
     for role, specification in references.items():
-        roots = specification.get("roots") if isinstance(specification, dict) else None
-        if not isinstance(roots, list) or not roots:
-            raise ValueError(f"final-evaluation {role} reference roots are absent")
-        for value in roots:
-            path = Path(str(value)).resolve()
-            if (
-                not path.is_relative_to(approved)
-                or "staging" in path.parts
-                or not path.is_dir()
-                or not (path / "dataset_manifest.json").is_file()
-            ):
-                raise ValueError(f"final-evaluation {role} reference is not published")
+        datasets = (
+            specification.get("datasets")
+            if isinstance(specification, dict)
+            else None
+        )
+        expected_count, expected_dataset_count = _REFERENCE_COUNTS[role]
+        exclusions = (
+            specification.get("excluded_physical_system_ids", ())
+            if isinstance(specification, dict)
+            else ()
+        )
+        if (
+            not isinstance(datasets, list)
+            or len(datasets) != expected_dataset_count
+            or int(specification.get("accepted_system_count", -1))
+            != expected_count
+            or not isinstance(exclusions, list)
+            or (role == "train" and len(exclusions) != 5)
+            or (role != "train" and exclusions)
+        ):
+            raise ValueError(
+                f"final-evaluation {role} structured reference contract is invalid"
+            )
+        resolved = [
+            resolve_bound_published_reference_dataset(
+                item,
+                approved_root=approved,
+            )
+            for item in datasets
+        ]
+        if len({item.dataset_root for item in resolved}) != len(resolved):
+            raise ValueError(f"final-evaluation {role} dataset roots collide")
     staging = Path(str(config["paths"]["staging_root"]))
     staging.parent.mkdir(parents=True, exist_ok=True)
     free = shutil.disk_usage(staging.parent).free
