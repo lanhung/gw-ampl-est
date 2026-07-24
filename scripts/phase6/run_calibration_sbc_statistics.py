@@ -52,6 +52,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     parser.add_argument("--calibration-scores", type=Path)
     parser.add_argument("--sbc-ranks-and-scores", type=Path)
     parser.add_argument("--output-root", type=Path)
+    parser.add_argument("--seed", type=int)
     parser.add_argument("--execute", action="store_true")
     arguments = parser.parse_args(argv)
     if not arguments.execute:
@@ -73,6 +74,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         arguments.calibration_scores,
         arguments.sbc_ranks_and_scores,
         arguments.output_root,
+        arguments.seed,
     )
     if any(value is None for value in required):
         raise ValueError("calibration/SBC execution requires every reviewed artifact")
@@ -83,24 +85,43 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     if not (
         flags.get("calibration_fit_authorized") is True
         and flags.get("sbc_execution_authorized") is True
+        and flags.get("checkpoint_access_authorized") is False
         and flags.get("final_evaluation_authorized") is False
         and flags.get("model_retraining_or_tuning_authorized") is False
         and flags.get("gwosc_gwtc_access_authorized") is False
     ):
         raise PermissionError("calibration/SBC execution flags are inconsistent")
-    artifacts = authorization.get("score_artifacts", {})
+    if arguments.seed not in (0, 1, 2):
+        raise ValueError("calibration/SBC statistics require model seed 0, 1 or 2")
+    seed_key = str(arguments.seed)
+    selected = authorization.get("selected_architecture", {})
+    if (
+        authorization.get("authorized_model_seeds") != [0, 1, 2]
+        or int(selected.get("locked_training_rung", -1)) != 131072
+        or not str(selected.get("architecture_id", ""))
+    ):
+        raise PermissionError("calibration/SBC statistics seed or architecture lock changed")
+    artifacts_by_seed = authorization.get("score_artifacts_by_seed", {})
+    artifacts = (
+        artifacts_by_seed.get(seed_key, {})
+        if isinstance(artifacts_by_seed, dict)
+        else {}
+    )
+    calibration_artifact = artifacts.get("calibration_fit", {})
+    sbc_artifact = artifacts.get("sbc_diagnostic", {})
     if (
         arguments.calibration_scores.resolve()
-        != Path(str(artifacts.get("calibration_scores_path", ""))).resolve()
+        != Path(str(calibration_artifact.get("path", ""))).resolve()
         or _sha256(arguments.calibration_scores)
-        != artifacts.get("calibration_scores_sha256")
+        != calibration_artifact.get("sha256")
         or arguments.sbc_ranks_and_scores.resolve()
-        != Path(str(artifacts.get("sbc_ranks_and_scores_path", ""))).resolve()
+        != Path(str(sbc_artifact.get("path", ""))).resolve()
         or _sha256(arguments.sbc_ranks_and_scores)
-        != artifacts.get("sbc_ranks_and_scores_sha256")
+        != sbc_artifact.get("sha256")
     ):
         raise ValueError("calibration/SBC score artifact identity mismatch")
-    expected_output = Path(str(authorization.get("statistics_output_root", ""))).resolve()
+    roots = authorization.get("statistics_output_roots", {})
+    expected_output = Path(str(roots.get(seed_key, ""))).resolve()
     if arguments.output_root.resolve() != expected_output or arguments.output_root.exists():
         raise ValueError("calibration/SBC output identity is unauthorized or already exists")
     calibration = _load_npz(arguments.calibration_scores)
@@ -137,7 +158,9 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
         score_identity[name] = calibration_value
     if score_identity != {
         str(key): str(value)
-        for key, value in authorization.get("score_identity", {}).items()
+        for key, value in authorization.get("score_identities_by_seed", {})
+        .get(seed_key, {})
+        .items()
     }:
         raise ValueError("calibration/SBC score identity differs from authorization")
     if (
@@ -174,8 +197,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     )
     result = {
         "status": "completed_calibration_fit_and_independent_sbc",
-        "calibration_score_sha256": artifacts["calibration_scores_sha256"],
-        "sbc_score_sha256": artifacts["sbc_ranks_and_scores_sha256"],
+        "calibration_score_sha256": calibration_artifact["sha256"],
+        "sbc_score_sha256": sbc_artifact["sha256"],
         "score_identity": score_identity,
         "calibration_map_fitted_from_calibration_fit_only": True,
         "sbc_used_to_fit_calibration_map": False,

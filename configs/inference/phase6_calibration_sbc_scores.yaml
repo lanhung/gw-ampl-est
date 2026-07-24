@@ -1,0 +1,41 @@
+version: "1.0.0"
+purpose: calibration_fit_and_independent_sbc_score_extraction
+
+calibration_sbc_preregistration:
+  version: "1.1.0-rc.5"
+  path: configs/statistics/calibration_sbc_preregistration.yaml
+  canonical_hash: "033b996930c93e7e4a9881fc3de49bb85cf4be96fcbd890bf2543b46368c9d8e"
+
+locked_training_rung: 131072
+model_seeds: [0, 1, 2]
+best_seed_selection_authorized: false
+
+calibration_posterior_draws_per_case: 4096
+sbc_posterior_draws_per_replicate: 1024
+sbc_subset_seed: 2026071601
+posterior_draw_chunk_size: 256
+physical_batch_size: 32
+
+root_seed_by_split_and_model_seed:
+  calibration_fit:
+    "0": 5797955760267947900
+    "1": 2270784568403084936
+    "2": 1512040146187397664
+  sbc_diagnostic:
+    "0": 18324846580004574092
+    "1": 16190595083045764
+    "2": 14035610911462268088
+
+output_contract:
+  score_artifact_format: numpy_npz
+  posterior_draw_arrays_persisted: false
+  one_artifact_per_split_and_model_seed: true
+  total_score_artifact_count: 6
+  atomic_write: true
+
+closed_boundaries:
+  calibration_map_fitting_authorized: false
+  sbc_statistical_test_authorized: false
+  model_retraining_or_tuning_authorized: false
+  final_evaluation_authorized: false
+  gwosc_gwtc_access_authorized: false
