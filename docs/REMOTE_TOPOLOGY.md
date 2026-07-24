@@ -26,6 +26,41 @@ Read-only legacy evidence on AutoDL
 - Candidate sizes: wjx pair project 834 GB; qkzhang root 425 GB; `/root/autodl-tmp/tmp` 143 GB.
 - New project root was created empty and uses negligible space.
 
+## Endpoint and capacity audit on 2026-07-24
+
+An owner-provided secondary SSH endpoint was tested as a possible four-GPU
+offload host. It is another network entry point to the active AutoDL container,
+not an independent machine. The following identities matched exactly through
+both entry points:
+
+- hostname and kernel boot ID;
+- all four NVIDIA GPU UUIDs;
+- the `/root/autodl-tmp/lensing-4` device and inode;
+- the active tmux-session set.
+
+No hostname, public address, port, password or private key for the secondary
+entry point is committed.
+
+The current container reports:
+
+- four NVIDIA RTX 5000 Ada GPUs with 32,760 MiB each;
+- 64 logical CPUs;
+- approximately 125.5 GiB RAM;
+- approximately 34.2 GiB available on the active 210.2 GB overlay at the audit
+  instant.
+
+The terminal 131k probe uses GPUs 0, 1 and 2 through separate
+`CUDA_VISIBLE_DEVICES` bindings. GPU 3, and additional capacity on GPUs 0 and
+1, were occupied by unrelated owner workloads at the audit instant. Those
+processes must not be interrupted or repurposed implicitly.
+
+The active three-seed probe cannot gain capacity from this second endpoint and
+must not be migrated mid-run. A future genuinely independent host is eligible
+only when it has a distinct boot ID and GPU UUID set and passes an exact
+wheel/environment test. Independent future architecture fits may be assigned
+across verified hosts; one official fit must remain on one immutable hardware
+and software identity from launch through completion.
+
 ## Safety boundaries
 
 - `scripts/remote/sync_to_autodl.sh` excludes Git metadata, credentials and large
