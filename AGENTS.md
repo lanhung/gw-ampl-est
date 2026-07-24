@@ -1273,6 +1273,23 @@ selection, result-threshold changes, ablation/reference execution and
 GWOSC/GWTC remain closed. Only synthetic fixtures were used; no final record,
 scientific checkpoint or calibration map was opened.
 
+The implementation-only Phase 7 boundary now also contains the exact terminal
+input-ablation release chain through:
+
+`configs/execution/phase7_ablation_release_stack_authorization.yaml`
+
+Implementation commit `93ca300366cdc00b8d407fc18badd312d4946844` creates a
+non-authorizing packet that binds the future 131k terminal decision, the
+twelve-result architecture lock, the primary 131k membership and
+standardizers, immutable training wheel/environment and exactly six fresh
+outputs: GW-only and EM-only views for seeds 0, 1 and 2. A separate
+hash-bound delegated review is required before the runtime authorization can
+open data or start one fit.
+
+This implementation used synthetic fixtures only. Terminal probe completion,
+architecture selection, all six ablation fits, calibration/SBC, final
+evaluation and GWOSC/GWTC remain separately closed.
+
 ## Scientific integrity
 
 - Never fabricate results, citations, completed runs or calibration.
