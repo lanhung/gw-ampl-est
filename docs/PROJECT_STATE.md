@@ -1013,3 +1013,20 @@ optional-dependency skips, maintained Ruff, mypy over 79 source files and
 package build. Tests cover the closed contract, exact gate identities, dry-run
 CLIs and both atomic output paths using synthetic kernels. Scientific execution
 is still closed; the active 131k probe remains the critical path.
+
+## Ablation IID descriptive finalizer
+
+The RC.8 execution chain now includes the previously missing all-seed
+closeout. The future IID release allocates one
+`ablation_iid_summary.json` alongside six scores and six paired comparisons.
+The typed finalizer requires every completed job summary, verifies exact
+score/comparison paths and SHA-256 values, rejects missing or duplicate
+view/seed identities and atomically writes the frozen two-view/three-seed
+descriptive aggregate.
+
+Only synthetic completed-job fixtures were used. No scientific checkpoint,
+calibration case, IID record, primary score or final result was opened.
+Scientific execution remains closed and the running 131k terminal probe is
+still the critical path. Verification passed 17 focused tests and 558 full
+tests with eight optional-dependency skips, maintained-scope Ruff, mypy over
+79 source files and package build.

@@ -18,6 +18,7 @@ frozen_execution_config:
 authorization:
   typed_calibration_runtime_implementation_authorized: true
   typed_iid_runtime_implementation_authorized: true
+  descriptive_iid_aggregate_runtime_implementation_authorized: true
   fail_closed_cli_implementation_authorized: true
   synthetic_fixture_tests_authorized: true
 

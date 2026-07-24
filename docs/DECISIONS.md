@@ -1759,3 +1759,24 @@ An immutable execution configuration freezes twelve distinct seed domains,
 runners are dry-run unless `--execute` is supplied, and even then their typed
 gate requires a separately reviewed runtime authorization. The implementation
 gate itself keeps all scientific access false.
+
+## D130 — Finalize ablation IID only from all six hash-bound comparisons
+
+The RC.8 analysis requires a descriptive mean and sample standard deviation
+across seeds for both GW-only and EM-only controls. Six independent jobs alone
+do not prove that every view and seed entered the final comparison, and a
+manual aggregation could silently omit one seed or select the most favorable
+result.
+
+The future IID release therefore allocates one aggregate output under the same
+reviewed output root. Its runtime may execute only after all six score files,
+all six companion run summaries and all six paired-comparison JSON files
+exist at their authorized paths. It verifies the score/comparison hashes and
+view/seed identities before calling the frozen RC.8 aggregate. The result
+retains all seed-level comparisons and reports only the preregistered
+mean/sample-standard-deviation summaries.
+
+This finalizer opens no final record, checkpoint or posterior draws. It cannot
+refit calibration, execute a non-IID ablation, choose a best seed or trigger
+training/tuning. The implementation and synthetic evidence do not authorize a
+future scientific aggregate.
