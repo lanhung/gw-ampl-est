@@ -108,6 +108,13 @@ def _calibration_packet() -> dict:
             "locked_training_rung": 131072,
         },
         "ablation_checkpoints": _checkpoints(),
+        "primary_same_seed_calibration_scores": {
+            str(seed): {
+                "path": f"/project/primary/seed-{seed}/calibration.npz",
+                "sha256": f"{seed + 7}" * 64,
+            }
+            for seed in (0, 1, 2)
+        },
         "calibration_publication": {
             "parent_root": "/root/autodl-tmp/lensing-4/calibration",
             "parent_manifest_sha256": "b" * 64,
@@ -301,7 +308,15 @@ def test_calibration_packet_allocates_six_scores_and_six_maps(
         lambda value: _checkpoints(),
     )
     monkeypatch.setattr(
-        release_module, "_primary_statistics_completed", lambda *args, **kwargs: None
+        release_module,
+        "_primary_statistics_completed",
+        lambda *args, **kwargs: {
+            str(seed): {
+                "path": f"/project/primary/seed-{seed}/calibration.npz",
+                "sha256": f"{seed + 7}" * 64,
+            }
+            for seed in (0, 1, 2)
+        },
     )
     monkeypatch.setattr(
         release_module,
@@ -339,6 +354,7 @@ def test_primary_statistics_completion_requires_exact_runtime_status(
 ) -> None:
     project = tmp_path / "project"
     roots = {}
+    scores = {}
     for seed in (0, 1, 2):
         output = project / f"seed-{seed}"
         _write_json(
@@ -346,6 +362,15 @@ def test_primary_statistics_completion_requires_exact_runtime_status(
             {"status": "completed_calibration_fit_and_independent_sbc"},
         )
         roots[str(seed)] = str(output)
+        score = project / f"scores/seed-{seed}/calibration.npz"
+        score.parent.mkdir(parents=True, exist_ok=True)
+        score.write_bytes(f"score-{seed}".encode())
+        scores[str(seed)] = {
+            "calibration_fit": {
+                "path": str(score),
+                "sha256": _sha256(score),
+            }
+        }
     monkeypatch.setattr(release_module, "PROJECT_ROOT", project)
     authorization = {
         "authorization_status": "authorized_calibration_sbc_statistics_only",
@@ -355,10 +380,12 @@ def test_primary_statistics_completion_requires_exact_runtime_status(
         },
         "authorized_model_seeds": [0, 1, 2],
         "statistics_output_roots": roots,
+        "score_artifacts_by_seed": scores,
     }
-    release_module._primary_statistics_completed(  # noqa: SLF001
+    artifacts = release_module._primary_statistics_completed(  # noqa: SLF001
         authorization, selected_architecture_id="nsf-t10-w256"
     )
+    assert set(artifacts) == {"0", "1", "2"}
     changed = deepcopy(authorization)
     _write_json(
         Path(changed["statistics_output_roots"]["2"]) / "run_summary.json",

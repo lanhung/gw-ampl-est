@@ -1739,3 +1739,23 @@ ablation IID scores plus six paired-comparison outputs. It cannot access SBC,
 tail, cross-family, OOD or mismatch cases, select a best seed, refit a map or
 trigger retraining. Both packets remain non-authorizing until separate
 hash-bound delegated reviews exist.
+
+## D129 — Reuse the primary score kernels for ablation execution
+
+The modality ablations change only the deployable input view. They do not
+define a new posterior target, calibration statistic or final metric. A
+separate copy of the posterior-draw, region-score or calibrated IID code would
+therefore create unnecessary mathematical and schema drift.
+
+The future ablation runtime reuses the primary calibration `_score_batches`
+kernel and final `_score_final_batches` kernel. The GW-only or EM-only mask is
+applied after the exact primary input standardizer through typed dataset
+adapters. Each view/seed checkpoint uses its own deterministic posterior-draw
+seed for calibration and IID, its own calibration map and the same-seed primary
+IID artifact for the paired comparison. Posterior draws remain transient.
+
+An immutable execution configuration freezes twelve distinct seed domains,
+4,096 draws per case, physical batch 16 and draw microbatch 256. Two CLI
+runners are dry-run unless `--execute` is supplied, and even then their typed
+gate requires a separately reviewed runtime authorization. The implementation
+gate itself keeps all scientific access false.

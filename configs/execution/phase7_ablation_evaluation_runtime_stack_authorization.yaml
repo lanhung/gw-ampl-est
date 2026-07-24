@@ -1,0 +1,39 @@
+phase: "7-ablation-evaluation-runtime-stack"
+authorization_status: authorized_implementation_and_synthetic_fixture_only
+authorized_by: codex_as_delegated_scientific_and_engineering_reviewer
+authorization_date: "2026-07-24"
+
+authorization_basis:
+  owner_delegation: continue_without_routine_human_intervention
+  scientific_contract_changed: false
+  scientific_checkpoint_available: false
+  calibration_publication_available: false
+  iid_publication_unsealed: false
+
+frozen_execution_config:
+  path: configs/inference/phase7_ablation_evaluation.yaml
+  canonical_hash: "1fb19fe9bfcf451919196b0510fad471c507ad5220bbc1410ebd196d00b20dcd"
+  parent_rc8_hash: "219160f67030bad745b0a4573d78d02f9d0db7536a6490c907196e8570647c9a"
+
+authorization:
+  typed_calibration_runtime_implementation_authorized: true
+  typed_iid_runtime_implementation_authorized: true
+  fail_closed_cli_implementation_authorized: true
+  synthetic_fixture_tests_authorized: true
+
+  scientific_checkpoint_access_authorized: false
+  calibration_fit_data_access_authorized: false
+  ablation_calibration_score_execution_authorized: false
+  ablation_calibration_map_fit_authorized: false
+  final_iid_unsealing_authorized: false
+  final_iid_ablation_inference_authorized: false
+  primary_iid_score_access_authorized: false
+  paired_comparison_execution_authorized: false
+  model_training_or_tuning_authorized: false
+  primary_calibration_refit_authorized: false
+  sbc_authorized: false
+  ood_or_mismatch_ablation_authorized: false
+  manuscript_claim_finalization_authorized: false
+  gwosc_gwtc_access_authorized: false
+
+stop_after_implementation: true
