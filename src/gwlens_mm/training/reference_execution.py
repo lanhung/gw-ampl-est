@@ -7,16 +7,21 @@ import json
 import os
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any, Dict, Mapping, Optional, Tuple
+from typing import Any, Dict, Mapping, Optional, Sequence, Tuple
 
 import numpy as np
 
 from ..config import load_yaml
+from ..production.final_evaluation import (
+    BoundPublishedReferenceDataset,
+    resolve_bound_published_reference_dataset,
+)
 from ..schema import SplitName
 from .architecture import selected_model_configuration
 from .calibration import wilson_interval
 from .contracts import WAVEFORM_CORRECTION_HASH, model_configuration_hash
 from .data import (
+    ConcatenatedPublishedStageADataset,
     CorrectedTrainingPublication,
     PublishedStageADataset,
     corrected_65k_training_dataset,
@@ -51,6 +56,11 @@ QUERY_SPECS: Mapping[str, Tuple[SplitName, int]] = {
     "validation": (SplitName.VALIDATION, VALIDATION_COUNT),
     "iid_test": (SplitName.IID_TEST, 8192),
     "balanced_tail_diagnostic": (SplitName.BALANCED_TAIL_DIAGNOSTIC, 4096),
+}
+QUERY_COMPONENT_COUNTS: Mapping[str, Tuple[int, ...]] = {
+    "validation": (VALIDATION_COUNT,),
+    "iid_test": (8192,),
+    "balanced_tail_diagnostic": (1024, 1024, 1024, 1024),
 }
 
 
@@ -91,6 +101,9 @@ def validate_reference_execution_stack_contract(root: Path) -> Mapping[str, Any]
         contract.get("query_roles") == list(QUERY_SPECS)
         and contract.get("query_counts")
         == {role: count for role, (_, count) in QUERY_SPECS.items()}
+        and contract.get("query_dataset_counts")
+        == {role: len(counts) for role, counts in QUERY_COMPONENT_COUNTS.items()}
+        and contract.get("atomic_parent_child_binding_required") is True
         and int(contract.get("exact_neighbors", -1)) == 256
         and int(contract.get("posterior_draws_per_case", -1))
         == POSTERIOR_DRAW_COUNT
@@ -103,6 +116,9 @@ def validate_reference_execution_stack_contract(root: Path) -> Mapping[str, Any]
     allowed = {
         "fail_closed_reference_runner_implementation_authorized",
         "bounded_score_writer_implementation_authorized",
+        "atomic_parent_child_reference_implementation_authorized",
+        "nonauthorizing_release_packet_implementation_authorized",
+        "delegated_review_builder_implementation_authorized",
         "synthetic_fixture_tests_authorized",
     }
     if any(flags.get(name) is not True for name in allowed):
@@ -187,8 +203,8 @@ def validate_reference_query_execution_gate(
     terminal_decision_path: Path,
     selected_architecture_decision_path: Path,
     primary_rung_preparation_path: Path,
-    query_dataset_root: Path,
-    query_parent_manifest_path: Path,
+    query_dataset_roots: Sequence[Path],
+    query_parent_roots: Sequence[Path],
     terminal_train_parent_root: Optional[Path] = None,
     terminal_combined_publication_root: Optional[Path] = None,
     terminal_development_tail_parent_root: Optional[Path] = None,
@@ -209,9 +225,12 @@ def validate_reference_query_execution_gate(
         if flags.get(required) is not True:
             raise ReferenceBaselineGateError(f"reference gate requires {required}=true")
     for forbidden in (
+        "final_evaluation_materialization_authorized",
         "checkpoint_access_authorized",
         "calibration_refit_authorized",
         "model_retraining_or_tuning_authorized",
+        "architecture_or_size_selection_authorized",
+        "extension_above_131072_authorized",
         "likelihood_gold_claim_authorized",
         "importance_sampling_efficiency_claim_authorized",
         "gwosc_gwtc_access_authorized",
@@ -229,6 +248,11 @@ def validate_reference_query_execution_gate(
         and int(authorization.get("neighbor_count", -1)) == 256
         and int(authorization.get("posterior_draws_per_case", -1))
         == POSTERIOR_DRAW_COUNT
+        and authorization.get("stop_after_reference_query") is True
+        and authorization.get("reference_is_exact_likelihood_or_gold") is False
+        and authorization.get("importance_sampling_efficiency_claim_authorized")
+        is False
+        and authorization.get("reference_config_sha256") == REFERENCE_CONFIG_HASH
     ):
         raise ReferenceBaselineGateError("reference query count or algorithm changed")
     final_role = role != "validation"
@@ -370,30 +394,59 @@ def validate_reference_query_execution_gate(
     ):
         raise ReferenceBaselineGateError("reference standardizer hash changed")
 
-    configured_query = Path(str(authorization.get("query_dataset_root", ""))).resolve()
-    configured_parent = Path(
-        str(authorization.get("query_parent_manifest_path", ""))
-    ).resolve()
-    if not (
-        query_dataset_root.resolve() == configured_query
-        and query_parent_manifest_path.resolve() == configured_parent
-        and query_dataset_root.is_relative_to(Path("/root/autodl-tmp/lensing-4"))
-        and query_parent_manifest_path.is_file()
-        and _sha256(query_parent_manifest_path)
-        == authorization.get("query_parent_manifest_sha256")
+    specifications = authorization.get("query_datasets")
+    if not isinstance(specifications, list):
+        raise ReferenceBaselineGateError("reference query dataset catalog is absent")
+    if (
+        len(query_dataset_roots) != len(specifications)
+        or len(query_parent_roots) != len(specifications)
+        or tuple(sorted(int(item.get("accepted_count", -1)) for item in specifications))
+        != tuple(sorted(QUERY_COMPONENT_COUNTS[role]))
     ):
-        raise ReferenceBaselineGateError("reference query parent identity changed")
-    dataset_manifest = query_dataset_root / "dataset_manifest.json"
-    if not dataset_manifest.is_file() or _sha256(dataset_manifest) != authorization.get(
-        "query_dataset_manifest_sha256"
+        raise ReferenceBaselineGateError("reference query component arithmetic changed")
+    references: list[BoundPublishedReferenceDataset] = []
+    for specification, dataset_root, parent_root in zip(
+        specifications,
+        query_dataset_roots,
+        query_parent_roots,
     ):
-        raise ReferenceBaselineGateError("reference query dataset manifest changed")
-    if role == "validation" and not (
-        query_dataset_root.resolve() == validation_root.resolve()
-        and _sha256(dataset_manifest)
-        == validation_manifest_sha256
-    ):
-        raise ReferenceBaselineGateError("validation query is not the locked development set")
+        if not isinstance(specification, Mapping):
+            raise ReferenceBaselineGateError("reference query dataset is malformed")
+        try:
+            reference = resolve_bound_published_reference_dataset(specification)
+        except ValueError as error:
+            raise ReferenceBaselineGateError(
+                "reference query is not bound to its atomic parent"
+            ) from error
+        if (
+            reference.dataset_root != dataset_root.resolve()
+            or reference.parent_root != parent_root.resolve()
+        ):
+            raise ReferenceBaselineGateError("reference query child/parent changed")
+        references.append(reference)
+    if len({item.dataset_root for item in references}) != len(references):
+        raise ReferenceBaselineGateError("reference query dataset root is duplicated")
+    if role == "validation":
+        reference = references[0]
+        if not (
+            reference.dataset_root == validation_root.resolve()
+            and reference.parent_root == validation_root.resolve().parent
+            and reference.parent_manifest_sha256
+            == corrected_publication.stage_a.manifest_sha256
+        ):
+            raise ReferenceBaselineGateError(
+                "validation query is not the locked development set"
+            )
+    query_identity = hashlib.sha256()
+    for reference in references:
+        for value in (
+            reference.dataset_id,
+            str(reference.dataset_root),
+            str(reference.parent_root),
+            reference.parent_manifest_sha256,
+        ):
+            query_identity.update(value.encode("utf-8"))
+            query_identity.update(b"\0")
     return {
         "authorization": authorization,
         "publication": publication,
@@ -405,7 +458,8 @@ def validate_reference_query_execution_gate(
         "locked_training_rung": locked_rung,
         "locked_train_manifest_sha256": train_manifest_sha256,
         "input_standardizer": input_standardizer,
-        "query_dataset_manifest_sha256": _sha256(dataset_manifest),
+        "query_dataset_references": tuple(references),
+        "query_publication_identity_sha256": query_identity.hexdigest(),
     }
 
 
@@ -558,8 +612,8 @@ def run_authorized_reference_query(
     terminal_decision_path: Path,
     selected_architecture_decision_path: Path,
     primary_rung_preparation_path: Path,
-    query_dataset_root: Path,
-    query_parent_manifest_path: Path,
+    query_dataset_roots: Sequence[Path],
+    query_parent_roots: Sequence[Path],
     psd_root: Path,
     output_root: Path,
     execution_commit: str,
@@ -579,8 +633,8 @@ def run_authorized_reference_query(
         terminal_decision_path=terminal_decision_path,
         selected_architecture_decision_path=selected_architecture_decision_path,
         primary_rung_preparation_path=primary_rung_preparation_path,
-        query_dataset_root=query_dataset_root,
-        query_parent_manifest_path=query_parent_manifest_path,
+        query_dataset_roots=query_dataset_roots,
+        query_parent_roots=query_parent_roots,
         terminal_train_parent_root=terminal_train_parent_root,
         terminal_combined_publication_root=terminal_combined_publication_root,
         terminal_development_tail_parent_root=terminal_development_tail_parent_root,
@@ -615,12 +669,24 @@ def run_authorized_reference_query(
         bank_dataset = terminal_131k_training_dataset(publication, curves)
     else:
         raise ReferenceBaselineGateError("reference gate returned an invalid bank")
-    query_dataset = PublishedStageADataset(
-        query_dataset_root,
-        expected_split=gate["query_split"],
-        detector_curves=curves,
-        expected_total_pairs=int(gate["query_count"]),
+    references = tuple(gate["query_dataset_references"])
+    component_counts = tuple(
+        int(value) for value in QUERY_COMPONENT_COUNTS[str(gate["query_role"])]
     )
+    components = tuple(
+        PublishedStageADataset(
+            reference.dataset_root,
+            expected_split=gate["query_split"],
+            detector_curves=curves,
+            expected_total_pairs=count,
+        )
+        for reference, count in zip(references, component_counts)
+    )
+    query_dataset: PublishedStageADataset
+    if len(components) == 1:
+        query_dataset = components[0]
+    else:
+        query_dataset = ConcatenatedPublishedStageADataset(components)
     if set(bank_dataset.physical_system_ids()) & set(query_dataset.physical_system_ids()):
         raise ReferenceBaselineGateError("reference bank overlaps query identities")
     standardizer = gate["input_standardizer"]
@@ -645,7 +711,9 @@ def run_authorized_reference_query(
         "selected_architecture_id": gate["selected_architecture_id"],
         "locked_training_rung": gate["locked_training_rung"],
         "locked_train_manifest_sha256": gate["locked_train_manifest_sha256"],
-        "query_dataset_manifest_sha256": gate["query_dataset_manifest_sha256"],
+        "query_publication_identity_sha256": gate[
+            "query_publication_identity_sha256"
+        ],
         "query_role": role,
         "query_count": gate["query_count"],
         "reference_summary_sha256": _sha256(

@@ -21,6 +21,11 @@ implementation_contract:
     validation: 6144
     iid_test: 8192
     balanced_tail_diagnostic: 4096
+  query_dataset_counts:
+    validation: 1
+    iid_test: 1
+    balanced_tail_diagnostic: 4
+  atomic_parent_child_binding_required: true
   exact_neighbors: 256
   posterior_draws_per_case: 4096
   posterior_draws_persisted: false
@@ -30,6 +35,9 @@ implementation_contract:
 authorization:
   fail_closed_reference_runner_implementation_authorized: true
   bounded_score_writer_implementation_authorized: true
+  atomic_parent_child_reference_implementation_authorized: true
+  nonauthorizing_release_packet_implementation_authorized: true
+  delegated_review_builder_implementation_authorized: true
   synthetic_fixture_tests_authorized: true
 
   scientific_reference_bank_access_authorized: false

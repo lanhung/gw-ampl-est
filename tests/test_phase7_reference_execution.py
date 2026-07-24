@@ -125,6 +125,9 @@ def test_reference_execution_implementation_gate_keeps_every_query_closed() -> N
     allowed = {
         "fail_closed_reference_runner_implementation_authorized",
         "bounded_score_writer_implementation_authorized",
+        "atomic_parent_child_reference_implementation_authorized",
+        "nonauthorizing_release_packet_implementation_authorized",
+        "delegated_review_builder_implementation_authorized",
         "synthetic_fixture_tests_authorized",
     }
     assert all(flags[name] is True for name in allowed)
@@ -211,8 +214,8 @@ def test_implementation_authorization_cannot_index_a_scientific_bank(
             terminal_decision_path=tmp_path / "terminal.json",
             selected_architecture_decision_path=tmp_path / "selection.json",
             primary_rung_preparation_path=tmp_path / "preparation.json",
-            query_dataset_root=tmp_path / "query",
-            query_parent_manifest_path=tmp_path / "parent.json",
+            query_dataset_roots=(tmp_path / "query",),
+            query_parent_roots=(tmp_path / "parent",),
         )
     assert not any(tmp_path.iterdir())
 

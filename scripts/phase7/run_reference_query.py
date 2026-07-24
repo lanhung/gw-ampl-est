@@ -28,8 +28,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
     parser.add_argument("--terminal-size-decision", type=Path)
     parser.add_argument("--selected-architecture-decision", type=Path)
     parser.add_argument("--primary-rung-preparation", type=Path)
-    parser.add_argument("--query-dataset", type=Path)
-    parser.add_argument("--query-parent-manifest", type=Path)
+    parser.add_argument("--query-dataset", type=Path, action="append")
+    parser.add_argument("--query-parent", type=Path, action="append")
     parser.add_argument("--psd-root", type=Path)
     parser.add_argument("--output-root", type=Path)
     parser.add_argument("--execution-commit")
@@ -60,7 +60,7 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             arguments.selected_architecture_decision,
             arguments.primary_rung_preparation,
             arguments.query_dataset,
-            arguments.query_parent_manifest,
+            arguments.query_parent,
             arguments.psd_root,
             arguments.output_root,
             arguments.execution_commit,
@@ -77,8 +77,8 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
             terminal_decision_path=arguments.terminal_size_decision,
             selected_architecture_decision_path=arguments.selected_architecture_decision,
             primary_rung_preparation_path=arguments.primary_rung_preparation,
-            query_dataset_root=arguments.query_dataset,
-            query_parent_manifest_path=arguments.query_parent_manifest,
+            query_dataset_roots=tuple(arguments.query_dataset),
+            query_parent_roots=tuple(arguments.query_parent),
             psd_root=arguments.psd_root,
             output_root=arguments.output_root,
             execution_commit=arguments.execution_commit,
