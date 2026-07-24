@@ -1570,3 +1570,25 @@ calibration and SBC IDs must remain disjoint, maps are never pooled across
 seeds, and no best seed is selected. Checkpoint access closes before the
 statistics step; final evaluation, retraining and GWOSC/GWTC remain closed
 through both releases.
+
+## D121 — Bind final-evaluation children to atomic parent manifests
+
+The scientific publications use one atomic parent manifest for one or more
+dataset children. Requiring every child directory to duplicate
+`dataset_manifest.json` was inconsistent with the real Stage A, Stage B,
+correction and calibration/SBC layouts and would have blocked the final
+materialization preflight.
+
+The final-evaluation release now represents each child by its dataset ID and
+root plus the exact parent root and parent-manifest SHA-256. The execution
+runner revalidates that binding before streaming record identifiers. The
+terminal train view contains exactly five child roots: Stage A train, Stage B
+train, the two correction-replacement children and the terminal increment.
+Validation, calibration-fit and SBC each bind one disjoint child. The five
+superseded waveform-pathology IDs remain explicit train exclusions.
+
+A non-authorizing packet binds this catalog to the terminal size decision,
+twelve-result architecture decision, exact generator wheel/environment and
+the frozen 20,480-case sealed contract. A separate delegated review is still
+required before materialization. No final identity, pair, checkpoint or
+scientific result is created by this engineering correction.

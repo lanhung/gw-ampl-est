@@ -1,0 +1,34 @@
+phase: "7-final-materialization-release-stack"
+authorization_status: authorized_implementation_and_synthetic_fixture_only
+authorized_by: codex_as_delegated_scientific_and_engineering_reviewer
+authorization_date: "2026-07-24"
+
+authorization_basis:
+  owner_delegation: continue_without_routine_human_intervention
+  terminal_probe_complete: false
+  architecture_locked: false
+  calibration_sbc_materialized: false
+  final_evaluation_materialized: false
+
+frozen_contracts:
+  final_generator_configuration_hash: "11277a2a4c5d233e6f525b3ab5d6ece90c115d818d752849076f3a136e574d66"
+  final_generation_commitment_sha256: "c13412eced163bac26abc4b22d054f3a6fa967e7e5a4dd7849ebf54f42df6083"
+  numerical_validity_addendum_sha256: "431c09f2c279e1c745bd118fb1b0c06643de7dc42f605af78a49ca99b5b0019b"
+  terminal_preregistration_hash: "77ff5b6b45b886657e90023c50ae002afffb077db594c80665166d537fd2346a"
+
+authorization:
+  atomic_parent_child_reference_resolver_implementation_authorized: true
+  nonauthorizing_release_packet_implementation_authorized: true
+  delegated_review_builder_implementation_authorized: true
+  synthetic_fixture_tests_authorized: true
+
+  scientific_publication_access_authorized: false
+  final_evaluation_materialization_authorized: false
+  final_evaluation_unsealing_authorized: false
+  checkpoint_access_authorized: false
+  calibration_map_access_authorized: false
+  scientific_inference_authorized: false
+  model_training_or_tuning_authorized: false
+  gwosc_gwtc_access_authorized: false
+
+stop_after_implementation: true

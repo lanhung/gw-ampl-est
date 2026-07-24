@@ -25,6 +25,7 @@ from gwlens_mm.production.final_evaluation import (
     final_evaluation_namespaces,
     load_final_evaluation_contract,
     load_final_evaluation_numerical_validity_addendum,
+    resolve_bound_published_reference_dataset,
     validate_final_evaluation_namespace,
     validate_future_final_evaluation_authorization,
 )
@@ -34,6 +35,7 @@ from gwlens_mm.production.storage import tree_checksum, verify_complete_shard
 from gwlens_mm.provenance import configuration_hash
 
 ROOT = Path(__file__).resolve().parents[2]
+APPROVED_REMOTE_ROOT = Path("/root/autodl-tmp/lensing-4")
 _ALLOWED_POSTFREEZE_PATHS = (
     "AGENTS.md",
     "configs/execution/phase4_final_evaluation_materialization_authorization.yaml",
@@ -46,6 +48,11 @@ _ALLOWED_POSTFREEZE_PATHS = (
     "results/phase4/final_evaluation_commitment.sha256",
     "results/phase4/final_evaluation_numerical_validity_addendum.json",
     "results/phase4/final_evaluation_numerical_validity_addendum.sha256",
+    "results/phase7/final_reference_catalog.json",
+    "results/phase7/final_materialization_release_packet.json",
+    "results/phase7/final_materialization_review.json",
+    "results/phase7/final_materialization_release_certificate.json",
+    "results/phase7/final_materialization_result.json",
     "tests/test_phase4_direct_target.py",
     "tests/test_phase4_final_evaluation.py",
 )
@@ -216,12 +223,27 @@ def main() -> None:
         specification = reference_roots_value[role]
         if not isinstance(specification, dict):
             raise ValueError("final-evaluation reference role is not structured")
-        roots_value = specification.get("roots")
+        datasets_value = specification.get("datasets")
         exclusions_value = specification.get("excluded_physical_system_ids", [])
-        if not isinstance(roots_value, list) or not isinstance(exclusions_value, list):
-            raise ValueError("final-evaluation reference roots or exclusions are invalid")
-        roots = tuple(Path(str(value)).resolve() for value in roots_value)
+        if not isinstance(datasets_value, list) or not isinstance(
+            exclusions_value, list
+        ):
+            raise ValueError(
+                "final-evaluation reference datasets or exclusions are invalid"
+            )
+        bound = tuple(
+            resolve_bound_published_reference_dataset(
+                item,
+                approved_root=APPROVED_REMOTE_ROOT,
+            )
+            for item in datasets_value
+        )
+        roots = tuple(item.dataset_root for item in bound)
         exclusions = tuple(str(value) for value in exclusions_value)
+        if int(specification.get("accepted_system_count", -1)) != (
+            expected_reference_counts[role]
+        ):
+            raise ValueError("final-evaluation reference count declaration changed")
         if role == "train":
             expected_root_count = 5 if reference_mode == "terminal_131k" else 4
             if len(roots) != expected_root_count or len(exclusions) != 5:
@@ -256,7 +278,7 @@ def main() -> None:
 
     staging_root = Path(config["paths"]["staging_root"])
     publication_root = Path(config["paths"]["publication_root"])
-    approved = Path("/root/autodl-tmp/lensing-4")
+    approved = APPROVED_REMOTE_ROOT
     for path in (staging_root, publication_root):
         if not path.is_absolute() or not path.is_relative_to(approved):
             raise ValueError("final-evaluation path escaped the AutoDL project root")
@@ -365,6 +387,7 @@ def main() -> None:
         role_ids = collect_published_group_identifiers(
             roots,
             excluded_physical_system_ids=exclusions,
+            require_root_manifest=False,
         )
         if len(role_ids["system"]) != expected_reference_counts[role]:
             raise ValueError(f"final-evaluation {role} reference count mismatch")

@@ -30,6 +30,7 @@ from gwlens_mm.production.final_evaluation import (
     dry_run_plan,
     final_evaluation_namespaces,
     load_final_evaluation_contract,
+    resolve_bound_published_reference_dataset,
     validate_final_evaluation_record,
     validate_future_final_evaluation_authorization,
 )
@@ -339,6 +340,85 @@ def test_future_official_identities_are_namespace_specific() -> None:
     assert identities.parent_run_id.startswith("phase7-final-evaluation-")
     assert len(identities.namespace_dataset_ids) == 15
     assert len(set(identities.namespace_dataset_ids.values())) == 15
+
+
+def test_atomic_parent_manifest_binds_child_reference_dataset(
+    tmp_path: Path,
+) -> None:
+    approved = tmp_path / "project"
+    parent = approved / "published" / "parent"
+    child = parent / "train-dataset"
+    shard = child / "shards" / "shard-00000"
+    shard.mkdir(parents=True)
+    (shard / "records.parquet").write_bytes(b"fixture")
+    manifest = parent / "dataset_manifest.json"
+    manifest.write_text('{"status":"passed"}\n', encoding="utf-8")
+    digest = hashlib.sha256(manifest.read_bytes()).hexdigest()
+    specification = {
+        "dataset_id": child.name,
+        "dataset_root": str(child),
+        "parent_root": str(parent),
+        "parent_manifest_sha256": digest,
+    }
+    resolved = resolve_bound_published_reference_dataset(
+        specification,
+        approved_root=approved,
+    )
+    assert resolved.dataset_root == child
+    assert resolved.parent_manifest_path == manifest
+
+    changed = deepcopy(specification)
+    changed["parent_manifest_sha256"] = "0" * 64
+    with pytest.raises(ValueError, match="atomic parent"):
+        resolve_bound_published_reference_dataset(
+            changed,
+            approved_root=approved,
+        )
+    changed = deepcopy(specification)
+    changed["dataset_root"] = str(parent)
+    with pytest.raises(ValueError, match="atomic parent"):
+        resolve_bound_published_reference_dataset(
+            changed,
+            approved_root=approved,
+        )
+
+
+def test_bound_child_reference_streams_records_without_fake_child_manifest(
+    tmp_path: Path,
+) -> None:
+    pandas = pytest.importorskip("pandas")
+    pytest.importorskip("pyarrow")
+    approved = tmp_path / "project"
+    parent = approved / "published" / "parent"
+    child = parent / "train-dataset"
+    shard = child / "shards" / "shard-00000"
+    shard.mkdir(parents=True)
+    record_json = (ROOT / "examples/v2_metadata_example.json").read_text(
+        encoding="utf-8"
+    )
+    pandas.DataFrame({"record_json": [record_json]}).to_parquet(
+        shard / "records.parquet",
+        index=False,
+    )
+    manifest = parent / "dataset_manifest.json"
+    manifest.write_text('{"status":"passed"}\n', encoding="utf-8")
+    specification = {
+        "dataset_id": child.name,
+        "dataset_root": str(child),
+        "parent_root": str(parent),
+        "parent_manifest_sha256": hashlib.sha256(manifest.read_bytes()).hexdigest(),
+    }
+    bound = resolve_bound_published_reference_dataset(
+        specification,
+        approved_root=approved,
+    )
+    identifiers = collect_published_group_identifiers(
+        (bound.dataset_root,),
+        require_root_manifest=False,
+    )
+    assert len(identifiers["system"]) == 1
+    with pytest.raises(ValueError, match="manifest is absent"):
+        collect_published_group_identifiers((bound.dataset_root,))
 
 
 def test_numerical_validity_addendum_preserves_original_commitment() -> None:
