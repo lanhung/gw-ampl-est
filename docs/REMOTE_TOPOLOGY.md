@@ -46,8 +46,18 @@ The current container reports:
 - four NVIDIA RTX 5000 Ada GPUs with 32,760 MiB each;
 - 64 logical CPUs;
 - approximately 125.5 GiB RAM;
-- approximately 34.2 GiB available on the active 210.2 GB overlay at the audit
-  instant.
+- approximately 34.2 GiB available on the container root overlay at the audit
+  instant;
+- a separate XFS project-data mount at `/root/autodl-tmp`, with
+  2,978,626,187,264 bytes total and 222,942,441,472 bytes available
+  (approximately 207.6 GiB) at the audit instant.
+
+The root-overlay figure is not a scientific-data capacity gate. All project
+data, training outputs and future materializations belong on the separate
+`/root/autodl-tmp` mount. At the same audit instant,
+`/root/autodl-tmp/lensing-4` occupied 196,533,215,232 bytes, of which
+182,424,875,008 bytes were under `data_v2` and 3,913,789,440 bytes were under
+`training`.
 
 The terminal 131k probe uses GPUs 0, 1 and 2 through separate
 `CUDA_VISIBLE_DEVICES` bindings. GPU 3, and additional capacity on GPUs 0 and
